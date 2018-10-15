@@ -1,0 +1,126 @@
+ Sea
+
+ Timestamp is 5bc49a9f (Mon Oct 15 21:48:15 2018)
+
+ Preferred load address is 00400000
+
+ Start         Length     Name                   Class
+ 0001:00000000 000017d2H .text                   CODE
+ 0002:00000000 00000080H .idata$5                DATA
+ 0002:00000080 00000004H .CRT$XCC                DATA
+ 0002:00000090 000000c0H .rdata                  DATA
+ 0002:00000150 00000028H .idata$2                DATA
+ 0002:00000178 00000014H .idata$3                DATA
+ 0002:0000018c 00000080H .idata$4                DATA
+ 0002:0000020c 00000234H .idata$6                DATA
+ 0002:00000440 00000030H .edata                  DATA
+ 0002:00000470 0000003fH .rdata$debug            DATA
+ 0002:000004b0 00000004H .rdata$sxdata           DATA
+ 0003:00000000 00000008H .data                   DATA
+ 0003:00000008 00000320H .bss                    DATA
+ 0004:00000000 00000290H .rsrc$01                DATA
+ 0004:00000290 000288d8H .rsrc$02                DATA
+
+  Address         Publics by Value              Rva+Base     Lib:Object
+
+ 0000:00000001       ___safe_se_handler_count   00000001     <absolute>
+ 0001:00000100       _Startup@0                 00401100 f   Sea.obj
+ 0001:00000290       _NtCurrentTeb@0            00401290 f i Sea.obj
+ 0001:00000320       _Print                     00401320 f   Print.obj
+ 0001:00000490       _CreateKey@16              00401490 f   Sysload.obj
+ 0001:00000530       _OpenKey@12                00401530 f   Sysload.obj
+ 0001:000005c0       _SetValueKey@20            004015c0 f   Sysload.obj
+ 0001:00000b40       _LoadSystemImage@8         00401b40 f   Sysload.obj
+ 0001:00001280       _UnloadSystemImage@4       00402280 f   Sysload.obj
+ 0001:000014da       _NtTerminateProcess@8      004024da f   ntdll:ntdll.dll
+ 0001:000014e0       _NtClose@4                 004024e0 f   ntdll:ntdll.dll
+ 0001:000014e6       _NtDeviceIoControlFile@40  004024e6 f   ntdll:ntdll.dll
+ 0001:000014ec       _NtOpenFile@24             004024ec f   ntdll:ntdll.dll
+ 0001:000014f2       _RtlInitUnicodeString@8    004024f2 f   ntdll:ntdll.dll
+ 0001:000014f8       _DbgPrint                  004024f8 f   ntdll:ntdll.dll
+ 0001:000014fe       _RtlFreeHeap@12            004024fe f   ntdll:ntdll.dll
+ 0001:00001504       __vsnwprintf               00402504 f   ntdll:ntdll.dll
+ 0001:0000150a       _RtlAllocateHeap@12        0040250a f   ntdll:ntdll.dll
+ 0001:00001510       __vscwprintf               00402510 f   ntdll:ntdll.dll
+ 0001:00001516       _LdrGetProcedureAddress@16 00402516 f   ntdll:ntdll.dll
+ 0001:0000151c       _RtlInitAnsiString@8       0040251c f   ntdll:ntdll.dll
+ 0001:00001522       _LdrGetDllHandle@16        00402522 f   ntdll:ntdll.dll
+ 0001:00001528       _NtCreateKey@28            00402528 f   ntdll:ntdll.dll
+ 0001:0000152e       _NtOpenKey@12              0040252e f   ntdll:ntdll.dll
+ 0001:00001534       _NtSetValueKey@24          00402534 f   ntdll:ntdll.dll
+ 0001:0000153a       _NtLoadDriver@4            0040253a f   ntdll:ntdll.dll
+ 0001:00001540       _RtlFreeUnicodeString@4    00402540 f   ntdll:ntdll.dll
+ 0001:00001546       _memset                    00402546 f   ntdll:ntdll.dll
+ 0001:0000154c       _memcpy                    0040254c f   ntdll:ntdll.dll
+ 0001:00001552       _RtlDosPathNameToNtPathName_U_WithStatus@16 00402552 f   ntdll:ntdll.dll
+ 0001:00001558       _wcslen                    00402558 f   ntdll:ntdll.dll
+ 0001:0000155e       _wcscat                    0040255e f   ntdll:ntdll.dll
+ 0001:00001564       _wcscpy                    00402564 f   ntdll:ntdll.dll
+ 0001:0000156a       _RtlAdjustPrivilege@16     0040256a f   ntdll:ntdll.dll
+ 0001:00001570       _NtDeleteKey@4             00402570 f   ntdll:ntdll.dll
+ 0001:00001576       _NtUnloadDriver@4          00402576 f   ntdll:ntdll.dll
+ 0001:0000157c       __DllMainCRTStartupForGS@12 0040257c f   bufferoverflow:gs_dllmain.obj
+ 0001:0000159c       __DllMainCRTStartupForGS2@12 0040259c f   bufferoverflow:gs_dllmain.obj
+ 0001:000015b3       _NtGetTickCount@0          004025b3 f i bufferoverflow:gs_support.obj
+ 0001:000015e6       ___report_gsfailure        004025e6 f   bufferoverflow:gs_support.obj
+ 0001:000016b7       ___security_init_cookie_ex 004026b7 f   bufferoverflow:gs_support.obj
+ 0001:00001749       ___security_init_cookie    00402749 f   bufferoverflow:gs_support.obj
+ 0001:00001774       __SEH_prolog               00402774 f   msvcrt:sehprolg.obj
+ 0001:000017af       __SEH_epilog               004027af f   msvcrt:sehprolg.obj
+ 0001:000017c0       __except_handler3          004027c0 f   msvcrt:msvcrt.dll
+ 0001:000017c6       _LdrDisableThreadCalloutsForDll@4 004027c6 f   ntdll:ntdll.dll
+ 0001:000017cc       _RtlUnhandledExceptionFilter@4 004027cc f   ntdll:ntdll.dll
+ 0002:00000000       __imp___except_handler3    00403000     msvcrt:msvcrt.dll
+ 0002:00000004       \177msvcrt_NULL_THUNK_DATA 00403004     msvcrt:msvcrt.dll
+ 0002:00000008       __imp__NtDeviceIoControlFile@40 00403008     ntdll:ntdll.dll
+ 0002:0000000c       __imp__NtOpenFile@24       0040300c     ntdll:ntdll.dll
+ 0002:00000010       __imp__RtlInitUnicodeString@8 00403010     ntdll:ntdll.dll
+ 0002:00000014       __imp__DbgPrint            00403014     ntdll:ntdll.dll
+ 0002:00000018       __imp__RtlFreeHeap@12      00403018     ntdll:ntdll.dll
+ 0002:0000001c       __imp___vsnwprintf         0040301c     ntdll:ntdll.dll
+ 0002:00000020       __imp__RtlAllocateHeap@12  00403020     ntdll:ntdll.dll
+ 0002:00000024       __imp___vscwprintf         00403024     ntdll:ntdll.dll
+ 0002:00000028       __imp__LdrGetProcedureAddress@16 00403028     ntdll:ntdll.dll
+ 0002:0000002c       __imp__RtlInitAnsiString@8 0040302c     ntdll:ntdll.dll
+ 0002:00000030       __imp__LdrGetDllHandle@16  00403030     ntdll:ntdll.dll
+ 0002:00000034       __imp__NtCreateKey@28      00403034     ntdll:ntdll.dll
+ 0002:00000038       __imp__NtClose@4           00403038     ntdll:ntdll.dll
+ 0002:0000003c       __imp__NtSetValueKey@24    0040303c     ntdll:ntdll.dll
+ 0002:00000040       __imp__NtLoadDriver@4      00403040     ntdll:ntdll.dll
+ 0002:00000044       __imp__RtlFreeUnicodeString@4 00403044     ntdll:ntdll.dll
+ 0002:00000048       __imp__memset              00403048     ntdll:ntdll.dll
+ 0002:0000004c       __imp__memcpy              0040304c     ntdll:ntdll.dll
+ 0002:00000050       __imp__RtlDosPathNameToNtPathName_U_WithStatus@16 00403050     ntdll:ntdll.dll
+ 0002:00000054       __imp__wcslen              00403054     ntdll:ntdll.dll
+ 0002:00000058       __imp__wcscat              00403058     ntdll:ntdll.dll
+ 0002:0000005c       __imp__wcscpy              0040305c     ntdll:ntdll.dll
+ 0002:00000060       __imp__RtlAdjustPrivilege@16 00403060     ntdll:ntdll.dll
+ 0002:00000064       __imp__NtDeleteKey@4       00403064     ntdll:ntdll.dll
+ 0002:00000068       __imp__NtUnloadDriver@4    00403068     ntdll:ntdll.dll
+ 0002:0000006c       __imp__NtOpenKey@12        0040306c     ntdll:ntdll.dll
+ 0002:00000070       __imp__NtTerminateProcess@8 00403070     ntdll:ntdll.dll
+ 0002:00000074       __imp__LdrDisableThreadCalloutsForDll@4 00403074     ntdll:ntdll.dll
+ 0002:00000078       __imp__RtlUnhandledExceptionFilter@4 00403078     ntdll:ntdll.dll
+ 0002:0000007c       \177ntdll_NULL_THUNK_DATA  0040307c     ntdll:ntdll.dll
+ 0002:000000ac       _RtlAlternateDosPathSeparatorString 004030ac     Sea.obj
+ 0002:000000b4       ??_C@_13CGOKJPIL@?$AA?1?$AA?$AA@ 004030b4     Sea.obj
+ 0002:000000b8       _RtlDosPathSeparatorsString 004030b8     Sea.obj
+ 0002:000000c0       ??_C@_15MNCACJLI@?$AA?2?$AA?1?$AA?$AA@ 004030c0     Sea.obj
+ 0002:000000c8       _RtlNtPathSeparatorString  004030c8     Sea.obj
+ 0002:000000d0       ??_C@_13FPGAJAPJ@?$AA?2?$AA?$AA@ 004030d0     Sea.obj
+ 0002:000000d4       _RtlAlternateDosPathSeperatorString 004030d4     bufferoverflow:gs_dllmain.obj
+ 0002:000000dc       _RtlDosPathSeperatorsString 004030dc     bufferoverflow:gs_dllmain.obj
+ 0002:000000e4       _RtlNtPathSeperatorString  004030e4     bufferoverflow:gs_dllmain.obj
+ 0002:00000108       __load_config_used         00403108     ntdll:loadcfg.obj
+ 0002:00000150       __IMPORT_DESCRIPTOR_ntdll  00403150     ntdll:ntdll.dll
+ 0002:00000164       __IMPORT_DESCRIPTOR_msvcrt 00403164     msvcrt:msvcrt.dll
+ 0002:00000178       __NULL_IMPORT_DESCRIPTOR   00403178     ntdll:ntdll.dll
+ 0002:000004b0       ___safe_se_handler_table   004034b0     <linker-defined>
+ 0003:00000000       ___security_cookie_complement 00404000     bufferoverflow:gs_support.obj
+ 0003:00000004       ___security_cookie         00404004     bufferoverflow:gs_support.obj
+ 0003:00000324       _Kernel32OutputDebugString 00404324     <common>
+
+ entry point at        0000:00000000
+
+ Static symbols
+

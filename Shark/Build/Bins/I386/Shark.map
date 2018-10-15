@@ -1,0 +1,227 @@
+ Shark
+
+ Timestamp is 5bc49a9b (Mon Oct 15 21:48:11 2018)
+
+ Preferred load address is 00400000
+
+ Start         Length     Name                   Class
+ 0001:00000000 00002b38H .text                   CODE
+ 0001:00003000 00001000H .text$00                CODE
+ 0001:00004000 000009ceH .text$mn                CODE
+ 0002:00000000 00000047H INIT                    CODE
+ 0003:00000000 000000c8H .idata$5                DATA
+ 0003:00000100 00001480H .rdata                  DATA
+ 0003:00001580 00000014H .idata$2                DATA
+ 0003:00001594 00000014H .idata$3                DATA
+ 0003:000015a8 000000c8H .idata$4                DATA
+ 0003:00001670 000003b2H .idata$6                DATA
+ 0003:00001a30 00000032H .edata                  DATA
+ 0003:00001a64 00000041H .rdata$debug            DATA
+ 0003:00001ab0 00000004H .rdata$sxdata           DATA
+ 0004:00000000 00000008H .data                   DATA
+ 0004:00000020 0000004cH .bss                    DATA
+ 0005:00000000 00000058H .rsrc$01                DATA
+ 0005:00000060 000002a0H .rsrc$02                DATA
+
+  Address         Publics by Value              Rva+Base     Lib:Object
+
+ 0000:00000000       __except_list              00000000     <absolute>
+ 0000:00000001       ___safe_se_handler_count   00000001     <absolute>
+ 0001:00000000       _WalkFrameChain@8          00401000 f   StackI386.obj
+ 0001:000001e0       _DriverEntry@8             004011e0 f   Shark.obj
+ 0001:00000380       _DriverUnload@4            00401380 f   Shark.obj
+ 0001:000003d0       _DeviceCreate@8            004013d0 f   Shark.obj
+ 0001:00000410       _DeviceClose@8             00401410 f   Shark.obj
+ 0001:00000450       _DeviceWrite@8             00401450 f   Shark.obj
+ 0001:00000490       _DeviceRead@8              00401490 f   Shark.obj
+ 0001:000004d0       _DeviceControl@8           004014d0 f   Shark.obj
+ 0001:00000570       _RemoteDispatcher@20       00401570 f   Ctx.obj
+ 0001:00000610       _RemoteCall@20             00401610 f   Ctx.obj
+ 0001:000007d0       _KeGetCurrentThread@0      004017d0 f i Ctx.obj
+ 0001:000007e0       _EncodeSystemPointer32@4   004017e0 f   Except.obj
+ 0001:00000840       _DecodeSystemPointer32@4   00401840 f   Except.obj
+ 0001:000008a0       _CaptureImageExceptionValues@12 004018a0 f   Except.obj
+ 0001:000009e0       _DetourGetInstructionLength@4 004019e0 f   Jump.obj
+ 0001:00000a90       _BuildJumpCode32@8         00401a90 f   Jump.obj
+ 0001:00000b90       _BuildJumpCode64@8         00401b90 f   Jump.obj
+ 0001:00000c90       _BuildJumpCode@8           00401c90 f   Jump.obj
+ 0001:00000e70       _ProbeAndLockPages@16      00401e70 f   Lock.obj
+ 0001:00001090       _UnlockPages@4             00402090 f   Lock.obj
+ 0001:00001120       _InitializeLoadedModuleList@4 00402120 f   KernelReload.obj
+ 0001:00001270       _InitializeListHead@4      00402270 f i KernelReload.obj
+ 0001:00001290       _InsertTailList@8          00402290 f i KernelReload.obj
+ 0001:000012d0       _FindEntryForPrivateSystemImage@8 004022d0 f   KernelReload.obj
+ 0001:00001350       _FindEntryForSystemImage@8 00402350 f   KernelReload.obj
+ 0001:000013c0       _FindEntryForPrivateSystemImageAddress@8 004023c0 f   KernelReload.obj
+ 0001:00001450       _FindEntryForSystemImageAddress@8 00402450 f   KernelReload.obj
+ 0001:000014d0       _GetPlatform@4             004024d0 f   KernelReload.obj
+ 0001:00001510       _GetAddressOfEntryPoint@4  00402510 f   KernelReload.obj
+ 0001:00001590       _GetTimeStamp@4            00402590 f   KernelReload.obj
+ 0001:000015d0       _GetSubsystem@4            004025d0 f   KernelReload.obj
+ 0001:00001640       _GetSizeOfImage@4          00402640 f   KernelReload.obj
+ 0001:000016a0       _SectionTableFromVirtualAddress@8 004026a0 f   KernelReload.obj
+ 0001:000017b0       _GetForwarder@4            004027b0 f   KernelReload.obj
+ 0001:00001950       _GetProcedureAddress@12    00402950 f   KernelReload.obj
+ 0001:00001aa0       _RelocationBlock@16        00402aa0 f   KernelReload.obj
+ 0001:00001c10       _RelocateImage@8           00402c10 f   KernelReload.obj
+ 0001:00001ca0       _GetRelocCount@4           00402ca0 f i KernelReload.obj
+ 0001:00001cc0       _DereferenceKernelImage@4  00402cc0 f   KernelReload.obj
+ 0001:00001d60       _DereferenceKernelImports@4 00402d60 f   KernelReload.obj
+ 0001:00001dd0       _ReferenceKernelImage@4    00402dd0 f   KernelReload.obj
+ 0001:00001f00       _SnapThunk@4               00402f00 f   KernelReload.obj
+ 0001:00002090       _AllocateImage@4           00403090 f   KernelReload.obj
+ 0001:00002120       _MapImageNtSection@4       00403120 f   KernelReload.obj
+ 0001:000022a0       _LoadPrivateSystemImage@12 004032a0 f   KernelReload.obj
+ 0001:000024a0       _UnloadPrivateSystemImage@4 004034a0 f   KernelReload.obj
+ 0001:00002500       _RemoveEntryList@4         00403500 f i KernelReload.obj
+ 0001:00002590       _TrimBytes@16              00403590 f   Scan.obj
+ 0001:00002870       _CompareBytes@16           00403870 f   Scan.obj
+ 0001:00002900       _ScanBytes@12              00403900 f   Scan.obj
+ 0001:000029e8       _IoGetStackLimits@8        004039e8 f   ntoskrnl:ntoskrnl.exe
+ 0001:000029ee       __except_handler3          004039ee f   ntoskrnl:ntoskrnl.exe
+ 0001:000029f4       _IoDeleteDevice@4          004039f4 f   ntoskrnl:ntoskrnl.exe
+ 0001:000029fa       _IoCreateSymbolicLink@8    004039fa f   ntoskrnl:ntoskrnl.exe
+ 0001:00002a00       _DbgPrint                  00403a00 f   ntoskrnl:ntoskrnl.exe
+ 0001:00002a06       _IoCreateDevice@28         00403a06 f   ntoskrnl:ntoskrnl.exe
+ 0001:00002a0c       _RtlInitUnicodeString@8    00403a0c f   ntoskrnl:ntoskrnl.exe
+ 0001:00002a12       _IoDeleteSymbolicLink@4    00403a12 f   ntoskrnl:ntoskrnl.exe
+ 0001:00002a18       @IofCompleteRequest@8      00403a18 f   ntoskrnl:ntoskrnl.exe
+ 0001:00002a1e       _memset                    00403a1e f   ntoskrnl:ntoskrnl.exe
+ 0001:00002a24       _ExAllocatePool@8          00403a24 f   ntoskrnl:ntoskrnl.exe
+ 0001:00002a2a       _KeSetEvent@12             00403a2a f   ntoskrnl:ntoskrnl.exe
+ 0001:00002a30       @ObfDereferenceObject@4    00403a30 f   ntoskrnl:ntoskrnl.exe
+ 0001:00002a36       _KeWaitForSingleObject@20  00403a36 f   ntoskrnl:ntoskrnl.exe
+ 0001:00002a3c       _KeInsertQueueApc@16       00403a3c f   ntoskrnl:ntoskrnl.exe
+ 0001:00002a42       _KeInitializeApc@32        00403a42 f   ntoskrnl:ntoskrnl.exe
+ 0001:00002a48       _KeInitializeEvent@12      00403a48 f   ntoskrnl:ntoskrnl.exe
+ 0001:00002a4e       _PsLookupThreadByThreadId@8 00403a4e f   ntoskrnl:ntoskrnl.exe
+ 0001:00002a54       _RtlImageDirectoryEntryToData@16 00403a54 f   ntoskrnl:ntoskrnl.exe
+ 0001:00002a5a       _RtlImageNtHeader@4        00403a5a f   ntoskrnl:ntoskrnl.exe
+ 0001:00002a60       _ExFreePoolWithTag@8       00403a60 f   ntoskrnl:ntoskrnl.exe
+ 0001:00002a66       _memcpy                    00403a66 f   ntoskrnl:ntoskrnl.exe
+ 0001:00002a6c       _MmMapLockedPagesSpecifyCache@24 00403a6c f   ntoskrnl:ntoskrnl.exe
+ 0001:00002a72       _IoFreeMdl@4               00403a72 f   ntoskrnl:ntoskrnl.exe
+ 0001:00002a78       _MmProbeAndLockPages@12    00403a78 f   ntoskrnl:ntoskrnl.exe
+ 0001:00002a7e       _IoAllocateMdl@20          00403a7e f   ntoskrnl:ntoskrnl.exe
+ 0001:00002a84       _MmUnlockPages@4           00403a84 f   ntoskrnl:ntoskrnl.exe
+ 0001:00002a8a       _RtlAssert@16              00403a8a f   ntoskrnl:ntoskrnl.exe
+ 0001:00002a90       _RtlEqualUnicodeString@12  00403a90 f   ntoskrnl:ntoskrnl.exe
+ 0001:00002a96       _ObReferenceObjectByName@32 00403a96 f   ntoskrnl:ntoskrnl.exe
+ 0001:00002a9c       _RtlCharToInteger@12       00403a9c f   ntoskrnl:ntoskrnl.exe
+ 0001:00002aa2       _RtlFreeUnicodeString@4    00403aa2 f   ntoskrnl:ntoskrnl.exe
+ 0001:00002aa8       _RtlAnsiStringToUnicodeString@12 00403aa8 f   ntoskrnl:ntoskrnl.exe
+ 0001:00002aae       _RtlInitAnsiString@8       00403aae f   ntoskrnl:ntoskrnl.exe
+ 0001:00002ab4       _strchr                    00403ab4 f   ntoskrnl:ntoskrnl.exe
+ 0001:00002aba       __stricmp                  00403aba f   ntoskrnl:ntoskrnl.exe
+ 0001:00002ac0       _MmAllocateContiguousMemory@12 00403ac0 f   ntoskrnl:ntoskrnl.exe
+ 0001:00002ac6       _wcslen                    00403ac6 f   ntoskrnl:ntoskrnl.exe
+ 0001:00002acc       _wcscat                    00403acc f   ntoskrnl:ntoskrnl.exe
+ 0001:00002ad2       _wcscpy                    00403ad2 f   ntoskrnl:ntoskrnl.exe
+ 0001:00002ad8       _wcsrchr                   00403ad8 f   ntoskrnl:ntoskrnl.exe
+ 0001:00002ade       _MmFreeContiguousMemory@4  00403ade f   ntoskrnl:ntoskrnl.exe
+ 0001:00002ae4       _isxdigit                  00403ae4 f   ntoskrnl:ntoskrnl.exe
+ 0001:00002aea       _strlen                    00403aea f   ntoskrnl:ntoskrnl.exe
+ 0001:00002af0       _RtlCompareMemory@12       00403af0 f   ntoskrnl:ntoskrnl.exe
+ 0001:00002af6       ___report_gsfailure        00403af6 f   bufferoverflowk:gs_support.obj
+ 0001:00002b1c       @__security_check_cookie@4 00403b1c f   bufferoverflowk:secchk.obj
+ 0001:00002b32       _KeBugCheckEx@20           00403b32 f   ntoskrnl:ntoskrnl.exe
+ 0001:00003000       __CmpByte@8                00404000     CmpI386.obj
+ 0001:00003020       __CmpShort@8               00404020     CmpI386.obj
+ 0001:00003040       __CmpLong@8                00404040     CmpI386.obj
+ 0001:00003050       __CmpLongLong@16           00404050     CmpI386.obj
+ 0001:00004000       _DetourCopyInstruction@20  00405000 f   disasm.obj
+ 0001:00004040       ??0CDetourDis@@QAE@PAPAEPAJ@Z 00405040 f   disasm.obj
+ 0001:000040d0       ?CopyInstruction@CDetourDis@@QAEPAEPAE0@Z 004050d0 f   disasm.obj
+ 0001:00004130       ?SanityCheckSystem@CDetourDis@@SAHXZ 00405130 f   disasm.obj
+ 0001:000041f0       ?CopyBytes@CDetourDis@@IAEPAEPBUCOPYENTRY@1@PAE1@Z 004051f0 f   disasm.obj
+ 0001:000043d0       ?CopyBytesPrefix@CDetourDis@@IAEPAEPBUCOPYENTRY@1@PAE1@Z 004053d0 f   disasm.obj
+ 0001:00004430       ?CopyBytesRax@CDetourDis@@IAEPAEPBUCOPYENTRY@1@PAE1@Z 00405430 f   disasm.obj
+ 0001:000044a0       ?CopyBytesJump@CDetourDis@@IAEPAEPBUCOPYENTRY@1@PAE1@Z 004054a0 f   disasm.obj
+ 0001:000045c0       ?Invalid@CDetourDis@@IAEPAEPBUCOPYENTRY@1@PAE1@Z 004055c0 f   disasm.obj
+ 0001:000045e0       ?AdjustTarget@CDetourDis@@IAEPAEPAE0JJJ@Z 004055e0 f   disasm.obj
+ 0001:00004750       ?Copy0F@CDetourDis@@IAEPAEPBUCOPYENTRY@1@PAE1@Z 00405750 f   disasm.obj
+ 0001:000047b0       ?Copy66@CDetourDis@@IAEPAEPBUCOPYENTRY@1@PAE1@Z 004057b0 f   disasm.obj
+ 0001:000047e0       ?Copy67@CDetourDis@@IAEPAEPBUCOPYENTRY@1@PAE1@Z 004057e0 f   disasm.obj
+ 0001:00004810       ?CopyF6@CDetourDis@@IAEPAEPBUCOPYENTRY@1@PAE1@Z 00405810 f   disasm.obj
+ 0001:00004880       ?CopyF7@CDetourDis@@IAEPAEPBUCOPYENTRY@1@PAE1@Z 00405880 f   disasm.obj
+ 0001:000048f0       ?CopyFF@CDetourDis@@IAEPAEPBUCOPYENTRY@1@PAE1@Z 004058f0 f   disasm.obj
+ 0002:00000000       _GsDriverEntry@8           00406000 f   bufferoverflowk:gs_support.obj
+ 0003:00000000       _MmHighestUserAddress      00407000     ntoskrnl:ntoskrnl.exe
+ 0003:00000000       __imp__MmHighestUserAddress 00407000     ntoskrnl:ntoskrnl.exe
+ 0003:00000004       __imp__IoGetStackLimits@8  00407004     ntoskrnl:ntoskrnl.exe
+ 0003:00000008       __imp___except_handler3    00407008     ntoskrnl:ntoskrnl.exe
+ 0003:0000000c       __imp__IoDeleteDevice@4    0040700c     ntoskrnl:ntoskrnl.exe
+ 0003:00000010       __imp__IoCreateSymbolicLink@8 00407010     ntoskrnl:ntoskrnl.exe
+ 0003:00000014       __imp__DbgPrint            00407014     ntoskrnl:ntoskrnl.exe
+ 0003:00000018       __imp__IoCreateDevice@28   00407018     ntoskrnl:ntoskrnl.exe
+ 0003:0000001c       __imp__RtlInitUnicodeString@8 0040701c     ntoskrnl:ntoskrnl.exe
+ 0003:00000020       __imp__IoDeleteSymbolicLink@4 00407020     ntoskrnl:ntoskrnl.exe
+ 0003:00000024       __imp_@IofCompleteRequest@8 00407024     ntoskrnl:ntoskrnl.exe
+ 0003:00000028       __imp__memset              00407028     ntoskrnl:ntoskrnl.exe
+ 0003:0000002c       __imp__ExAllocatePool@8    0040702c     ntoskrnl:ntoskrnl.exe
+ 0003:00000030       __imp__KeSetEvent@12       00407030     ntoskrnl:ntoskrnl.exe
+ 0003:00000034       __imp_@ObfDereferenceObject@4 00407034     ntoskrnl:ntoskrnl.exe
+ 0003:00000038       __imp__KeWaitForSingleObject@20 00407038     ntoskrnl:ntoskrnl.exe
+ 0003:0000003c       __imp__KeInsertQueueApc@16 0040703c     ntoskrnl:ntoskrnl.exe
+ 0003:00000040       __imp__KeInitializeApc@32  00407040     ntoskrnl:ntoskrnl.exe
+ 0003:00000044       __imp__KeInitializeEvent@12 00407044     ntoskrnl:ntoskrnl.exe
+ 0003:00000048       __imp__PsLookupThreadByThreadId@8 00407048     ntoskrnl:ntoskrnl.exe
+ 0003:0000004c       __imp__RtlImageDirectoryEntryToData@16 0040704c     ntoskrnl:ntoskrnl.exe
+ 0003:00000050       __imp__RtlImageNtHeader@4  00407050     ntoskrnl:ntoskrnl.exe
+ 0003:00000054       __imp__ExFreePoolWithTag@8 00407054     ntoskrnl:ntoskrnl.exe
+ 0003:00000058       __imp__memcpy              00407058     ntoskrnl:ntoskrnl.exe
+ 0003:0000005c       __imp__MmMapLockedPagesSpecifyCache@24 0040705c     ntoskrnl:ntoskrnl.exe
+ 0003:00000060       __imp__IoFreeMdl@4         00407060     ntoskrnl:ntoskrnl.exe
+ 0003:00000064       __imp__MmProbeAndLockPages@12 00407064     ntoskrnl:ntoskrnl.exe
+ 0003:00000068       __imp__IoAllocateMdl@20    00407068     ntoskrnl:ntoskrnl.exe
+ 0003:0000006c       __imp__MmUnlockPages@4     0040706c     ntoskrnl:ntoskrnl.exe
+ 0003:00000070       __imp__RtlAssert@16        00407070     ntoskrnl:ntoskrnl.exe
+ 0003:00000074       __imp__RtlEqualUnicodeString@12 00407074     ntoskrnl:ntoskrnl.exe
+ 0003:00000078       __imp__ObReferenceObjectByName@32 00407078     ntoskrnl:ntoskrnl.exe
+ 0003:0000007c       _IoDriverObjectType        0040707c     ntoskrnl:ntoskrnl.exe
+ 0003:0000007c       __imp__IoDriverObjectType  0040707c     ntoskrnl:ntoskrnl.exe
+ 0003:00000080       __imp__RtlCharToInteger@12 00407080     ntoskrnl:ntoskrnl.exe
+ 0003:00000084       __imp__RtlFreeUnicodeString@4 00407084     ntoskrnl:ntoskrnl.exe
+ 0003:00000088       __imp__RtlAnsiStringToUnicodeString@12 00407088     ntoskrnl:ntoskrnl.exe
+ 0003:0000008c       __imp__RtlInitAnsiString@8 0040708c     ntoskrnl:ntoskrnl.exe
+ 0003:00000090       __imp__strchr              00407090     ntoskrnl:ntoskrnl.exe
+ 0003:00000094       __imp___stricmp            00407094     ntoskrnl:ntoskrnl.exe
+ 0003:00000098       __imp__MmAllocateContiguousMemory@12 00407098     ntoskrnl:ntoskrnl.exe
+ 0003:0000009c       __imp__wcslen              0040709c     ntoskrnl:ntoskrnl.exe
+ 0003:000000a0       __imp__wcscat              004070a0     ntoskrnl:ntoskrnl.exe
+ 0003:000000a4       __imp__wcscpy              004070a4     ntoskrnl:ntoskrnl.exe
+ 0003:000000a8       __imp__wcsrchr             004070a8     ntoskrnl:ntoskrnl.exe
+ 0003:000000ac       __imp__MmFreeContiguousMemory@4 004070ac     ntoskrnl:ntoskrnl.exe
+ 0003:000000b0       __imp__isxdigit            004070b0     ntoskrnl:ntoskrnl.exe
+ 0003:000000b4       __imp__strlen              004070b4     ntoskrnl:ntoskrnl.exe
+ 0003:000000b8       __imp__RtlCompareMemory@12 004070b8     ntoskrnl:ntoskrnl.exe
+ 0003:000000bc       __imp__KeTickCount         004070bc     ntoskrnl:ntoskrnl.exe
+ 0003:000000bc       _KeTickCount               004070bc     ntoskrnl:ntoskrnl.exe
+ 0003:000000c0       __imp__KeBugCheckEx@20     004070c0     ntoskrnl:ntoskrnl.exe
+ 0003:000000c4       \177ntoskrnl_NULL_THUNK_DATA 004070c4     ntoskrnl:ntoskrnl.exe
+ 0003:00000140       _KiFindFirstSetRight       00407140     PatchGuardI386.obj
+ 0003:00000240       _KiFindFirstSetLeft        00407240     PatchGuardI386.obj
+ 0003:00000340       _KiMask32Array             00407340     PatchGuardI386.obj
+ 0003:000003c0       _RtlAlternateDosPathSeparatorString 004073c0     PatchGuardI386.obj
+ 0003:000003c8       ??_C@_13CGOKJPIL@?$AA?1?$AA?$AA@ 004073c8     PatchGuardI386.obj
+ 0003:000003cc       _RtlDosPathSeparatorsString 004073cc     PatchGuardI386.obj
+ 0003:000003d4       ??_C@_15MNCACJLI@?$AA?2?$AA?1?$AA?$AA@ 004073d4     PatchGuardI386.obj
+ 0003:000003dc       _RtlNtPathSeparatorString  004073dc     PatchGuardI386.obj
+ 0003:000003e4       ??_C@_13FPGAJAPJ@?$AA?2?$AA?$AA@ 004073e4     PatchGuardI386.obj
+ 0003:00000428       ?s_rceCopyTable@CDetourDis@@1QBUCOPYENTRY@1@B 00407428     disasm.obj
+ 0003:00000c30       ?s_rceCopyTable0F@CDetourDis@@1QBUCOPYENTRY@1@B 00407c30     disasm.obj
+ 0003:00001438       ?s_rbModRm@CDetourDis@@1QBEB 00408438     disasm.obj
+ 0003:00001538       __load_config_used         00408538     ntoskrnl:loadcfg.obj
+ 0003:00001580       __IMPORT_DESCRIPTOR_ntoskrnl 00408580     ntoskrnl:ntoskrnl.exe
+ 0003:00001594       __NULL_IMPORT_DESCRIPTOR   00408594     ntoskrnl:ntoskrnl.exe
+ 0003:00001ab0       ___safe_se_handler_table   00408ab0     <linker-defined>
+ 0004:00000000       ___security_cookie         00409000     ntoskrnl:seccook.obj
+ 0004:00000004       ___security_cookie_complement 00409004     bufferoverflowk:gs_support.obj
+ 0004:0000002c       _MmPfnOwner                0040902c     <common>
+ 0004:00000040       _MmSessionFailureCauses    00409040     <common>
+
+ entry point at        0002:00000000
+
+ Static symbols
+
+ 0001:00003000       _$$$00001@0                00404000 f   CmpI386.obj

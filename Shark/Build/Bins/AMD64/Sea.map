@@ -1,0 +1,152 @@
+ Sea
+
+ Timestamp is 5bc49aa0 (Mon Oct 15 21:48:16 2018)
+
+ Preferred load address is 0000000000400000
+
+ Start         Length     Name                   Class
+ 0001:00000000 000013a6H .text                   CODE
+ 0001:000013b0 000002a3H .text$s                 CODE
+ 0002:00000000 00000118H .idata$5                DATA
+ 0002:00000118 00000008H .CRT$XCC                DATA
+ 0002:00000120 000000a8H .rdata                  DATA
+ 0002:000001c8 00000040H .rdata$debug            DATA
+ 0002:00000208 00000090H .xdata                  DATA
+ 0002:00000298 00000028H .idata$2                DATA
+ 0002:000002c0 00000014H .idata$3                DATA
+ 0002:000002d8 00000118H .idata$4                DATA
+ 0002:000003f0 0000027cH .idata$6                DATA
+ 0002:00000670 00000030H .edata                  DATA
+ 0003:00000000 00000410H .data                   DATA
+ 0003:00000410 00000578H .bss                    DATA
+ 0004:00000000 00000090H .pdata                  DATA
+ 0005:00000000 00000290H .rsrc$01                DATA
+ 0005:00000290 000288d8H .rsrc$02                DATA
+
+  Address         Publics by Value              Rva+Base             Lib:Object
+
+ 0000:00000000       ___safe_se_handler_table   0000000000000000     <absolute>
+ 0000:00000000       ___safe_se_handler_count   0000000000000000     <absolute>
+ 0001:00000000       Startup                    0000000000401000 f   Sea.obj
+ 0001:00000270       NtCurrentTeb               0000000000401270 f i Sea.obj
+ 0001:00000280       Print                      0000000000401280 f   Print.obj
+ 0001:00000470       CreateKey                  0000000000401470 f   Sysload.obj
+ 0001:00000560       OpenKey                    0000000000401560 f   Sysload.obj
+ 0001:00000620       SetValueKey                0000000000401620 f   Sysload.obj
+ 0001:000006b0       LoadSystemImage            00000000004016b0 f   Sysload.obj
+ 0001:00000dc0       UnloadSystemImage          0000000000401dc0 f   Sysload.obj
+ 0001:000010a4       NtTerminateProcess         00000000004020a4 f   ntdll:ntdll.dll
+ 0001:000010aa       NtClose                    00000000004020aa f   ntdll:ntdll.dll
+ 0001:000010b0       NtDeviceIoControlFile      00000000004020b0 f   ntdll:ntdll.dll
+ 0001:000010b6       NtOpenFile                 00000000004020b6 f   ntdll:ntdll.dll
+ 0001:000010bc       RtlInitUnicodeString       00000000004020bc f   ntdll:ntdll.dll
+ 0001:000010c2       DbgPrint                   00000000004020c2 f   ntdll:ntdll.dll
+ 0001:000010c8       RtlFreeHeap                00000000004020c8 f   ntdll:ntdll.dll
+ 0001:000010ce       _vsnwprintf                00000000004020ce f   ntdll:ntdll.dll
+ 0001:000010d4       RtlAllocateHeap            00000000004020d4 f   ntdll:ntdll.dll
+ 0001:000010da       _vscwprintf                00000000004020da f   ntdll:ntdll.dll
+ 0001:000010e0       LdrGetProcedureAddress     00000000004020e0 f   ntdll:ntdll.dll
+ 0001:000010e6       RtlInitAnsiString          00000000004020e6 f   ntdll:ntdll.dll
+ 0001:000010ec       LdrGetDllHandle            00000000004020ec f   ntdll:ntdll.dll
+ 0001:000010f2       NtCreateKey                00000000004020f2 f   ntdll:ntdll.dll
+ 0001:000010f8       NtOpenKey                  00000000004020f8 f   ntdll:ntdll.dll
+ 0001:000010fe       NtSetValueKey              00000000004020fe f   ntdll:ntdll.dll
+ 0001:00001104       NtLoadDriver               0000000000402104 f   ntdll:ntdll.dll
+ 0001:0000110a       RtlFreeUnicodeString       000000000040210a f   ntdll:ntdll.dll
+ 0001:00001110       memset                     0000000000402110 f   ntdll:ntdll.dll
+ 0001:00001116       memcpy                     0000000000402116 f   ntdll:ntdll.dll
+ 0001:0000111c       RtlDosPathNameToNtPathName_U_WithStatus 000000000040211c f   ntdll:ntdll.dll
+ 0001:00001122       wcslen                     0000000000402122 f   ntdll:ntdll.dll
+ 0001:00001128       wcscat                     0000000000402128 f   ntdll:ntdll.dll
+ 0001:0000112e       wcscpy                     000000000040212e f   ntdll:ntdll.dll
+ 0001:00001134       RtlAdjustPrivilege         0000000000402134 f   ntdll:ntdll.dll
+ 0001:0000113a       NtDeleteKey                000000000040213a f   ntdll:ntdll.dll
+ 0001:00001140       NtUnloadDriver             0000000000402140 f   ntdll:ntdll.dll
+ 0001:00001150       _DllMainCRTStartupForGS    0000000000402150 f   bufferoverflow:gs_dllmain.obj
+ 0001:00001180       _DllMainCRTStartupForGS2   0000000000402180 f   bufferoverflow:gs_dllmain.obj
+ 0001:000011a0       NtGetTickCount             00000000004021a0 f i bufferoverflow:gs_support.obj
+ 0001:000011c0       __report_gsfailure         00000000004021c0 f   bufferoverflow:gs_support.obj
+ 0001:000012d0       __security_init_cookie_ex  00000000004022d0 f   bufferoverflow:gs_support.obj
+ 0001:00001340       __security_init_cookie     0000000000402340 f   bufferoverflow:gs_support.obj
+ 0001:00001382       RtlVirtualUnwind           0000000000402382 f   kernel32:KERNEL32.dll
+ 0001:00001388       RtlLookupFunctionEntry     0000000000402388 f   kernel32:KERNEL32.dll
+ 0001:0000138e       RtlCaptureContext          000000000040238e f   kernel32:KERNEL32.dll
+ 0001:00001394       __C_specific_handler       0000000000402394 f   kernel32:KERNEL32.dll
+ 0001:0000139a       LdrDisableThreadCalloutsForDll 000000000040239a f   ntdll:ntdll.dll
+ 0001:000013a0       RtlUnhandledExceptionFilter 00000000004023a0 f   ntdll:ntdll.dll
+ 0001:000013b0       ??_C@_0CF@OIKGAIJG@?4textNT_SUCCESS?$CINtClose?$CIFileHand@ 00000000004023b0     Sea.obj
+ 0001:000013d0       ??_C@_1CC@NNCCLFIJ@t?4xe?$AAt?$AA?2?$AAD?$AAe?$AAv?$AAi?$AAc?$AAe?$AA?2?$AAS?$AAh?$AAa?$AAr?$AAk?$AA?$AA@ 00000000004023d0     Sea.obj
+ 0001:000013f0       ??_C@_0DG@EKEKEHKN@?4text?$CFs?$CI?$CFd?$CJ?3?5Soft?5assertion?5fail@ 00000000004023f0     Sea.obj
+ 0001:00001430       ??_C@_0L@OKAHDEFK@?4textSea?4c?$AA@ 0000000000402430     Sea.obj
+ 0001:00001440       ??_C@_0BI@IIBFDAEC@?4textNT_SUCCESS?$CIStatus?$CJ?$AA@ 0000000000402440     Sea.obj
+ 0001:00001460       ??_C@_1BK@PFNLILMH@t?4xe?$AAt?$AAS?$AAh?$AAa?$AAr?$AAk?$AA?4?$AAs?$AAy?$AAs?$AA?$AA@ 0000000000402460     Sea.obj
+ 0001:00001480       ??_C@_1BC@INGELJMG@t?4xe?$AAt?$AAS?$AAh?$AAa?$AAr?$AAk?$AA?$AA@ 0000000000402480     Sea.obj
+ 0001:00001490       ??_C@_0BI@PBJENNDP@?4textOutputDebugStringW?$AA@ 0000000000402490     Print.obj
+ 0001:000014b0       ??_C@_0N@EIHLOIED@?4textPrint?4c?$AA@ 00000000004024b0     Print.obj
+ 0001:000014c0       ??_C@_1CA@EIJNOBNN@t?4xe?$AAt?$AAK?$AAe?$AAr?$AAn?$AAe?$AAl?$AA3?$AA2?$AA?4?$AAd?$AAl?$AAl?$AA?$AA@ 00000000004024c0     Print.obj
+ 0001:000014e0       ??_C@_0CE@PPPANLEH@?4textNT_SUCCESS?$CINtClose?$CIKeyHandl@ 00000000004024e0     Sysload.obj
+ 0001:00001500       ??_C@_1BK@EAEKCABJ@t?4xe?$AAt?$AAI?$AAm?$AAa?$AAg?$AAe?$AAP?$AAa?$AAt?$AAh?$AA?$AA@ 0000000000402500     Sysload.obj
+ 0001:00001520       ??_C@_1BO@NDKGEFII@t?4xe?$AAt?$AAD?$AAi?$AAs?$AAp?$AAl?$AAa?$AAy?$AAN?$AAa?$AAm?$AAe?$AA?$AA@ 0000000000402520     Sysload.obj
+ 0001:00001540       ??_C@_1BC@LIIMJPGJ@t?4xe?$AAt?$AAS?$AAt?$AAa?$AAr?$AAt?$AA?$AA@ 0000000000402540     Sysload.obj
+ 0001:00001550       ??_C@_1CA@PJNPDJFJ@t?4xe?$AAt?$AAE?$AAr?$AAr?$AAo?$AAr?$AAC?$AAo?$AAn?$AAt?$AAr?$AAo?$AAl?$AA?$AA@ 0000000000402550     Sysload.obj
+ 0001:00001570       ??_C@_0CL@MLPEJFGL@?4text?$CIRTL_SOFT_ASSERT?$CINT_SUCCESS@ 0000000000402570     Sysload.obj
+ 0001:000015a0       ??_C@_1BA@GDCGNEOM@t?4xe?$AAt?$AAT?$AAy?$AAp?$AAe?$AA?$AA@ 00000000004025a0     Sysload.obj
+ 0001:000015b0       ??_C@_1HA@EPBPLDHD@t?4xe?$AAt?$AA?2?$AAR?$AAe?$AAg?$AAi?$AAs?$AAt?$AAr?$AAy?$AA?2?$AAM?$AAa?$AAc?$AAh?$AAi?$AAn?$AAe?$AA?2?$AAS?$AAy?$AAs?$AAt?$AAe?$AAm?$AA?2?$AAC?$AAu?$AAr?$AAr@ 00000000004025b0     Sysload.obj
+ 0001:00001620       ??_C@_0P@DEGFHBBE@?4textSysload?4c?$AA@ 0000000000402620     Sysload.obj
+ 0001:00001630       ??_C@_0CI@IJDHMFDD@?4textNT_SUCCESS?$CINtDeleteKey?$CIKeyH@ 0000000000402630     Sysload.obj
+ 0002:00000000       __imp_RtlCaptureContext    0000000000403000     kernel32:KERNEL32.dll
+ 0002:00000008       __imp_RtlLookupFunctionEntry 0000000000403008     kernel32:KERNEL32.dll
+ 0002:00000010       __imp_RtlVirtualUnwind     0000000000403010     kernel32:KERNEL32.dll
+ 0002:00000018       __imp___C_specific_handler 0000000000403018     kernel32:KERNEL32.dll
+ 0002:00000020       \177KERNEL32_NULL_THUNK_DATA 0000000000403020     kernel32:KERNEL32.dll
+ 0002:00000028       __imp_DbgPrint             0000000000403028     ntdll:ntdll.dll
+ 0002:00000030       __imp_RtlFreeHeap          0000000000403030     ntdll:ntdll.dll
+ 0002:00000038       __imp__vsnwprintf          0000000000403038     ntdll:ntdll.dll
+ 0002:00000040       __imp_RtlAllocateHeap      0000000000403040     ntdll:ntdll.dll
+ 0002:00000048       __imp__vscwprintf          0000000000403048     ntdll:ntdll.dll
+ 0002:00000050       __imp_LdrGetProcedureAddress 0000000000403050     ntdll:ntdll.dll
+ 0002:00000058       __imp_RtlInitAnsiString    0000000000403058     ntdll:ntdll.dll
+ 0002:00000060       __imp_LdrGetDllHandle      0000000000403060     ntdll:ntdll.dll
+ 0002:00000068       __imp_NtCreateKey          0000000000403068     ntdll:ntdll.dll
+ 0002:00000070       __imp_NtOpenKey            0000000000403070     ntdll:ntdll.dll
+ 0002:00000078       __imp_NtSetValueKey        0000000000403078     ntdll:ntdll.dll
+ 0002:00000080       __imp_RtlInitUnicodeString 0000000000403080     ntdll:ntdll.dll
+ 0002:00000088       __imp_RtlFreeUnicodeString 0000000000403088     ntdll:ntdll.dll
+ 0002:00000090       __imp_memset               0000000000403090     ntdll:ntdll.dll
+ 0002:00000098       __imp_memcpy               0000000000403098     ntdll:ntdll.dll
+ 0002:000000a0       __imp_RtlDosPathNameToNtPathName_U_WithStatus 00000000004030a0     ntdll:ntdll.dll
+ 0002:000000a8       __imp_wcslen               00000000004030a8     ntdll:ntdll.dll
+ 0002:000000b0       __imp_wcscat               00000000004030b0     ntdll:ntdll.dll
+ 0002:000000b8       __imp_wcscpy               00000000004030b8     ntdll:ntdll.dll
+ 0002:000000c0       __imp_RtlAdjustPrivilege   00000000004030c0     ntdll:ntdll.dll
+ 0002:000000c8       __imp_NtDeleteKey          00000000004030c8     ntdll:ntdll.dll
+ 0002:000000d0       __imp_NtUnloadDriver       00000000004030d0     ntdll:ntdll.dll
+ 0002:000000d8       __imp_NtOpenFile           00000000004030d8     ntdll:ntdll.dll
+ 0002:000000e0       __imp_NtDeviceIoControlFile 00000000004030e0     ntdll:ntdll.dll
+ 0002:000000e8       __imp_NtClose              00000000004030e8     ntdll:ntdll.dll
+ 0002:000000f0       __imp_NtLoadDriver         00000000004030f0     ntdll:ntdll.dll
+ 0002:000000f8       __imp_NtTerminateProcess   00000000004030f8     ntdll:ntdll.dll
+ 0002:00000100       __imp_LdrDisableThreadCalloutsForDll 0000000000403100     ntdll:ntdll.dll
+ 0002:00000108       __imp_RtlUnhandledExceptionFilter 0000000000403108     ntdll:ntdll.dll
+ 0002:00000110       \177ntdll_NULL_THUNK_DATA  0000000000403110     ntdll:ntdll.dll
+ 0002:00000140       RtlAlternateDosPathSeparatorString 0000000000403140     Sea.obj
+ 0002:00000150       ??_C@_13CGOKJPIL@?$AA?1?$AA?$AA@ 0000000000403150     Sea.obj
+ 0002:00000158       RtlDosPathSeparatorsString 0000000000403158     Sea.obj
+ 0002:00000168       ??_C@_15MNCACJLI@?$AA?2?$AA?1?$AA?$AA@ 0000000000403168     Sea.obj
+ 0002:00000170       RtlNtPathSeparatorString   0000000000403170     Sea.obj
+ 0002:00000180       ??_C@_13FPGAJAPJ@?$AA?2?$AA?$AA@ 0000000000403180     Sea.obj
+ 0002:00000188       RtlAlternateDosPathSeperatorString 0000000000403188     bufferoverflow:gs_dllmain.obj
+ 0002:00000198       RtlDosPathSeperatorsString 0000000000403198     bufferoverflow:gs_dllmain.obj
+ 0002:000001a8       RtlNtPathSeperatorString   00000000004031a8     bufferoverflow:gs_dllmain.obj
+ 0002:00000298       __IMPORT_DESCRIPTOR_ntdll  0000000000403298     ntdll:ntdll.dll
+ 0002:000002ac       __IMPORT_DESCRIPTOR_KERNEL32 00000000004032ac     kernel32:KERNEL32.dll
+ 0002:000002c0       __NULL_IMPORT_DESCRIPTOR   00000000004032c0     ntdll:ntdll.dll
+ 0003:00000000       HotPatchBuffer             0000000000404000     HOTPATCH.obj
+ 0003:00000400       __security_cookie_complement 0000000000404400     bufferoverflow:gs_support.obj
+ 0003:00000408       __security_cookie          0000000000404408     bufferoverflow:gs_support.obj
+ 0003:00000980       Kernel32OutputDebugString  0000000000404980     <common>
+
+ entry point at        0001:00000000
+
+ Static symbols
+
