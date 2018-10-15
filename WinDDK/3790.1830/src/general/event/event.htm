@@ -1,0 +1,67 @@
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1252">
+<META NAME="Generator" CONTENT="Microsoft Word 97">
+<TITLE>EVENT </TITLE>
+<META NAME="Template" CONTENT="C:\PROGRAM FILES\MICROSOFT OFFICE\OFFICE\html.dot">
+</HEAD>
+<BODY TEXT="#000000" LINK="#0000ff" VLINK="#800080" BGCOLOR="#ffffff" leftmargin="8">
+<FONT FACE="Verdana"><H2><A NAME="MYSAMPLE">EVENT</A> </H2>
+<H3>SUMMARY</h3></FONT><FONT FACE="Verdana" SIZE=2><P>
+This sample demonstrates two different ways a Windows NT kernel-mode driver can notify an application about a hardware event. One is event based method and the other is an IRP based method. Since the sample driver
+is not talking to any real hardware, it uses a timer DPC to simulate hardware events. The test application informs the driver
+whether it wants to be notified by signaling an event or by completing the pending IRP and also gives a relative time at
+which the DPC timer has to fire. <P>
+
+<B>Event based approach:</B> The application creates an event using CreateEvent(). It then passes the event handle to the driver in a private ioctl IOCTL_REGISTER_EVENT. Since the driver is a monolithic toplevel driver, its IRP dispatch routines run in the application process context and as a result the event handle is still valid in the driver. The driver dereferences the user-mode handle into system space & saves the event object pointer for later use and queues a custom timer DPC. When the DPC fires, the driver signals the event via KeSetEvent() at DISPATCH_LEVEL and deletes the references to the event object. You can't use this approach if your driver is not a monolithic - toplevel driver, because you can't guarantee the process context in a multi-level driver stack if you are not at the top.<P>
+
+<B>Pending IRP based approach:</B> The application make a synchronous ioctl(IOCTL_REGISTER_EVENT) request. The driver marks the device I/O control IRP pending and queues a timer DPC and returns STATUS_PENDING. When the timer fires to indicate a hardware event, the driver completes the pending IRP to notify the application about the hardware event. <P>
+
+There are two advantages of this method over the event based approach. One is that you can send a message to the application along with your notification and other one is that the driver routines don't have to be in the context of the process that made the request. The application can do a synchronous or asynchronous (overlapped) ioctl to the driver. 
+
+
+<P><B>
+This sample driver is not a PnP driver. This is a minimal driver meant to demonstrate an OS feature. Neither it nor its sample programs are intended for use in a production environment. Rather, they are intended for educational purposes and as a skeleton driver.</B><P>
+
+<P>This driver will work on Windows NT 4.0, Windows 2000, Windows XP and Windows Server 2003 operating systems. The build instructions given here applies to Windows 2000/XP/Server 2003 build environments. This has sample hasn't been tested on Windows 9x systems so it may or may not work.<P>
+
+
+<H3>BUILDING THE SAMPLE</h3></FONT><FONT FACE="Verdana" SIZE=2><P>
+Click the Free Build Environment or Checked Build Environment icon under Development Kits program group to set basic environment variables. <P>
+
+Change to the directory containing the device source code, such as CD Src\General\Event. <P>
+
+Run <B>build -ceZ,</B> or use the macro <B>BLD</B>. This command invokes the Microsoft make routines to build the components. If the build succeeds, you will find the driver, event.sys, and the test application, event.exe, in the i386 subdirectory of the %TARGETPATH% directory specified in the Sources file. If it fails you can find errors and warnings in the buildxxx.err and buildxxx.err respectively, where xxx is eithr chk or fre depending on the build environment. <P>
+
+<H3>TESTING</h3></FONT><FONT FACE="Verdana" SIZE=2><P>
+To test this driver, copy the test app, event.exe, and the driver to the same directory, and run the application. The application will automatically load the driver if it's not already loaded and interact with the driver. When you exit the app, the driver will be stopped, unloaded and removed. <P>
+
+c:\>Event.exe DELAY <0/1> <P>
+where DELAY equals the time to delay the Event signal in seconds.<P>
+Specify O for IRP based notification and 1 for event based notification.<P>
+<H3>CODE TOUR</H3><P>
+<H4>File Manifest</H4>
+</FONT><U><PRE>File&#9;&#9;Description
+</U>
+
+Event.htm&#9;Documentation for the sample (this file)
+
+Exe\Sources&#9;Generic file for building the test app
+Exe\Eventtest.c&#9;Simple console test application
+Exe\install.c&#9;Code for registering and starting the driver service
+
+Sys\Sources&#9;Generic file for building the driver
+Sys\Event.h&#9;Header file private to the driver
+Sys\public.h&#9;Common header file between app and driver
+Sys\Event.c&#9;Main driver file
+Sys\Event.rc&#9;Driver resource file
+
+</FONT><P ALIGN="CENTER"><A HREF="#top"><FONT FACE="Verdana" SIZE=2>Top of page</FONT></A><FONT FACE="Verdana" SIZE=2> </P></FONT>
+<TABLE CELLSPACING=0 BORDER=0 WIDTH=624>
+<TR><TD VALIGN="MIDDLE" BGCOLOR="#00ffff" HEIGHT=2>
+<P></TD>
+</TR>
+</TABLE>
+
+<FONT FACE="MS Sans Serif" SIZE=1><P>&copy; 1998 Microsoft Corporation</FONT><FONT FACE="Verdana" SIZE=2> </P></FONT></BODY>
+</HTML>

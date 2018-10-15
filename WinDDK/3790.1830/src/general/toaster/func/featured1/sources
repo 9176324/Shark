@@ -1,0 +1,15 @@
+TARGETNAME=toaster
+TARGETTYPE=DRIVER
+TARGETPATH=obj
+
+
+NTTARGETFILE0=mofcomp
+
+TARGETLIBS= $(DDK_LIB_PATH)\ntstrsafe.lib
+
+INCLUDES = ..\..\inc;..\shared
+
+SOURCES= toaster.rc \
+         toaster.c  \
+         power.c \
+         wmi.c 

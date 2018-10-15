@@ -1,0 +1,42 @@
+TARGETNAME=ndisprot
+TARGETPATH=obj
+TARGETTYPE=DRIVER
+
+C_DEFINES=$(C_DEFINES)  -DNDIS_WDM=1  
+# C_DEFINES=$(C_DEFINES) -DDBG_SPIN_LOCK=1 -DEX_CALLBACK=1
+# C_DEFINES=$(C_DEFINES) -DWIN9X=1
+
+# MSC_WARNING_LEVEL=/W4
+
+PRECOMPILED_INCLUDE=precomp.h
+PRECOMPILED_PCH=precomp.pch
+PRECOMPILED_OBJ=precomp.obj
+
+USE_MAPSYM=1
+
+TARGETLIBS=\
+    $(DDK_LIB_PATH)\ndis.lib \
+    $(DDK_LIB_PATH)\wdmsec.lib
+
+
+!if "$(DDK_TARGET_OS)"=="Win2K"
+	
+C_DEFINES = $(C_DEFINES) -DNDIS50=1 
+
+!else
+#
+# Comment the following line if you don't want software tracing
+#
+C_DEFINES = $(C_DEFINES) -DNDIS51=1 
+
+!endif
+
+SOURCES=\
+    ndisprot.rc \
+    ntdisp.c \
+    ndisbind.c \
+    recv.c \
+    send.c \
+    debug.c \
+    ExCallbk.c
+

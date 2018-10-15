@@ -1,0 +1,30 @@
+/*++
+
+Copyright (c) 1996-2003  Microsoft Corporation
+All rights reserved.
+
+Module Name:
+
+    pjlmon.rc
+
+Abstract:
+
+    Spooler setup strings
+
+Revision History:
+
+--*/
+#include <windows.h>
+
+/********************************************************************
+
+    Version stamp
+
+********************************************************************/
+
+#define VER_FILETYPE    VFT_DLL
+#define VER_FILESUBTYPE VFT2_UNKNOWN
+#define VER_FILEDESCRIPTION_STR     "PJL Language monitor"
+#define VER_INTERNALNAME_STR        "PJLMON.DLL"
+#define VER_ORIGINALFILENAME_STR    "PJLMON.DLL"
+

@@ -1,0 +1,33 @@
+;//+-------------------------------------------------------------------------
+;//
+;//  Microsoft Windows
+;//
+;//  Copyright (C) Microsoft Corporation, 1998 - 1998
+;//
+;//  File:       tape.def
+;//
+;//--------------------------------------------------------------------------
+
+
+
+NAME TAPE.SYS
+
+EXPORTS
+    TapeClassInitialize
+    TapeClassAllocateSrbBuffer
+    TapeClassZeroMemory
+    TapeClassCompareMemory
+    TapeClassLogicalBlockToPhysicalBlock
+    TapeClassPhysicalBlockToLogicalBlock
+    TapeClassLiDiv
+    TapeDebugPrint
+
+    ;
+    ; Alias to allow /GS support LIB to be miniport-agnostic.  Must
+    ; be exported as "ScsiPortNotification" to allow SCSI/RAID
+    ; miniports compiled for the current OS to run downlevel as well.
+    ;
+
+    TapeClassNotification
+    ScsiPortNotification=TAPE.TapeClassNotification
+

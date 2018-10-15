@@ -1,0 +1,4 @@
+DIRS= \
+     all_kbds \
+     fe_kbds \
+     kbdus

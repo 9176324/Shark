@@ -1,0 +1,228 @@
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=us-ascii">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 11">
+<meta name=Originator content="Microsoft Word 11">
+<link rel=File-List href="wia_files/filelist.xml">
+<title>Windows Image Acquisition</title>
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Verdana;
+	panose-1:2 11 6 4 3 5 4 4 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:536871559 0 0 0 415 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0in;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";}
+h1
+	{mso-margin-top-alt:auto;
+	margin-right:0in;
+	mso-margin-bottom-alt:auto;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	mso-outline-level:1;
+	font-size:24.0pt;
+	font-family:"Times New Roman";
+	font-weight:bold;}
+h2
+	{mso-margin-top-alt:auto;
+	margin-right:0in;
+	mso-margin-bottom-alt:auto;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	mso-outline-level:2;
+	font-size:18.0pt;
+	font-family:"Times New Roman";
+	font-weight:bold;}
+h3
+	{mso-margin-top-alt:auto;
+	margin-right:0in;
+	mso-margin-bottom-alt:auto;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	mso-outline-level:3;
+	font-size:13.5pt;
+	font-family:"Times New Roman";
+	font-weight:bold;}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+p
+	{mso-margin-top-alt:auto;
+	margin-right:0in;
+	mso-margin-bottom-alt:auto;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";}
+pre
+	{margin:0in;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt;
+	font-size:10.0pt;
+	font-family:"Courier New";
+	mso-fareast-font-family:"Times New Roman";}
+@page Section1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.25in 1.0in 1.25in;
+	mso-header-margin:.5in;
+	mso-footer-margin:.5in;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Table Normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0in 5.4pt 0in 5.4pt;
+	mso-para-margin:0in;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman";
+	mso-ansi-language:#0400;
+	mso-fareast-language:#0400;
+	mso-bidi-language:#0400;}
+</style>
+<![endif]--><!--[if gte mso 9]><xml>
+ <o:shapedefaults v:ext="edit" spidmax="2050"/>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <o:shapelayout v:ext="edit">
+  <o:idmap v:ext="edit" data="1"/>
+ </o:shapelayout></xml><![endif]-->
+</head>
+
+<body bgcolor=white lang=EN-US link=blue vlink=blue style='tab-interval:.5in'
+leftmargin=8>
+
+<div class=Section1>
+
+<div>
+
+<h1>Windows Image Acquisition</h1>
+
+<h2>SUMMARY</h2>
+
+<p>This directory contains samples and test tools for Windows Image Acquisition
+(WIA), a driver architecture and user interface for acquiring images from still
+image devices such as scanners and digital still cameras. These samples will
+not run on Windows 2000, Windows 98, or Windows 95.</p>
+
+<h2>CONTENTS</h2>
+
+<p>The following lists the WIA components and samples in the DDK:</p>
+
+<h3>DOCUMENTATION</h3>
+
+<p>Documentation on WIA can be found in the Platform SDK and this DDK. The DDK
+contains information on developing drivers, and the Platform SDK contains
+information for application writers. Note that WIA properties are only
+documented in the Platform SDK under the topic Windows Image Acquisition/Wia
+References/WIA Application Programming Interface/Constants/WIA Property
+Constants.</p>
+
+<p>Each sample directory contains brief documentation on how to build and run
+that sample.</p>
+
+<h3>FLAT-BED SCANNER SAMPLE DRIVER</h3>
+
+<p>The Wiascanr directory contains a sample WIA minidriver for a flat-bed
+scanner with a document feeder. See the documentation file Wiascanr.htm in the
+Wiascanr directory for more information. (This sample replaces the old sample, Wiatscan.)</p>
+
+<h3>SCANNER MICRODRIVER SAMPLE DRIVER</h3>
+
+<p>The Microdrv directory contains a sample WIA microdriver for a scanner. A
+microdriver is much easier to develop than a full WIA minidriver but provides
+only basic functionality. See the documentation file Testmcro.htm in the
+Microdrv directory for more information.</p>
+
+<h3>DIGITAL STILL CAMERA SAMPLE DRIVER</h3>
+
+<p>The Wiacam and Microcam directories contain a sample WIA driver for a
+digital still camera and the Extend directory contains a sample user interface
+extension. See the documentation file Wiacam.htm in the Wiacam directory,
+Fakecam.htm in the Microcam directory, and Extend.htm in the Extend directory
+for more information.</p>
+
+<h3>TOOLS</h3>
+
+<p>The Tools\Wia directory in the root directory of the DDK contains additional
+tools to help with WIA driver development. Documentation for the tools is
+contained in the DDK documentation.</p>
+
+<h2>USING THE SAMPLES</h2>
+
+<p>To quickly build and test all of the samples, run the <b style='mso-bidi-font-weight:
+normal'>build</b> command in the src\wdm\wia directory by using the Free or
+Checked DDK Build Environment. Next, run the &quot;copywia.cmd&#8221; batch
+file to gather all of the binaries into a subdirectory named
+&#8220;wiabins&#8221;. The camera and scanner samples can be installed in
+Windows Me or Windows XP by using the <b style='mso-bidi-font-weight:normal'>Add
+Device</b> icon in the Scanners and Cameras control panel. Use the <b
+style='mso-bidi-font-weight:normal'>Have Disk</b> button to point to the
+wiabins\drivers or wiabins\drivers folder. Wiatest.exe (from the DDK Tools\Wia
+directory), MS Paint, the Scanner and Camera Wizard, or any TWAIN application
+(through the WIA TWAIN compatibility layer) can be used to test the samples.</p>
+
+<p>For more information on building and using the samples, see the individual
+documentation files referenced earlier.</p>
+
+<h2>RESOURCES</h2>
+
+<p>WIA information: <a
+href="http://www.microsoft.com/whdc/device/stillimage/default.mspx">http://www.microsoft.com/whdc/device/stillimage/default.mspx</a></p>
+
+<p>DDK information: <a href="http://www.microsoft.com/whdc/default.mspx">http://www.microsoft.com/whdc/default.mspx</a></p>
+
+<p align=center style='text-align:center'><span style='font-size:10.0pt;
+font-family:"Courier New"'><a href="#top"><span style='font-family:Verdana'>Top
+of page</span></a></span> </p>
+
+<pre>&nbsp;</pre>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width=624
+ style='width:6.5in;mso-cellspacing:0in;mso-padding-alt:0in 0in 0in 0in'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+  <td style='background:aqua;padding:0in 0in 0in 0in'>
+  <p class=MsoNormal>&nbsp; </p>
+  </td>
+ </tr>
+</table>
+
+<pre>&nbsp;</pre><pre>&nbsp;</pre>
+
+<p>&copy; 2004 Microsoft Corporation </p>
+
+</div>
+
+</div>
+
+</body>
+
+</html>
+

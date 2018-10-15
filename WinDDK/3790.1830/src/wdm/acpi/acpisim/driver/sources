@@ -1,0 +1,17 @@
+
+TARGETNAME=acpisim
+TARGETPATH=obj
+TARGETTYPE=DRIVER
+
+MSC_WARNING_LEVEL=-W3 -WX
+
+SOURCES= acpisim.c                        \
+         acpisim.rc                     
+
+
+TARGETLIBS=$(DDK_LIB_PATH)\oprghdlr.lib         \
+           $(DDK_LIB_PATH)\acpisim.lib
+
+
+INCLUDES= $(DDK_INC_PATH)\wdm;$(DDK_INC_PATH)\wdm\inc;..\inc
+

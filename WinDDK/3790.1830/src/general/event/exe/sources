@@ -1,0 +1,12 @@
+TARGETNAME=event
+#TARGETPATH=$(BASEDIR)\lib
+TARGETPATH=obj
+TARGETTYPE=PROGRAM
+
+INCLUDES=..\sys
+
+SOURCES=eventtest.c \
+	install.c
+
+UMTYPE=console
+UMBASE=0x400000

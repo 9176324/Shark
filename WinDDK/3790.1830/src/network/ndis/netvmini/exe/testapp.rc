@@ -1,0 +1,28 @@
+/*++
+
+Copyright (c) Microsoft Corporation.  All rights reserved.
+
+    THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
+    KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+    IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR
+    PURPOSE.
+
+--*/
+
+#include "windows.h"
+
+#include "testapp.h"
+
+
+GenericMenu MENU
+  {
+    POPUP    "&Action"
+    {
+      MENUITEM "&Open all Miniport",  IDM_OPEN
+      MENUITEM "&Close all handles", IDM_CLOSE
+      MENUITEM "&Ioctl to Control Device",  IDM_CTL_IOCTL
+      MENUITEM "Clea&r Display",  IDM_CLEAR           
+      MENUITEM "E&xit",  IDM_EXIT     
+    }
+  }
+

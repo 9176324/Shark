@@ -1,0 +1,450 @@
+!IF 0
+
+Copyright (c) 1994-1996  Microsoft Corporation
+
+Module Name:
+
+    ia64mk.inc
+
+Abstract:
+
+        This module contains the ia64 specific build controls.  It is included
+        by makefile.def.
+
+        Add the following variable to your env.
+
+        1) To turn on IA64 hazard detection:
+
+                    set _IA64_HAZARD_DETECTION=-X explicit
+
+        2) To turn on Merced MSR access, add the following variable to your env.
+
+                    set _IA64_MERCED_MSR =-A MERCED
+
+Revision History:
+
+!ENDIF
+
+DELAYLOAD_SUPPORTED=1
+!ifndef DELAYLOAD_VERSION
+DELAYLOAD_VERSION=0x0200
+!endif
+
+#
+# ia64 option control
+#
+
+!undef USE_MAPSYM
+
+UMBASE=$(UMBASE:*=ia64)
+UMLIBS=$(UMLIBS:*=ia64)
+NTRES=$(NTRES:*=ia64)
+UMRES=$(UMRES:*=ia64)
+UMOBJS=$(UMOBJS:*=ia64)
+CRTLIBS=$(CRTLIBS:*=ia64)
+LINKLIBS=$(LINKLIBS:*=ia64)
+GDI_DRIVER_LIBS=$(GDI_DRIVER_LIBS:*=ia64)
+DLLBASE=$(DLLBASE:*=ia64)
+DLLDEF=$(DLLDEF:*=ia64)
+MACHINE_TARGETLIBS=$(MACHINE_TARGETLIBS:*=ia64)
+TARGET=$(TARGET:*=ia64)
+DYNLINK_LIB=$(DYNLINK_LIB:*=ia64)
+TARGETEXEFILES=$(TARGETEXEFILES:*=ia64)
+TARGETLIBFILES=$(TARGETLIBFILES:*=ia64)
+TARGETOBJFILES=$(TARGETOBJFILES:*=ia64)
+UMOBJFILES=$(UMOBJFILES:*=ia64)
+UMEXEFILES=$(UMEXEFILES:*=ia64)
+HEADERFILE=$(HEADERFILE:*=ia64)
+HEADEROBJNAME=$(HEADEROBJNAME:*=ia64)
+HEADEROBJ=$(HEADEROBJ:*=ia64)
+PRECOMPILED=$(PRECOMPILED:*=ia64)
+PRECOMPILED_CXX=$(PRECOMPILED_CXX:*=ia64)
+PRECOMPILED_TARGET=$(PRECOMPILED_TARGET:*=ia64)
+MFC_STATIC_LIB=$(MFC_STATIC_LIB:*=ia64)
+CRT_LIB_PATH=$(CRT_LIB_PATH:*=ia64)
+SDK_LIB_PATH=$(SDK_LIB_PATH:*=ia64)
+DDK_LIB_PATH=$(DDK_LIB_PATH:*=ia64)
+IFSKIT_LIB_PATH=$(IFSKIT_LIB_PATH:*=ia64)
+HALKIT_LIB_PATH=$(HALKIT_LIB_PATH:*=ia64)
+PROCESSOR_LIB_PATH=$(PROCESSOR_LIB_PATH:*=ia64)
+ORDER=$(ORDER:*=ia64)
+OBJLIBFILES=$(OBJLIBFILES:*=ia64)
+MISCFILES=$(MISCFILES) $(IA64_MISCFILES)
+SOURCES=$(SOURCES) $(IA64_SOURCES)
+# BINPLACE_FLAGS=$(BINPLACE_FLAGS) -CI 8,halo.exe,-certain,-errata,-quiet
+
+!ifdef NTTARGETFILES
+NTTARGETFILES=$(NTTARGETFILES:*=ia64)
+!endif
+!ifdef NTTARGETFILE0
+NTTARGETFILE0=$(NTTARGETFILE0:*=ia64)
+!endif
+!ifdef NTTARGETFILE1
+NTTARGETFILE1=$(NTTARGETFILE1:*=ia64)
+!endif
+
+!ifdef PROJECT_LIB_PATH
+PROJECT_LIB_PATH=$(PROJECT_LIB_PATH:*=ia64)
+!endif
+
+ENTRY_SUFFIX=
+GDI_ENTRY_SUFFIX=
+
+DEFAULT_STACKRESERVE=0x100000
+DEFAULT_STACKCOMMIT=0x4000
+
+ADDITIONAL_ATL_LIBS = $(ADDITIONAL_ATL_LIBS) $(ATL_LIB_PATH)\atl21asm.lib
+
+!if !defined(_IA64_HAZARD_DETECTION)
+_IA64_HAZARD_DETECTION=-X explicit
+!endif
+
+!if !defined(_IA64_MERCED_MSR)
+_IA64_MERCED_MSR=-A itanium
+!endif
+
+!ifndef GENIA64
+MSC_WARNING_LEVEL=$(MSC_WARNING_LEVEL) /Wp64
+!endif
+
+!IF DEFINED(IA64_WARNING_LEVEL)
+MSC_WARNING_LEVEL=$(IA64_WARNING_LEVEL)
+!ENDIF
+
+MSC_WARNING_LEVEL=$(MSC_WARNING_LEVEL) $(COMPILER_WX_SWITCH)
+
+!IF DEFINED(IA64_PERFFLAGS)
+PERFFLAGS = $(IA64_PERFFLAGS)
+!endif
+
+# Set MSC_OPTIMIZATION.
+# Order of precedence:
+#   Platform specific override
+#   Environment variable
+#   System Default
+
+!if defined(IA64_OPTIMIZATION)
+MSC_OPTIMIZATION=$(IA64_OPTIMIZATION)
+!elseif !defined(MSC_OPTIMIZATION)
+MSC_OPTIMIZATION=$(DEFAULT_MSC_OPT)
+!endif
+
+LINK_TIME_CODE_GENERATION_MSC_FLAG=
+
+!ifndef GENIA64
+!if defined(IA64_DEBUGGABLE_OPTIMIZATION)
+MSC_OPTIMIZATION=$(MSC_OPTIMIZATION) /Zx
+!endif
+!ifndef IA64_FULL_FLOATING_POINT
+MSC_OPTIMIZATION=$(MSC_OPTIMIZATION) /QIPF_fr32
+!endif
+!if defined(LINK_TIME_CODE_GENERATION) && !defined(FORCENATIVEOBJECT)
+# Some objects must be built native, so turn off GL for those
+LINK_TIME_CODE_GENERATION_MSC_FLAG=/GL
+!endif
+!endif
+
+DBGFLAGS=$(DBGFLAGS) $(MSC_OPTIMIZATION) $(LINK_TIME_CODE_GENERATION_MSC_FLAG)
+IA64_ADBGFLAGS=$(IA64_ADBGFLAGS) -d debug
+
+WIN32_LIBS=$(WIN32_LIBS) $(LIBRARY_PATH)\ntdll.lib
+
+!if defined(IA64_CPPFLAGS)
+MSC_CPPFLAGS=$(IA64_CPPFLAGS)
+!elseif defined(386_CPPFLAGS)
+MSC_CPPFLAGS=$(386_CPPFLAGS)
+!ENDIF
+
+!ifdef NO_STRING_POOLING
+STRING_POOLING =
+!else
+!ifdef NO_READONLY_STRINGS
+STRING_POOLING = /Gf
+!else
+STRING_POOLING = /GF
+!endif
+!endif
+
+!ifdef USE_NATIVE_EH
+!if "$(USE_NATIVE_EH)" == "ASYNC"
+EH_FLAGS=/EHa
+!else
+!if "$(USE_NATIVE_EH)" == "CTHROW"
+EH_FLAGS=/EHsc-
+!else
+EH_FLAGS=/EHsc
+!endif
+!endif
+!else
+EH_FLAGS=/EHs-c-
+!endif
+
+! ifdef USE_RTTI
+RTTI_FLAGS=/GR
+! else
+RTTI_FLAGS=/GR-
+! endif
+
+!if "$(BUFFER_OVERFLOW_CHECKS)" == "" || \
+    "$(BUFFER_OVERFLOW_CHECKS)" == "NO_NTDLL"
+BUFFER_OVERFLOW_CHECKS=1
+!endif
+
+!if "$(BUFFER_OVERFLOW_CHECKS)" == "1" || \
+    ("$(BUFFER_OVERFLOW_CHECKS)" == "CHK" && !$(FREEBUILD))
+! if "$(TARGETTYPE)" == "DRIVER" || \
+    "$(TARGETTYPE)" == "EXPORT_DRIVER" || \
+    "$(TARGETTYPE)" == "DRIVER_LIBRARY"
+!  if "$(DRIVERTYPE)" == "WDM" || "$(DRIVERTYPE)" == "wdm"
+BO_FLAGS=/GS
+BO_LIB=$(SDK_LIB_PATH)\BufferOverflowK.lib
+DRIVER_ENTRY=GsDriverEntry
+!  else
+!   if "$(DRIVERTYPE)" != "VXD"
+BO_FLAGS=/GS
+BO_LIB=$(SDK_LIB_PATH)\BufferOverflowK.lib
+DRIVER_ENTRY=GsDriverEntry
+!   endif
+!  endif
+! else
+!  if "$(TARGETTYPE)" == "GDI_DRIVER"
+BO_FLAGS=/GS
+BO_LIB=$(SDK_LIB_PATH)\BufferOverflowGDI.lib
+GDI_DRIVER_ENTRY=GsDrvEnableDriver
+!  else
+!   if  "$(TARGETTYPE)" == "MINIPORT"
+BO_FLAGS=/GS
+BO_LIB=$(SDK_LIB_PATH)\BufferOverflowK.lib
+DRIVER_ENTRY=GsDriverEntry
+!   else
+!    if "$(TARGETTYPE)" == "DYNLINK"
+!     if !defined(RESOURCE_ONLY_DLL) 
+!      if !(("$(UMTYPE)"== "nt") || ("$(UMTYPE)"=="ntss"))
+BO_FLAGS=/GS
+BO_LIB=$(SDK_LIB_PATH)\BufferOverflowU.lib
+!       if "$(DLLENTRY)" == "-noentry"
+!        if defined(USE_MSVCRT) || defined(USE_LIBCMT)
+DLLENTRY=-entry:_DllMainCRTStartup
+!        else
+DLLENTRY=-entry:_DllMainCRTStartupForGS
+!        endif
+!       endif
+!      endif
+!     endif
+!    else
+!     if ("$(UMTYPE)"== "nt") || ("$(UMTYPE)"=="ntss")
+BO_FLAGS=/GS
+!      IF "$(NTTEST)" != ""
+BO_LIB=$(SDK_LIB_PATH)\BufferOverflowK.lib
+!      else
+UMENTRY=-entry:NtProcessStartupForGS
+BO_LIB=$(SDK_LIB_PATH)\BufferOverflow.lib
+!      endif
+!     else
+BO_FLAGS=/GS
+BO_LIB=$(SDK_LIB_PATH)\BufferOverflowU.lib
+!     endif
+!    endif
+!   endif
+!  endif
+! endif
+!else
+! if "$(BUFFER_OVERFLOW_CHECKS)" == "NTDLL"
+# Needed for EXEs that can't link to kernel32.dll (smss.exe, sprestrt.exe, etc)
+BO_FLAGS=/GS
+!  if ("$(UMTYPE)"== "nt") || ("$(UMTYPE)"=="ntss")
+UMENTRY=-entry:NtProcessStartupForGS
+!  endif
+!  if "$(TARGETTYPE)" == "DYNLINK" && !defined(RESOURCE_ONLY_DLL) && "$(DLLENTRY)" == "-noentry"
+!   if "$(TARGETNAME)" != "ntdll"
+DLLENTRY=-entry:_DllMainCRTStartupForGS
+!   endif
+!  endif
+BO_LIB=$(SDK_LIB_PATH)\BufferOverflow.lib
+! else
+!  if "$(BUFFER_OVERFLOW_CHECKS)" == "GDI"
+# Needed for LIBs linked into drivers of type GDI_DRIVER
+BO_FLAGS=/GS
+BO_LIB=$(SDK_LIB_PATH)\BufferOverflowGDI.lib
+!  else
+!   if "$(BUFFER_OVERFLOW_CHECKS)" == "COMPILE_ONLY"
+BO_FLAGS=/GS
+!   endif
+!  endif
+! endif
+!endif  # Overflow checks
+
+ERRATA_FLAGS=
+
+!if defined(IA64_STRUCT_PACKING)
+MSC_STRUCT_PACKING=$(IA64_STRUCT_PACKING)
+!elseif !defined(MSC_STRUCT_PACKING)
+MSC_STRUCT_PACKING=/Zp8
+!endif
+
+STDFLAGS= /c /Zl $(MSC_STRUCT_PACKING) /Gy $(CBSTRING) $(MSC_WARNING_LEVEL) \
+          $(ERATTA_FLAGS) $(EH_FLAGS) $(RTTI_FLAGS) $(STRING_POOLING) \
+          $(BO_FLAGS)
+
+!IF $(FREEBUILD)
+ASM_DBG_DEFINES=-DDBG=0
+!ELSE
+IA64_ADBGFLAGS=$(IA64_ADBGFLAGS) -d debug
+!ENDIF
+
+# This is only needed on x86
+TARGET_DBG_DEFINES= $(TARGET_DBG_DEFINES) -DFPO=0
+
+
+!IFDEF SECTION_ALIGNMENT
+SECTION_ALIGNMENT=-align:$(SECTION_ALIGNMENT)
+!ENDIF
+
+KERNEL_ALIGNMENT=0x80
+HAL_ALIGNMENT=0x80
+
+LINKER_FLAGS = $(LINKER_FLAGS) $(SECTION_ALIGNMENT) -debugtype:pdata
+
+LINK_LIB_IGNORE_FLAG=$(LINK_LIB_IGNORE_FLAG),4006,4044,4108,4088
+
+!ifndef USE_PDB_TO_COMPILE
+DBGFLAGS=$(DBGFLAGS:/Zi=-Z7)
+DBGFLAGS=$(DBGFLAGS:-Zi=-Z7)
+!else
+! if "$(TARGETTYPE)" == "LIBRARY"
+DBGFLAGS=$(DBGFLAGS) /Fd$(TARGETPATH)\$(TARGET_DIRECTORY)\$(TARGETNAME).pdb
+! else
+DBGFLAGS=$(DBGFLAGS) /Fd$(MAKEDIR)\$(_OBJ_DIR)\ia64^\
+! endif
+!endif
+
+!ifndef NO_BROWSER_INFO
+! ifdef BROWSER_INFO
+DBGFLAGS=$(DBGFLAGS) /FR$(MAKEDIR)\$(_OBJ_DIR)\ia64^\
+! endif
+!endif
+
+!IF "$(HALTYPE)" == ""
+HALDEF=
+!ELSE
+HALDEF=-D$(HALTYPE)=1
+!ENDIF
+
+
+#
+#
+#
+!ifdef GENIA64
+STD_DEFINES= -D_WIN64 -D_IA64_=1 -DIA64=1 -DNO_HW_DETECT -D_MSC_EXTENSIONS -D_GENIA64_ $(HALDEF) $(STD_DEFINES) -D_CROSS_PLATFORM_=1
+!else
+STD_DEFINES= -D_WIN64 -D_IA64_=1 -DIA64=1 -DNO_HW_DETECT -D_MSC_EXTENSIONS $(PTR_SIZE) $(HALDEF) $(STD_DEFINES) -D_MERCED_A0_=1
+!endif
+
+!if defined(PC98CHANGE)
+STD_DEFINES=$(STD_DEFINES) -D_PC98_
+!endif
+
+CDEFINES=$(STD_DEFINES) $(TARGET_DBG_DEFINES) \
+              $(LIBC_DEFINES) $(C_DEFINES) $(NET_C_DEFINES) $(MFC_DEFINES)
+ASM_DEFINES=$(ASM_DEFINES) -D__assembler=1
+CFLAGS=$(IA64_FLAGS) $(NTIA64FLAGS) $(STDFLAGS) $(DBGFLAGS) $(PERFFLAGS) $(USER_C_FLAGS)
+IA64_ASMFLAGS=$(IA64_ADBGFLAGS) $(STD_DEFINES) $(ASM_DBG_DEFINES)\
+              $(TARGET_DBG_DEFINES) $(ASM_DEFINES)
+
+IA64_CDEFINES=$(CDEFINES)
+IA64_CFLAGS=$(CFLAGS)
+
+!ifdef RAZZLETOOLPATH
+! if "$(PROCESSOR_ARCHITECTURE)" == "IA64"  
+CC_NAME = $(RAZZLETOOLPATH)\ia64\cl -nologo
+! else
+CC_NAME = $(RAZZLETOOLPATH)\win64\x86\cl -nologo
+! endif
+!else
+CC_NAME=cl -nologo
+!endif
+
+C_COMPILER_NAME     = $(CC_NAME)
+CXX_COMPILER_NAME   = $(CC_NAME)
+C_PREPROCESSOR_NAME = $(CC_NAME)
+!ifndef IA64_ASSEMBLER_NAME
+IA64_ASSEMBLER_NAME  = ias
+!endif
+
+# CRT workaround for:  cl : warning D9025 : overriding '/D_MT' with '/U_MT'
+!if defined(CRTLIBTYPE) && "$(MTOPTION)" != ""
+CRT_BUILD_FLAGS = $(CRT_BUILD_FLAGS:/U_MT=)
+!endif
+GLOBAL_C_FLAGS = -Iia64\ -I. $(INCPATH1) $(CRT_BUILD_FLAGS) $(CDEFINES) $(CFLAGS)
+
+NP_COMPILER_FLAGS = $(GLOBAL_C_FLAGS) $(COMPILER_WARNINGS)
+
+C_COMPILER_FLAGS = $(NP_COMPILER_FLAGS) $(PRECOMPILED)
+CXX_COMPILER_FLAGS = $(NP_COMPILER_FLAGS) $(PRECOMPILED_CXX) $(MSC_CPPFLAGS) $(NTCPPFLAGS)
+C_PREPROCESSOR_FLAGS = $(GLOBAL_C_FLAGS) -EP -Tc
+
+C_PREPROCESSOR = $(C_PREPROCESSOR_NAME) $(C_PREPROCESSOR_FLAGS)
+C_ASM_PREPROCESSOR = $(C_PREPROCESSOR_NAME) $(ASM_DEFINES) $(C_PREPROCESSOR_FLAGS:-EP=-E)
+C_COMPILER     = $(C_COMPILER_NAME) $(C_COMPILER_FLAGS)
+NP_C_COMPILER  = $(C_COMPILER_NAME) $(NP_COMPILER_FLAGS)
+CXX_COMPILER   = $(CXX_COMPILER_NAME) $(CXX_COMPILER_FLAGS)
+
+IA64_ASSEMBLER=$(IA64_ASSEMBLER_NAME) $(_IA64_HAZARD_DETECTION) $(_IA64_MERCED_MSR) -Nso -Iia64\ -I. $(INCPATH1) $(IA64_ADBGFLAGS)
+
+ECHO_MSG=$(C_COMPILER) $<
+ECHO_MSG_P=$(NP_C_COMPILER) $**
+ECHO_CXX_MSG=$(CXX_COMPILER) $<
+
+ECHO_PRECOMPILED_MSG1=$(C_COMPILER_NAME) $(C_COMPILER_FLAGS) /Yl$(TARGETNAME) /Yc$(?F) $(HEADERFILE) \
+               $(HEADEROBJ) $(PRECOMPILED_FLAG) $(PRECOMPILED_SOURCEFILE)
+	       
+ECHO_PRECOMPILED_MSG2=$(C_COMPILER_NAME) $(C_COMPILER_FLAGS) /Yl$(TARGETNAME) /Yc$(?F) $(HEADERFILE) \
+               $(HEADEROBJ) $(PRECOMPILED_FLAG)
+
+{}.c{}.s:
+    $(C_COMPILER_NAME) @<< /Fa $(MAKEDIR)\$(<F)
+$(C_COMPILER_FLAGS: =
+)
+$(C_COMPILER_FLAGS:##= )
+<<NOKEEP
+
+{..\ia64\}.s{}.lst:
+    $(IA64_ASSEMBLER) -o $(_OBJ_DIR)\ia64\$(@B).obj $<
+
+{ia64\}.s{}.lst:
+    $(IA64_ASSEMBLER) -o $(MAKEDIR)\$(_OBJ_DIR)\ia64\$(@B).obj $<
+
+{..\ia64\}.s{$(_OBJ_DIR)\ia64\}.obj:
+    @-erase $@ >nul 2>&1
+    $(C_ASM_PREPROCESSOR) $(MAKEDIR)\..\ia64\$(<F) >$(MAKEDIR)\$(_OBJ_DIR)\ia64\$(<B).i
+    $(IA64_ASSEMBLER) -o $(MAKEDIR)\$@ $(MAKEDIR)\$(_OBJ_DIR)\ia64\$(<B).i
+    @-erase $(MAKEDIR)\$(_OBJ_DIR)\ia64\$(<B).i >nul 2>&1
+
+{$(_OBJ_DIR)\ia64\}.s{$(_OBJ_DIR)\ia64\}.obj:
+    @-erase $@ >nul 2>&1
+    $(C_ASM_PREPROCESSOR) $(MAKEDIR)\$(_OBJ_DIR)\ia64\$(<F) >$(MAKEDIR)\$(_OBJ_DIR)\ia64\$(<B).i
+    $(IA64_ASSEMBLER) -o $@ $(MAKEDIR)\$(_OBJ_DIR)\ia64\$(<B).i
+    @-erase $(MAKEDIR)\$(_OBJ_DIR)\ia64\$(<B).i >nul 2>&1
+
+{ia64\}.s{$(_OBJ_DIR)\ia64\}.obj:
+    @-erase $@ >nul 2>&1
+    $(C_ASM_PREPROCESSOR) $(MAKEDIR)\ia64\$(<F) >$(MAKEDIR)\$(_OBJ_DIR)\ia64\$(<B).i
+    $(IA64_ASSEMBLER) -o $@ $(MAKEDIR)\$(_OBJ_DIR)\ia64\$(<B).i
+    @-erase $(MAKEDIR)\$(_OBJ_DIR)\ia64\$(<B).i >nul 2>&1
+
+
+!if defined(_NTIA64LIBS)
+_NTLIBS=$(_NTIA64LIBS)
+!elseif DEFINED(_NT386LIBS)
+_NTLIBS=$(_NT386LIBS)
+!endif
+
+!if defined(IA64COPYDST)
+COPYDST=$(IA64COPYDST)
+!elseif defined(386COPYDST)
+COPYDST=$(386COPYDST)
+!endif
+LIB_COPY=ntia64cp.cmd
+
+NTTEST_LINK_OPTIONS=-section:ivt,,align=0x8000 -fixed:no -base:0xE000000084000000 -entry:KiSystemBegin
+

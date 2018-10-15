@@ -1,0 +1,131 @@
+; Copyright (c) Microsoft Corporation.  All rights reserved.
+;               
+; usbi_w2k.INF - Intel USB digital camera sample
+;
+; Note:
+;    
+;     This is a modified version of the production image.inf installation file.
+;     The Device ID specified in this INF will not override the
+;     ID in image.inf on initial device installation. Once installed however, this
+;     INF can be used to update the driver (by choosing the "Have Disk" option).
+;     Customize this INF to use your device's hardware ID.
+;
+;     This INF expects the following hierarchy in the installation folder:
+;
+;     \
+;         usbi_w2k.inf
+;         objfre_x86\
+;             usbintel.sys
+;
+
+[Version]
+LayoutFile=layout.inf
+Signature="$CHICAGO$"
+Class=Image
+ClassGUID={6bdd1fc6-810f-11d0-bec7-08002be2092f}
+Provider=%OrganizationName%
+CatalogFile=usbintel.cat ; This file is required and is supplied when the package is certified
+DriverVer=09/30/2004
+
+[SourceDisksNames]
+1000 = %cdname%,,,
+
+[SourceDisksFiles]
+usbintel.sys = 1000,\objfre_x86
+
+[ControlFlags]
+; All PnP devices should be excluded from manual AddDevice Applet list
+ExcludeFromSelect=*
+
+[Manufacturer]
+%IntelMfg%=Intel
+
+[DestinationDirs]
+Intel.USBDCam.Files=10,system32\drivers
+
+[Intel]
+%USB\VID_04C8&PID_0720.DeviceDesc%=Intel.USBDCam,USB\VID_04C8&PID_0720
+
+[Intel.USBDCam.NT]
+Include=    ks.inf, kscaptur.inf, dshowext.inf
+Needs=      KS.Registration,KSCAPTUR.Registration.NT,DSHOWEXT.Registration
+AddReg=     Intel.USBDCam.AddReg
+CopyFiles=Intel.USBDCam.Files
+;WIA
+SubClass=StillImage
+DeviceType=3
+DeviceSubType=0x1
+Capabilities=0x00000031
+DeviceData=Intel.USBDCam.DeviceData
+ICMProfiles="sRGB Color Space Profile.icm"
+
+[Intel.USBDCam.AddReg]
+HKR,,OkToHibernate,3,01
+HKR,,DontSuspendIfStreamsAreRunning,3,01
+HKR,,PageOutWhenUnopened,3,01
+HKR,Settings,Brightness,0x00010001,0x3c
+HKR,Settings,Contrast,0x00010001,0x30
+HKR,Settings,Saturation,0x00010001,0x54
+HKR,Settings,Sharpness,0x00010001,0x54
+HKR,Settings,WhiteBalance,0x00010001,0x114
+; WIA
+HKR,,HardwareConfig,1,1
+HKR,,USDClass,,"{0527d1d0-88c2-11d2-82c7-00c04f8ec183}"
+
+[Intel.USBDCam.DeviceData]
+Server=local
+UI Class ID={5d8ef5a3-ac13-11d2-a093-00c04f72dc3c}
+
+[Intel.USBDCam.NT.Interfaces]
+AddInterface=%KSCATEGORY_CAPTURE%,GLOBAL,Intel.USBDCam.Interface
+AddInterface=%KSCATEGORY_VIDEO%,GLOBAL,Intel.USBDCam.Interface
+
+[Intel.USBDCam.Interface]
+AddReg=Intel.USBDCam.Intf.AddReg
+         
+[Intel.USBDCam.Intf.AddReg]
+HKR,,CLSID,,%ProxyVCap.CLSID%
+HKR,,FriendlyName,,%USB\VID_04C8&PID_0720.DeviceDesc%
+HKR,PageAliases,"{71F96464-78F3-11d0-A18C-00A0C9118956}",1,21,E8,C2,3D, 13,47, d2,11, 0xba, 0x41, 0x0, 0xa0, 0xc9, 0xd, 0x2b, 0x5
+HKR,PinFactory\1\Interfaces\{5BB95400-52BB-11d2-BA41-00A0C90D2B05},,,
+
+[Intel.USBDCam.NT.Services]
+AddService = usbintel,0x00000002,Intel.USBDCam.ServiceInstall
+
+[Intel.USBDCam.ServiceInstall]
+DisplayName   = %USB\VID_04C8&PID_0720.DeviceDesc%
+ServiceType   = %SERVICE_KERNEL_DRIVER%
+StartType     = %SERVICE_DEMAND_START%
+ErrorControl  = %SERVICE_ERROR_NORMAL%
+ServiceBinary = %12%\UsbIntel.sys
+
+[Intel.USBDCam.Files]
+usbintel.sys
+usbcamd.sys
+stream.sys
+
+[Strings]
+
+;----------------
+; Non-Localizable
+;----------------
+
+ProxyVCap.CLSID="{17CCA71B-ECD7-11D0-B908-00A0C9223196}"
+KSCATEGORY_CAPTURE="{65E8773D-8F56-11D0-A3B9-00A0C9223196}"
+KSCATEGORY_VIDEO="{6994AD05-93EF-11D0-A3CC-00A0C9223196}"
+SERVICE_KERNEL_DRIVER=1
+SERVICE_DEMAND_START=3
+SERVICE_ERROR_NORMAL=1
+
+;----------------
+; Localizable
+;----------------
+
+OrganizationName="OrganizationName"
+
+IntelMfg="Intel"
+USB\VID_04C8&PID_0720.DeviceDesc="DDK Version, USB Video Camera for Intel Proshare technology"
+
+cdname="Disk 1"
+
+

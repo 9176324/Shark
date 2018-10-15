@@ -1,0 +1,199 @@
+<HTML>
+<HEAD>
+<TITLE>Co-installer for Copying INF Files</TITLE>
+<META content="text/html; charset=windows-1252" http-equiv=Content-Type>
+<META content="Microsoft FrontPage 5.0" name=GENERATOR>
+</HEAD>
+
+<BODY link=#0000ff><FONT face=Verdana size=5>
+<H2>Co-installer for Copying INF Files</H2></FONT><FONT face=Verdana size=2>
+<P><SPAN style="COLOR: #ff0000; FONT-FAMILY: Arial; FONT-SIZE: 10pt">[This is 
+preliminary documentation and subject to change.]</SPAN></P>
+<P><b><i style="mso-bidi-font-style:normal"><span style="font-size:9.5pt;mso-bidi-font-size:10.0pt;font-family:Arial">Abstract:
+</span></i></b>This document accompanies the redistributable co-installer that
+can be used to build an INF file that can be used to copy multiple INF files.
+This binary is to support the CopyINF directive on the Microsoft® Windows®
+2000 operating system. Support for the <b>CopyINF</b> directive discussed in
+this document is built into the Windows XP operating system, so this co-installer need not be used in an INF section targeted for only Windows
+XP. The co-installer must not be used when installing on a 64-bit platform.<H3>SUMMARY</H3>
+This document accompanies and describes a redistributable
+co-installer that can be used to install additional device INF files on the
+target system during a device installation. The instructions provided herein
+apply to the Microsoft Windows 2000 and Windows XP operating systems.
+<p>
+The co-installer described in this article interprets <b>CopyINF</b>
+directives in a [<i>DDInstall</i>] section in an INF file. Using <b>CopyINF</b>
+together with this co-installer allows for one INF file to copy multiple INF
+files to the target system.
+<p>
+This technique is useful, for example, when installing a
+multifunction device. Using this method, the base INF file for a multifunction
+device could list the INF files for the individual functions of the devices in a
+<b>CopyINF</b> directive and install the co-installer, which would then install
+the referenced INF files for the individual functions.
+<p>The syntax of the <b>CopyINF</b> directive is:
+<p style="margin-left:.25in">[<em>DDInstall</em>]<br>
+<b>CopyINF =</b> <em>filename.inf</em><i>[,</i><em>filename2.inf]</em>...
+
+<p>The source code for this co-installer and two sample INF files
+are available at &lt;ddkroot&gt;\src\setup\cocpyinf and &lt;ddkroot&gt;\src\setup\cocpyinf\install
+respectively.
+
+<p><b>Notes:</b>
+<ul>
+  <li>
+    <p class="MsoListBullet">The INF copying functionality demonstrated in this
+    example is not necessary for Windows XP, which includes built-in
+    support for the <b>CopyINF</b> directive. However it is recommended for an
+    INF that may be installed on Windows® 2000. For an installation that may 
+    include a 64-bit platform, decorated sections should be used to ensure that 
+    this co-installer is not installed and used on a 64-bit platform as native 
+    platform co-installers must be used.</li>
+</ul>
+<ul>
+  <li>
+    <p class="MsoListBullet">Windows 2000 and Windows XP Setup expect the
+    locations of INF files specified in the <b>CopyINF</b> directive to be
+    relative to the source location of the INF in which they are specified.</li>
+</ul>
+<ul>
+  <li>
+    <p class="MsoListBullet">The INF file copy occurs after the device has been 
+    installed. Windows 2000 and Windows XP Setup assume that the source
+    media is still available. Therefore, be sure to include all INF files on
+    each disk of a multi-disk installation package.</li>
+</ul>
+<ul>
+  <li>
+    <p class="MsoListBullet">If the current INF file name and the original INF
+    file name are different, then CoCpyInf assumes the INF has already been
+    copied and will not perform the file copies.
+  </li>
+</ul>
+<blockquote>
+<p>When a device installation from a third-party INF occurs, that
+INF is copied to the system INF directory under a unique OEM<i>&lt;n&gt;</i>.inf 
+name. The co-installer determines whether the additional <b>CopyINF</b>
+actions are necessary, depending on whether the INF’s original name differs
+from its current name. If the two names are the same, then the INF has not yet
+been installed into the INF directory, so the additional INF files are copied.
+If the INF’s original and current names differ, this indicates installation is
+from a third-party INF that already resides in the INF directory. In that case,
+the additional INF copy operations do not need to be performed, because they
+would have been copied previously.
+
+<p>Attempting to perform the additional copies in this scenario
+wouldn’t work anyway, because the third-party media is no longer available.
+
+<p>To ensure that the names of the INF files are always different to
+avoid support issues, do not use names like OEM&lt;n&gt;.inf (e.g. OEM1.INF), or
+a name that is the same as the name of a system provided INF file.
+</blockquote>
+<ul>
+  <li>Some multifunction devices do not have a single base INF file. For example, for
+a multifunction PCI card, all functions are enumerated as peers of each other. Therefore,
+a co-installer created for such a device must be registered for each function, and each
+function’s installation would have to reference the other INFs, because there is no
+guarantee as to which function will be enumerated first.</li>
+</ul>
+
+<H3>USING THE CO-INSTALLER</H3>
+<h5>To use the co-installer for driver installation and registration:</h5>
+<p style="margin-left:0in;tab-stops:.5in">Copy the 32-bit Cocpyinf.dll redistributable binary to the directory
+where you are assembling your driver package. You should use this following
+version of cocpyinf.dll:
+<blockquote>
+<p><b>tools\coinstallers\x86</b><b>\cocpyinf.dll</b></blockquote>
+<p>To use this co-installer, add the following sections to every INF
+file for your drivers. If the multifunction device is a single parent that enumerates multiple
+children, then only the parent’s INF needs to install or use the co-installer.
+
+<p><span style="font-family:Symbol">·<span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Add a [<i>DDInstall</i>.CoInstallers] section for each device
+specified in the INF. This section must include the following two lines:
+<blockquote>
+<p><style="margin-left:.5in">AddReg = CoCopyINF.AddReg<br>
+CopyFiles= CoCopyINF.CopyFiles
+</blockquote>
+
+<blockquote>
+<p><style="margin-left:.5in">For example:
+</blockquote>
+
+<blockquote>
+<p><style="margin-left:.5in">[InstallA.NT.CoInstallers]<br>
+AddReg = CoCopyINF.AddReg<br>
+CopyFiles= CoCopyINF.CopyFiles
+</blockquote>
+
+<p>&nbsp;<span style="font-family:Symbol">·<span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Add the following sections:
+
+<blockquote>
+<p><style="margin-left:.5in">[CoCopyINF.AddReg]<br>
+HKR,,CoInstallers32,0x10000,&quot;cocpyinf.DLL,CoCopyINF&quot;<br style="mso-special-character:line-break">
+<br style="mso-special-character:line-break">
+<style="margin-left:.5in">[CoCopyINF.CopyFiles]<br>
+cocpyinf.dll,,,0x10
+</blockquote>
+
+<p style="tab-stops:list .25in"><span style="font-family:Symbol">·<span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Add a reference to the CopyFiles section in the [DestinationDirs]
+section. For example:
+
+<blockquote>
+<p><style="margin-left:.5in">[DestinationDirs]<br>
+CoCopyINF.CopyFiles = 11
+</blockquote>
+
+<p><span style="font-family:Symbol">·<span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Add references to all the other INF files in the package in the [<i>DDInstall</i>]
+section. For&nbsp;example:
+
+<blockquote>
+<p><style="margin-left:.5in">[InstallA.NT]<br>
+CopyInf = B.INF
+</blockquote>
+
+<p><span style="font-family:Symbol">·<span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Add sections to install the drivers.<br style="mso-special-character:line-break">
+<br style="mso-special-character:line-break">
+For more information, see the sample INF files located at &lt;ddkroot&gt;\src\setup\cocpyinf\install.
+
+<H3>TESTING</H3>
+<p>To ensure that the INF files are not in the system, type:
+<p>Del %windir%\INF\OEM*.?NF
+<p>Note that this step is only safe to do for testing purposes, and will delete any
+other third party INF files that are present on the system. The system may be left in an unstable state.
+<p>Uninstall the devices in Device Manager.
+
+<p>Install the devices by clicking on the &quot;Scan for
+hardware changes&quot; item in the Device Manager Action Menu.
+
+<p>Once all the relevant devices have been installed, you should
+check that a re-install also works. Uninstall the devices in Device Manager
+again (this time without removing the OEM*.?NF files) and click on &quot;Scan
+for hardware changes&quot; again.
+
+<H3>CODE TOUR</H3>
+<H4>File Manifest</H4>
+</FONT><FONT face="Courier" size="3">
+<TABLE BORDER=0 CELLSPACING=1 CELLPADDING=0 width="744">
+<TR><TD width="200"><U>File</u></TD><TD width="534"><u>Description<u></TD></TR>
+<TR><TD width="200"><i>CoCpyInf.htm</i></TD><TD width="534">Sample tour documentation for this binary (this file).</TD></TR>
+<TR><TD width="200"><i>x86\Cocpyinf.dll</i></TD><TD width="534">Redistributable 
+  32-bit co-installer binary.</TD></TR>
+</TABLE>
+
+<H3>FEEDBACK</H3>
+<P>We welcome your comments, problem reports and wish-list requests. Please 
+submit them by pointing your Internet browser to <A href="http://www.microsoft.com/ddk">http://www.microsoft.com/ddk</A>. 
+</FONT></P>
+<P align=center><FONT face=Verdana size=2><A href="#top">Top of page</A></P></FONT>
+<TABLE border=0" cellSpacing="0" width="624">
+<TR>
+<TD bgColor="#00ffff" height="2" vAlign="middle"></TD></TR></TABLE>
+<FONT face="MS Sans Serif" size=1>
+<P>&copy; Microsoft Corporation 2000</FONT><FONT face=Verdana size=2> 
+</P></FONT>
+</BODY>

@@ -1,0 +1,277 @@
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 11">
+<meta name=Originator content="Microsoft Word 11">
+<link rel=File-List href="fmsynth_files/filelist.xml">
+<title>FMSynth</title>
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;
+	mso-font-charset:2;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:0 268435456 0 0 -2147483648 0;}
+@font-face
+	{font-family:Verdana;
+	panose-1:2 11 6 4 3 5 4 4 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:536871559 0 0 0 415 0;}
+@font-face
+	{font-family:"MS Sans Serif";
+	panose-1:0 0 0 0 0 0 0 0 0 0;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-format:other;
+	mso-font-pitch:variable;
+	mso-font-signature:3 0 0 0 1 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0in;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+p
+	{font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";}
+pre
+	{margin-top:0in;
+	margin-bottom:0in;
+	margin-bottom:.0001pt;
+	font-size:10.0pt;
+	font-family:"Courier New";
+	mso-fareast-font-family:"Times New Roman";}
+span.SpellE
+	{mso-style-name:"";
+	mso-spl-e:yes;}
+span.GramE
+	{mso-style-name:"";
+	mso-gram-e:yes;}
+@page Section1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.25in 1.0in 1.25in;
+	mso-header-margin:.5in;
+	mso-footer-margin:.5in;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+ /* List Definitions */
+ @list l0
+	{mso-list-id:951208305;
+	mso-list-template-ids:1270284002;}
+@list l0:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l1
+	{mso-list-id:1830050358;
+	mso-list-template-ids:63613562;}
+@list l1:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Table Normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0in 5.4pt 0in 5.4pt;
+	mso-para-margin:0in;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman";
+	mso-ansi-language:#0400;
+	mso-fareast-language:#0400;
+	mso-bidi-language:#0400;}
+</style>
+<![endif]-->
+</head>
+
+<body lang=EN-US link=blue vlink=blue style='tab-interval:.5in'>
+
+<div class=Section1>
+
+<h2><span class=SpellE><span style='font-family:Verdana'>FMSynth</span></span><span
+style='font-family:Verdana'><o:p></o:p></span></h2>
+
+<h3><span style='font-family:Verdana'>SUMMARY<o:p></o:p></span></h3>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>This is the <span
+class=SpellE>FMSynth</span> sample driver, which is a <st1:place w:st="on">MIDI</st1:place>
+miniport driver. The sample driver provides applications that use the
+Microsoft® Windows® multimedia <span class=SpellE><b>midiOut<i>Xxx</i></b></span>
+functions with an interface to a device that implements OPL3-style FM
+synthesis. Because the sample is a synthesizer, it handles <st1:place w:st="on">MIDI</st1:place>
+output only. <o:p></o:p></span></p>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>The <st1:place w:st="on">MIDI</st1:place>
+port driver, which is built into <span class=SpellE>PortCls.sys</span>, serves
+as a wrapper for this miniport driver. Because the sample driver is a <span
+class=SpellE>PortCls</span> client, <span class=SpellE>PortCls</span> handles
+Plug and Play and power management on behalf of the sample driver. <o:p></o:p></span></p>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>There are two <span
+class=SpellE>GUIDs</span> with which <span class=GramE>an adapter driver can</span>
+instantiate this miniport driver: <o:p></o:p></span></p>
+
+<ul type=disc>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l0 level1 lfo1;tab-stops:list .5in'><span class=SpellE><b><span
+     style='font-size:10.0pt;font-family:Verdana'>CLSID_MiniportDriverFmSynth</span></b></span><span
+     style='font-size:10.0pt;font-family:Verdana'> <o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l0 level1 lfo1;tab-stops:list .5in'><span class=SpellE><b><span
+     style='font-size:10.0pt;font-family:Verdana'>CLSID_MiniportDriverFmSynthWithVol</span></b></span><span
+     style='font-size:10.0pt;font-family:Verdana'> <o:p></o:p></span></li>
+</ul>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>The first is the normal
+mode, which is used by a vast majority of clients. However, if the audio device
+does not provide an analog volume control in the data path following the FM synthesizer
+(for example, the WSS device lacks a volume control), then the second GUID,
+which implements an FM <span class=SpellE>synth</span> with a built-in volume
+control, can be used instead. <o:p></o:p></span></p>
+
+<h3><span style='font-family:Verdana'>BUILDING THE SAMPLE<o:p></o:p></span></h3>
+
+<p><b><span style='font-size:10.0pt;font-family:Verdana'>NOTE:</span></b><span
+style='font-size:10.0pt;font-family:Verdana'> This sample cannot be built for
+64-bit targets. <o:p></o:p></span></p>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>To build the sample
+driver, execute the <b>build</b> command in the DDK directory <span
+class=SpellE>src\wdm\audio\miniport\fmsynth</span>. If the build succeeds, it
+produces the <span class=SpellE>fmsynth.lib</span> library module, which can be
+linked into an audio adapter driver. <o:p></o:p></span></p>
+
+<h3><span style='font-family:Verdana'>RESOURCES<o:p></o:p></span></h3>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>The <span class=SpellE>FMSynth</span>
+sample driver is identical to the system-supplied <span class=SpellE>FMSynth</span>
+miniport driver in <span class=SpellE>PortCls.sys</span>. The source code for
+this sample can serve as a starting point for developers who need to augment
+it, as well as for those who need to write completely new <st1:place w:st="on">MIDI</st1:place>
+miniport drivers. <o:p></o:p></span></p>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>The sample is a miniport
+driver that interfaces to the <st1:place w:st="on">MIDI</st1:place> port
+driver, which is available in all versions of <span class=SpellE>PortCls.sys</span>,
+including the version in Windows 98 Gold. The MIDI port driver lacks support
+for the advanced <st1:place w:st="on">MIDI</st1:place> features in
+DirectMusic®, which are supported by the <span class=SpellE>DMus</span> port
+driver. The <span class=SpellE>DMus</span> port driver was introduced into <span
+class=SpellE>PortCls.sys</span> in Microsoft Windows 98 Second Edition (SE) and
+is available in Windows Me and <span class=SpellE>and</span> in Microsoft
+Windows 2000 and later. If you are creating your own miniport driver, consider
+the advantages of interfacing to <span class=SpellE>DMus</span> instead of <st1:place
+w:st="on">MIDI</st1:place>: <o:p></o:p></span></p>
+
+<ul type=disc>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l1 level1 lfo2;tab-stops:list .5in'><span style='font-size:10.0pt;
+     font-family:Verdana'>The <span class=SpellE>DMus</span> port driver
+     provides higher functionality than the <st1:place w:st="on">MIDI</st1:place>
+     port driver. <o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l1 level1 lfo2;tab-stops:list .5in'><span class=SpellE><span
+     style='font-size:10.0pt;font-family:Verdana'>DMus</span></span><span
+     style='font-size:10.0pt;font-family:Verdana'> miniport drivers are visible
+     to DirectMusic applications, unlike <st1:place w:st="on">MIDI</st1:place>
+     miniport drivers. In addition, <span class=SpellE>DMus</span> miniport
+     drivers are still visible to the older, Windows multimedia <span
+     class=SpellE><b>midi<i>Xxx</i></b></span> functions. <o:p></o:p></span></li>
+</ul>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>In short, <span
+class=SpellE>DMus</span> miniport drivers have the benefits of backward
+compatibility and advanced functionality. <o:p></o:p></span></p>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>Please refer to the SB16
+(Sound Blaster 16) sample to learn how to use the system-supplied <span
+class=SpellE>FMSynth</span> miniport driver in <span class=SpellE>PortCls.sys</span>.
+<o:p></o:p></span></p>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>DirectMusic kernel
+support is not available in Windows 98 Gold. It is available only in Windows 98
+SE and Windows Me, and in Windows 2000 and later. <o:p></o:p></span></p>
+
+<h3><span style='font-family:Verdana'>CODE TOUR<o:p></o:p></span></h3>
+
+<h4><span style='font-family:Verdana'>File Manifest<o:p></o:p></span></h4>
+
+<pre><u>File<span style='mso-tab-count:2'>           </span>Description</u></pre><pre><o:p>&nbsp;</o:p></pre><pre><span
+class=SpellE><span class=GramE>miniport.cpp</span></span><span
+style='mso-tab-count:1'>   </span>Miniport driver implementation for <span
+class=SpellE>FMSynth</span></pre><pre><span class=GramE>sources</span><span style='mso-spacerun:yes'>     </span><span
+style='mso-tab-count:1'>   </span>Sources for build</pre><pre><o:p>&nbsp;</o:p></pre><pre><o:p>&nbsp;</o:p></pre>
+
+<p align=center style='text-align:center;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
+style='font-size:10.0pt;font-family:"Courier New"'><a href="#top"><span
+style='font-family:Verdana'>Top of page</span></a><o:p></o:p></span></p>
+
+<p align=center style='text-align:center;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
+style='font-size:10.0pt;font-family:Verdana;mso-bidi-font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><o:p></o:p></span></p>
+
+<pre><o:p>&nbsp;</o:p></pre><pre><o:p>&nbsp;</o:p></pre>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width=800
+ style='width:600.0pt;mso-cellspacing:0in'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes;
+  height:2.25pt'>
+  <td style='background:aqua;padding:.75pt .75pt .75pt .75pt;height:2.25pt'>
+  <p class=MsoNormal><span style='font-size:2.0pt;mso-bidi-font-size:12.0pt'><o:p>&nbsp;</o:p></span></p>
+  </td>
+ </tr>
+</table>
+
+<pre><o:p>&nbsp;</o:p></pre><pre><o:p>&nbsp;</o:p></pre><pre><span
+style='font-size:7.5pt;font-family:"MS Sans Serif"'><o:p>&nbsp;</o:p></span></pre>
+
+<p style='tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
+style='font-size:7.5pt;font-family:"MS Sans Serif";mso-bidi-font-family:"Courier New"'>©
+2004 Microsoft Corporation</span><span style='font-size:10.0pt;font-family:
+"Courier New"'><o:p></o:p></span></p>
+
+<p style='tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
+style='font-size:10.0pt;font-family:Verdana;mso-bidi-font-family:"Courier New"'><span
+style='mso-spacerun:yes'> </span><o:p></o:p></span></p>
+
+</div>
+
+</body>
+
+</html>
+

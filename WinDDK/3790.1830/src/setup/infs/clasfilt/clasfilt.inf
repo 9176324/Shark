@@ -1,0 +1,91 @@
+; This INF file and the accompanying readme demonstrate how to programmatically install a class filter driver.
+; See the comments inline below for items that need to be modified when using this sample. The accompanying 
+; readme discusses using this INF file to install the class filter driver.
+;
+; Copyright Microsoft Corporation
+
+
+[Version]
+signature = "$Windows NT$"
+ 
+
+
+; Distribution Media information
+;
+[SourceDisksNames]
+1 = %ClasFilt.MediaDesc%
+
+
+[SourceDisksFiles]
+clasfilt.sys = 1
+
+
+[DestinationDirs]
+;
+; Driver to be installed in the drivers subdirectory.
+;
+DefaultDestDir = 12	; DIRID_DRIVERS
+ 
+
+
+[DefaultInstall.NT]
+;
+; DefaultInstall section is used to install the class filter driver. Use .NT platform extension so this
+; section won't be executed on Windows 9x/ME.
+;
+; Change clasfilt.sys to the name of the class filter driver you need to copy.
+;
+CopyFiles = @clasfilt.sys
+AddReg = ClassFilter_AddReg
+ 
+[ClassFilter_AddReg]
+;
+; Change {setup-ClassGUID} to the string form of the ClassGUID that you are installing the filter on.
+;
+; Change UpperFilters to LowerFilters if this is a lower class filter.
+;
+HKLM, System\CurrentControlSet\Control\Class\{setup-ClassGUID}, UpperFilters, 0x00010008, clasfilt
+
+
+[DefaultInstall.NT.Services]
+;
+; Services section is required for installation of drivers on NT-based operating systems.
+;
+AddService = clasfilt, , clasfilt_Service_Inst, clasfilt_EventLog_Inst
+
+
+[clasfilt_Service_Inst]
+DisplayName    = %ClasFilt.SvcDesc%
+ServiceType    = %SERVICE_KERNEL_DRIVER%
+StartType      = %SERVICE_DEMAND_START%
+ErrorControl   = %SERVICE_ERROR_IGNORE%
+ServiceBinary  = %12%\clasfilt.sys		;change clasfilt.sys to the name of your driver binary.
+
+
+[clasfilt_EventLog_Inst]
+AddReg = clasfilt_EventLog_AddReg
+
+
+[clasfilt_EventLog_AddReg]
+;Change clasfilt.sys to the name of your driver file.
+HKR,,EventMessageFile, %REG_EXPAND_SZ%,"%%SystemRoot%%\System32\IoLogMsg.dll;%%SystemRoot%%\System32\drivers\clasfilt.sys"
+HKR,,TypesSupported, %REG_DWORD%, 7
+
+
+[Strings]
+;
+; Change the service description to describe your driver.
+;
+ClasFilt.SvcDesc	= "Upper Class Filter Driver"
+
+; Change the media description to describe your media.
+;
+ClasFilt.MediaDesc 	= "Class Filter Driver Disc"
+
+
+; Useful constants
+SERVICE_KERNEL_DRIVER = 1
+SERVICE_DEMAND_START  = 3
+SERVICE_ERROR_IGNORE  = 0
+REG_EXPAND_SZ         = 0x00020000
+REG_DWORD             = 0x00010001

@@ -1,0 +1,16 @@
+TARGETNAME=ioctlvdd
+TARGETPATH=obj
+TARGETTYPE=DYNLINK
+
+TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib     \
+           $(SDK_LIB_PATH)\user32.lib       \
+           $(SDK_LIB_PATH)\ntvdm.lib
+
+DLLENTRY=VDDInitialize
+DLLBASE=0x2000000
+
+INCLUDES=
+
+SOURCES=
+i386_SOURCES=ioctlvdd.c
+

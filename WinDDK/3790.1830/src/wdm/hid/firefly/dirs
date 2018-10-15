@@ -1,0 +1,5 @@
+DIRS= \
+     app \
+     driver \
+     lib \
+     sauron

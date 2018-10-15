@@ -1,0 +1,892 @@
+<HTML>
+<!-- Copyright © 2001 Microsoft Corporation. All rights reserved. -->
+<HEAD>
+	<STYLE>
+		body
+		{
+			background-color: threedface;
+			color: buttontext;
+			font-family:verdana;
+			font-size:smaller;
+		}
+
+		table
+		{
+			background-color: threedface;
+			color: buttontext;
+			font-size:  x-small;
+			border-style:  none;
+			border-width:   0px;
+		}
+		td
+		{
+			vertical-align:   top;
+			border-style  :  none;
+			border-width  :   0px;
+			padding       :   0px;
+		}
+		input.edit
+		{
+			font-family: verdana;
+			border-style:solid;
+			border-width:  1px;
+			background-color: #F0C8B4;
+			height:1.75em;
+		}
+		input.btn
+		{
+			font-family: verdana;
+			cursor:hand;
+			border-style:solid;
+			border-width:  1px;
+			background-color: buttonface;
+			height:1.75em;
+			width:6em;
+			margin-bottom:1ex;
+		}
+
+	</STYLE>
+
+	<OBJECT CLASSID="clsid:5220cb21-c88d-11cf-b347-00aa00a28331">
+		<PARAM NAME="LPKPath" VALUE="mscomctl.LPK" />
+	</OBJECT>
+
+</HEAD>
+
+<BODY tabindex="-1"><!-- This is displayed until the entire defect log is loaded -->
+	<DIV id="divLoading">
+		<H5><CENTER>Loading the defect log</CENTER></H5>
+		<CENTER><SPAN id="spanLoadProgress" style="FONT-SIZE: 16pt; FONT-FAMILY: Wingdings"></SPAN></CENTER>
+	</DIV>
+
+	<DIV id="divSortingAndFiltering" style="DISPLAY: none">
+		<H5><CENTER>Sorting and Filtering defects...</CENTER></H5>
+	</DIV>
+
+	<DIV id="divFormatting" style="DISPLAY: none">
+		<H5><CENTER>Formatting defects for display...</CENTER></H5>
+	</DIV><!-- This contains the list view where the defects will be listed -->
+	<DIV id="theDiv" style="DISPLAY: none">
+	<table width="100%" height="100%" cellspacing="0">
+		<tr id="trFilter" height="33%" style="DISPLAY: none">
+			<td width="100%">
+				<table width="100%" height="100%" cellspacing="0">
+					<tr style="HEIGHT: 1ex">
+						<td colspan="2">
+							<table width="100%" height="100%" cellspacing="0">
+								<tr>
+									<td style="WIDTH: 5em; PADDING-TOP: 3px">Presets:</td>
+									<td style="WIDTH: 21em" align="middle">
+										<SELECT id="comboPreset" style="WIDTH: 20em">
+										</SELECT>
+									</td>
+									<td width="*">
+										<input type="button" class="btn" style="VISIBILITY: hidden; WIDTH: 8em" value="Save Preset..."></input>
+										<input type="button" class="btn" style="VISIBILITY: hidden; WIDTH: 8em" value="Delete Preset"></input>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+
+					<tr height="100%">
+						<td width="100%">
+							<OBJECT id=listFilter codeBase=mscomctl.cab#Version=6,0,88,62 
+							classid=clsid:BDD1F04B-858B-11D1-B16A-00C0F0283628 width="100%" height="100%">
+								<PARAM NAME="_ExtentX" VALUE="18494"><PARAM NAME="_ExtentY" VALUE="3916"><PARAM NAME="SortKey" VALUE="0"><PARAM NAME="View" VALUE="0"><PARAM NAME="Arrange" VALUE="0"><PARAM NAME="LabelEdit" VALUE="0"><PARAM NAME="SortOrder" VALUE="0"><PARAM NAME="Sorted" VALUE="0"><PARAM NAME="MultiSelect" VALUE="0"><PARAM NAME="LabelWrap" VALUE="-1"><PARAM NAME="HideSelection" VALUE="-1"><PARAM NAME="HideColumnHeaders" VALUE="0"><PARAM NAME="OLEDragMode" VALUE="0"><PARAM NAME="OLEDropMode" VALUE="0"><PARAM NAME="AllowReorder" VALUE="0"><PARAM NAME="Checkboxes" VALUE="0"><PARAM NAME="FlatScrollBar" VALUE="0"><PARAM NAME="FullRowSelect" VALUE="0"><PARAM NAME="GridLines" VALUE="0"><PARAM NAME="HotTracking" VALUE="0"><PARAM NAME="HoverSelection" VALUE="0"><PARAM NAME="PictureAlignment" VALUE="0"><PARAM NAME="TextBackground" VALUE="0"><PARAM NAME="_Version" VALUE="393217"><PARAM NAME="ForeColor" VALUE="-2147483640"><PARAM NAME="BackColor" VALUE="-2147483643"><PARAM NAME="BorderStyle" VALUE="1"><PARAM NAME="Appearance" VALUE="1"><PARAM NAME="MousePointer" VALUE="0"><PARAM NAME="Enabled" VALUE="1"><PARAM NAME="NumItems" VALUE="0">
+							</OBJECT>
+						</td>
+						<td align="right" style="PADDING-LEFT: 1ex; WIDTH: 6em; HEIGHT: 16ex">
+							<input id="btnOK"     type="submit" class="btn" value="OK" name="btnOK"><br>
+							<input id="btnCancel" type="button" class="btn" value="Cancel" name="btnCancel"><br>
+							<input id="btnApply"  type="button" class="btn" value="Apply" name="btnApply"><br>
+							<br>
+							<input id="btnInvert" type="button" class="btn" value="Invert" name="btnInvert" style="MARGIN-BOTTOM: 0px">
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr id="trFilterSep" style="DISPLAY: none">
+			<td id="tdFilterSep"><br ></td>
+		</tr>
+		<tr height="*">
+			<td width="100%" height="100%">
+				<OBJECT id=theList codeBase=mscomctl.cab#Version=6,0,88,62 
+				classid=clsid:BDD1F04B-858B-11D1-B16A-00C0F0283628 width="100%" height="100%">
+					<PARAM NAME="_ExtentX" VALUE="20796"><PARAM NAME="_ExtentY" VALUE="10398"><PARAM NAME="SortKey" VALUE="0"><PARAM NAME="View" VALUE="0"><PARAM NAME="Arrange" VALUE="0"><PARAM NAME="LabelEdit" VALUE="0"><PARAM NAME="SortOrder" VALUE="0"><PARAM NAME="Sorted" VALUE="0"><PARAM NAME="MultiSelect" VALUE="0"><PARAM NAME="LabelWrap" VALUE="-1"><PARAM NAME="HideSelection" VALUE="-1"><PARAM NAME="HideColumnHeaders" VALUE="0"><PARAM NAME="OLEDragMode" VALUE="0"><PARAM NAME="OLEDropMode" VALUE="0"><PARAM NAME="AllowReorder" VALUE="0"><PARAM NAME="Checkboxes" VALUE="0"><PARAM NAME="FlatScrollBar" VALUE="0"><PARAM NAME="FullRowSelect" VALUE="0"><PARAM NAME="GridLines" VALUE="0"><PARAM NAME="HotTracking" VALUE="0"><PARAM NAME="HoverSelection" VALUE="0"><PARAM NAME="PictureAlignment" VALUE="0"><PARAM NAME="TextBackground" VALUE="0"><PARAM NAME="_Version" VALUE="393217"><PARAM NAME="ForeColor" VALUE="-2147483640"><PARAM NAME="BackColor" VALUE="-2147483643"><PARAM NAME="BorderStyle" VALUE="1"><PARAM NAME="Appearance" VALUE="1"><PARAM NAME="MousePointer" VALUE="0"><PARAM NAME="Enabled" VALUE="1"><PARAM NAME="NumItems" VALUE="0">
+				</OBJECT>
+			</td>
+		</tr>
+	</table>
+
+	</DIV>
+
+	<!-- This is displayed when the defect log is empty -->
+	<DIV id="divNoDefects" style="DISPLAY: none">
+		There are no defects in the defect log.
+	</DIV>
+
+	<!-- This is never displayed -->
+	<!--
+	<DIV style="display: none">
+		<object id="g_objDefectSet"  classid="clsid:0da90235-df20-4b4c-a2f5-cccfd0424318" >
+		 
+		</object>
+		<object id="g_objPresets"   classid="clsid:91404F3F-2861-4801-BBB4-318BFDB2797C" >
+		</object>
+	</DIV>
+	-->
+
+<SCRIPT>
+/////////////////////////////////////////////////////////////////////////////
+// Globals
+
+
+var g_fInitializing = true;
+var g_objShell   = new ActiveXObject("WScript.Shell");
+var g_objFSO     = new ActiveXObject("Scripting.FileSystemObject");
+var g_objDefectSet;
+var g_objPresets;
+var g_objEdited;
+var g_defectSelected;
+
+/////////////////////////////////////////////////////////////////////////////
+// Displays one <DIV> element in a group, hiding the others. The g_divsMutex
+// is an array of the mutually-exclusive <DIV> tags.
+//
+var g_divsMutex =
+	new Array
+	(
+		divLoading,
+		divSortingAndFiltering,
+		divFormatting,
+		theDiv,
+		divNoDefects
+	);
+function DisplayDiv(oDiv)
+{
+	// Hide all of the other DIV's
+	for (var i = 0; i < g_divsMutex.length; ++i)
+		if (oDiv != g_divsMutex[i])
+			g_divsMutex[i].style.display = "none";
+
+	// Show the specified DIV
+	oDiv.style.display = "";
+}
+
+function ShowFilter(fShow)
+{
+	if (fShow)
+	{
+		// Hide the filter UI if it's already visible
+		if ("" == trFilter.style.display)
+		{
+			ShowFilter(false);
+			return;
+		}
+
+		// Update the user interface from the selected preset filter
+		g_objPresets.selectedPreset.copyTo(g_objEdited);
+		UpdateUIFromSelectedFilter();
+
+		// Display the filter UI panels
+		trFilter.style.display = "";
+		trFilterSep.style.display = "";
+	}
+	else
+	{
+		// Hide the filter UI panels
+		trFilter.style.display = "none";
+		trFilterSep.style.display = "none";
+	}
+}
+
+function UpdateUIFromSelectedFilter()
+{
+	// Get the name of the selected preset
+	var objMatch = g_objPresets.selectedPreset;
+	var strMatch = objMatch.name;
+
+	// Select the matching preset in the combo box
+	var oOptions = comboPreset.options;
+	var cOptions = oOptions.length;
+	for (var i = 0; i < cOptions; ++i)
+	{
+		if (oOptions(i).innerText == strMatch)
+		{
+			oOptions(i).selected = true;
+			break;
+		}
+	}
+
+	// Check/uncheck all items to reflect the selected filter
+	var objListItems = listFilter.ListItems;
+	for (var e = new Enumerator(objListItems); !e.atEnd(); e.moveNext())
+	{
+		// Get the list item's ID
+		var item = e.item();
+		var strID = item.SubItems(1);
+
+		// Check/uncheck the item according to the filter
+		item.Checked = objMatch.isEnabled(strID);
+	}
+}
+
+function GetTotalDefectCount()
+{
+	return g_objDefectSet.defectNodesMaster.length;
+}
+
+function GetFilteredDefectCount()
+{
+	return g_objDefectSet.defectNodesFiltered.length;
+}
+
+function IsFilterInEffect()
+{
+	return !g_objDefectSet.filter.isEquivalent(g_objPresets("(all defects)"));
+}
+
+function GetSelectedDefect()
+{
+	return g_defectSelected;
+}
+
+function SelectPreviousDefect()
+{
+	var defect = GetSelectedDefect();
+	if (defect)
+		defect = defect.previousSibling;
+	if (defect)
+	{
+		var strID = defect.getAttribute("_seq");
+		var cItems = theList.ListItems.Count;
+		var nIndex = theList.SelectedItem ? theList.SelectedItem.Index - 1 : 1;
+		var item = theList.FindItem(strID, 0, nIndex);
+		if (item)
+		{
+			item.Selected = true;
+			g_defectSelected = defect;
+			return true;
+		}
+	}
+	return false;
+}
+
+function SelectNextDefect()
+{
+	var defect = GetSelectedDefect();
+	if (defect)
+		defect = defect.nextSibling;
+	if (defect)
+	{
+		var strID = defect.getAttribute("_seq");
+		var cItems = theList.ListItems.Count;
+		var nIndex = theList.SelectedItem ? theList.SelectedItem.Index + 1 : 1;
+		var item = theList.FindItem(strID, 0, nIndex);
+		if (item)
+		{
+			item.Selected = true;
+			g_defectSelected = defect;
+			return true;
+		}
+	}
+	return false;
+}
+
+function DefectSet_onSortKeysChanged()
+{
+	if (g_fInitializing)
+		return;
+	SortAndOrFilterDefects();
+}
+
+
+function DefectSet_onFilterChanged()
+{
+	if (g_fInitializing)
+		return;
+	SortAndOrFilterDefects();
+}
+
+
+function DefectFilterPresets_onSortKeysChanged()
+{
+	PopulateFilterUI();
+	UpdateUIFromSelectedFilter();
+}
+
+
+function DefectFilterPresets_onSelChanged()
+{
+	UpdateUIFromSelectedFilter();
+}
+
+
+function BeginDocumentLoad()
+{
+	// Begin loading the defect log
+	var strDefectLog = g_objShell.ExpandEnvironmentStrings("%PREFASTLOG%");
+	g_objDefectSet.load(strDefectLog, true);
+
+	// Wait for the document to load, using a timer
+	WaitForDocumentLoad();
+}
+
+var g_nLoadProgress = 0;
+var g_arrLoadProgress = new Array(
+"&nbsp;&nbsp;&nbsp;&nbsp;&#239;&#239;&#239;&#240;&#240;&#240;&nbsp;&nbsp;&nbsp;&nbsp;", 
+"&nbsp;&nbsp;&nbsp;&#239;&#239;&#239;&nbsp;&nbsp;&#240;&#240;&#240;&nbsp;&nbsp;&nbsp;", 
+"&nbsp;&nbsp;&#239;&#239;&#239;&nbsp;&nbsp;&nbsp;&nbsp;&#240;&#240;&#240;&nbsp;&nbsp;", 
+"&nbsp;&#239;&#239;&#239;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#240;&#240;&#240;&nbsp;", 
+"&#239;&#239;&#239;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#240;&#240;&#240;", 
+"&#240;&#240;&#240;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#239;&#239;&#239;", 
+"&nbsp;&#240;&#240;&#240;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#239;&#239;&#239;&nbsp;", 
+"&nbsp;&nbsp;&#240;&#240;&#240;&nbsp;&nbsp;&nbsp;&nbsp;&#239;&#239;&#239;&nbsp;&nbsp;", 
+"&nbsp;&nbsp;&nbsp;&#240;&#240;&#240;&nbsp;&nbsp;&#239;&#239;&#239;&nbsp;&nbsp;&nbsp;", 
+"&nbsp;&nbsp;&nbsp;&nbsp;&#240;&#240;&#240;&#239;&#239;&#239;&nbsp;&nbsp;&nbsp;&nbsp;");
+
+function WaitForDocumentLoad()
+{
+	// Check the ready state of the XML document and all inline style sheets
+	if (!g_objDefectSet.isLoadComplete)
+	{
+		// Advance the UI element
+		if (++g_nLoadProgress >= g_arrLoadProgress.length)
+			g_nLoadProgress = 0;
+		spanLoadProgress.innerHTML = g_arrLoadProgress[g_nLoadProgress];
+
+		// Set a timeout to check again
+		window.setTimeout(WaitForDocumentLoad, 100);
+	}
+	else
+	{
+		// Initialize the 'edited' filter
+		g_objEdited = parent.GuardedCreatePREfastObject("PREfast.DefectFilter");
+		g_objEdited.init(g_objPresets.defectDefinitions,
+			g_objPresets.defectRegExpDefinitions,
+			"(edited)", "", "", false);
+
+		// Initialize the PREfast.DefectSet object
+		g_objDefectSet.filter = g_objPresets.selectedPreset;
+
+		// Get the number of defects
+		var cDefects = g_objDefectSet.defectNodesMaster.length;
+
+		// Get the number of defects with a @_seq attribute
+		var cDefectsWithSeq = g_objDefectSet.defectsElementMaster.selectNodes("DEFECT[@_seq]").length;
+		if (cDefects != cDefectsWithSeq)
+		{
+			var strLog = '"' + g_objShell.ExpandEnvironmentStrings("%PREFASTLOG%") + '"';
+			var str =
+				"The specified defect log file is not valid.\n" +
+				"Often, this is because PREfast was stopped prior to completion.\n" +
+				"You may be able to fix this by running the following command:\n\n" +
+				"PREFAST REMOVEDUPS " + strLog + " " + strLog + "\n\n" +
+				"(use Ctrl+C to copy this message to the clipboard)";
+			alert(str);
+			parent.close();
+			return;
+		}
+
+		// Initialize the filter user interface elements
+		InitializeFilterUI();
+		PopulateFilterUI();
+
+		// Initialize the defect list user interface elements
+		InitializeDefectListUI();
+
+		// Sort and filter the defects
+		SortAndOrFilterDefects();
+
+		// Indicate that we've finished initializing
+		g_fInitializing = false;
+	}
+}
+
+function SortAndOrFilterDefects()
+{
+	// Advance to the next step
+	window.setTimeout(OnDocumentLoaded, 0);
+}
+
+function OnDocumentLoaded()
+{
+	// Indicate that we're sorting and filtering
+	DisplayDiv(divSortingAndFiltering);
+
+	// Advance to the next step
+	window.setTimeout(OnSortAndOrFilterDefects, 0);
+}
+
+var g_fPopulating = false;
+var g_fPopulatingCancel = false;
+var g_iPopulateFrom = 0;
+var g_strSeqSelected;
+
+function OnSortAndOrFilterDefects()
+{
+	// Get the _seq attribute of the selected defect before sorting
+	var defectSelected = GetSelectedDefect();
+	g_strSeqSelected = defectSelected ? defectSelected.getAttribute("_seq") : "1";
+	
+	// Get the filtered set of <DEFECT> elements
+	var defects = g_objDefectSet.defectNodesFiltered;
+
+	// Update control frames
+	parent.UpdateDefectCountText();
+
+	// Display the "formatting" DIV
+	DisplayDiv(divFormatting);
+
+	// Populate the list view
+	g_fPopulating = false;
+	g_fPopulatingCancel = false;
+	g_iPopulateFrom = 0;
+	window.setTimeout(OnPopulateDefectList, 0);
+}
+
+function OnPopulateDefectList()
+{
+	// Get all of the <DEFECT> elements
+	var defects = g_objDefectSet.defectNodesFiltered;
+	var cDefects = defects.length;
+
+	// Remove all defects from the listview, if g_iPopulateFrom is zero
+	if (g_iPopulateFrom == 0)
+		theList.ListItems.Clear();
+
+	// Compute the last index to populate this go-around
+	var iEnd = Math.min(cDefects, g_iPopulateFrom + 50);
+
+	// Loop through each defect
+	var objListItems = theList.ListItems;
+	var cListItems = objListItems.Count;
+	for (var i = g_iPopulateFrom; i < iEnd; ++i)
+	{
+		// Get the next defect
+		var defect = defects(i);
+
+		// Extract the XML data and format the strings
+		var strNumber   = defect.selectSingleNode("@_seq").text;
+		var strDesc     = defect.selectSingleNode("DESCRIPTION").text;
+		var strWarning  = defect.selectSingleNode("DEFECTCODE").text;
+		var strFile     = defect.selectSingleNode("SFA/FILEPATH").text +
+		                  defect.selectSingleNode("SFA/FILENAME").text + "(" +
+		                  defect.selectSingleNode("SFA/LINE").text + ")";
+		var strFunction = defect.selectSingleNode("FUNCTION").text;
+
+		// Add the defect to the listview
+		var item = objListItems.Add(++cListItems, "", strNumber);
+		var subitems = item.ListSubItems;
+		var vUndefined;
+		subitems.Add(subitems.Count + 1, "", strDesc    , vUndefined, strDesc    );
+		subitems.Add(subitems.Count + 1, "", strWarning , vUndefined, strWarning );
+		subitems.Add(subitems.Count + 1, "", strFile    , vUndefined, strFile    );
+		subitems.Add(subitems.Count + 1, "", strFunction, vUndefined, strFunction);
+
+		// Re-select the previously selected defect
+		if ((new Number(strNumber)).valueOf() == (new Number(g_strSeqSelected)).valueOf())
+		{
+			item.Selected = true;
+			g_defectSelected = defect;
+		}
+	}
+
+	// Show the list view, if g_iPopulateFrom is zero
+	if (g_iPopulateFrom == 0)
+		OnListViewPopulated();
+
+	// Iterate, if more items to be populated
+	if (iEnd < cDefects)
+	{
+		g_iPopulateFrom = iEnd;
+		window.setTimeout(OnPopulateDefectList, 0);
+		return;
+	}
+
+	// Ensure that the selected item is visible
+	if (theList.SelectedItem)
+		theList.SelectedItem.EnsureVisible();
+}
+
+function OnListViewPopulated()
+{
+	// Display the list view
+	DisplayDiv(theDiv);
+
+	// Display the Filter button
+	parent.ShowFilterButton(true);
+
+	// Update the defect count text
+	parent.UpdateDefectCountText();
+
+	// Give focus to the listview
+	theList.focus();
+}
+
+
+function InitializeFilterUI()
+{
+	// Populate the Presets combo box
+	var arrPresets = g_objPresets.presetNames.split('\n');
+	var strSelected = g_objPresets.selectedPreset.name;
+	var iSelected = -1;
+	for (var i in arrPresets)
+	{
+		var option  = document.createElement("OPTION");
+		option.text = arrPresets[i];
+		if (iSelected < 0 && option.text == strSelected)
+			iSelected = i;
+		comboPreset.add(option);
+	}
+
+	//
+	// Adjust the properties of the filter listview
+	//
+	listFilter.View               = 3;  // lvwReport
+	listFilter.LabelEdit          = 1;  // lvwManual
+	listFilter.Sorted             = true;
+	listFilter.MultiSelect        = true;
+	listFilter.HideSelection      = false;
+	listFilter.HideColumnHeaders  = false;
+	listFilter.AllowColumnReorder = true;
+	listFilter.Checkboxes         = true;
+	listFilter.FullRowSelect      = true;
+
+	// Add columns to the filter listview
+	var columns = listFilter.ColumnHeaders;
+	columns.Add(columns.Count + 1, "number(@enabled)", ""           ,  18, 0); // lvwColumnRight = 0
+	columns.Add(columns.Count + 1, "number(@id);@id" , "Warning"    ,  66, 1); // lvwColumnRight = 1
+	columns.Add(columns.Count + 1, "description"     , "Description", 705, 0);
+}
+
+function PopulateFilterUI()
+{
+	// Get the id attributes of the selected defects before sorting
+	var dictSelectedIDs = new ActiveXObject("Scripting.Dictionary");
+	for (var e = new Enumerator(listFilter.ListItems); !e.atEnd(); e.moveNext())
+	{
+		var item = e.item();
+		if (item.Selected)
+			dictSelectedIDs(item.SubItems(1)) = true;
+	}
+	var nIDSelected = 0;
+	var itemSelected = listFilter.SelectedItem;
+	if (itemSelected)
+		nIDSelected = itemSelected.SubItems(1);
+
+	// Remove all defect definitions from the listview
+	listFilter.ListItems.Clear();
+
+	// Loop through each defect definition
+	var itemSelectedPrimary;
+	var objListItems = listFilter.ListItems;
+
+	// Get all of the <FilterDef> elements
+	var cListItems = objListItems.Count;
+	var defs = g_objPresets.defectRegExpDefinitions.defectFilterNodes;
+	var cDefs = defs.length;
+	for (var i = 0; i < cDefs;)
+	{
+		// Get the next defect definition
+		var def = defs(i);
+
+		// Extract the XML data and format the strings
+		var strEnabled = def.selectSingleNode("@enabled").text;
+		var strWarning = def.selectSingleNode("@id").text;
+		var strDisplay = def.selectSingleNode("description").text;
+
+		// Remove any extra spaces from the description
+	    var re = /\s{2,}/g;
+	    strDisplay = strDisplay.replace(re, " ");
+
+		// Add the defect definition to the listview
+		++i;
+		var item = objListItems.Add(i + cListItems, "", "");
+		var subitems = item.ListSubItems;
+		var vUndefined;
+		subitems.Add(subitems.Count + 1, "", strWarning, vUndefined, strWarning);
+		subitems.Add(subitems.Count + 1, "", strDisplay, vUndefined, strDisplay);
+		item.Checked = strEnabled;
+
+		// Re-select the previously selected defects
+		var fSelected = dictSelectedIDs.Exists(strWarning) && dictSelectedIDs(strWarning);
+		item.Selected = fSelected;
+		if (strWarning == nIDSelected)
+			itemSelectedPrimary = item;
+	}
+
+	// Get all of the <DefectDef> elements
+	var cListItems = objListItems.Count;
+	Defs = g_objPresets.defectDefinitions.defectDefNodes;
+	var cDefs = Defs.length;
+	for (var i = 0; i < cDefs;)
+	{
+		// Get the next defect definition
+		var def = Defs(i);
+
+		// Extract the XML data and format the strings
+		var strEnabled = def.selectSingleNode("@enabled").text;
+		var strWarning = def.selectSingleNode("@id").text;
+		var strDisplay = def.selectSingleNode("description").text;
+
+		// Add in the additionalInfo field if it exists, it often allows one
+		// to distinguish between multiple defects with identical
+		// descriptions.
+		var nodeAdditionalInfo = def.selectSingleNode("additionalInfo");
+		if (nodeAdditionalInfo) {
+			strDisplay = strDisplay + ":  " + nodeAdditionalInfo.text + ".";
+		} else {
+			strDisplay = strDisplay + ".";
+		}
+
+		// Remove any extra spaces from the description
+	    var re = /\s{2,}/g;
+	    strDisplay = strDisplay.replace(re, " ");
+
+		// Add the defect definition to the listview
+		++i;
+		var item = objListItems.Add(i + cListItems, "", "");
+		var subitems = item.ListSubItems;
+		var vUndefined;
+		subitems.Add(subitems.Count + 1, "", strWarning, vUndefined, strWarning);
+		subitems.Add(subitems.Count + 1, "", strDisplay, vUndefined, strDisplay);
+		item.Checked = strEnabled;
+
+		// Re-select the previously selected defects
+		var fSelected = dictSelectedIDs.Exists(strWarning) && dictSelectedIDs(strWarning);
+		item.Selected = fSelected;
+		if (strWarning == nIDSelected)
+			itemSelectedPrimary = item;
+	}
+
+	// Select last the primarily selected item
+	if (itemSelectedPrimary)
+		itemSelectedPrimary.Selected = true;
+
+	// Ensure that the selected item is visible
+	if (listFilter.SelectedItem)
+		listFilter.SelectedItem.EnsureVisible();
+
+
+}
+
+function InitializeDefectListUI()
+{
+	//
+	// Adjust the properties of the defect listview
+	//
+	theList.View               = 3; // lvwReport
+	theList.FullRowSelect      = true;
+	theList.HideSelection      = false;
+	theList.AllowColumnReorder = true;
+	theList.LabelEdit          = 1; // lvwManual;
+	theList.Sorted             = false;
+
+	// Add columns to the defect listview
+	var columns = theList.ColumnHeaders;
+	columns.Add(columns.Count + 1, "number(@_seq)"                              , "#"              ,  38, 0);
+	columns.Add(columns.Count + 1, "DESCRIPTION"                                , "Description"    , 288, 0); // lvwColumnLeft  = 0
+	columns.Add(columns.Count + 1, "number(DEFECTCODE)"                         , "Warning"        ,  65, 1); // lvwColumnRight = 1
+	columns.Add(columns.Count + 1, "SFA/FILEPATH;SFA/FILENAME;number(SFA/LINE)" , "Source Location", 364, 0);
+	columns.Add(columns.Count + 1, "FUNCTION"                                   , "In Function"    , 141, 0);
+}
+
+
+function ApplyEditedFilter()
+{
+	// Copy the edited filter over the current filter
+	g_objDefectSet.filter = g_objPresets.selectedPreset;
+}
+
+function CancelEditedFilter()
+{
+	// In the Presets object, select the currently applied filter
+	g_objPresets.selectedPreset = g_objDefectSet.filter;
+}
+
+function InitialUpdate()
+{
+    g_objDefectSet = parent.GuardedCreatePREfastObject("PREfast.DefectSet");
+	g_objDefectSet.connectEvents( self );
+
+	g_objPresets = parent.GuardedCreatePREfastObject("PREfast.DefectFilterPresets");
+	g_objPresets.connectEvents( self );
+
+	// Begin processing
+	window.setTimeout("BeginDocumentLoad();", 0);
+}
+
+
+function comboPreset::onchange()
+{
+	// Select the corresponding preset
+	var iSelected = comboPreset.selectedIndex;
+	var strSelected = comboPreset.options(iSelected).innerText;
+	g_objPresets.selectedPreset = strSelected;
+	g_objPresets.selectedPreset.copyTo(g_objEdited);
+}
+
+function listFilter::ItemCheck(itemChecked)
+{
+	// Get the list items collection
+	var objListItems = listFilter.ListItems;
+
+	// Select the specified item, if it is not
+	if (!itemChecked.Selected)
+	{
+		for (var e = new Enumerator(objListItems); !e.atEnd(); e.moveNext())
+		{
+			var item = e.item();
+			if (item != itemChecked)
+				item.Selected = false;
+			else
+				item.Selected = true;
+		}
+	}
+
+	// Get the checked status of the item
+	var fChecked = itemChecked.Checked;
+
+	// Enable/disable all selected items
+	var arrEnabled = new Array;
+	var arrDisabled = new Array;
+	for (var e = new Enumerator(objListItems); !e.atEnd(); e.moveNext())
+	{
+		// Modify the enabled state of each selected item
+		var item = e.item();
+		if (item.Selected)
+		{
+			// Get the list item ID
+			var strID = item.SubItems(1);
+
+			// Add it to the enabled or disabled array
+			var arr = fChecked ? arrEnabled : arrDisabled;
+			arr[arr.length] = strID;
+		}
+	}
+
+	// Apply the changes to the filter being edited
+	g_objEdited.enable(arrEnabled.join(';'), true);
+	g_objEdited.enable(arrDisabled.join(';'), false);
+
+	// Select the matching preset filter
+	g_objPresets.selectedPreset = g_objEdited;
+}
+
+function listFilter::ColumnClick(header)
+{
+	// Update the sort keys
+	g_objPresets.defectDefinitions.sortKeys.primaryKey = header.key;
+	g_objPresets.defectRegExpDefinitions.sortKeys.primaryKey = header.key;
+}
+
+
+function btnOK::onclick()
+{
+	// Apply the changes to the current filter
+	ApplyEditedFilter();
+
+	// Hide the Filter
+	ShowFilter(false);
+}
+
+function btnCancel::onclick()
+{
+	// Apply the changes to the current filter
+	CancelEditedFilter();
+
+	// Hide the Filter
+	ShowFilter(false);
+}
+
+function btnApply::onclick()
+{
+	// Apply the changes to the current filter
+	ApplyEditedFilter();
+
+	// Change the text of the Cancel button to Close
+	btnCancel.innerText = "Close";
+}
+
+function btnInvert::onclick()
+{
+	// Invert all selected items
+	var arrEnabled = new Array;
+	var arrDisabled = new Array;
+	var objListItems = listFilter.ListItems;
+	for (var e = new Enumerator(objListItems); !e.atEnd(); e.moveNext())
+	{
+		// Invert the state of the selected items
+		var item = e.item();
+		if (item.Selected)
+		{
+			var strID = item.SubItems(1);
+			var arr = g_objEdited.isEnabled(strID) ? arrDisabled : arrEnabled;
+			arr[arr.length] = strID;
+		}
+	}
+
+	// Apply the changes to the filter being edited
+	g_objEdited.enable(arrEnabled.join(';'), true);
+	g_objEdited.enable(arrDisabled.join(';'), false);
+
+	// Select the matching preset filter
+	g_objPresets.selectedPreset = g_objEdited;
+}
+
+function theList::ItemClick(item)
+{
+	g_defectSelected = null;
+	item.Selected = true;
+	if (theList.SelectedItem)
+	{
+		var strID = item.Text;
+		var elemDefects = g_objDefectSet.defectsElementFiltered;
+		g_defectSelected = elemDefects.selectSingleNode("DEFECT[@_seq='" + strID + "']");
+	}
+	parent.UpdateDefectCountText();
+}
+
+function theList::DblClick()
+{
+	parent.ShowDefectView();
+}
+
+function theList::KeyDown(nKeyCode, nShift)
+{
+	if (0 == nShift && (13 == nKeyCode || 10 == nKeyCode))
+	{
+		parent.ShowDefectView();
+	}
+}
+
+function theList::KeyPress(nKeyCode)
+{
+	if (13 == nKeyCode || 10 == nKeyCode)
+	{
+		parent.ShowDefectView();
+	}
+}
+
+function theList::ColumnClick(header)
+{
+	// Update the sort keys
+	g_objDefectSet.sortKeys.primaryKey = header.Key;
+}
+
+function window::onunload()
+{
+	CancelEditedFilter();
+}
+
+// End of script block
+/////////////////////////////////////////////////////////////////////////////
+</SCRIPT>
+
+
+</BODY>
+
+</HTML>

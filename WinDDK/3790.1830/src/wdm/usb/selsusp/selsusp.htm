@@ -1,0 +1,919 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 11">
+<meta name=Originator content="Microsoft Word 11">
+<link rel=File-List href="selsusp_files/filelist.xml">
+<link rel=Preview href="selsusp_files/preview.wmf">
+<title>Selective Suspend Driver</title>
+<!--[if gte mso 9]><xml>
+ <o:DocumentProperties>
+  <o:LastAuthor>john osborne</o:LastAuthor>
+  <o:Revision>4</o:Revision>
+  <o:TotalTime>39</o:TotalTime>
+  <o:Created>2004-10-08T17:23:00Z</o:Created>
+  <o:LastSaved>2004-10-22T00:23:00Z</o:LastSaved>
+  <o:Pages>1</o:Pages>
+  <o:Words>971</o:Words>
+  <o:Characters>5536</o:Characters>
+  <o:Lines>46</o:Lines>
+  <o:Paragraphs>12</o:Paragraphs>
+  <o:CharactersWithSpaces>6495</o:CharactersWithSpaces>
+  <o:Version>11.6360</o:Version>
+ </o:DocumentProperties>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:SpellingState>Clean</w:SpellingState>
+  <w:GrammarState>Clean</w:GrammarState>
+  <w:ValidateAgainstSchemas/>
+  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
+  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
+  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+ </w:WordDocument>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:LatentStyles DefLockedState="false" LatentStyleCount="156">
+ </w:LatentStyles>
+</xml><![endif]-->
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Courier;
+	panose-1:2 7 4 9 2 2 5 2 4 4;
+	mso-font-charset:0;
+	mso-generic-font-family:modern;
+	mso-font-format:other;
+	mso-font-pitch:fixed;
+	mso-font-signature:3 0 0 0 1 0;}
+@font-face
+	{font-family:Verdana;
+	panose-1:2 11 6 4 3 5 4 4 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:536871559 0 0 0 415 0;}
+@font-face
+	{font-family:"MS Sans Serif";
+	panose-1:0 0 0 0 0 0 0 0 0 0;
+	mso-font-alt:"Times New Roman";
+	mso-font-charset:0;
+	mso-generic-font-family:roman;
+	mso-font-format:other;
+	mso-font-pitch:auto;
+	mso-font-signature:0 0 0 0 0 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0in;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";}
+h2
+	{mso-margin-top-alt:auto;
+	margin-right:0in;
+	mso-margin-bottom-alt:auto;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	mso-outline-level:2;
+	font-size:18.0pt;
+	font-family:"Times New Roman";
+	font-weight:bold;}
+h3
+	{mso-style-link:"Heading 3 Char";
+	mso-margin-top-alt:auto;
+	margin-right:0in;
+	mso-margin-bottom-alt:auto;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	mso-outline-level:3;
+	font-size:13.5pt;
+	font-family:"Times New Roman";
+	font-weight:bold;}
+h4
+	{mso-margin-top-alt:auto;
+	margin-right:0in;
+	mso-margin-bottom-alt:auto;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	mso-outline-level:4;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	font-weight:bold;}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+p
+	{mso-style-link:"Normal \(Web\) Char";
+	mso-margin-top-alt:auto;
+	margin-right:0in;
+	mso-margin-bottom-alt:auto;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";}
+span.Heading3Char
+	{mso-style-name:"Heading 3 Char";
+	mso-style-locked:yes;
+	mso-style-link:"Heading 3";
+	mso-ansi-font-size:13.5pt;
+	mso-bidi-font-size:13.5pt;
+	mso-ansi-language:EN-US;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:AR-SA;
+	font-weight:bold;}
+span.NormalWebChar
+	{mso-style-name:"Normal \(Web\) Char";
+	mso-style-locked:yes;
+	mso-style-link:"Normal \(Web\)";
+	mso-ansi-font-size:12.0pt;
+	mso-bidi-font-size:12.0pt;
+	mso-ansi-language:EN-US;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:AR-SA;}
+span.SpellE
+	{mso-style-name:"";
+	mso-spl-e:yes;}
+span.GramE
+	{mso-style-name:"";
+	mso-gram-e:yes;}
+@page Section1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.25in 1.0in 1.25in;
+	mso-header-margin:.5in;
+	mso-footer-margin:.5in;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+ /* List Definitions */
+ @list l0
+	{mso-list-id:111756472;
+	mso-list-type:hybrid;
+	mso-list-template-ids:152889856 67698689 67698691 67698693 67698689 67698691 67698693 67698689 67698691 67698693;}
+@list l0:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:.25in;
+	mso-level-number-position:left;
+	margin-left:.25in;
+	text-indent:-.25in;
+	font-family:Symbol;}
+@list l0:level2
+	{mso-level-tab-stop:1.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level3
+	{mso-level-tab-stop:1.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level4
+	{mso-level-tab-stop:2.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level5
+	{mso-level-tab-stop:2.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level6
+	{mso-level-tab-stop:3.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level7
+	{mso-level-tab-stop:3.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level8
+	{mso-level-tab-stop:4.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level9
+	{mso-level-tab-stop:4.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l1
+	{mso-list-id:127165824;
+	mso-list-type:hybrid;
+	mso-list-template-ids:1334591732 67698689 67698691 67698693 67698689 67698691 67698693 67698689 67698691 67698693;}
+@list l1:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:.25in;
+	mso-level-number-position:left;
+	margin-left:.25in;
+	text-indent:-.25in;
+	font-family:Symbol;}
+@list l1:level2
+	{mso-level-tab-stop:1.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l1:level3
+	{mso-level-tab-stop:1.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l1:level4
+	{mso-level-tab-stop:2.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l1:level5
+	{mso-level-tab-stop:2.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l1:level6
+	{mso-level-tab-stop:3.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l1:level7
+	{mso-level-tab-stop:3.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l1:level8
+	{mso-level-tab-stop:4.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l1:level9
+	{mso-level-tab-stop:4.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2
+	{mso-list-id:393504959;
+	mso-list-type:hybrid;
+	mso-list-template-ids:1210625938 67698689 67698691 67698693 67698689 67698691 67698693 67698689 67698691 67698693;}
+@list l2:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:.25in;
+	mso-level-number-position:left;
+	margin-left:.25in;
+	text-indent:-.25in;
+	font-family:Symbol;}
+@list l2:level2
+	{mso-level-tab-stop:1.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2:level3
+	{mso-level-tab-stop:1.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2:level4
+	{mso-level-tab-stop:2.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2:level5
+	{mso-level-tab-stop:2.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2:level6
+	{mso-level-tab-stop:3.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2:level7
+	{mso-level-tab-stop:3.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2:level8
+	{mso-level-tab-stop:4.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2:level9
+	{mso-level-tab-stop:4.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l3
+	{mso-list-id:488793568;
+	mso-list-type:hybrid;
+	mso-list-template-ids:1101462368 67698689 67698691 67698693 67698689 67698691 67698693 67698689 67698691 67698693;}
+@list l3:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	font-family:Symbol;}
+@list l3:level2
+	{mso-level-tab-stop:1.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l3:level3
+	{mso-level-tab-stop:1.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l3:level4
+	{mso-level-tab-stop:2.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l3:level5
+	{mso-level-tab-stop:2.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l3:level6
+	{mso-level-tab-stop:3.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l3:level7
+	{mso-level-tab-stop:3.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l3:level8
+	{mso-level-tab-stop:4.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l3:level9
+	{mso-level-tab-stop:4.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l4
+	{mso-list-id:821502839;
+	mso-list-type:hybrid;
+	mso-list-template-ids:-1702845432 67698689 67698691 67698693 67698689 67698691 67698693 67698689 67698691 67698693;}
+@list l4:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:.25in;
+	mso-level-number-position:left;
+	margin-left:.25in;
+	text-indent:-.25in;
+	font-family:Symbol;}
+@list l4:level2
+	{mso-level-tab-stop:1.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l4:level3
+	{mso-level-tab-stop:1.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l4:level4
+	{mso-level-tab-stop:2.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l4:level5
+	{mso-level-tab-stop:2.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l4:level6
+	{mso-level-tab-stop:3.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l4:level7
+	{mso-level-tab-stop:3.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l4:level8
+	{mso-level-tab-stop:4.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l4:level9
+	{mso-level-tab-stop:4.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l5
+	{mso-list-id:862328167;
+	mso-list-type:hybrid;
+	mso-list-template-ids:-1443206276 67698689 67698691 67698693 67698689 67698691 67698693 67698689 67698691 67698693;}
+@list l5:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:.25in;
+	mso-level-number-position:left;
+	margin-left:.25in;
+	text-indent:-.25in;
+	font-family:Symbol;}
+@list l5:level2
+	{mso-level-tab-stop:1.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l5:level3
+	{mso-level-tab-stop:1.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l5:level4
+	{mso-level-tab-stop:2.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l5:level5
+	{mso-level-tab-stop:2.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l5:level6
+	{mso-level-tab-stop:3.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l5:level7
+	{mso-level-tab-stop:3.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l5:level8
+	{mso-level-tab-stop:4.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l5:level9
+	{mso-level-tab-stop:4.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l6
+	{mso-list-id:1974482104;
+	mso-list-type:hybrid;
+	mso-list-template-ids:2047738968 67698689 67698691 67698693 67698689 67698691 67698693 67698689 67698691 67698693;}
+@list l6:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:.25in;
+	mso-level-number-position:left;
+	margin-left:.25in;
+	text-indent:-.25in;
+	font-family:Symbol;}
+@list l6:level2
+	{mso-level-tab-stop:1.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l6:level3
+	{mso-level-tab-stop:1.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l6:level4
+	{mso-level-tab-stop:2.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l6:level5
+	{mso-level-tab-stop:2.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l6:level6
+	{mso-level-tab-stop:3.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l6:level7
+	{mso-level-tab-stop:3.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l6:level8
+	{mso-level-tab-stop:4.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l6:level9
+	{mso-level-tab-stop:4.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Table Normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0in 5.4pt 0in 5.4pt;
+	mso-para-margin:0in;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman";
+	mso-ansi-language:#0400;
+	mso-fareast-language:#0400;
+	mso-bidi-language:#0400;}
+</style>
+<![endif]-->
+</head>
+
+<body lang=EN-US link=blue vlink=blue style='tab-interval:.5in'>
+
+<div class=Section1>
+
+<h2><span style='font-family:Verdana'>Selective Suspend Driver<o:p></o:p></span></h2>
+
+<h3><span style='font-family:Verdana'>SUMMARY<o:p></o:p></span></h3>
+
+<p style='text-align:justify'><span style='font-size:10.0pt;mso-bidi-font-size:
+12.0pt;font-family:Verdana'>The selective suspend driver is a generic function
+driver based on the Windows Driver Model (WDM). It supports Plug and <span
+class=GramE>Play(</span>PnP), Power Management(PM), Windows Management
+Instrumentation (WMI) and the Selective Suspend (SS) features. The support for
+PnP, PM and the WMI feature is essential for any driver based on the WDM model.
+The SS feature, described in detail later, is a new feature in the core USB
+stack. <o:p></o:p></span></p>
+
+<h3><span style='font-family:Verdana'>PLUG AND PLAY<o:p></o:p></span></h3>
+
+<p><span style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Verdana'>The
+Plug and Play system allows for dynamic recognition of installed hardware and
+configuration of resources. The selective suspend driver (function driver)
+registers a dispatch routine to receive and process PnP requests from the PnP
+manager. In the dispatch routine, the driver examines the minor function of the
+PnP requests and delegates them for further processing. <br>
+Please refer the Windows XP DDK docs and the Toaster sample in the DDK to
+understand the kernel-driver responsibilities and handling of PnP requests. <o:p></o:p></span></p>
+
+<p><span style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Verdana'>The
+selective suspend driver has the following delegate-routines to process the PnP
+requests:<o:p></o:p></span></p>
+
+<table class=MsoNormalTable border=1 cellpadding=0 width="75%"
+ style='width:75.34%;mso-cellspacing:1.5pt;margin-left:17.6pt;mso-padding-alt:
+ 0in 5.4pt 0in 5.4pt'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>
+  <td width="48%" style='width:48.14%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal><span style='font-size:11.0pt;font-family:"Courier New"'>IRP_MN_START_DEVICE</span><span
+  style='font-size:11.0pt'><o:p></o:p></span></p>
+  </td>
+  <td width="50%" style='width:50.72%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal><span class=SpellE><span style='font-size:11.0pt;
+  font-family:"Courier New"'>HandleStartDevice</span></span><span
+  style='font-size:11.0pt;font-family:"Courier New"'>()</span><span
+  style='font-size:11.0pt'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:1'>
+  <td width="48%" style='width:48.14%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal><span style='font-size:11.0pt;font-family:"Courier New"'>IRP_MN_QUERY_STOP_DEVICE</span><span
+  style='font-size:11.0pt'><o:p></o:p></span></p>
+  </td>
+  <td width="50%" style='width:50.72%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal><span class=SpellE><span style='font-size:11.0pt;
+  font-family:"Courier New"'>HandleQueryStopDevice</span></span><span
+  style='font-size:11.0pt;font-family:"Courier New"'>()</span><span
+  style='font-size:11.0pt'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:2'>
+  <td width="48%" style='width:48.14%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal><span style='font-size:11.0pt;font-family:"Courier New"'>IRP_MN_CANCEL_STOP_DEVICE</span><span
+  style='font-size:11.0pt'><o:p></o:p></span></p>
+  </td>
+  <td width="50%" style='width:50.72%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal><span class=SpellE><span style='font-size:11.0pt;
+  font-family:"Courier New"'>HandleCancelStopDevice</span></span><span
+  style='font-size:11.0pt;font-family:"Courier New"'>()</span><span
+  style='font-size:11.0pt'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:3'>
+  <td width="48%" style='width:48.14%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal><span style='font-size:11.0pt;font-family:"Courier New"'>IRP_MN_STOP_DEVICE</span><span
+  style='font-size:11.0pt'><o:p></o:p></span></p>
+  </td>
+  <td width="50%" style='width:50.72%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal><span class=SpellE><span style='font-size:11.0pt;
+  font-family:"Courier New"'>HandleStopDevice</span></span><span
+  style='font-size:11.0pt;font-family:"Courier New"'>()</span><span
+  style='font-size:11.0pt'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:4'>
+  <td width="48%" style='width:48.14%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal><span style='font-size:11.0pt;font-family:"Courier New"'>IRP_MN_QUERY_REMOVE_DEVICE</span><span
+  style='font-size:11.0pt'><o:p></o:p></span></p>
+  </td>
+  <td width="50%" style='width:50.72%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal><span class=SpellE><span style='font-size:11.0pt;
+  font-family:"Courier New"'>HandleQueryRemoveDevice</span></span><span
+  style='font-size:11.0pt;font-family:"Courier New"'>()</span><span
+  style='font-size:11.0pt'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:5'>
+  <td width="48%" style='width:48.14%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal><span style='font-size:11.0pt;font-family:"Courier New"'>IRP_MN_CANCEL_REMOVE_DEVICE</span><span
+  style='font-size:11.0pt'><o:p></o:p></span></p>
+  </td>
+  <td width="50%" style='width:50.72%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal><span class=SpellE><span style='font-size:11.0pt;
+  font-family:"Courier New"'>HandleCancelRemoveDevice</span></span><span
+  style='font-size:11.0pt;font-family:"Courier New"'>()</span><span
+  style='font-size:11.0pt'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:6'>
+  <td width="48%" style='width:48.14%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal><span style='font-size:11.0pt;font-family:"Courier New"'>IRP_MN_SURPRISE_REMOVAL</span><span
+  style='font-size:11.0pt'><o:p></o:p></span></p>
+  </td>
+  <td width="50%" style='width:50.72%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal><span class=SpellE><span style='font-size:11.0pt;
+  font-family:"Courier New"'>HandleSurpriseRemoval</span></span><span
+  style='font-size:11.0pt;font-family:"Courier New"'>()</span><span
+  style='font-size:11.0pt'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:7'>
+  <td width="48%" style='width:48.14%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal><span style='font-size:11.0pt;font-family:"Courier New"'>IRP_MN_REMOVE_DEVICE</span><span
+  style='font-size:11.0pt'><o:p></o:p></span></p>
+  </td>
+  <td width="50%" style='width:50.72%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal><span class=SpellE><span style='font-size:11.0pt;
+  font-family:"Courier New"'>HandleRemoveDevice</span></span><span
+  style='font-size:11.0pt;font-family:"Courier New"'>()</span><span
+  style='font-size:11.0pt'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:8;mso-yfti-lastrow:yes'>
+  <td width="48%" style='width:48.14%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal><span style='font-size:11.0pt;font-family:"Courier New"'>IRP_MN_QUERY_CAPABILITIES</span><span
+  style='font-size:11.0pt'><o:p></o:p></span></p>
+  </td>
+  <td width="50%" style='width:50.72%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal><span class=SpellE><span style='font-size:11.0pt;
+  font-family:"Courier New"'>HandleQueryCapabilities</span></span><span
+  style='font-size:11.0pt;font-family:"Courier New"'>()</span><span
+  style='font-size:11.0pt'><o:p></o:p></span></p>
+  </td>
+ </tr>
+</table>
+
+<h3><span style='font-family:Verdana'><o:p>&nbsp;</o:p></span></h3>
+
+<h3><span style='font-family:Verdana'>POWER MANAGEMENT<o:p></o:p></span></h3>
+
+<p><span style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Verdana'>The
+power manager is the global power-policy owner for the system and the devices. The
+selective suspend driver registers a dispatch routine to receive and process
+power requests. In the dispatch routine, the driver examines the minor function
+of the power requests and delegates them for further processing. Please refer
+the Windows XP DDK docs and the Toaster sample in the DDK to understand the
+kernel-driver responsibilities and handling of power requests.<o:p></o:p></span></p>
+
+<table class=MsoNormalTable border=1 cellpadding=0 width="76%"
+ style='width:76.78%;mso-cellspacing:1.5pt;margin-left:17.6pt;mso-padding-alt:
+ 0in 5.4pt 0in 5.4pt'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>
+  <td width="57%" style='width:57.4%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal><span style='font-size:11.0pt;font-family:"Courier New"'>IRP_MN_QUERY_POWER(<span
+  class=SpellE>SystemPowerState</span>)</span><span style='font-size:11.0pt'><o:p></o:p></span></p>
+  </td>
+  <td width="41%" style='width:41.46%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal><span class=SpellE><span style='font-size:11.0pt;
+  font-family:"Courier New"'>HandleSystemQueryPower</span></span><span
+  style='font-size:11.0pt;font-family:"Courier New"'>()</span><span
+  style='font-size:11.0pt'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:1'>
+  <td width="57%" style='width:57.4%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal><span style='font-size:11.0pt;font-family:"Courier New"'>IRP_MN_QUERY_POWER(<span
+  class=SpellE>DevicePowerState</span>)</span><span style='font-size:11.0pt'><o:p></o:p></span></p>
+  </td>
+  <td width="41%" style='width:41.46%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal><span class=SpellE><span style='font-size:11.0pt;
+  font-family:"Courier New"'>HandleDeviceQueryPower</span></span><span
+  style='font-size:11.0pt;font-family:"Courier New"'>()</span><span
+  style='font-size:11.0pt'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:2'>
+  <td width="57%" style='width:57.4%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal><span style='font-size:11.0pt;font-family:"Courier New"'>IRP_MN_SET_POWER
+  (<span class=SpellE>DevicePowerState</span>)</span><span style='font-size:
+  11.0pt'><o:p></o:p></span></p>
+  </td>
+  <td width="41%" style='width:41.46%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal><span class=SpellE><span style='font-size:11.0pt;
+  font-family:"Courier New"'>HandleDeviceSetPower</span></span><span
+  style='font-size:11.0pt;font-family:"Courier New"'>()</span><span
+  style='font-size:11.0pt'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:3;mso-yfti-lastrow:yes'>
+  <td width="57%" style='width:57.4%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal><span style='font-size:11.0pt;font-family:"Courier New"'>IRP_MN_SET_POWER
+  (<span class=SpellE>SystemPowerState</span>)</span><span style='font-size:
+  11.0pt'><o:p></o:p></span></p>
+  </td>
+  <td width="41%" style='width:41.46%;padding:.75pt .75pt .75pt .75pt'>
+  <p class=MsoNormal><span class=SpellE><span style='font-size:11.0pt;
+  font-family:"Courier New"'>HandleSystemSetPower</span></span><span
+  style='font-size:11.0pt;font-family:"Courier New"'>()</span><span
+  style='font-size:11.0pt'><o:p></o:p></span></p>
+  </td>
+ </tr>
+</table>
+
+<h3><span style='font-family:Verdana'><br>
+REMOTE WAKEUP CAPABILITY<o:p></o:p></span></h3>
+
+<p><span style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Verdana'>The
+selective suspend driver supports the remote wakeup capability. The routines
+which implement this capability are<span class=GramE>:</span><br>
+</span><span class=SpellE><span style='font-family:"Courier New"'>IssueWaitWake</span></span><span
+style='font-family:"Courier New"'>()<br>
+<span class=SpellE>WaitWakeCallback</span>()<br>
+<span class=SpellE>WaitWakeCompletionRoutine</span>()</span></p>
+
+<p><span class=NormalWebChar><span style='font-size:10.0pt;mso-bidi-font-size:
+12.0pt;font-family:Verdana'>After the device is configured and is in a D0 power
+state, the selective suspend driver requests <span class=GramE>an</span></span></span>
+<span style='font-size:11.0pt;font-family:"Courier New"'>IRP_MN_WAIT_WAKE</span>
+<span class=NormalWebChar><span style='font-size:10.0pt;mso-bidi-font-size:
+12.0pt;font-family:Verdana'>request for the device -</span></span> <span
+class=SpellE><span style='font-size:11.0pt;font-family:"Courier New"'>IssueWaitWake</span></span><span
+style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Verdana'>. A
+pointer to the callback function in the driver,</span> <span class=SpellE><span
+style='font-size:11.0pt;font-family:"Courier New"'>WaitWakeCallback</span></span><span
+style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Verdana'>, is
+passed this request. The wait-wake request is sent to the PDO for the driver. When
+this request is received by the selective suspend <span class=GramE>driver ,</span>
+the dispatch routine sets a completion routine, </span><span class=SpellE><span
+style='font-size:11.0pt;font-family:"Courier New"'>WaitWakeCompletionRoutine</span></span><span
+style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Verdana'>, for
+this request. The request is then passed down the stack. The request remains
+pending with the hub driver until completed by the hub driver. On resume
+signaling, the wait wake request is completed and the callback function is
+invoked. The</span> <span class=SpellE><span style='font-size:11.0pt;
+font-family:"Courier New"'>WaitWakeCallback</span></span><span
+style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Verdana'> routine
+<span class=GramE>powers up the device and issues</span> a new wait-wake
+request for the device. The wait wake request should not be sent when the
+device is in a low power state. <o:p></o:p></span></p>
+
+<h3><span style='font-family:Verdana;text-transform:uppercase'><o:p>&nbsp;</o:p></span></h3>
+
+<h3><span style='font-family:Verdana;text-transform:uppercase'>Selective
+Suspend feature<o:p></o:p></span></h3>
+
+<p><span style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Verdana'>The
+USB core stack supports a new feature called the selective suspend feature.
+This feature allows the driver to power down the device while the system
+remains in the S0 power state. <o:p></o:p></span></p>
+
+<p><span style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Verdana'>The
+device driver &quot;observes&quot; that the device is idle and sends an idle
+request down the stack<span class=GramE>&nbsp; -</span> </span><span
+class=SpellE><span style='font-size:11.0pt;font-family:"Courier New"'>SubmitIdleRequestIrp</span></span><span
+style='font-size:10.0pt;mso-bidi-font-size:11.0pt;font-family:Verdana;
+mso-bidi-font-family:"Courier New"'>. </span><span style='font-size:10.0pt;
+mso-bidi-font-size:12.0pt;font-family:Verdana'>The exact notion of the device
+in idle state is described in the selective suspend model section. A pointer to
+the callback function in the driver, </span><span class=SpellE><span
+style='font-size:11.0pt;font-family:"Courier New"'>IdleNotificationCallback</span></span><span
+style='font-size:10.0pt;mso-bidi-font-size:11.0pt;font-family:Verdana;
+mso-bidi-font-family:"Courier New"'>,</span><span style='font-size:10.0pt;
+mso-bidi-font-size:12.0pt;font-family:Verdana'> is passed along with it. The
+driver also sets a completion routine,</span> <span class=SpellE><span
+style='font-size:11.0pt;font-family:"Courier New"'>IdleNotificationRequestComplete</span></span><span
+style='font-size:10.0pt;mso-bidi-font-size:11.0pt;font-family:Verdana;
+mso-bidi-font-family:"Courier New"'> </span><span style='font-size:10.0pt;
+mso-bidi-font-size:12.0pt;font-family:Verdana'>for this request. The hub driver
+<span class=SpellE>pends</span> this idle request for the device. When the hub
+&quot;deems it appropriate&quot; to selectively suspend the device, the
+callback function </span><span class=SpellE><span style='font-size:11.0pt;
+font-family:"Courier New"'>IdleNotificationCallback</span></span><span
+style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Verdana'> is
+invoked. This function powers down the device.&nbsp; The device is powered down
+to the</span> <span class=SpellE><span style='font-size:11.0pt;font-family:
+"Courier New"'>DeviceWake</span></span><span style='font-size:10.0pt;
+mso-bidi-font-size:12.0pt;font-family:Verdana'> state (initialized while
+handling the</span> <span style='font-size:11.0pt;font-family:"Courier New"'>IRP_MN_QUERY_CAPABILITIES</span><span
+style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Verdana'>). If
+the</span> <span class=SpellE><span style='font-size:11.0pt;font-family:"Courier New"'>DeviceWake</span></span><span
+style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Verdana'> state
+is not known, then the device should power down to the D2 power state. <o:p></o:p></span></p>
+
+<h3><span style='font-family:Verdana;text-transform:uppercase'><o:p>&nbsp;</o:p></span></h3>
+
+<h3><span style='font-family:Verdana;text-transform:uppercase'>COMMENTS<o:p></o:p></span></h3>
+
+<p style='margin-left:.25in;text-indent:-.25in;mso-list:l1 level1 lfo12;
+tab-stops:list .25in'><![if !supportLists]><span style='font-size:10.0pt;
+mso-bidi-font-size:12.0pt;font-family:Symbol;mso-fareast-font-family:Symbol;
+mso-bidi-font-family:Symbol'><span style='mso-list:Ignore'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=NormalWebChar><span
+style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Verdana'>Since
+the hub invokes the callback function, </span></span><span class=SpellE><span
+style='font-size:11.0pt;font-family:"Courier New"'>IdleNotificationCallback</span></span><span
+style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Verdana'>, only
+when it deems appropriate, the function driver should never assume that the
+device will power down as soon as the idle request is sent down the stack. <o:p></o:p></span></p>
+
+<p style='margin-left:.25in;text-indent:-.25in;mso-list:l1 level1 lfo12;
+tab-stops:list .25in'><![if !supportLists]><span style='font-size:10.0pt;
+mso-bidi-font-size:12.0pt;font-family:Symbol;mso-fareast-font-family:Symbol;
+mso-bidi-font-family:Symbol'><span style='mso-list:Ignore'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style='font-size:10.0pt;mso-bidi-font-size:
+12.0pt;font-family:Verdana'>Since it is not appropriate to send requests down
+the stack when the device is in low power state, the function driver should
+send an idle request only when the device is in D0 power state. <o:p></o:p></span></p>
+
+<p style='margin-left:.25in;text-indent:-.25in;mso-list:l1 level1 lfo12;
+tab-stops:list .25in'><![if !supportLists]><span style='font-size:10.0pt;
+mso-bidi-font-size:12.0pt;font-family:Symbol;mso-fareast-font-family:Symbol;
+mso-bidi-font-family:Symbol'><span style='mso-list:Ignore'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style='font-size:10.0pt;mso-bidi-font-size:
+12.0pt;font-family:Verdana'>As soon as the device is &quot;not idle&quot;, the
+driver should cancel the idle request -</span> <span class=SpellE><span
+style='font-size:11.0pt;font-family:"Courier New"'>CancelSelectSuspend</span></span><span
+style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Verdana'>. <o:p></o:p></span></p>
+
+<p style='margin-left:.25in;text-indent:-.25in;mso-list:l1 level1 lfo12;
+tab-stops:list .25in'><![if !supportLists]><span style='font-size:10.0pt;
+mso-bidi-font-size:12.0pt;font-family:Symbol;mso-fareast-font-family:Symbol;
+mso-bidi-font-family:Symbol'><span style='mso-list:Ignore'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style='font-size:10.0pt;mso-bidi-font-size:
+12.0pt;font-family:Verdana'>No assumptions should be made on the completion of
+idle request. If the driver needs to pass requests (reads/writes/<span
+class=SpellE>ioctls</span>) down the stack, then the driver should wait for the
+idle request to complete before proceeding to submit one. <o:p></o:p></span></p>
+
+<p style='margin-left:.25in;text-indent:-.25in;mso-list:l1 level1 lfo12;
+tab-stops:list .25in'><![if !supportLists]><span style='font-size:10.0pt;
+mso-bidi-font-size:12.0pt;font-family:Symbol;mso-fareast-font-family:Symbol;
+mso-bidi-font-family:Symbol'><span style='mso-list:Ignore'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style='font-size:10.0pt;mso-bidi-font-size:
+12.0pt;font-family:Verdana'>If the idle request completes in error, the</span> <span
+class=SpellE><span style='font-size:11.0pt;font-family:"Courier New"'>IdleNotificationRequestComplete</span></span><span
+style='font-size:10.0pt;mso-bidi-font-size:11.0pt;font-family:Verdana;
+mso-bidi-font-family:"Courier New"'> </span><span style='font-size:10.0pt;
+mso-bidi-font-size:12.0pt;font-family:Verdana'>powers up the device. <o:p></o:p></span></p>
+
+<p style='margin-left:.25in;text-indent:-.25in;mso-list:l1 level1 lfo12;
+tab-stops:list .25in'><![if !supportLists]><span style='font-size:10.0pt;
+mso-bidi-font-size:12.0pt;font-family:Symbol;mso-fareast-font-family:Symbol;
+mso-bidi-font-family:Symbol'><span style='mso-list:Ignore'>·<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style='font-size:10.0pt;mso-bidi-font-size:
+12.0pt;font-family:Verdana'>Only one idle request can be pending for the device
+at any time. <o:p></o:p></span></p>
+
+<h3><span style='font-family:Verdana;text-transform:uppercase'><o:p>&nbsp;</o:p></span></h3>
+
+<h3><span style='font-family:Verdana;text-transform:uppercase'>Selective
+Suspend model<o:p></o:p></span></h3>
+
+<p><span style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Verdana'>The
+selective suspend driver interprets the device as idle when<br>
+a) there are no open handles to the device and<br>
+b) no PnP requests are being processed. <o:p></o:p></span></p>
+
+<p><span style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Verdana'>This
+is a mere suggestion. A function driver may have a different interpretation of
+the idle state.<br>
+As an example, an open handle need not violate the idle state of the device if
+this does not cause any request to be sent down the stack. <o:p></o:p></span></p>
+
+<p><span style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Verdana'>The
+selective suspend driver initializes a timer to fire at fixed intervals. The
+DPC associated with the timer checks the idle state of the device and queues a
+work item to submit an idle request for the device. The timer is cancelled when
+the idle request is passed down the stack. The timer is re-initialized when the
+idle request completes. <o:p></o:p></span></p>
+
+<p><span style='font-size:10.0pt;mso-bidi-font-size:12.0pt;font-family:Verdana'>Please
+refer to the inline comments in the selSusp sample for implementation of the
+above suggestions.<o:p></o:p></span></p>
+
+<h4><span style='font-family:Verdana'><o:p>&nbsp;</o:p></span></h4>
+
+<h3><span style='font-family:Verdana'>FEEDBACK<o:p></o:p></span></h3>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>We welcome your comments,
+problem reports and wish-list requests. Please submit them by pointing your
+Internet browser to <a href="http://www.microsoft.com/ddk">http://www.microsoft.com/ddk</a>.
+</span><span style='font-family:Courier'><o:p></o:p></span></p>
+
+<p align=center style='text-align:center'><span style='font-size:10.0pt;
+font-family:Verdana'><a
+href="../../../../../INF/Readmes%20-%20Post%20WinHEC%202000/ChkInf.htm#top">Top
+of page</a> <o:p></o:p></span></p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width=624
+ style='width:6.5in;mso-cellspacing:0in;mso-padding-alt:0in 5.4pt 0in 5.4pt'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes;
+  height:1.5pt'>
+  <td style='background:aqua;padding:.75pt .75pt .75pt .75pt;height:1.5pt'>
+  <p class=MsoNormal><span style='font-size:2.0pt;mso-bidi-font-size:12.0pt'><o:p>&nbsp;</o:p></span></p>
+  </td>
+ </tr>
+</table>
+
+<p><span style='font-size:7.5pt;font-family:"MS Sans Serif"'>© 2004</span><span
+style='font-size:10.0pt;font-family:Verdana'> </span><span style='font-size:
+7.5pt;font-family:"MS Sans Serif"'>Microsoft Corporation </span><span
+style='font-size:10.0pt;font-family:Verdana'><o:p></o:p></span></p>
+
+</div>
+
+</body>
+
+</html>
+

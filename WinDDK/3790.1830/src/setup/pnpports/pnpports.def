@@ -1,0 +1,7 @@
+LIBRARY PNPPORTS.DLL
+
+EXPORTS
+        PortsClassInstaller
+        ParallelPortPropPageProvider
+        SerialPortPropPageProvider
+

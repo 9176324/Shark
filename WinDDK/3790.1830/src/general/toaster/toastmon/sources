@@ -1,0 +1,21 @@
+TARGETNAME=toastmon
+TARGETPATH=obj
+TARGETTYPE=DRIVER
+
+!IFNDEF BUILD_ALT_DIR
+SAMPLE_COMMON_DIR=..\disk
+!ELSE
+SAMPLE_COMMON_DIR=..\disk\$(BUILD_ALT_DIR)
+!ENDIF
+
+TARGETPATH=$(SAMPLE_COMMON_DIR)
+
+
+INCLUDES = ..\inc
+
+MSC_OPTIMIZATION=/Odi
+
+SOURCES= toastmon.rc \
+         toastmon.c  \
+         wmi.c
+

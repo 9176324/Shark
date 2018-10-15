@@ -1,0 +1,4 @@
+DIRS= \
+     aha154x \
+     i2o \
+     initio

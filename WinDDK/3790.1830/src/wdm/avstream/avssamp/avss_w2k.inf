@@ -1,0 +1,107 @@
+; Copyright (c) Microsoft Corporation.  All rights reserved.
+;
+; avss_w2k.INF -- This file contains installation information for the filter-based
+;                 AVStream sample driver avssamp.sys
+;           
+; Note:
+;    
+;     This INF expects the following hierarchy in the installation folder:
+;
+;     \
+;         avss_w2k.inf
+;         objfre_x86\
+;             avssamp.sys
+;
+[Version]
+Signature="$CHICAGO$"
+Class=MEDIA
+ClassGUID={4d36e96c-e325-11ce-bfc1-08002be10318}
+Provider=%Msft%
+CatalogFile=avssamp.cat
+DriverVer=09/30/2004,1.0.0.0
+
+[SourceDisksNames]
+1000 = %cdname%,,,
+
+[SourceDisksFiles]
+avssamp.sys = 1000,\objfre_x86
+
+[ControlFlags]
+ExcludeFromSelect=*
+
+[DestinationDirs]
+avssamp.CopyFiles=10,system32\drivers
+
+[Manufacturer]
+%Msft%=Microsoft
+
+;-------------------------------------------------------------------------------
+
+[DefaultInstall]
+needs=avssamp.Installation
+
+[avssamp.Installation]
+AddReg=avssamp.RunOnce.AddReg
+
+[avssamp.RunOnce.AddReg]
+HKLM,%RunOnce%,"avssamp.Reader.Capture",,"rundll32.exe streamci,StreamingDeviceSetup %avssamp.DeviceId%,%KSSTRING_Filter%,%KSCATEGORY_CAPTURE%,%01%\avssamp.inf,avssamp.Reader.Install"
+
+;-------------------------------------------------------------------------------
+
+[Microsoft]
+%avssamp.DeviceDesc%=avssamp,SW\{20698827-7099-4c4e-861A-4879D639A35F}
+
+[avssamp.NT]
+include=ks.inf,kscaptur.inf
+needs=KS.Registration,KSCAPTUR.Registration.NT
+CopyFiles=avssamp.CopyFiles
+
+[avssamp.CopyFiles]
+avssamp.sys
+
+[avssamp.Reader.Install]
+AddReg=avssamp.Reader.AddReg
+
+[avssamp.Reader.AddReg]
+HKR,,CLSID,,%Proxy.CLSID%
+HKR,,FriendlyName,,%avssamp.Reader.FriendlyName%
+HKLM,System\CurrentControlSet\Control\MediaCategories\%AudioCapturePinGUID%
+HKLM,System\CurrentControlSet\Control\MediaCategories\%AudioCapturePinGUID%,Name,,%AudioCapturePinName%
+
+[avssamp.NT.Services]
+AddService=avssamp, 0x00000002, avssamp.ServiceInstall
+
+[avssamp.ServiceInstall]
+DisplayName=%avssamp.DeviceDesc%
+ServiceType=%SERVICE_KERNEL_DRIVER%
+StartType=%SERVICE_DEMAND_START%
+ErrorControl=%SERVICE_ERROR_NORMAL%
+ServiceBinary=%12%\avssamp.sys
+LoadOrderGroup=ExtendedBase
+
+
+[Strings]
+; non-localizeable
+RunOnce="SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce"
+Proxy.CLSID="{17CCA71B-ECD7-11D0-B908-00A0C9223196}"
+avssamp.DeviceId="{20698827-7099-4c4e-861A-4879D639A35F}"
+KSCATEGORY_CAPTURE="{65E8773D-8F56-11D0-A3B9-00A0C9223196}"
+KSSTRING_Filter="{9B365890-165F-11D0-A195-0020AFD156E4}"
+AudioCapturePinGUID="{BA1184B9-1FE6-488a-AE78-6E997B02CAEA}"
+AudioCapturePinName="Audio Capture"
+
+SERVICE_KERNEL_DRIVER=1
+SERVICE_DEMAND_START=3
+SERVICE_ERROR_NORMAL=1
+REG_EXPAND_SZ=0x00020000
+REG_DWORD=0x00010001
+
+;localizeable
+Msft="Microsoft"
+avssamp.DeviceDesc="Microsoft AVStream Filter-Centric Sample Driver"
+avssamp.Reader.FriendlyName="avssamp Source"
+
+cdname="Disk 1"
+
+
+

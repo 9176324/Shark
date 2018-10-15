@@ -1,0 +1,703 @@
+<?xml version ="1.0"?>
+<Schema name = "ModelSchema.xdr"
+     xmlns = "urn:schemas-microsoft-com:xml-data"
+     xmlns:dt = "urn:schemas-microsoft-com:datatypes">
+
+    <description>
+    This schema describes function models used for static code analysis using PREfast.
+    </description>
+
+    <ElementType name="Models" content="eltOnly" order="one">
+        <element type="Function"/>
+    </ElementType>
+    
+    <ElementType name="Function" content="eltOnly">
+        <description>
+        Describes the model of a single function.
+        </description>
+        
+        <AttributeType name="name" dt:type="string" required="yes">
+            <description>
+            The undecorated name of the function.
+            </description>
+        </AttributeType>
+
+        <attribute type="name"/>
+        <element type="FunctionProperties" minOccurs="0" maxOccurs="1"/>
+        <element type="External"           minOccurs="0" maxOccurs="*"/>
+    </ElementType>
+    
+    <ElementType name="FunctionProperties" content="eltOnly">
+        <description>
+        The properties of the function.
+        </description>
+
+        <element type="Deprecated" minOccurs="0" maxOccurs="1"/>
+        <element type="Terminates" minOccurs="0" maxOccurs="1"/>
+        <element type="PreferredFunction" minOccurs="0" maxOccurs="*"/>
+        <element type="ReviewGroup" minOccurs="0" maxOccurs="*"/>
+        <element type="PreConditions"  minOccurs="0" maxOccurs="1"/>
+        <element type="PostConditions" minOccurs="0" maxOccurs="1"/>		
+    </ElementType>
+    
+    <ElementType name="Deprecated" content="empty">
+        <description>
+        Indicates if the function is obsolete; usually in favor of a more robust function.
+        </description>
+
+        <AttributeType name="value" dt:type="boolean" required="no" default="0">
+            <description>
+            If 1, the function is obsolete.
+            </description>
+        </AttributeType>
+
+        <attribute type="value"/>
+    </ElementType>
+    
+    <ElementType name="Terminates" content="empty">
+        <description>
+        Indicates whether or not the function terminates processing.
+        </description>
+
+        <AttributeType name="value" dt:type="boolean" required="no" default="0">
+            <description>
+            If 1, the function terminates processing.
+            </description>
+        </AttributeType>
+
+        <attribute type="value"/>
+    </ElementType>
+
+    <ElementType name="Reason" content="mixed" model="open">
+        <description>
+        The reason this function is preferred. This is free-form text.
+        <!-- and may contain XHTML markup.
+             Support exists in the code for XHTML, but I can't understand namespaces
+             quickly enough to get the schema to accept all HTML tags. -->
+        </description>
+    </ElementType>
+
+    <ElementType name="PreferredFunction" content="eltOnly">
+        <description>
+        Indicates a function that is to be used in preference of this one.
+        The open content of this element is the reason that the function is preferred to the
+        other. This text is free form and may contain XHTML markup.
+        </description>
+
+        <AttributeType name="name" dt:type="string" required="yes">
+            <description>
+            The undecorated name of a function that is to be used in preference of this one.
+            </description>
+        </AttributeType>
+
+        <attribute type="name"/>
+        <element type="Reason" minOccurs="1" maxOccurs="1" />
+    </ElementType>
+
+    <ElementType name="ReviewGroup" content="eltOnly">
+        <description>
+        Indicates that this function is a member of a logical code review group.
+        The open content of this element is the reason that calls to this function should be reviewed.
+        This text is free form and may contain XHTML markup.
+        </description>
+
+        <AttributeType name="value" dt:type="int" required="yes">
+            <description>
+            A zero-based, numerical review group number.
+            </description>
+        </AttributeType>
+
+        <attribute type="value"/>
+        <element type="Reason" minOccurs="1" maxOccurs="1" />
+    </ElementType>
+    
+    <ElementType name="External" content="eltOnly">
+        <description>
+        Defines an entity used by the function but is external to the function,
+        such as return value, parameters, and globals.
+        </description>
+
+        <element type="ExternalID"     minOccurs="1" maxOccurs="1"/>
+        <element type="PreConditions"  minOccurs="0" maxOccurs="1"/>
+        <element type="PostConditions" minOccurs="0" maxOccurs="1"/>
+    </ElementType>
+    
+    <ElementType name="ExternalID" content="empty">
+        <description>
+        Defines an identifier for the external.
+        </description>
+
+        <AttributeType name="deref" dt:type="enumeration" dt:values="0 1" required="no" default="0">
+            <description>
+            Defines the level of indirection for the external.
+            Example - for a parameter named 'p':
+                if 0, then this external refers to p.
+                if 1, then this external refers to *p.
+                if 2, then this external refers to **p (although not currently supported).
+            </description>
+        </AttributeType>
+        
+        <AttributeType name="type" dt:type="enumeration" dt:values="retval param" required="yes">
+            <description>
+            Defines the type of the external. The following types are currently supported:
+                "retval" - This external is the function return value.
+                "param" - This external is a parameter to the function.
+                "global" - This external is a global variable (not currently supported).
+                "lasterr" - This external is the value of the Win32 GetLastError API (not currently supported).
+            </description>
+        </AttributeType>
+        
+        <AttributeType name="index" dt:type="int" required="no">
+            <description>
+            A zero-based, numerical index into the function's parameter list.
+            This attribute should only be specified when type="param", otherwise it is ignored.
+            </description>
+        </AttributeType>
+        
+        <attribute type = "deref"/>
+        <attribute type = "type"/>
+        <attribute type = "index"/>
+    </ElementType>
+    
+    <ElementType name="PreConditions" content="eltOnly">
+        <description>
+        Defines the input conditions of the external. When this element does not exist, it
+        indicates that the external has no input conditions, as is true for a return value.
+        </description>
+
+        <element type="IsNullOk"               minOccurs="0" maxOccurs="1"/>
+        <element type="IsMinSize"              minOccurs="0" maxOccurs="1"/>
+        <element type="ShouldBeZeroTerminated" minOccurs="0" maxOccurs="1"/>
+        <element type="MustBeTrusted"          minOccurs="0" maxOccurs="1"/>
+        <element type="ShouldBeInitialized"    minOccurs="0" maxOccurs="1"/>
+        <element type="IsFormatString"         minOccurs="0" maxOccurs="1"/>
+        <element type="UsedForConcatenation"   minOccurs="0" maxOccurs="1"/>
+        <element type="IsWritableString"       minOccurs="0" maxOccurs="1"/>        
+        <element type="AllowMemberCallSyntax"  minOccurs="0" maxOccurs="1"/> 
+        <element type="TypeName"               minOccurs="0" maxOccurs="1"/> 
+    </ElementType>
+
+    <ElementType name="TypeName" content="empty">
+         
+        <description>
+        Indicates the type of the external.
+        </description>
+
+        <AttributeType name="value" dt:type="enumeration" dt:values="never always sometimes"
+            required="no" default="never">
+            <description>
+            Indicates when the external is of the named type.
+            The following values are supported:
+                "never" - The attribute is invalid. 
+                "always" - The external is always of the named type. 
+                "sometimes" - The external is sometimes of the named type. 
+            </description>
+        </AttributeType>
+        
+        <AttributeType name="stringvalue" dt:type="string" required="yes">
+            <description>
+            The name of the type of the external.
+            </description>
+        </AttributeType>
+ 
+        <attribute type="value"/>
+        <attribute type="stringvalue"/>
+	 
+    </ElementType>
+ 
+    <ElementType name="AllowMemberCallSyntax" content="empty">
+        <description>
+        Indicates whether or not the static member function should be called with member call syntax.
+        </description>
+
+        <AttributeType name="value" dt:type="enumeration" dt:values="never always sometimes"
+             required="no" default="never">
+            <description>
+            Indicates when the function can be called with . or -> syntax.
+            The following values are supported:
+                "never" - Member call syntax never allowed
+                "always" - Member call syntax always allowed
+                "sometimes" - Member call syntax allowed sometimes
+            </description>
+        </AttributeType>
+
+        <attribute type="value"/>
+    </ElementType>    
+    
+    <ElementType name="IsNullOk" content="empty">
+        <description>
+        Indicates whether or not the pointer external is allowed to be a NULL upon input.
+        </description>
+        
+        <AttributeType name="value" dt:type="enumeration" dt:values="never always sometimes"
+             required="no" default="always">
+            <description>
+            Indicates when the external is allowed to be NULL upon input.
+            The following values are supported:
+                "never" - The external is never allowed to be NULL.
+                "always" - The external is always allowed to be NULL.
+                "sometimes" - The external is sometimes allowed to be NULL.
+            </description>
+        </AttributeType>
+        
+        <attribute type="value"/>
+    </ElementType>
+
+    <ElementType name="IsMinSize" content="eltOnly" model="closed">
+        <description>
+        Indicates whether or not the external must be a minimum size.
+        </description>
+
+        <AttributeType name="value" dt:type="enumeration" dt:values="never always sometimes"
+             required="no" default="never">
+            <description>
+            Indicates when the external has a minimum size condition.
+            The following values are supported:
+                "never" - The external never has a minimum size condition.
+                "always" - The external always has a minimum size condition.
+                "sometimes" - The external sometimes has a minimum size condition.
+            </description>
+        </AttributeType>
+
+        <attribute type="value"/>
+        <group order="one" minOccurs="1" maxOccurs="1">
+            <group order="one" minOccurs="1" maxOccurs="1">
+                <element type="ValueOfExternal"/>
+                <element type="LengthOfExternal"/>
+                <element type="Constant"/>
+                <element type="Unlimited"/>
+            </group>
+            <group>
+                <element type="None" minOccurs="0" maxOccurs="1"/>
+            </group>
+        </group>
+    </ElementType>
+    
+    <ElementType name="ValueOfExternal" content="eltOnly" order="one">
+        <description>
+        Indicates that the minimum size of the external is derived from the value of another external.
+        </description>
+
+        <element type="Multiplier" minOccurs="0" maxOccurs="1"/>
+        <element type="ExternalID" minOccurs="1" maxOccurs="1"/>
+    </ElementType>
+    
+    <ElementType name="Multiplier" content="textOnly" dt:type="int" model="closed">
+        <description>
+        A constant value multiplied by another value for use in minimum size calculations.
+        </description>
+
+        <AttributeType name="value" dt:type="int" required="yes">
+            <description>
+            A constant value. Defaults to 1.
+            </description>
+        </AttributeType>
+
+        <attribute type = "value"/>
+    </ElementType>
+
+    <ElementType name="LengthOfExternal" content="eltOnly" order="one">
+        <description>
+        Indicates that the minimum size of the external is derived from the string length of another external.
+        </description>
+
+        <element type="Multiplier" minOccurs="0" maxOccurs="1"/>
+        <element type="ExternalID" minOccurs="1" maxOccurs="1"/>
+    </ElementType>
+    
+    <ElementType name="Constant" content="empty">
+        <description>
+        Indicates that the minimum size of the external is a constant value.
+        </description>
+
+        <AttributeType name="value" dt:type="int" required="yes">
+            <description>
+            A constant value.
+            </description>
+        </AttributeType>
+
+        <attribute type = "value"/>
+    </ElementType>
+    
+    <ElementType name="Unlimited" content="empty">
+        <description>
+        Indicates that the external must be of unlimited minimum size. This typically means
+        that the function is evil.
+        </description>
+    </ElementType>
+    
+    <ElementType name="None" content="empty">
+        <description>
+        Indicates that the external has no minimum size condition
+        </description>
+    </ElementType>
+    
+    <ElementType name="ShouldBeZeroTerminated" content="empty">
+        <description>
+        Indicates whether or not the external is a buffer that should be zero-terminated.
+        </description>
+
+        <AttributeType name="value" dt:type="enumeration" dt:values="never always sometimes"
+             required="no" default="never">
+            <description>
+            Indicates when the external should be a zero-terminated buffer.
+            The following values are supported:
+                "never" - The external should never be a zero-terminated buffer.
+                "always" - The external should always be a zero-terminated buffer.
+                "sometimes" - The external should sometimes be a zero-terminated buffer.
+            </description>
+        </AttributeType>
+
+        <attribute type = "value"/>
+    </ElementType>
+    
+    <ElementType name="MustBeTrusted" content="empty">
+        <description>
+        Indicates whether or not the external must be trusted (untainted).
+        </description>
+
+        <AttributeType name="value" dt:type="enumeration" dt:values="never always sometimes"
+             required="no" default="never">
+            <description>
+            Indicates when the external must be trusted (untainted).
+            The following values are supported:
+                "never" - The external must never be trusted (untainted).
+                "always" - The external must always be trusted (untainted).
+                "sometimes" - The external must sometimes be trusted (untainted).
+            </description>
+        </AttributeType>
+
+        <attribute type = "value"/>
+    </ElementType>
+    
+    <ElementType name="ShouldBeInitialized" content="empty">
+        <description>
+        Indicates whether or not the external should be initialized.
+        </description>
+
+        <AttributeType name="value" dt:type="enumeration" dt:values="never always sometimes"
+             required="no" default="always">
+            <description>
+            Indicates when the external should be initialized.
+            The following values are supported:
+                "never" - The external should never be initialized.
+                "always" - The external should always be initialized.
+                "sometimes" - The external should sometimes be initialized.
+            </description>
+        </AttributeType>
+
+        <attribute type = "value"/>
+    </ElementType>
+    
+    <ElementType name="IsFormatString" content="empty">
+        <description>
+        Indicates whether or not the external represents a string used for formatting.
+        </description>
+
+        <AttributeType name="value" dt:type="enumeration" dt:values="never always sometimes"
+             required="no" default="never">
+            <description>
+            Indicate when the external represents a string used for formatting.
+            The following values are supported:
+                "never" - The external never represents a string used for formatting.
+                "always" - The external always represents a string used for formatting.
+                "sometimes" - The external sometimes represents a string used for formatting.
+            </description>
+        </AttributeType>
+        
+        <AttributeType name="style" dt:type="enumeration" dt:values="printf scanf FormatMessage strftime"
+             required="no" default="printf">
+            <description>
+            The style of the format string. Can be one of the following:
+                "printf" - As used by the printf-family of CRT functions.
+                "scanf" - As used by the scanf-family of CRT functions.
+                "FormatMessage" - As used by the FormatMessage Win32 function.
+                "strftime" -  As used by the strftime-family of CRT functions.
+            </description>
+        </AttributeType>
+
+        <attribute type="value"/>
+        <attribute type="style"/>
+    </ElementType>
+
+    <ElementType name="UsedForConcatenation" content="empty">
+        <description>
+        Indicates whether or not the external addresses a buffer that is going to be appended to.
+        </description>
+
+        <AttributeType name="value" dt:type="enumeration" dt:values="never always sometimes"
+             required="no" default="never">
+            <description>
+            Indicates when the external addresses a buffer that is going to be appended to.
+            The following values are supported:
+                "never" - The external never addresses a buffer that is going to be appended to.
+                "always" - The external always addresses a buffer that is going to be appended to.
+                "sometimes" - The external sometimes addresses a buffer that is going to be appended to.
+            </description>
+        </AttributeType>
+    
+        <attribute type="value"/>
+    </ElementType>
+
+    <ElementType name="IsWritableString" content="empty">
+        <description>
+        Indicates whether or not the external addresses a string buffer that is going to be written to.
+        </description>
+
+        <AttributeType name="value" dt:type="enumeration" dt:values="never always sometimes"
+             required="no" default="never">
+            <description>
+            Indicates when the external addresses a string buffer that is going to be written to.
+            The following values are supported:
+                "never" - The external never addresses a string buffer that is going to be written to.
+                "always" - The external always addresses a string buffer that is going to be written to.
+                "sometimes" - The external sometimes addresses a string buffer that is going to be written to.
+            </description>
+        </AttributeType>
+    
+        <attribute type="value"/>
+    </ElementType>
+
+    <ElementType name="PostConditions" content="eltOnly">
+        <description>
+        Defines the output conditions of the external. When this element does not exist, it
+        indicates that the external has no output conditions, as is true for an [in] parameter.
+        </description>
+
+        <element type = "IsInitialized"           minOccurs="0" maxOccurs="1" />
+        <element type = "IsSetToNull"             minOccurs="0" maxOccurs="1" />
+        <element type = "NeedsRelease"            minOccurs="0" maxOccurs="1" />
+        <element type = "IsReleased"              minOccurs="0" maxOccurs="1" />
+        <element type = "MustBeChecked"           minOccurs="0" maxOccurs="1" />
+        <element type = "IsTrusted"               minOccurs="0" maxOccurs="1" />
+        <element type = "IsValidPointer"          minOccurs="0" maxOccurs="1" />
+        <element type = "RequiresZeroTermination" minOccurs="0" maxOccurs="1" />
+        <element type = "CheckGetLastError"       minOccurs="0" maxOccurs="1" />
+        <element type = "ThrowsException"	      minOccurs="0" maxOccurs="1" />
+		<element type = "InvalidCheck"		      minOccurs="0" maxOccurs="1" />
+		 
+    </ElementType>
+
+	<ElementType name="InvalidCheck" content="empty">
+         
+        <description>
+        Indicates when the return value should not be checked against this invalid value.
+        </description>
+
+        <AttributeType name="value"
+             dt:type="enumeration" dt:values="never always sometimes"
+             required="no" default="never">
+            <description>
+            Indicates the value against which the return value should not be checked.
+            The following values are supported:
+                "never" - The attribute is invalid.  
+                "always" - The external is always checked against this invalid value. 
+                "sometimes" - The external is sometimes checked against this invalid value. 
+            </description>
+        </AttributeType>
+        
+        <AttributeType name="longvalue" dt:type="int" required="yes">
+            <description>
+            The incorrect value.
+            </description>
+        </AttributeType>
+ 
+        <attribute type="value"/>
+        <attribute type="longvalue"/>
+	 
+    </ElementType>
+    
+    <ElementType name="IsInitialized" content="empty">
+        <description>
+        Indicates whether or not the external is initialized by the function.
+        </description>
+
+        <AttributeType name="value"
+             dt:type="enumeration" dt:values="never always sometimes"
+             required="no" default="always">
+            <description>
+            Indicates when the external is initialized by the function.
+            The following values are supported:
+                "never" - The external is never initialized.
+                "always" - The external is always initialized.
+                "sometimes" - The external is sometimes initialized.
+            </description>
+        </AttributeType>
+
+        <attribute type = "value"/>
+    </ElementType>
+    
+    <ElementType name="IsSetToNull" content="empty">
+        <description>
+        Indicates whether or not the function sets the external to NULL.
+        </description>
+
+        <AttributeType name="value" dt:type="enumeration" dt:values="never always sometimes"
+             required="no" default="never">
+            <description>
+            Indicates when the external is set to null by the function.
+            The following values are supported:
+                "never" - The external is never set to null by the function.
+                "always" - The external is always set to null by the function.
+                "sometimes" - The external is sometimes set to null by the function.
+            </description>
+        </AttributeType>
+
+        <attribute type="value"/>
+    </ElementType>
+    
+    <ElementType name="NeedsRelease" content="empty">
+        <description>
+        Indicates whether or not the external needs to be released.
+        </description>
+
+        <AttributeType name="value" dt:type="enumeration" dt:values="never always sometimes"
+             required="no" default="never">
+            <description>
+            Indicates when the external needs to be released by the caller.
+            The following values are supported:
+                "never" - The external never needs to be released by the caller.
+                "always" - The external always needs to be released by the caller.
+                "sometimes" - The external sometimes needs to be released by the caller.
+            </description>
+        </AttributeType>
+
+        <attribute type="value"/>
+    </ElementType>
+    
+    <ElementType name="IsReleased" content="empty">
+        <description>
+        Indicates whether or not the external is released by the function.
+        </description>
+
+        <AttributeType name="value" dt:type="enumeration" dt:values="never always sometimes"
+             required="no" default="always">
+            <description>
+            Indicates when the external is released by the function.
+            The following values are supported:
+                "never" - The external is never released by the function.
+                "always" - The external is always released by the function.
+                "sometimes" - The external is sometimes released by the function.
+            The default for this is "always" since we don't currently track double free's.
+            </description>
+        </AttributeType>
+
+        <attribute type="value"/>
+    </ElementType>
+    
+    <ElementType name="MustBeChecked" content="empty">
+        <description>
+        Indicates whether or not the external needs to be verified by the caller.
+        </description>
+
+        <AttributeType name="value" dt:type="enumeration" dt:values="never always sometimes"
+             required="no" default="never">
+            <description>
+            Indicates when the external needs to be verified by the caller.
+            The following values are supported:
+                "never" - The external never needs to be verified by the caller.
+                "always" - The external always needs to be verified by the caller.
+                "sometimes" - The external sometimes needs to be verified by the caller.
+            </description>
+        </AttributeType>
+
+        <attribute type = "value"/>
+    </ElementType>
+    
+    <ElementType name="IsTrusted" content="empty">
+        <description>
+        Indicates whether or not the external is trusted (untainted) upon exiting the function.
+        </description>
+
+        <AttributeType name="value" dt:type="enumeration" dt:values="never always sometimes"
+             required="no" default="always">
+            <description>
+            Indicates when the external is trusted (untainted) upon exiting the function.
+            The following values are supported:
+                "never" - The external is never trusted (untainted) upon exiting the function.
+                "always" - The external is always trusted (untainted) upon exiting the function.
+                "sometimes" - The external is sometimes trusted (untainted) upon exiting the function.
+            </description>
+        </AttributeType>
+
+        <attribute type = "value"/>
+    </ElementType>
+    
+    <ElementType name="IsValidPointer" content="empty">
+        <description>
+        Indicates whether or not the external is a valid pointer upon exiting the function.
+        </description>
+
+        <AttributeType name="value" dt:type="enumeration" dt:values="never always sometimes"
+             required="no" default="always">
+            <description>
+            Indicates when the external is a valid pointer upon exiting the function.
+            The following values are supported:
+                "never" - The external is never a valid pointer upon exiting the function.
+                "always" - The external is always a valid pointer upon exiting the function.
+                "sometimes" - The external is sometimes a valid pointer upon exiting the function.
+            </description>
+        </AttributeType>
+
+        <attribute type = "value"/>
+    </ElementType>
+    
+    <ElementType name="RequiresZeroTermination" content="empty">
+        <description>
+        Indicates whether or not the caller needs to explicitly zero-terminate the
+        buffer addressed by the external.
+        </description>
+
+        <AttributeType name="value" dt:type="enumeration" dt:values="never always sometimes"
+             required="no" default="never">
+            <description>
+            Indicates when the caller needs to explicitly zero-terminate the buffer addressed by the external.
+            The following values are supported:
+                "never" - The caller never needs to explicitly zero-terminate the buffer addressed by the external.
+                "always" - The caller always needs to explicitly zero-terminate the buffer addressed by the external.
+                "sometimes" - The caller sometimes needs to explicitly zero-terminate the buffer addressed by the external.
+            </description>
+        </AttributeType>
+    
+        <attribute type="value"/>
+    </ElementType>
+
+    <ElementType name="CheckGetLastError" content="empty">
+        <description>
+        Indicates whether or not the caller should check GetLastError after calling
+        this function.
+        </description>
+
+        <AttributeType name="value" dt:type="enumeration" dt:values="never always sometimes"
+             required="no" default="never">
+            <description>
+                Indicates whether or not the caller should check GetLastError after calling
+                this function.
+                "never" - This function does not SetLastError, if the caller is checking, it is probably in error.
+                "always" - The caller must always check GetLastError after calling this function.
+                "sometimes" - This function does SetLastError, but it is not mandatory the caller checks it.
+            </description>
+        </AttributeType>
+    
+        <attribute type="value"/>
+    </ElementType>
+
+    <ElementType name="ThrowsException" content="empty">
+        <description>
+        Indicates whether or not the function throws an exception.
+        </description>
+
+        <AttributeType name="value" dt:type="enumeration" dt:values="never always sometimes"
+             required="no" default="never">
+            <description>
+                Indicates whether or not the function throws an exception.
+                "never" - This function does not throw any exceptions ever.
+                "always" - This function always throws an exception every time it is called.
+                "sometimes" - This function sometimes throws an exception.
+            </description>
+        </AttributeType>
+    
+        <attribute type="value"/>
+    </ElementType>
+
+</Schema>

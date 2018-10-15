@@ -1,0 +1,12 @@
+#include <windows.h>
+
+#include <ntverp.h>
+#define VER_FILEVERSION             0, 3, VER_PRODUCTBUILD, VER_PRODUCTBUILD_QFE
+#define VER_FILETYPE                VFT_DLL
+#define VER_FILESUBTYPE             VFT2_DRV_PRINTER
+#define VER_FILEDESCRIPTION_STR     "Windows Server 2003 Raster/Pen Plotter Driver"
+#define VER_INTERNALNAME_STR        "PLOTTER.DLL"
+#define VER_ORIGINALFILENAME_STR    "PLOTTER.DLL"
+
+#include "common.ver"
+

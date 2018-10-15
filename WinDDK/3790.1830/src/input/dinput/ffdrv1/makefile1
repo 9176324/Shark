@@ -1,0 +1,55 @@
+!include <win32.mak>
+
+!if "$(nodebug)" == "1"
+OBJ_DIR = Retail
+!else
+OBJ_DIR = Debug
+!endif
+
+COMMON_H = effdrv.h effpub.h
+OBJS = \
+        $(OBJ_DIR)\main.obj \
+        $(OBJ_DIR)\clsfact.obj \
+        $(OBJ_DIR)\effdrv.obj \
+        $(OBJ_DIR)\effhw.obj \
+
+proj=ffdrv1
+
+cflags=$(cflags) -DWIN32_LEAN_AND_MEAN
+
+all: mkdir $(OBJ_DIR)\$(proj).dll
+
+$(OBJ_DIR)\main.obj:       main.c $(COMMON_H)
+    $(cc) $(cdebug) $(cflags) $(cvarsdll) -Fo$(OBJ_DIR)\main.obj    main.c
+
+$(OBJ_DIR)\clsfact.obj: clsfact.c $(COMMON_H)
+    $(cc) $(cdebug) $(cflags) $(cvarsdll) -Fo$(OBJ_DIR)\clsfact.obj clsfact.c
+
+$(OBJ_DIR)\effdrv.obj:   effdrv.c $(COMMON_H)
+    $(cc) $(cdebug) $(cflags) $(cvarsdll) -Fo$(OBJ_DIR)\effdrv.obj  effdrv.c
+
+$(OBJ_DIR)\effhw.obj:     effhw.c $(COMMON_H)
+    $(cc) $(cdebug) $(cflags) $(cvarsdll) -Fo$(OBJ_DIR)\effhw.obj   effhw.c
+
+$(OBJ_DIR)\$(proj).res: $(proj).rc
+   rc -r -fo $(OBJ_DIR)\$(proj).res $(proj).rc
+
+$(OBJ_DIR)\$(proj).dll: $(OBJS) $(OBJ_DIR)\$(proj).res
+    $(link) $(linkdebug) \
+           -out:$(OBJ_DIR)\$(proj).dll \
+           $(dllflags) \
+           $(OBJS) \
+           $(OBJ_DIR)\$(proj).res \
+           $(dllflags) $(olelibsdll) \
+           -Entry:DllEntryPoint \
+           $(guilibs) dinput.lib dxguid.lib
+
+mkdir:
+    if not exist $(OBJ_DIR)\NUL md $(OBJ_DIR)
+    
+# Rules for cleaning out those old files
+clean:
+    -echo y | del Retail
+    -echo y | del Debug
+    -rd Retail
+    -rd Debug

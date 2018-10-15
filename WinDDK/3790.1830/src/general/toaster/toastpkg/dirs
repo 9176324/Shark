@@ -1,0 +1,4 @@
+DIRS= \
+     toastapp \
+     toastco \
+     toastva

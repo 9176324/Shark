@@ -1,0 +1,152 @@
+[Version]
+Signature="$Windows NT$"
+Class=Mouse
+ClassGUID={4D36E96F-E325-11CE-BFC1-08002BE10318}
+Provider=%Provider%
+DriverVer=12/10/2004,2.0.1403.0
+CatalogFile=Firefly.cat
+
+[DestinationDirs]
+DefaultDestDir = 12 ; DIRID_DRIVERS
+
+[ControlFlags]
+; We don't want our device to be installable via the non-PnP hardware dialogs
+ExcludeFromSelect = *
+
+; Manufacturer Section
+; ---------------------------------------------------------
+[Manufacturer]
+%ShinyThings%=ShinyThingsMfg,NTx86,NTia64,NTamd64
+
+; Devices Section for Win2K
+; ---------------------------------------------------------
+[ShinyThingsMfg]
+%HID\Vid_045E&Pid_001E.DeviceDesc%=Firefly_Inst,, HID\Vid_045E&Pid_001E
+%HID\Vid_045E&Pid_0029.DeviceDesc%=Firefly_Inst,, HID\Vid_045E&Pid_0029
+%HID\Vid_045E&Pid_0039.DeviceDesc%=Firefly_Inst,, HID\Vid_045E&Pid_0039
+%HID\Vid_045E&Pid_0040.DeviceDesc%=Firefly_Inst,, HID\Vid_045E&Pid_0040
+%HID\Vid_045E&Pid_0047.DeviceDesc%=Firefly_Inst,, HID\Vid_045E&Pid_0047
+
+; For XP and later
+[ShinyThingsMfg.NTx86]
+%HID\Vid_045E&Pid_001E.DeviceDesc%=Firefly_Inst,, HID\Vid_045E&Pid_001E
+%HID\Vid_045E&Pid_0029.DeviceDesc%=Firefly_Inst,, HID\Vid_045E&Pid_0029
+%HID\Vid_045E&Pid_0039.DeviceDesc%=Firefly_Inst,, HID\Vid_045E&Pid_0039
+%HID\Vid_045E&Pid_0040.DeviceDesc%=Firefly_Inst,, HID\Vid_045E&Pid_0040
+%HID\Vid_045E&Pid_0047.DeviceDesc%=Firefly_Inst,, HID\Vid_045E&Pid_0047
+
+[ShinyThingsMfg.NTia64]
+%HID\Vid_045E&Pid_001E.DeviceDesc%=Firefly_Inst,, HID\Vid_045E&Pid_001E
+%HID\Vid_045E&Pid_0029.DeviceDesc%=Firefly_Inst,, HID\Vid_045E&Pid_0029
+%HID\Vid_045E&Pid_0039.DeviceDesc%=Firefly_Inst,, HID\Vid_045E&Pid_0039
+%HID\Vid_045E&Pid_0040.DeviceDesc%=Firefly_Inst,, HID\Vid_045E&Pid_0040
+%HID\Vid_045E&Pid_0047.DeviceDesc%=Firefly_Inst,, HID\Vid_045E&Pid_0047
+
+[ShinyThingsMfg.NTamd64]
+%HID\Vid_045E&Pid_001E.DeviceDesc%=Firefly_Inst,, HID\Vid_045E&Pid_001E
+%HID\Vid_045E&Pid_0029.DeviceDesc%=Firefly_Inst,, HID\Vid_045E&Pid_0029
+%HID\Vid_045E&Pid_0039.DeviceDesc%=Firefly_Inst,, HID\Vid_045E&Pid_0039
+%HID\Vid_045E&Pid_0040.DeviceDesc%=Firefly_Inst,, HID\Vid_045E&Pid_0040
+%HID\Vid_045E&Pid_0047.DeviceDesc%=Firefly_Inst,, HID\Vid_045E&Pid_0047
+
+
+; Install Section for Windows Millennium
+; ---------------------------------------------------------
+
+[Firefly_Inst]
+Include=MSMOUSE.INF
+Needs=HIDMouse
+CopyFiles = Firefly_Inst_CopyFiles
+AddReg = Firefly_Inst_AddReg
+
+[Firefly_Inst_AddReg]
+HKR,,upperfilters,0,"Firefly"
+
+[Firefly_Inst_CopyFiles]
+Firefly.sys
+
+
+; Install Section for Windows 2000 & Windows XP
+; ---------------------------------------------------------
+
+[Firefly_Inst.NT]
+Include = MSMOUSE.INF
+Needs = HID_Mouse_Inst.NT
+CopyFiles = Firefly_Inst_CopyFiles.NT
+
+[Firefly_Inst.NT.HW]
+Include = MSMOUSE.INF
+Needs = HID_Mouse_Inst.NT
+AddReg = Firefly_Inst_HWAddReg.NT
+
+[Firefly_Inst_HWAddReg.NT]
+HKR,,"UpperFilters",0x00010000,"Firefly"
+
+[Firefly_Inst_CopyFiles.NT]
+Firefly.sys
+
+[Firefly_Inst.NT.Services]
+Needs = HID_Mouse_Inst.NT.Services
+AddService = Firefly, , Firefly_Service_Inst
+
+[Firefly_Service_Inst]
+DisplayName    = %Firefly.SvcDesc%
+ServiceType    = 1                  ; SERVICE_KERNEL_DRIVER
+StartType      = 3                  ; SERVICE_DEMAND_START
+ErrorControl   = 1                  ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\Firefly.sys
+LoadOrderGroup = PNP Filter
+
+
+; Source Media Section
+; ---------------------------------------------------------
+
+[SourceDisksNames.x86]
+1 = %DiskName%,,,\i386
+
+[SourceDisksNames.ia64]
+1 = %DiskName%,,,\ia64
+
+[SourceDisksNames.amd64]
+1 = %DiskName%,,,\amd64
+
+
+[SourceDisksFiles]
+Firefly.sys = 1
+
+
+; Strings Section
+; ---------------------------------------------------------
+[Strings]
+; Provider names
+Provider = "Shiny Things"
+
+; Mfg names
+ShinyThings = "Shiny Things"
+
+; Service names
+Firefly.SvcDesc = "Firefly Service"
+
+; Media names
+DiskName = "Firefly Driver Disk"
+
+; HID device IDs
+HID\VID_045E&PID_001E.DeviceDesc = "Shiny Things Firefly Mouse"
+HID\VID_045E&PID_0029.DeviceDesc = "Shiny Things Firefly Mouse"
+HID\VID_045E&PID_0039.DeviceDesc = "Shiny Things Firefly Mouse"
+HID\VID_045E&PID_0040.DeviceDesc = "Shiny Things Firefly Mouse"
+HID\VID_045E&PID_0047.DeviceDesc = "Shiny Things Firefly Mouse"
+
+; Standard defs
+SPSVCINST_TAGTOFRONT  = 0x00000001
+SPSVCINST_ASSOCSERVICE= 0x00000002
+SERVICE_KERNEL_DRIVER = 1
+SERVICE_BOOT_START    = 0
+SERVICE_SYSTEM_START  = 1
+SERVICE_AUTO_START    = 2
+SERVICE_ERROR_NORMAL  = 1
+SERVICE_ERROR_IGNORE  = 0
+REG_EXPAND_SZ         = 0x00020000
+REG_DWORD             = 0x00010001
+REG_SZ                = 0x00000000
+

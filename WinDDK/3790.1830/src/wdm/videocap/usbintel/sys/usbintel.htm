@@ -1,0 +1,104 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD W3 HTML//EN">
+<HTML>
+<HEAD>
+
+<META content="text/html; charset=windows-1252" http-equiv=Content-Type><TITLE>USBINTEL</TITLE>
+<META content='"MSHTML 5.00.0707.2700"' name=GENERATOR>
+<META content="C:\PROGRAM FILES\MICROSOFT OFFICE\OFFICE\html.dot" name=Template>
+</HEAD>
+<BODY bgColor=#ffffff leftMargin=8 link=#0000ff text=#000000 vLink=#800080><FONT 
+face=Verdana>
+<H2><A name=MYSAMPLE>USBINTEL</A> </H2>
+
+<H3>SUMMARY</H3>
+</FONT><FONT face=Verdana size=2>
+<P>USBINTEL is a sample WDM stream class video capture driver that supports two 
+Intel USB digital cameras:
+<P>
+<LI>Intel USB camera model number YC76 
+<LI>Intel USB camera model number YC72
+<P>The main difference between the two models is the snapshot button for 
+acquiring still images. It is only available on the newer model (YC76).
+<P>Digital camera supported by Usbintel.sys is a data source that produces 
+digital image data without any other input connection. It manifests itself in a 
+Microsoft DirectShow(r) graph as a WDM Streaming Capture Device and as a capture 
+filter that has output capture stream supporting image sizes of (320x240), 
+(160x120), (176x144) with IYUV/I420 color space. Its decompressor, IYUV_32.DLL, 
+is part of the operating system delivery, and it can convert image data format 
+from IYUV to RGB16, RGB8, or to a Microsoft DirectDraw(r) surface if the video 
+card supports IYUV format. 
+<P>
+<H3>BUILDING THE SAMPLE</H3>
+</FONT><FONT face=Verdana size=2>
+<P>The sample is built with the standard DDK BUILD utility in the standard 
+checked or free DDK build environment. 
+<P>USBINTEL supports Plug and Play, and the Image.inf shipped with Microsoft(r) 
+Windows(r) is used to install detected devices. It cannot be manually installed. 
+The sample Usbintel.inf, which is a subset of Image.inf, can be used as an 
+installation file template.
+<P>The USBINTEL sample is completely contained in one directory. 
+<P>
+<H3>RESOURCES</H3>
+</FONT><FONT face=Verdana size=2>
+<P>Please refer to the file Usbcamd.doc in the Windows NT(R) device driver kit 
+for more details about this library.
+<P>For detailed information about stream class architecture and its interface, 
+and for information about the class driver support for USB bus in both 
+Windows(R) 98 and Windows NT 5.0, click <A 
+href="http://www.microsoft.com/hwdev">here</A>.
+<P>For the USB specification and many USB bus-related articles, click <A 
+href="http://www.usb.org/">here</A>. 
+<P>For information about DirectShow, click <A 
+href="http://www.microsoft.com/directx">here</A>. 
+<P>
+<H3>CODE TOUR</H3>
+
+<H4>File Manifest</H4>
+</FONT><U>
+<PRE>File		Description
+</U>
+Usbintel.htm	The documentation for this sample (this file)
+Sources		The generic file for building the code sample
+Usbintel.inf	A sample installation file
+Intelcam.c	DriverEntry(), Initialize and un-initialize device 
+Prpget.c     	Handles all get property functions
+Prpobj.c     	Property sets definitions
+Prpset.c     	Contains Set property handlers for device properties
+Prpmanf.c    	Custom property sets
+Camqi.c      	Plug-n-Play routines
+Intelcam.rc	Resource file 
+ 
+</PRE>
+</FONT><FONT face=Verdana size=2>
+<P>
+<H4>Programming Tour</H4>
+</FONT><FONT face=Verdana size=2>
+<P>This driver requires a helper kernel library (Usbcamd.sys) to work. Please 
+refer to Usbcamd.doc for details about its relation to this driver.
+<P>In DriverEntry(), it initializes the hardware initialization structure 
+including registers its entry point functions. 
+<P>HwReceivePacket field describes the entry point for receiving SRBs (Stream 
+Request Packet) from stream class driver. Here is a possible sequence of SRBs 
+that this driver may receive.
+<P></P>
+<LI>SRB_INITIALIZE_DEVICE to initialize the device. Called after DriverEntry(). 
+<LI>SRB_GET_STREAM_INFO to get supported stream format. 
+<LI>SRB_GET_DATA_INTERSECTION to query a supported format given some key fields. 
+
+<LI>SRB_OPEN_STREAM to open the device. This SRB is handled by USBCAMD. 
+<LI>SRB_CLOSE_STREAM to close the open stream. This SRB is handled by USBCAMD. 
+<LI>SRB_UNINITIALIZE_DEVICE to indicate that a device has been unloaded or 
+removed. </FONT>
+<P align=center><A 
+href="file:///C:/Users/husnir.002/Local%20Settings/Temp/USBINTEL%20Edited.htm#top"><FONT 
+face=Verdana size=2>Top of page</FONT></A><FONT face=Verdana size=2> </P></FONT>
+<TABLE border=0 cellSpacing=0 width=624>
+  <TR>
+    <TD bgColor=#00ffff height=2 vAlign=center>
+      <P></P></TD></TR>
+  </TBODY>
+</TABLE>
+<FONT face="MS Sans Serif" size=1>
+<P>&copy; 1998 Microsoft Corporation</FONT><FONT face=Verdana size=2> 
+</P></FONT></LI></BODY></HTML>
+

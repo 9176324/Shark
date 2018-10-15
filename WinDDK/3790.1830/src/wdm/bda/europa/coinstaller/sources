@@ -1,0 +1,14 @@
+TARGETNAME=34CoInstaller
+TARGETPATH=obj
+TARGETTYPE=DYNLINK
+
+SOURCES=34coinstaller.rc \
+	34CoInstaller.cpp
+
+
+TARGETLIBS= $(SDK_LIB_PATH)\setupapi.lib \
+            $(SDK_LIB_PATH)\kernel32.lib \
+            $(SDK_LIB_PATH)\advapi32.lib \
+            $(SDK_LIB_PATH)\user32.lib
+
+DLLBASE=0x2000000

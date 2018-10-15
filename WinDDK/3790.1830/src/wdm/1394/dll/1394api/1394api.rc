@@ -1,0 +1,15 @@
+#include <windows.h>
+
+#include <ntverp.h>
+
+#define VER_FILETYPE				VFT_DLL
+#define VER_FILESUBTYPE				VFT_UNKNOWN
+#define VER_FILEDESCRIPTION_STR     "1394 API Wrappers"
+#define VER_INTERNALNAME_STR        "1394API"
+#define VER_LEGALCOPYRIGHT_YEARS    "1998"
+#define VER_ORIGINALFILENAME_STR    "1394API.DLL"
+
+#include <common.ver>
+
+
+

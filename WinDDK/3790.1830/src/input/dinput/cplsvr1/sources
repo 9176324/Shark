@@ -1,0 +1,43 @@
+!IF 0
+
+Copyright (c) 1989 - 2000 Microsoft Corporation
+
+
+!ENDIF
+
+LINKER_STACKSIZE=-STACK:4096,1024
+
+# Compile for Win95 for widest compatibility
+CHICAGO_PRODUCT=1
+WIN32_IE_VERSION=0x0300
+
+UMTYPE=windows
+
+TARGETNAME=cplsvr1
+TARGETEXT=dll
+TARGETPATH=obj
+TARGETTYPE=DYNLINK
+
+DLLENTRY=_DllMainCRTStartup
+
+USE_MSVCRT=1
+
+TARGETLIBS= \
+           $(SDK_LIB_PATH)\ole32.lib    \
+           $(SDK_LIB_PATH)\uuid.lib     \
+           $(SDK_LIB_PATH)\dinput.lib   \
+           $(SDK_LIB_PATH)\kernel32.lib \
+           $(SDK_LIB_PATH)\user32.lib   \
+           $(SDK_LIB_PATH)\gdi32.lib    \
+           $(SDK_LIB_PATH)\advapi32.lib \
+           $(SDK_LIB_PATH)\comctl32.lib
+
+
+DLLDEF=CPLSVR1.DEF
+
+SOURCES=cplsvr1.rc    \
+        button.cpp    \
+        cplsvr1.cpp   \
+        dicputil.cpp  \
+        pages.cpp     
+

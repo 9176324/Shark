@@ -1,0 +1,74 @@
+[WMI, Dynamic, Provider("WMIProv"),
+ guid("{fa214809-e35f-11d0-9692-00c04fc3358c}"),
+ localeid(0x409),
+ WmiExpense(1),
+ Description("TBATM155 Query Vendor String")]
+class TbAtm155QueryVendorString
+{
+    [key, read]
+    string	InstanceName;				//	Instance name returned from WMI
+
+    [read]
+    boolean	Active;
+
+    [read,
+    Description("Query this to get vendor string back."),
+    WmiDataId(1)]	string	QueryVendorString;
+};
+
+
+[WMI, Dynamic, Provider("WMIProv"),
+ guid("{fa21480a-e35f-11d0-9692-00c04fc3358c}"),
+ localeid(0x409),
+ WmiExpense(1),
+ Description("TBATM155 Invalid VPI/VCI Received")]
+class TbAtm155InvalidVpiVci
+{
+    [key, read]
+    string InstanceName;
+
+    [read]
+    boolean Active;
+
+    [read,
+    Description("Invalid VPI/VCI received."),
+    WmiDataId(1)]	uint64	InvalidVpiVci;
+};
+
+[WMI, Dynamic, Provider("WMIProv"),
+ guid("{fa21480b-e35f-11d0-9692-00c04fc3358c}"),
+ localeid(0x409),
+ WmiExpense(1),
+ Description("TBATM155 PDUs Transmitted OK")]
+class TbAtm155PDUsTransmittedOk
+{
+    [key, read]
+    string InstanceName;
+
+    [read]
+    boolean Active;
+
+    [read,
+    Description("Number of PDUs transmitted without errors."),
+    WmiDataId(1)]	uint64	PDUsTransmittedOk;
+};
+
+[WMI, Dynamic, Provider("WMIProv"),
+ guid("{fa21480c-e35f-11d0-9692-00c04fc3358c}"),
+ localeid(0x409),
+ WmiExpense(1),
+ Description("TBATM155 PDUs Received OK")]
+class TbAtm155PDUsReceivedOk
+{
+    [key, read]
+    string InstanceName;
+
+    [read]
+    boolean Active;
+
+    [read,
+    Description("Number of PDUs received without errors."),
+    WmiDataId(1)]	uint64	PDUsReceivedOk;
+};
+
+

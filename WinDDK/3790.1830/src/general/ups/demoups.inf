@@ -1,0 +1,19 @@
+[version]
+Signature="$WINDOWS NT$"
+DriverVer=06/26/2001,1.0.0.0
+SetupClass=BASE
+
+[DefaultInstall]
+CopyFiles = DemoUPS_CopyFiles
+AddReg    = DemoUPS_AddReg
+
+[DestinationDirs]
+DefaultDestDir = 11
+DemoUPS_CopyFiles = 11
+
+[DemoUPS_CopyFiles]
+demoups.dll
+
+[DemoUPS_AddReg]
+HKLM,"SYSTEM\CurrentControlSet\Services\UPS\ServiceProviders\DDK Sample\","DDK Demo UPS",0x0,"0x1;demoups.dll"
+

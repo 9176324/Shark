@@ -1,0 +1,141 @@
+<html>
+<!-- Copyright © 2001 Microsoft Corporation. All rights reserved. -->
+<head>
+	<STYLE>
+		body
+		{
+			background-color:black;
+			color:white;
+			margin-bottom:0px;
+			padding-bottom:0px;
+		}
+
+		table
+		{
+			font-size:x-small;
+			border-style:none;
+			border-width:0px;
+			background-color:black;
+		}
+
+		td
+		{
+			vertical-align: middle;
+			border-style: solid;
+			border-width: 0px;
+			padding: 0px;
+		}
+
+		span.messageList
+		{
+			color:gold;
+			font-size:16pt;
+			font-family:Arial;
+			text-align:left;
+		}
+
+		span.version
+		{
+			cursor:default;
+			position:absolute;
+			left:50;
+			top:45;
+			color:white;
+			font-family:sans-serif;
+			font-size:xx-small;
+		}
+
+		.stats
+		{
+			cursor:default;
+			font-family:verdana;
+			font-size:smaller;
+			text-align: right;
+			color:gold;
+		}
+
+		img.btn
+		{
+			border  :      0px;
+			cursor  :     hand;
+			position: relative;
+		}
+
+	</STYLE>
+</head>
+
+<body tabindex="-1">
+	<SCRIPT>
+		function btn_onmousedown()
+		{
+			var elem = event.srcElement;
+			elem.style.top   = "1px";
+			elem.style.left  = "1px";
+		}
+		function btn_onmouseup()
+		{
+			var elem = event.srcElement;
+			elem.style.top   = "0px";
+			elem.style.left  = "0px";
+		}
+
+	</SCRIPT>
+
+	<TABLE width="100%" cellspacing="0">
+		<tr>
+			<td width="108px">
+				<IMG SRC="../images/logo.gif" />
+			</td>
+			<td style="width:20em">
+				<span class="messageList">
+				Message&nbsp;List
+				</span>
+			</td>
+			<td width="*">
+				<IMG class="btn" style="visibility:hidden;"
+				     SRC="../images/btnHidden.jpg">
+				<IMG id="btnFilter"
+				     class="btn" style="visibility:hidden;"
+				     SRC="../images/btnFilter.jpg"
+				     ALT="View or Modify Message Filtering Options"
+				     onmousedown="btn_onmousedown()"
+				     onmouseup="btn_onmouseup()"
+				     onmouseout="btn_onmouseup()"
+				     onclick="parent.ShowFilter(true)"
+				     onkeypress="parent.ShowFilter(true)"
+				     tabindex="1">
+				<IMG class="btn" style="visibility:hidden;"
+				     SRC="../images/btnHidden.jpg">
+			</td>
+			<td width="*" align="right" style="vertical-align:bottom;">
+				<span id="defectStats" class="stats">&nbsp;</span>
+			</td>
+		</tr>
+	</TABLE>
+
+	<span id="spanVersion" class="version" />
+
+<script>
+
+function ShowFilterButton(fShow)
+{
+	var strValue = fShow ? "visible" : "hidden";
+	btnFilter.style.visibility = strValue;
+}
+
+function UpdateDefectCountText(strText, fIsFilterInEffect)
+{
+	defectStats.innerHTML = strText;
+	btnFilter.src = "../images/btnFilter" + (fIsFilterInEffect ? "ed.jpg" : ".jpg");
+}
+
+function UpdateVersionText(strVersion)
+{
+	spanVersion.title = "PREfast Version " + strVersion;
+	spanVersion.innerText = strVersion;
+}
+
+</script>
+
+</body>
+</html>

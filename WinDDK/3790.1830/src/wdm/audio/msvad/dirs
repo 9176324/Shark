@@ -1,0 +1,8 @@
+DIRS= \
+     ac3 \
+     drmmult \
+     drmsimp \
+     ds2dhw \
+     multstr \
+     pcmex \
+     simple

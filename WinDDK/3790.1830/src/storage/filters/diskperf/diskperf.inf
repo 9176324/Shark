@@ -1,0 +1,74 @@
+; diskperf.inf
+;
+; Installation inf for the Disk Performance Monitor Filter driver [ DDK Sample ]
+;
+; Copyright (c) Microsoft Corporation
+;
+
+[Version]
+Signature = "$Windows NT$"
+Class     = DiskDrive
+ClassGUID = {4d36e967-e325-11ce-bfc1-08002be10318}
+Provider  = %msft%
+DriverVer = 03/22/2002,5.1.2600.0
+
+
+;
+; General installation section
+;
+
+[DefaultInstall.NT]
+CopyFiles = @diskperf.sys
+Addreg    = diskperf.AddReg
+
+[DestinationDirs]
+DefaultDestDir = 12
+
+[diskperf.AddReg]
+HKLM, System\CurrentControlSet\Control\Class\{4d36e967-e325-11ce-bfc1-08002be10318}, UpperFilters, 0x00010008, diskperf
+
+
+;
+; Service installation section
+;
+
+[DefaultInstall.NT.Services]
+AddService = diskperf, , diskperf.Service.Install
+
+[diskperf.Service.Install]
+DisplayName    = %service_desc%
+ServiceType    = 1
+StartType      = 0
+ErrorControl   = 1
+ServiceBinary  = %12%\diskperf.sys
+LoadOrderGroup = "PnP Filter"
+
+[SourceDisksFiles]
+diskperf.sys=1
+
+; Win2000
+
+[SourceDisksNames]
+1 = %diskid1%,,,\i386
+
+; WinXP and later
+
+[SourceDisksNames.x86]
+1 = %diskid1%,,,\i386
+
+[SourceDisksNames.ia64]
+1 = %diskid1%,,,\ia64
+
+[SourceDisksNames.amd64]
+1 = %diskid1%,,,\amd64
+
+;
+; Localizable Strings
+;
+
+[Strings]
+
+msft         = "Microsoft Corporation"
+service_desc = "Disk Performance Monitor Filter Driver"
+diskid1      = "Microsoft Corp. Installation Disk #1 (DiskPerf)"
+

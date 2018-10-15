@@ -1,0 +1,31 @@
+TARGETNAME=mcamgmt
+TARGETPATH=obj
+TARGETTYPE=PROGRAM
+
+UMTYPE=console
+UMENTRY=wmain
+
+C_DEFINES= $(C_DEFINES) -DUNICODE -D_UNICODE
+
+INCLUDES=$(DDK_INC_PATH);
+
+TARGETLIBS=	\
+		$(SDK_LIB_PATH)\wmip.lib	\
+		$(SDK_LIB_PATH)\kernel32.lib	\
+		$(SDK_LIB_PATH)\rpcrt4.lib	\
+		$(SDK_LIB_PATH)\user32.lib	\
+		$(SDK_LIB_PATH)\ole32.lib	\
+		$(SDK_LIB_PATH)\oleaut32.lib	\
+		$(SDK_LIB_PATH)\wbemuuid.lib	\
+		$(SDK_LIB_PATH)\uuid.lib
+
+SOURCES= \
+	Mca.cpp	\
+	MCAObjectSink.cpp	\
+	FatalEngine.cpp	\
+	CorrectedEngine.cpp	\
+	Common.cpp
+
+
+USE_IOSTREAM=1
+USE_VCCOM=1

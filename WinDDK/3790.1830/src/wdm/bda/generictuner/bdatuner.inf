@@ -1,0 +1,169 @@
+; Copyright (C) Microsoft Corporation, 1997 - 2001  All Rights Reserved.
+;
+; BDATuner.INF  -- This INF file installs BDATuner.sys, the BDA sample tuner driver.
+;           
+; Note:
+;    
+;     This INF expects the following hierarchy in the installation folder:
+;
+;     \
+;         bdatuner.inf
+;         objfre_wxp_x86\i386
+;             		 bdatuner.sys
+;         objfre_wnet_amd64\amd64
+;                           bdatuner.sys
+;
+
+[Version]
+Signature="$Windows NT$"
+Class=MEDIA
+ClassGUID={4d36e96c-e325-11ce-bfc1-08002be10318}
+Provider=%Msft%
+DriverVer=09/30/2004,1.0.0.0
+
+[SourceDisksNames]
+1000 = %cdname%,,,
+
+[SourceDisksFiles.x86]
+bdatuner.sys = 1000,\objfre_wxp_x86\i386
+
+[SourceDisksFiles.amd64]
+bdatuner.sys = 1000,\objfre_wnet_amd64\amd64
+
+[ControlFlags]
+ExcludeFromSelect=*
+
+[DestinationDirs]
+DefaultDestDir=12   ; \windows\system32\drivers
+
+[Manufacturer]
+; Specify the manufacturer of the hardware.
+; This should be change to the name of the actual hardware manufacturer.
+;
+%Msft%=Microsoft,NTamd64
+
+; The following Models sections should have a line for each device PnP
+; ID that this INF installs. Note that, for the Sample BDA Tuner, the PnP
+; ID matches the child device specified in the Sample BDA Capture driver's
+; INF.
+;
+; Since the Sample BDA Capture driver is an AVStream mini-driver, the PnP
+; ID starts with "AVSTREAM\".  If the Sample BDA Capture driver had been
+; a Stream Class mini-driver the PnP ID would start with "STREAM\".
+;
+; Replace the "SW\" line with the following line when actual PCI receiver
+; hardware is used.
+; %BdaTuner.DeviceDesc%=BdaTuner,AVSTREAM\BdaTuner
+
+; x86-specific Models section
+[Microsoft]
+%BdaTuner.DeviceDesc%=BdaTuner,SW\{828B00F0-9A04-4692-8573-535B05DFF3F4}
+
+; x64-specific Models section
+[Microsoft.NTamd64]
+%BdaTuner.DeviceDesc%=BdaTuner,SW\{828B00F0-9A04-4692-8573-535B05DFF3F4}
+
+[BdaTuner.NT]
+CopyFiles=BdaTuner.CopyDrivers
+
+[BdaTuner.CopyDrivers]
+BDATuner.sys
+
+[BdaTuner.NT.Interfaces]
+; Add an interface for each type of filter exposed by this device driver.
+; The format of each line is as follows
+;
+; AddInterface = DSHOW_CATEGORY, FILTER_REFERENCE_GUID, INSTALLATION_SECTION
+;
+; DSHOW_CATEGORY is the GUID for the Direct Show category in which the
+; filter should appear.  A filter that appears in multiple categories should
+; have a line for each category.
+;
+; FILTER_REFERENC_GUID should be the same as the ReferenceGuid in the
+; the KSFILTER_DESCRIPTOR for the filter.
+;
+; INSTALLATION_SECTION specifies the section that the installer should call
+; to add the ring 3 filter class to the registry.  Except for legacy analog
+; tuner and crossbar, all BDA filters should specify KSProxy as the ring 3
+; filter class.
+;
+AddInterface = %KSCATEGORY_BDATUNER%, %KSSTRING_BdaSWTunerFilter%, BdaTuner.Filter
+
+[BdaTuner.Filter]
+; This is the install section for the sample BDA digital tuner filter.
+;
+AddReg = BdaTuner.Filter.AddReg
+
+[BdaTuner.Filter.AddReg]
+; The sample BDA digital tuner uses KSProxy for its ring 3 filter class.
+;
+HKR,,CLSID,,%Proxy.CLSID%
+HKR,,FriendlyName,,%BdaTuner.FilterDesc%
+
+
+
+[BdaTuner.NT.Services]
+; Add the service (driver) for this device.
+;
+; NOTE!  A single .SYS file can only be used for one service at a time.
+;        If multiple board types use the same driver, they should all
+;        reference the same service install section.
+;
+AddService=BDATuner, 0x00000002, BdaTuner.ServiceInstall
+
+[BdaTuner.ServiceInstall]
+; This is the service install section for the sample BDA tuner driver.
+; (BdaTuner.sys)
+;
+DisplayName=%BdaTuner.DeviceDesc%
+ServiceType=%SERVICE_KERNEL_DRIVER%
+StartType=%SERVICE_DEMAND_START%
+ErrorControl=%SERVICE_ERROR_NORMAL%
+ServiceBinary=%10%\system32\drivers\BDATuner.sys
+LoadOrderGroup=ExtendedBase
+
+
+
+[Strings]
+
+;----------------
+; non-localizeable
+;----------------
+
+SERVICE_KERNEL_DRIVER=1
+SERVICE_DEMAND_START=3
+SERVICE_ERROR_NORMAL=1
+REG_EXPAND_SZ=0x00020000
+REG_DWORD=0x00010001
+
+; Specify the GUID for the Ksproxy plugin..
+;
+Proxy.CLSID="{17CCA71B-ECD7-11D0-B908-00A0C9223196}"
+
+; Specify the GUID for the BDA Source Filters category in GraphEdit.
+;
+KSCATEGORY_BDATUNER="{71985F48-1CA1-11d3-9CC8-00C04F7971E0}"
+
+; Specify the GUID for the digital tuner Filter.
+;
+; NOTE!  This must match the reference guid specified in the driver's filter
+;        descriptor.
+;
+KSSTRING_BdaSWTunerFilter="{91B0CC87-9905-4d65-A0D1-5861C6F22CBF}"
+
+; Specify the GUID for the tuner device's SW PnP ID
+;
+BdaSWTuner.DeviceId="{828B00F0-9A04-4692-8573-535B05DFF3F4}"
+
+
+;----------------
+; localizeable
+;----------------
+
+Msft="Microsoft"
+BdaTuner.DeviceDesc="Microsoft Sample BDA Tuner"
+BdaTuner.FilterDesc="Sample BDA Tuner Filter"
+BdaTuner.FriendlyName="Sample BDA Tuner"
+
+cdname="Disk 1"
+

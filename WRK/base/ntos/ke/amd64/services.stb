@@ -1,0 +1,167 @@
+;++
+;
+; Copyright (c) Microsoft Corporation. All rights reserved. 
+;
+; You may only use this code if you agree to the terms of the Windows Research Kernel Source Code License agreement (see License.txt).
+; If you do not agree to the terms, do not use the code.
+;
+;
+; Module Name:
+;
+;   sysstubs.asm
+;
+; Abstract:
+;
+;   This module implements the system service dispatch stub procedures.
+;
+;--
+
+include ksamd64.inc
+
+STUBS_BEGIN1 macro t
+        title   t
+        endm
+
+STUBS_BEGIN2 macro t
+        endm
+
+STUBS_BEGIN3 macro t
+        endm
+
+STUBS_BEGIN4 macro t
+        endm
+
+STUBS_BEGIN5 macro t
+        endm
+
+STUBS_BEGIN6 macro t
+        endm
+
+STUBS_BEGIN7 macro t
+        endm
+
+STUBS_BEGIN8 macro t
+        endm
+
+STUBS_END macro t
+        end
+        endm
+
+SYSSTUBS_ENTRY1 macro ServiceNumber, Name, NumArgs
+        extern  KiServiceInternal:proc
+        extern  KiServiceLinkage:proc
+        NESTED_ENTRY Zw&Name, _TEXT$00,, NoPad
+
+if DBG
+
+        mov     8[rsp], rcx             ; save argument register
+        mov     16[rsp], rdx            ;
+        mov     24[rsp], r8             ;
+        mov     32[rsp], r9             ;
+
+endif
+
+        mov	rax, rsp		; save stack address
+        cli                             ; disable interrupts
+        sub     rsp, 16                 ; alignment and dummy SS selector
+        push    rax                     ; save previous stack pointer
+        pushfq                          ; push EFLAGS on stack
+        push    KGDT64_R0_CODE          ; push CS selector
+        lea     rax, KiServiceLinkage   ; push service linkage RIP
+        push    rax                     ; push return address
+        mov     eax, ServiceNumber      ; set service number
+        jmp     KiServiceInternal       ; finish in service dispatcher
+        push_frame                      ; mark machine frame push
+        END_PROLOGUE
+        NESTED_END Zw&Name, _TEXT$00
+        endm
+
+SYSSTUBS_ENTRY2 macro ServiceNumber, Name, NumArgs
+        endm
+
+SYSSTUBS_ENTRY3 macro ServiceNumber, Name, NumArgs
+        endm
+
+SYSSTUBS_ENTRY4 macro ServiceNumber, Name, NumArgs
+        endm
+
+SYSSTUBS_ENTRY5 macro ServiceNumber, Name, NumArgs
+        endm
+
+SYSSTUBS_ENTRY6 macro ServiceNumber, Name, NumArgs
+        endm
+
+SYSSTUBS_ENTRY7 macro ServiceNumber, Name, NumArgs
+        endm
+
+SYSSTUBS_ENTRY8 macro ServiceNumber, Name, NumArgs
+        endm
+
+
+USRSTUBS_ENTRY1 macro ServiceNumber, Name, NumArgs
+        altentry Nt&Name
+        endm
+
+USRSTUBS_ENTRY2 macro ServiceNumber, Name, NumArgs
+
+ifidn <Name>, <QuerySystemTime>
+
+        extern RtlQuerySystemTime:proc
+
+endif
+
+        LEAF_ENTRY Zw&Name, _TEXT$00, NoPad
+        ALTERNATE_ENTRY Nt&Name
+
+if DBG
+
+        mov     8[rsp], rcx
+        mov     16[rsp], rdx
+        mov     24[rsp], r8
+        mov     32[rsp], r9
+
+endif
+
+ifidn <Name>, <QuerySystemTime>
+
+        jmp     RtlQuerySystemTime
+
+else
+
+        mov     r10, rcx
+        mov     eax, ServiceNumber
+        syscall
+        ret
+
+endif
+
+        LEAF_END Zw&Name, _TEXT$00
+        endm
+
+USRSTUBS_ENTRY3 macro ServiceNumber, Name, NumArgs
+        endm
+
+USRSTUBS_ENTRY4 macro ServiceNumber, Name, NumArgs
+        endm
+
+USRSTUBS_ENTRY5 macro ServiceNumber, Name, NumArgs
+        endm
+
+USRSTUBS_ENTRY6 macro ServiceNumber, Name, NumArgs
+        endm
+
+USRSTUBS_ENTRY7 macro ServiceNumber, Name, NumArgs
+        endm
+
+USRSTUBS_ENTRY8 macro ServiceNumber, Name, NumArgs
+        endm
+
+        STUBS_BEGIN1 <"System Service Stub Procedures">
+        STUBS_BEGIN2 <"System Service Stub Procedures">
+        STUBS_BEGIN3 <"System Service Stub Procedures">
+        STUBS_BEGIN4 <"System Service Stub Procedures">
+        STUBS_BEGIN5 <"System Service Stub Procedures">
+        STUBS_BEGIN6 <"System Service Stub Procedures">
+        STUBS_BEGIN7 <"System Service Stub Procedures">
+        STUBS_BEGIN8 <"System Service Stub Procedures">
+

@@ -1,0 +1,49 @@
+<html>
+<!-- Copyright © 2001 Microsoft Corporation. All rights reserved. -->
+<script>
+
+function contentWindow(frameElement)
+{
+	// The contentWindow property works in IE >= 5.5
+	if (frameElement.contentWindow)
+		return frameElement.contentWindow;
+		var strIndex = frameElement.name;
+	if (!strIndex || !strIndex.length)
+		strIndex = frameElement.id;
+		return frameElement.document.frames(strIndex);
+}
+
+function GetViewFrame()
+{
+	return contentWindow(document.all("defectViewFrame"));
+}
+
+</script>
+
+
+<frameset name="theFrameSet" framespacing="0" frameborder="0" cols="140,*" >
+
+	<frame
+		name="defectNavFrame"
+		application="yes"
+		src="defectNav.html"
+		noresize="true"
+		tabindex="-1" />
+
+	<frame
+		name="defectViewFrame"
+		application="yes"
+		src="defectView.html"
+		noresize="true"
+		tabindex="-1" />
+
+	<noframes>
+		<body bgcolor="#FFFFFF">
+			<p>This page uses frames, but your browser doesn't support them.</p>
+		</body>
+	</noframes>
+
+</frameset>
+
+</body>
+</html>

@@ -1,0 +1,181 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>BDACap</title>
+<style>
+<!--
+.manifest {font-size: 10.0pt; font-family: Courier New; margin-left: 0in; margin-right: 0in; margin-top: 0in; margin-bottom: .0001pt}
+p
+    {margin-right:0in;
+    margin-left:0in;
+    font-size:12.0pt;
+    font-family:"Times New Roman";
+    }
+h2
+    {margin-right:0in;
+    margin-left:0in;
+    font-size:18.0pt;
+    font-family:"Times New Roman";
+    font-weight:bold}
+h3
+    {margin-right:0in;
+    margin-left:0in;
+    font-size:13.5pt;
+    font-family:"Times New Roman";
+    font-weight:bold}
+ p.MsoNormal
+    {mso-style-parent:"";
+    margin-bottom:.0001pt;
+    font-size:12.0pt;
+    font-family:"Times New Roman";
+    margin-left:0in; margin-right:0in; margin-top:0in}
+h4
+    {margin-right:0in;
+    margin-left:0in;
+    font-size:12.0pt;
+    font-family:"Times New Roman";
+    font-weight:bold}
+ table.MsoNormalTable
+    {mso-style-parent:"";
+    font-size:10.0pt;
+    font-family:"Times New Roman";
+    }
+-->
+</style>
+</head>
+
+<body>
+
+<h2><span style="font-family:Verdana">BDACap : AVStream Simulated Hardware
+Sample Driver </span></h2>
+<h3><span style="font-family:Verdana">SUMMARY </span></h3>
+<p><span style="font-size:10.0pt;font-family:Verdana">The BDACap sample is based
+on the AVSHwS sample provided in the AVStream samples directory. Modifications
+were made to allow the original AVSHwS sample to work with the BDATuner
+sample.&nbsp;&nbsp; The purpose of the sample is to demonstrate how to write a pin-centric
+AVStream minidriver . The sample also shows how to implement DMA by using the
+related functionality provided by AVStream . </span></p>
+<p><span style="font-size:10.0pt;font-family:Verdana">The driver is designed to
+be used with the BDA sample generic tuner driver ( BDATuner.sys ). </span></p>
+<h3><span style="font-family:Verdana">BUILDING THE SAMPLE </span></h3>
+<p><b><span style='font-size:10.0pt;font-family:Verdana'>NOTE:</span></b><span
+style='font-size:10.0pt;font-family:Verdana'> This sample is for 32-bit
+platforms only. 64-bit target builds are disabled.<o:p></o:p></span></p>
+<p><span style="font-size:10.0pt;font-family:Verdana">Build the sample by typing
+<b>build - cZ </b>in either the standard checked or free build environment. A
+successful build produces BDACap<i>.sys</i> <i>. </i></span></p>
+<p><span style="font-size:10.0pt;font-family:Verdana">To use the BDACap.sys
+driver, you should also build the BDATuner.sys driver.&nbsp;&nbsp; Copy the two driver
+files along with the BDA sample tuner INF ( BDATuner.inf ), the BDA sample
+capture INF ( BDACap.inf ), and the software receiver INF ( BDASWRcv.inf ) to an
+installation directory on the target machine.&nbsp;&nbsp; To start installation of the
+drivers, right click on <i>BDASWRcv.inf</i> and select Install. </span></p>
+<h3><span style="font-family:Verdana">PROGRAMMING TOUR </span></h3>
+<p><b><span style="font-size:10.0pt;font-family:Verdana">DriverEntry </span></b>
+<span style="font-size:10.0pt;font-family:Verdana">in <i>device.cpp</i> is the
+initial point of entry. This routine passes control to AVStream through a call
+to <b>KsInitializeDriver</b> . In this call, the minidriver passes the device
+descriptor, an AVStream structure that recursively defines the AVStream object
+hierarchy for a driver. This is common behavior for an AVStream minidriver .
+</span></p>
+<p><span style="font-size:10.0pt;font-family:Verdana">At device start time (see
+the <b>CcaptureDevice::PnpStart</b> method in <i>device.cpp</i> ), a simulated
+piece of capture hardware is created (the ChardwareSimulation class), and a DMA
+adapter is acquired from the operating system and is registered with AVStream
+through a call to <b>KsDeviceRegisterAdapterObject</b> . This call is required
+for a sample that performs DMA directly into the capture buffers, instead of
+using DMA to write to a common buffer. </span></p>
+<p><i><span style="font-size:10.0pt;font-family:Verdana">Filter.cpp </span></i>
+<span style="font-size:10.0pt;font-family:Verdana">is where the sample lays out
+the KSPIN_DESCRIPTOR_EX structure for the single capture pin. In addition, a
+KSFILTER_DISPATCH structure and a KSFILTER_DESCRIPTOR structure are provided in
+this source file. The filter dispatch provides only a create dispatch, a routine
+that is included in <i>Filter.cpp</i> . The process dispatch is provided on the
+pin, since this is a pin-centric sample. </span></p>
+<p><i><span style="font-size:10.0pt;font-family:Verdana">Capture.cpp </span></i>
+<span style="font-size:10.0pt;font-family:Verdana">contains source for the
+transport input and output pins on the capture filter. This is where the
+KSPIN_DISPATCH structure for the unique pin is provided. This dispatch structure
+specifies a Process callback routine, also defined in this source file. This
+routine is where stream pointer manipulation and cloning occurs. </span></p>
+<p><span style="font-size:10.0pt;font-family:Verdana">The Process callback is
+one of two routines of interest in <i>Capture.cpp</i> that demonstrate how to do
+DMA transfers using AVStream functionality. The other is <b>
+CCapturePin::CompleteMappings</b> . These two methods show how to use the queue,
+obtain clone pointers, use scatter/gather lists, and perform other DMA-related
+tasks. </span></p>
+<p><i><span style="font-size:10.0pt;font-family:Verdana">Hwsim.cpp </span></i>
+<span style="font-size:10.0pt;font-family:Verdana">contains the hardware
+simulation code and also code that fills the scatter/gather mappings. This
+source file includes the Start, Pause and Stop methods for the hardware
+simulation class ( CHardwaresimulation ). Transport synthesis code is also here.
+The supplied objects provide a framework for synthesizing transport data. </span>
+</p>
+<p><span style="font-size:10.0pt;font-family:Verdana">For more information, see
+the comments in all *. cpp files. Also see complete AVStream documentation in
+the Windows DDK documentation. </span></p>
+<h3><span style="font-family:Verdana">RUNNING THE SAMPLE </span></h3>
+<p><span style="font-size:10.0pt;font-family:Verdana">Once installation is
+complete, access the driver through the graphedt tool. <i>Graphedt.exe</i> is
+available in the <i>Tools</i> directory of the DDK. In the Graphedt application,
+click the Graph menu and select Insert Filters. Click Insert Filter and the
+sample appears under “ Bda Receiver Component” as a single filter labelled as
+“Sample BDA Capture”. Then insert a Network Provider (ATSC ) , connect it the
+the “Sample BDA Tuner”, and attach the output of the Sample BDA Tuner filter to
+the input of the Sample BDA Capture Filter. The Sample BDA Tuner Filter appears
+under the category “BDA Source Filters”. Finally attach the output of the
+capture filter to the input pin of the MPEG-2 Demultiplexer filter. </span></p>
+<p><span style="font-size:10.0pt;font-family:Verdana">The sample BDA capture
+appears under &quot;BDA Receiver Components&quot; as &quot;Sample BDA Capture&quot;.&nbsp;&nbsp; The sample
+BDA tuner appears under “BDA Source Filters” as “Sample BDA Tuner Filter”.&nbsp;&nbsp; The
+MPEG-2 demultiplexer appears under “DirectShow Filters” as “MPEG-2 Demultiplexer
+”. </span></p>
+<h3><span style="font-family:Verdana">COMMENTS </span></h3>
+<p class="MsoNormal"><span style="font-size:10.0pt;font-family:Verdana">For more
+information on AVStream , see the Windows DDK documentation. </span></p>
+<h3><span style="font-family:Verdana">CODE TOUR </span></h3>
+<h4><span style="font-family:Verdana">File Manifest </span></h4>
+<p>&nbsp;</p>
+<table cellspacing="2" cellpadding="0" border="0">
+<tr><td class="manifest"><u>File</u></td><td rowspan="20" width="10">&nbsp;</td><td class="manifest"><u>Description</u></td></tr>
+<tr><td class="manifest">BDACap.htm</td><td class="manifest">The Sample Tour documentation for this sample (this file).</td></tr>
+<tr><td class="manifest">Sources</td><td class="manifest">The generic file for building the code sample.</td></tr>
+<tr><td class="manifest">BDACap.inf</td><td class="manifest">A sample capture installation file.</td></tr>
+<tr><td class="manifest">BDASWRcv.inf</td><td class="manifest">A special “software receiver” installation file.</td></tr>
+<tr><td class="manifest">BDACap.h</td><td class="manifest">The main header file for the sample.</td></tr>
+<tr><td class="manifest">device.cpp</td><td class="manifest">DriverEntry, Plug and Play handling, initialization, device level code.</td></tr>
+<tr><td class="manifest">device.h</td><td class="manifest"> Header file for above.</td></tr>
+<tr><td class="manifest">filter.cpp</td><td class="manifest">Filter level code for the capture filter.</td></tr>
+<tr><td class="manifest">filter.h</td><td class="manifest"> Header file for above.</td></tr>
+<tr><td class="manifest">capture.cpp</td><td class="manifest">Pin level code for the capture pin, DMA handling.</td></tr>
+<tr><td class="manifest">capture.h</td><td class="manifest">Header file for above.</td></tr>
+<tr><td class="manifest">hwsim.cpp</td><td class="manifest">Hardware simulation code, filling scatter/gather mappings, etc.</td></tr>
+<tr><td class="manifest">hwsim.h </td><td class="manifest">Header file for above.</td></tr>
+<tr><td class="manifest">TStream.cpp</td><td class="manifest">Transport stream simulation framework.</td></tr>
+<tr><td class="manifest">TStream.h</td><td class="manifest">Header file for above.</td></tr>
+<tr><td class="manifest">BDAC_W2K.inf</td><td class="manifest">Windows 2000 sample capture installation file</td></tr>
+<tr><td class="manifest">BDAS_W2K.inf</td><td class="manifest"> Windows 2000 sample receiver installation file</td></tr>
+<tr><td class="manifest">MAKEFILE</td><td class="manifest">The makefile for the project; do not edit.</td></tr>
+<tr><td class="manifest">BDACap.rc</td><td class="manifest">Resource file mainly for version.</td></tr>
+</table>
+
+<table class="MsoNormalTable" border="0" cellspacing="0" cellpadding="0" width="624" style="width: 6.5in" id="table1">
+<tr style="height: 1.5pt">
+<td style="height: 1.5pt; padding: .75pt; background: aqua">
+<p class="MsoNormal"><span style="font-size: 2.0pt">&nbsp;</span></td>
+</tr>
+</table>
+<pre class="descpre">&nbsp;</pre>
+<pre class="descpre">&nbsp;</pre>
+<p><strong><span style="font-size:13.5pt">Limitations</span></strong> </p>
+<p>1.&nbsp; 64-bit builds of BDA Capture Sample are currently disabled. </p>
+<p>&nbsp; </p>
+<p><span style="font-size: 7.5pt; font-family: MS Sans Serif">© 2004 Microsoft
+Corporation </span></p>
+<pre class="descpre">&nbsp;</pre>
+
+</body>
+
+</html>
+

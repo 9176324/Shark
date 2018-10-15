@@ -1,0 +1,56 @@
+<HTML>
+
+<HEAD>
+<TITLE> I2OMP StorPort Miniport Sample </TITLE>
+</HEAD>
+
+<BODY>
+<H2> I2OMP StorPort Miniport Sample </H2>
+<H3> SUMMARY </H3>
+<P>
+This directory contains the storport miniport driver supporting a variety of I2O Controllers.
+It exports functions that are used by storport.sys to issue requests to the underlying RAID Set(s)
+and pass-through devices, such as tape and CD-ROM drives.
+
+This driver illustrates the use of the new storport functionality to create a fully-featured
+storport miniport driver.
+</P>
+
+<H3>BUILDING THE SAMPLE</H3>
+<P>
+To build the sample, run the <B>build</B> command. This will produce i2omp.sys.
+As storport.sys was not included with earlier versions Microsoft(R) Windows(R) operating systems,
+Windows Server 2003 and later are required to use this miniport.
+
+</P>
+
+<H3>RESOURCES</H3>
+<P>
+More information concerning STORPORT miniports can be found in the Windows Server 2003 DDK.
+</P>
+
+<H3>CODE TOUR</H3>
+<P>
+</P>
+
+<H4>File Manifest</H4>
+<PRE><U> File            Description</U>
+<P>
+i2omp.c         Main source module for the miniport.
+i2omp.h         Main include file for the miniport.
+i2omp.rc        Resource definitions.
+i2obscsi.h      Include file for support of SCSI pass-through devices (tape, CD-ROM).
+i2ocontrol.h    Include file containing interface between management driver and miniport.
+i2otypes.h      Include file containing data-type information.    
+i2oexec.h       Include file containing Executive Class message definitions.
+i2omsg.h        Include file containing I2O Class and Function codes.
+i2omstor.h      Include file containing I2O Random Block Storage device class and function codes.
+i2outil.h       Include file containing I2O Utility Class message definitions.
+</PRE>
+</P>
+
+<FONT FACE="MS Sans Serif" SIZE = 1><P>&copy; 2002 Microsoft Corporation</P></FONT>
+</BODY>
+
+</HTML>
+

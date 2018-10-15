@@ -1,0 +1,17 @@
+TARGETTYPE=DRIVER
+TARGETNAME=tracedrv
+TARGETPATH=obj
+
+INCLUDES= .
+SOURCES= \
+	tracedrv.c \
+	tracedrv.rc
+
+!if !defined(DDK_TARGET_OS) || "$(DDK_TARGET_OS)"=="Win2K"
+C_DEFINES = $(C_DEFINES) -DTARGETING_Win2K
+RUN_WPP=  $(SOURCES) -km -gen:{km-w2k.tpl}*.tmh
+
+!else
+RUN_WPP= $(SOURCES) -km
+!endif
+

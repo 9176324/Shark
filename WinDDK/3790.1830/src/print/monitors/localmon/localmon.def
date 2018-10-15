@@ -1,0 +1,5 @@
+LIBRARY LOCALMON
+
+EXPORTS
+
+    InitializePrintMonitor2 = LocalMonInitializePrintMonitor2

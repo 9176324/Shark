@@ -1,0 +1,83 @@
+<html>
+<head>
+<title>Europa</title>
+<meta http-equiv="Content-Language" content="en-us">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<style> <!--	--></style>
+</head>
+<body>
+<p align="center"><b><span class="SpellE"><font size="5">Europa </font>
+</span><font size="5">:
+<span class="SpellE">BDA/AVStream</span>
+Hardware Driver Sample</font></b></p>
+<p align="left"><b><font size="4">Introduction</font></b></p>
+<p align="left">The Philips Europa&nbsp; PCI board is a TV Tuner/Video Capture 
+reference design board based on the Philips SAA7134 PCI video/stereo decoder 
+chip. It does PAL (Analog TV), DVB-T (Digital TV) and captures NTSC and PAL 
+through its SVideo/Composite Inputs. Based on this functionality the driver 
+exposes the standard filters for Analog TV, Digital TV and Video Capture. This 
+sample demonstrates how to write&nbsp; BDA/AVStream drivers for TV Tuner cards 
+and AVStream&nbsp; drivers for video capture cards in general.</p>
+<p align="left"><b><font size="4">Building and Installing the Sample Driver</font></b></p>
+<p align="left">
+This sample builds and functions&nbsp;in i386 and&nbsp;amd64 platforms.&nbsp;It 
+installs and works on all Windows systems starting from Windows 98 Gold 
+provided DirectX 9.0&nbsp; (or some equivalent) is installed on the system.</p>
+<p align="left">Run "build -cZ" from the europa directory. This should build the 
+driver binary <i>34bdacap.sys</i> and the coinstaller <i>34coinstaller.dll</i>. 
+The&nbsp;INF file&nbsp;used to install the driver is <EM>34avstrm.inf </EM>(<EM>34avstrm_w2k.inf
+</EM>for Windows 2000 and Windows 9x).&nbsp; The source files are arranged in 
+five directories : <i>src</i> (which contains the actual AVStream driver 
+sources), <i>inc</i> (the headers for the AVStream driver), <i>coinstaller </i>(which 
+contains the coinstaller sources for Europa installation),<i> hal</i> (which 
+contains the headers and a lib file for the card's HAL) and <i>lib</i> (which 
+contains the headers and a lib file specific to the board - these call into the 
+HAL). <EM>34hal.lib</EM> and <EM>34kmproxy.lib </EM>areboth required to build 
+the sample but&nbsp;distributed in binary form only. The coinstaller makes sure 
+that the driver can be installed only if DirectX version 9.0 or higher is 
+installed on the system. If DirectX 9.0 (or&nbsp;some equivalent) is not 
+installed on the system, the coinstaller fails the install with an error 
+message indicating "Bad Environment".</p>
+<p align="left">To install the driver, point the hardware wizard to a directory 
+containing the files <i>34avstrm.inf</i>, <i>34bdacap.sys and 34coinstaller.dll</i>. 
+Use <EM>34avstrm_w2k.inf</EM> instead <EM>34avstrm.inf</EM> on Windows 2000 and 
+Windows 9x systems. On XP and higher systems you shouldn't need to reboot in 
+order to install or reinstall the driver.</p>
+<P align="left">The driver needs to be built separately for the 1316 and 1344 tuner 
+boards. The tuner type defaults to 1316, and this can be changed 
+by&nbsp;changing&nbsp;a compiler flag in the&nbsp;sources file. Change -DTD1316 
+in the sources file&nbsp;to -DTD1344.</P>
+<p align="left"><b><font size="4">Graph Building</font></b></p>
+<p align="left"><i>To build a digital TV graph</i> insert the DVBT Network 
+Provider, the Europa BDA Tuner (from the BDA Source Filters category) and the 
+Europa BDA Digital Capture (BDA Receiver Components). Make sure there is a 
+tuning space called "DVBT". If not create one using the DVBT network provider 
+proppage and then right click, render the pin on the network provider. This 
+should build the entire graph pulling up required filters like the Transport 
+Information Filter, the MPEG2 Demultiplexer and the audio/video decoders. In 
+order to use the network provider property pages you will need to register 
+proppage.dll. Also when first creating a tuning space do a submit tune request 
+as well. In the absence of a tuning space the graph will not build.</p>
+<p align="left"><i>To build an Analog TV graph </i>insert the "Europa Analog Tuner" 
+(from the WDM Streaming TV Tuner Devices category), the "Europa Analog TV 
+Audio" filter (WDM Streaming TV Audio), the "Europa BDA Crossbar Filter" (WDM 
+Streaming Crossbar Devices) and the "Europa BDA Analog Capture" filter (WDM 
+Streaming Capture Devices). After this build and run an Analog TV graph in the 
+usual manner.
+</p>
+<p align="left"><i>To build a Video Capture graph</i> follow the instructions for 
+Analog TV - but you can dispense with the the tuner and tv audio filters. Set 
+the crossbar properties appropriately for S-Video and Composite Inputs and the 
+corresponding audio line-in. You will need to manually insert the CC/WST and 
+Line 21 Decoder filters for Closed Captioning / Teletext.
+</p>
+<p align="left"><font size="4"><b>Notes</b></font></p>
+<P align="left">1. The dgtl* files deal with Digital TV and the anlg* deal with 
+Analog TV and Video Capture related filters, pins and formats. The vamp* files 
+refer to the VampDevice which is a layer of abstraction between the driver and 
+the hardware.</P>
+<p align="left">2. Europa has a line-in for audio capture as well. Correspondingly, 
+the Analog Capture Filter has an Audio Out pin that produces Wave Format (PCM) 
+Audio.</p>
+</body>
+</html>

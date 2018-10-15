@@ -1,0 +1,6 @@
+!include ..\sources.inc
+
+TARGETNAME=bfdoupr
+
+C_DEFINES= $(C_DEFINES)  -DDBUS_UPPER=1
+

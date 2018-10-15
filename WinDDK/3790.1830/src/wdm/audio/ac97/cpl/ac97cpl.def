@@ -1,0 +1,6 @@
+LIBRARY AC97CPL
+
+EXPORTS
+        CPlApplet
+        AddPropSheet
+

@@ -1,0 +1,61 @@
+; Installation inf for the Intel 82930 USB IO Test Board
+;
+; (c) Copyright 1999 Microsoft
+;
+
+[Version]
+Signature="$CHICAGO$"
+Class=USB
+ClassGUID={36FC9E60-C465-11CF-8056-444553540000}
+provider=%MSFT%
+DriverVer=08/05/1999,5.00.2064
+CatalogFile=selSusp.cat
+
+[SourceDisksNames]
+1=%Disk_Description%,,,
+
+[SourceDisksFiles]
+SELSUSP.sys = 1
+
+[Manufacturer]
+%MfgName%=Microsoft
+
+[Microsoft]
+%USB\VID_045E&PID_930A.DeviceDesc%=SELSUSP.Dev, USB\VID_045E&PID_930A
+
+[DestinationDirs]
+SELSUSP.Files.Ext = 10,System32\Drivers
+
+[SELSUSP.Dev.NT]
+CopyFiles=SELSUSP.Files.Ext
+
+[SELSUSP.Dev.NT.Services]
+Addservice = SELSUSP, 0x00000002, SELSUSP.AddService
+
+[SELSUSP.AddService]
+DisplayName    = %SELSUSP.SvcDesc%
+ServiceType    = 1                  ; SERVICE_KERNEL_DRIVER
+StartType      = 3                  ; SERVICE_DEMAND_START
+ErrorControl   = 1                  ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %10%\System32\Drivers\SELSUSP.sys
+AddReg         = SELSUSP.AddReg
+LoadOrderGroup = Base
+
+[SELSUSP.AddReg]
+HKR,,DevLoader,,*ntkern
+HKR,,NTMPDriver,,SELSUSP.sys
+HKR,"Parameters","MaximumTransferSize",0x10001,4096
+HKR,"Parameters","DebugLevel",0x10001,2
+HKR,"Parameters","SelectSuspendEnable",0x10001,1
+
+[SELSUSP.Files.Ext]
+SELSUSP.sys
+
+;---------------------------------------------------------------;
+
+[Strings]
+MSFT="Microsoft"
+Disk_Description="Selective Suspend Installation Disk"
+MfgName="Intel"
+USB\VID_045E&PID_930A.DeviceDesc="selSusp.Sys Intel 82930 USB IO Test Board"
+SELSUSP.SvcDesc="SelSusp.Sys i82930 IO test driver"

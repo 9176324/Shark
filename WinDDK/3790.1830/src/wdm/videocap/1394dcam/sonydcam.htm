@@ -1,0 +1,222 @@
+<html>
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>SonyDCam</title>
+</head>
+<body bgcolor="#FFFFFF" link=blue vlink=blue class="Normal" lang=EN-US>
+<div class=Section1> 
+  <h2><span class=SpellE><span style='font-family:Verdana'>SonyDCam</span></span></h2>
+  <h3><span style='font-family:Verdana'>SUMMARY</span></h3>
+  <p><span class=SpellE><span style='font-size:10.0pt;font-family:Verdana'>SonyDCam</span></span><span
+style='font-size:10.0pt;font-family:Verdana'> is a sample WDM Stream class video 
+    capture driver that supports two IEEE 1394-based digital cameras:</span></p>
+  <ul type=disc>
+    <li><span style='font-size:10.0pt;
+     font-family:Verdana'>Sony 1394 CCM-DS250 Desktop Camera </span></li>
+    <li><span style='font-size:10.0pt;
+     font-family:Verdana'>TI 1394 MC680-DCC Desktop Camera</span></li>
+  </ul>
+  <p><span class=SpellE><span style='font-size:10.0pt;font-family:Verdana'>SonyDCam</span></span><span
+style='font-size:10.0pt;font-family:Verdana'> may support other 1394-based digital 
+    cameras that conform to the Digital Camera Specification from the 1394 Trade 
+    Association.</span></p>
+  <p><span style='font-size:10.0pt;font-family:Verdana'>A digital camera supported 
+    by <span class=SpellE>Sonydcam.sys</span> is a data source that produces digital 
+    image data without any other input connection. <span
+class=SpellE>SonyDCam</span> displays as a WDM Streaming Capture Device. <span
+class=SpellE>SonyDCam's</span> capture filter outputs a 320x240 capture stream 
+    in a UYVY color space. The output capture stream can be converted to another 
+    format using one of the filters provided in the msyuv.dll <span class=SpellE>decompressor</span>. 
+    Msyuv.dll is part of the Windows operating system delivery, and can convert 
+    image data format from UYVY to RGB16, RGB8, or to a Direct Draw surface if 
+    the video card supports UYVY <span class=GramE>format</span>.</span></p>
+  <p><span style='font-size:10.0pt;font-family:Verdana'>The <a
+href="http://www.1394ta.org/">1394 Trade Association's</a> 
+    website contains IEEE 1394 bus-related articles and specifications.</span></p>
+  <p><span style='font-size:10.0pt;font-family:Verdana'>The Windows Hardware and Driver 
+    Central website contains additional information about class driver support 
+    for an IEEE 1394 bus on both Windows® 98 and later, and Windows 2000 and later 
+    operating systems.</span></p>
+  <h3><span style='font-family:Verdana'>USING THE SAMPLE</span></h3>
+  <p><span style='font-size:10.0pt;font-family:Verdana'>The <span class=SpellE>SonyDCam</span> 
+    sample is completely contained in one directory. Build the sample with the 
+    standard DDK <i>build</i> utility. You may build the sample in either a checked 
+    or free DDK build environment. <span class=SpellE>SonyDCam</span> compiles 
+    for Windows 98 and later, and Windows 2000 and later operating systems. The 
+    sample also compiles for 64-bit Windows platforms.</span></p>
+  <p><span class=SpellE><span style='font-size:10.0pt;font-family:Verdana'>SonyDCam</span></span><span
+style='font-size:10.0pt;font-family:Verdana'> can not be manually installed because 
+    it is a Plug and Play driver. The <span class=SpellE>Image.inf</span> device 
+    installation file that is shipped with Windows operating systems installs 
+    detected devices, including <span class=SpellE>SonyDCam</span>, for the cameras 
+    listed earlier. The sample <span class=SpellE>SonyDCam.inf</span> device installation 
+    file is a subset of the <span class=SpellE>Image.inf</span> device installation 
+    file. You can use <span class=SpellE>SonyDCam.inf</span> as a template to 
+    create a device installation file for you own hardware.</span></p>
+  <h3><span style='font-family:Verdana'>LIMITATIONS</span></h3>
+  <p><span class=SpellE><span style='font-size:10.0pt;font-family:Verdana'>SonyDCam</span></span><span
+style='font-size:10.0pt;font-family:Verdana'> does not save to the registry changes 
+    made to property settings between reboots.</span></p>
+  <p><span class=SpellE><span style='font-size:10.0pt;font-family:Verdana'>SonyDCam</span></span><span
+style='font-size:10.0pt;font-family:Verdana'> does not support power management, 
+    such as power transitions from D3-&gt;D0 or D0-&gt;D3 device power states. 
+    The device installation file specifies &quot;<span class=SpellE>DontSuspendIfStreamsAreRunning</span>&quot; 
+    because of this limitation.</span></p>
+  <h3><span style='font-family:Verdana'>CODE TOUR</span></h3>
+  <p><b><span style='font-size:10.0pt;font-family:Verdana'>Operation</span></b></p>
+  <p><span style='font-size:10.0pt;font-family:Verdana'>The <span class=SpellE><span
+class=GramE>DriverEntry</span></span><span class=GramE>(</span>) routine in <span
+class=SpellE>SonyDCam.c</span> initializes a HW_INITIALIZATION_DATA structure 
+    with the entry points of driver-implemented functions.</span></p>
+  <p><span class=GramE><span style='font-size:10.0pt;font-family:Verdana'>The 
+    <span
+class=SpellE>HwReceivePacket</span> member of the HW_INITIALIZATION_DATA structure 
+    points to the driver-implement entry point for receiving <span
+class=SpellE>SRBs</span> (Stream Request Packets) from the Stream class driver.</span></span><span
+style='font-size:10.0pt;font-family:Verdana'> For example, <span class=SpellE>SonyDCam</span> 
+    may receive the following sequence of <span class=SpellE>SRBs</span>:</span></p>
+  <ul type=disc>
+    <li><span style='font-size:10.0pt;
+     font-family:Verdana'>SRB_INITIALIZE_DEVICE to initialize the device, and 
+      called after <span class=SpellE><span class=GramE>DriverEntry</span></span><span
+     class=GramE>(</span>).</span></li>
+    <li><span style='font-size:10.0pt;
+     font-family:Verdana'>SRB_GET_STREAM_INFO to get supported stream formats.</span></li>
+    <li><span style='font-size:10.0pt;
+     font-family:Verdana'>SRB_GET_DATA_INTERSECTION to query a supported format 
+      given some specific data types.</span></li>
+    <li><span style='font-size:10.0pt;
+     font-family:Verdana'>SRB_OPEN_STREAM to open a stream with format supplied 
+      from SRB_GET_DATA_INTERSECTION. <span class=SpellE>SonyDCam</span> registers 
+      two additional entry points for the newly opened stream to control the streaming 
+      state (<span class=SpellE>Srb</span>-&gt;<span
+     class=SpellE>StreamObject</span>-&gt;<span class=SpellE>ReceiveControlPacket</span>) 
+      and streaming data (<span class=SpellE>Srb</span>-&gt;<span class=SpellE>StreamObject</span>-&gt;<span
+     class=SpellE>ReceiveDataPacket</span>).</span></li>
+    <li><span style='font-size:10.0pt;
+     font-family:Verdana'>SRB_CLOSE_STREAM to close the open stream.</span></li>
+    <li><span style='font-size:10.0pt;
+     font-family:Verdana'>SRB_UNINITIALIZE_DEVICE to indicate that a device has 
+      been unloaded or removed.</span></li>
+  </ul>
+  <p><span class=GramE><span style='font-size:10.0pt;font-family:Verdana'>The 
+    <span
+class=SpellE>HwCancelPacket</span> member of the HW_INITIALIZATION_DATA structure 
+    points to the driver-implemented entry point that the Stream class driver 
+    calls to cancel packets that it has already sent to <span class=SpellE>SonyDCam</span>.</span></span><span
+style='font-size:10.0pt;font-family:Verdana'> The <span class=SpellE>HwRequestTimeoutHandler</span> 
+    member of the HW_INITIALIZATION_DATA structure points to the driver-implemented 
+    entry point to call if a packet has been queued for too long and has timed-out.</span></p>
+  <p><span class=SpellE><span style='font-size:10.0pt;font-family:Verdana'>SonyDCam</span></span><span
+style='font-size:10.0pt;font-family:Verdana'> implements two additional callback 
+    functions. The 1394 controller driver calls <span class=SpellE><span
+class=GramE>DCamIsochCallback</span></span><span class=GramE>(</span>) when an 
+    attached buffer is filled with data. The 1394 controller driver calls <span
+class=SpellE><span class=GramE>DCamBusResetNotification</span></span><span
+class=GramE>(</span>) to indicate a 1394 bus reset has occurred. Both of these 
+    functions execute at DISPATCH_LEVEL.</span></p>
+  <p><b><span style='font-size:10.0pt;font-family:Verdana'>Bus Reset</span></b></p>
+  <p><span style='font-size:10.0pt;font-family:Verdana'>There are some special 
+    cases <span class=SpellE>SonyCDam</span> must handle because it supports a 
+    PnP device. For example, (1) unplug the camera while streaming, or (2) plug 
+    a 2<sup>nd</sup> device into the same 1394 controller where a device is already 
+    streaming. In either of these cases the 1394 controller triggers a bus reset. 
+    After a bus reset the controller invalidates its clients' bandwidth and channel. 
+    However, after the bus reset the streaming device should continue to source 
+    isochronous video data according to IEEE 1394 digital camera specification.</span></p>
+  <p><span class=SpellE><span style='font-size:10.0pt;font-family:Verdana'>SonyDCam</span></span><span
+style='font-size:10.0pt;font-family:Verdana'> receives a SRB_SURPRISE_REMOVAL 
+    when its device has been removed. <span class=SpellE>SonyDCam</span> then 
+    must cancel all pending reads and prepare to be unloaded. In this case, <span
+class=SpellE>SonyDCam</span> is likely to receive SRB_UNINITIALIZE_DEVICE before 
+    SRB_CLOSE_STREAM. If a driver still has pending read <span class=SpellE>SRBs</span>, 
+    the Stream class driver will not send SRB_CLOSE_STREAM even after its client 
+    application is closed.</span></p>
+  <p><span style='font-size:10.0pt;font-family:Verdana'>For a device that is still 
+    plugged in, <span class=SpellE>SonyDCam</span> will receive a notification 
+    callback from the 1394 controller to restore to its original state, including 
+    freeing and reallocating channel and bandwidth (but not the resource), and 
+    restore to its original streaming state. <span class=SpellE>SonyDCam</span> 
+    then re-initializes and restarts the device. This is only necessary if the 
+    device stops sourcing isochronous video data. Re-initializing the device is 
+    also necessary if a device was attached but suspended (transition to a lower 
+    device power state) and then awakened (transition to a higher device power 
+    state). In this case, <span class=SpellE>SonyDCam</span> will also receive 
+    a bus reset callback notification.</span></p>
+  <p><b><span style='font-size:10.0pt;font-family:Verdana'>Frame rate and dropped 
+    frames</span></b></p>
+  <p><span style='font-size:10.0pt;font-family:Verdana'>Digital cameras support 
+    discrete frame rates. However, a client application can request to stream 
+    at any rate. WDM video capture drivers are required either to match the requested 
+    rate, or to select the next lower rate from the requested frame rate because 
+    <span
+class=SpellE>oversampling</span> the rate can cause synchronization problems.</span></p>
+  <p><span style='font-size:10.0pt;font-family:Verdana'>The number of dropped 
+    frames must be calculated because after a buffer is attached to the 1394 controller 
+    <span class=GramE>driver,</span> <span class=SpellE>SonyDCam</span> waits 
+    for the data buffer to be filled. If the 1394 controller does not fill the 
+    buffer because it misses the data (resulting in a dropped frame) the controller 
+    does not report that information back to <span class=SpellE>SonyDCam</span> 
+    and thus <span class=SpellE>SonyDCam</span> cannot detect the number of dropped 
+    frames. The calculation is based on the capture rate and the actual count 
+    of captured frames.</span></p>
+  <h4><span style='font-family:Verdana'>File Manifest</span></h4>
+  <pre><u>File           Description</u></pre>
+  <pre><span
+class=SpellE>Callback.c</span>     Process callbacks from controller driver for either a filled buffer or a bus reset</pre>
+  <pre><span
+class=SpellE>CapProp.c</span>      Process <span
+class=SpellE>VideoProcAmp</span> and <st1:place w:st="on"><st1:City w:st="on"><span
+  class=SpellE>CameraControl</span> <st1:State w:st="on">KS properties</pre>
+  <pre><span
+class=SpellE>CapProp.h</span>      Function prototypes for <span
+class=SpellE>CapProp.c</span></pre>
+  <pre><span class=SpellE>CtrlPkt.c</span>      Process stream control packet, such as querying and setting streaming state</pre>
+  <pre><span
+class=SpellE>DataPkt.c</span>      Process stream read data packet.</pre>
+  <pre><span
+class=SpellE>Dbg.c</span>          Debug functions</pre>
+  <pre><span
+class=SpellE>Dbg.h</span>          Debug preprocessor</pre>
+  <pre><span
+class=SpellE>DcamDef.h</span>      Function prototypes</pre>
+  <pre><span
+class=SpellE>DCamPkt.c</span>      Process Stream class driver's SRB_* packets </pre>
+  <pre><span
+class=SpellE>DcamPkt.h</span>      Function prototypes and major structure definition</pre>
+  <pre><span
+class=SpellE>Device.c</span>       Process reading and writing to device's registers</pre>
+  <pre><span
+class=SpellE>PropData.h</span>     Static KS properties for digital camera</pre>
+  <pre><span
+class=SpellE>SonyDCam.c</span>     <span
+class=SpellE><span class=GramE>DriverEntry</span></span><span class=GramE>(</span>), and device initialize and un-initialization</pre>
+  <pre><span
+class=SpellE>SonyDCam.h</span>     Function prototypes for <span
+class=SpellE>SonyDCam.c</span></pre>
+  <pre>SonyDCam.htm   The documentation for this sample (this file)</pre>
+  <pre><span
+class=SpellE>SonyDCam.inf</span>   A sample installation file</pre>
+  <pre><span
+class=SpellE>SonyDCam.rc</span>    Resource <span
+class=GramE>file</span> (mainly for version)</pre>
+  <pre>SOURCES        The generic file for building the code sample</pre>
+  <pre><span
+class=SpellE>StrmData.h</span>     Supported stream formats</pre>
+  <h3><span style='font-family:Verdana'>FEEDBACK</span></h3>
+  <p><span style='font-size:10.0pt;font-family:Verdana'>We welcome your comments, 
+    feature requests and problem reports. See the Windows Hardware and Driver 
+    Central website for more information.</span></p>
+  <p align=center style='text-align:center'><span style='font-size:10.0pt;
+font-family:Verdana'><a href="#top">Top of page</a> </span></p>
+  <table border=0 cellspacing=0 cellpadding=0 width=624>
+    <tr> 
+      <td bgcolor="aqua" class="Normal">&nbsp; </td>
+    </tr>
+  </table>
+  <p><span style='font-size:7.5pt;font-family:"MS Sans Serif"'>© Microsoft Corporation 
+    2004 </span></p>
+</div>
+</body>
+</html>
+

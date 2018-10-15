@@ -1,0 +1,76 @@
+<?xml version='1.0'?>
+<DefectFilters defaultPreset="Recommended Filters">
+    <preset name="Recommended Filters" recommended="1">
+    </preset>
+
+    <preset name="(all defects)">
+    </preset>
+
+    <preset name="(no defects)" invert="1">
+    </preset>
+	<preset name="winpft" invert="1">
+		<excludeWarnings>29;53;56;57;59;63;67;201;202;205;207;241;243;248;252;259;260;268;276;277;281;282;287;288;289;290;291;296;298;299;305;306;308;</excludeWarnings>
+		<excludeRegExps>pft</excludeRegExps>
+	</preset>
+
+	<preset name="wspmin" invert="1">
+		<excludeWarnings>29;53;56;57;59;63;67;201;202;205;207;241;243;248;252;259;260;268;276;277;281;282;287;288;289;290;291;296;298;299;305;306;308;</excludeWarnings>
+		<excludeRegExps>pft</excludeRegExps>
+	</preset>
+
+	<Filter id="pft" enableByDefault="1">
+		<description>PREfast Internal Errors</description>
+		<field>DEFECTCODE</field>
+		<regexp>99[0-9]{3}</regexp>
+	</Filter>
+
+	<Filter id="NTPub" enableByDefault="1">
+		<description>NT Public files</description>
+		<field>SFA/FILEPATH;SFA/FILENAME</field>
+		<regexp>^.*\\public\\.*$</regexp>
+	</Filter>
+
+	<Filter id="VC6" enableByDefault="1">
+		<description>VC6 includes</description>
+		<field>SFA/FILEPATH;SFA/FILENAME</field>
+		<regexp>^.*\\vc98\\include\\.*$</regexp>
+	</Filter>
+
+	<Filter id="MFC" enableByDefault="1">
+		<description>MFC includes</description>
+		<field>SFA/FILEPATH;SFA/FILENAME</field>
+		<regexp>^.*\\mfc\\include\\.*$</regexp>
+		<regexp>^.*\\atlmfc\\.*$</regexp>        
+		<regexp>^.*\\mfcatl\\.*$</regexp>                                
+	</Filter>
+
+	<Filter id="ATL" enableByDefault="1">
+		<description>ATL includes</description>
+		<field>SFA/FILEPATH;SFA/FILENAME</field>
+		<regexp>^.*\\atl\\.*$</regexp>
+		<regexp>^.*\\atl30\\.*$</regexp>        
+		<regexp>^.*\\atl70\\.*$</regexp> 
+		<regexp>^.*\\atlmfc\\.*$</regexp>        
+		<regexp>^.*\\mfcatl\\.*$</regexp>                        
+	</Filter>
+
+	<Filter id="LKRH" enableByDefault="1">
+		<description>LKRHash.h</description>
+		<field>SFA/FILEPATH;SFA/FILENAME</field>
+		<regexp>^.*\\lkrhash\.h$</regexp>
+	</Filter>
+
+	<Filter id="MIDL" enableByDefault="1">
+		<description>generated MIDL files</description>
+		<field>SFA/FILEPATH;SFA/FILENAME</field>
+		<regexp>^.*_[psc]\.c$</regexp>
+	</Filter>
+
+	<Filter id="INC" enableByDefault="0">
+		<description>all include files</description>
+		<field>SFA/FILEPATH;SFA/FILENAME</field>
+		<regexp>^.*\\include\\.*$</regexp>
+		<regexp>^.*\\inc\\.*$</regexp>
+	</Filter>
+
+</DefectFilters>

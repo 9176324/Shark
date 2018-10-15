@@ -1,0 +1,325 @@
+<html xmlns:v="urn:schemas-microsoft-com:vml"
+xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=us-ascii">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 11">
+<meta name=Originator content="Microsoft Word 11">
+<link rel=File-List href="extend_files/filelist.xml">
+<title>Sample User Interface Extension</title>
+<!--[if gte mso 9]><xml>
+ <o:DocumentProperties>
+  <o:Template>Normal</o:Template>
+  <o:LastAuthor>john osborne</o:LastAuthor>
+  <o:Revision>8</o:Revision>
+  <o:TotalTime>361</o:TotalTime>
+  <o:Created>1999-11-18T21:52:00Z</o:Created>
+  <o:LastSaved>2004-10-07T22:45:00Z</o:LastSaved>
+  <o:Pages>1</o:Pages>
+  <o:Words>370</o:Words>
+  <o:Characters>2114</o:Characters>
+  <o:Company>Microsoft Corp.</o:Company>
+  <o:Lines>17</o:Lines>
+  <o:Paragraphs>4</o:Paragraphs>
+  <o:CharactersWithSpaces>2480</o:CharactersWithSpaces>
+  <o:Version>11.6360</o:Version>
+ </o:DocumentProperties>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:HideSpellingErrors/>
+  <w:HideGrammaticalErrors/>
+  <w:ValidateAgainstSchemas/>
+  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
+  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
+  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+ </w:WordDocument>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:LatentStyles DefLockedState="false" LatentStyleCount="156">
+ </w:LatentStyles>
+</xml><![endif]-->
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:SimSun;
+	panose-1:2 1 6 0 3 1 1 1 1 1;
+	mso-font-alt:\5B8B\4F53;
+	mso-font-charset:134;
+	mso-generic-font-family:auto;
+	mso-font-format:other;
+	mso-font-pitch:variable;
+	mso-font-signature:1 135135232 16 0 262144 0;}
+@font-face
+	{font-family:Verdana;
+	panose-1:2 11 6 4 3 5 4 4 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:536871559 0 0 0 415 0;}
+@font-face
+	{font-family:"MS Sans Serif";
+	panose-1:0 0 0 0 0 0 0 0 0 0;
+	mso-font-alt:"Times New Roman";
+	mso-font-charset:0;
+	mso-generic-font-family:roman;
+	mso-font-format:other;
+	mso-font-pitch:auto;
+	mso-font-signature:0 0 0 0 0 0;}
+@font-face
+	{font-family:"\@SimSun";
+	mso-font-charset:134;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:3 135135232 16 0 262145 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0in;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";
+	color:black;}
+h1
+	{mso-margin-top-alt:auto;
+	margin-right:0in;
+	mso-margin-bottom-alt:auto;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	mso-outline-level:1;
+	font-size:24.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:SimSun;
+	color:black;
+	font-weight:bold;}
+h2
+	{mso-margin-top-alt:auto;
+	margin-right:0in;
+	mso-margin-bottom-alt:auto;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	mso-outline-level:2;
+	font-size:18.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:SimSun;
+	color:black;
+	font-weight:bold;}
+h3
+	{mso-margin-top-alt:auto;
+	margin-right:0in;
+	mso-margin-bottom-alt:auto;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	mso-outline-level:3;
+	font-size:13.5pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:SimSun;
+	color:black;
+	font-weight:bold;}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+p
+	{mso-margin-top-alt:auto;
+	margin-right:0in;
+	mso-margin-bottom-alt:auto;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";
+	color:black;}
+pre
+	{margin:0in;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt;
+	font-size:10.0pt;
+	font-family:"Courier New";
+	mso-fareast-font-family:"Courier New";
+	color:black;}
+@page Section1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.25in 1.0in 1.25in;
+	mso-header-margin:.5in;
+	mso-footer-margin:.5in;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+ /* List Definitions */
+ @list l0
+	{mso-list-id:371000526;
+	mso-list-type:hybrid;
+	mso-list-template-ids:619977120 67698703 67698713 67698715 67698703 67698713 67698715 67698703 67698713 67698715;}
+@list l0:level1
+	{mso-level-tab-stop:.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level2
+	{mso-level-tab-stop:1.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level3
+	{mso-level-tab-stop:1.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level4
+	{mso-level-tab-stop:2.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level5
+	{mso-level-tab-stop:2.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level6
+	{mso-level-tab-stop:3.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level7
+	{mso-level-tab-stop:3.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level8
+	{mso-level-tab-stop:4.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level9
+	{mso-level-tab-stop:4.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Table Normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0in 5.4pt 0in 5.4pt;
+	mso-para-margin:0in;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman";
+	mso-ansi-language:#0400;
+	mso-fareast-language:#0400;
+	mso-bidi-language:#0400;}
+</style>
+<![endif]--><!--[if gte mso 9]><xml>
+ <o:shapedefaults v:ext="edit" spidmax="6146"/>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <o:shapelayout v:ext="edit">
+  <o:idmap v:ext="edit" data="1"/>
+ </o:shapelayout></xml><![endif]-->
+</head>
+
+<body bgcolor=white lang=EN-US link=blue vlink=blue style='tab-interval:.5in'
+leftmargin=8>
+
+<div class=Section1>
+
+<h1><a name=MYSAMPLE>Sample </a>User Interface Extension</h1>
+
+<h2><span style='font-size:14.0pt'>SUMMARY<o:p></o:p></span></h2>
+
+<p>This sample shows how to write Windows Image Acquisition (WIA) user
+interface (UI) extensions. It adds tabs to the device properties dialog
+(accessible from Explorer) and it adds commands to the context menu for the
+sample camera device&#8217;s icon. These extensions are applied to the WIA
+sample camera from this DDK by providing implementations of IShellPropSheetExt
+and IContextMenu.</p>
+
+<p>This sample will not work on Windows 98 or Windows 2000.</p>
+
+<h3><span style='font-size:14.0pt'>BUILDING THE SAMPLE<o:p></o:p></span></h3>
+
+<p>To build the sample follow these steps:</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l0 level1 lfo2;
+tab-stops:list .5in'><![if !supportLists]><span style='mso-list:Ignore'>1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><![endif]>In
+the Start menu, select<span style='mso-spacerun:yes'>&nbsp; </span>&quot;Free
+Build Environment&quot; or &quot;Checked Build Environment&quot; under
+&quot;Windows DDK&quot; to open a command window and set basic environment
+variables needed to build drivers. </p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l0 level1 lfo2;
+tab-stops:list .5in'><![if !supportLists]><span style='mso-list:Ignore'>2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><![endif]>Change
+to the directory containing the sample driver source code, src\wdm\wia\extend.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l0 level1 lfo2;
+tab-stops:list .5in'><![if !supportLists]><span style='mso-list:Ignore'>3.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><![endif]>Execute
+the &quot;build&quot; command. After the build completes, a library named
+Extend.dll will be located in a subdirectory.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l0 level1 lfo2;
+tab-stops:list .5in'><![if !supportLists]><span style='mso-list:Ignore'>4.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><![endif]>Also
+build the sample camera driver located in the src\wdm\wia\wiacam directory.</p>
+
+<h3><span style='font-size:14.0pt'>USING THE SAMPLE<o:p></o:p></span></h3>
+
+<p><! ---------------- Snip  Snip ---------------- >To use the driver, follow
+the instructions in the sample camera readme file, <a
+href="../wiacam/wiacam.htm">wiacam.htm</a>.</p>
+
+<p>To test the sample UI extensions, open the Scanners and Cameras folder in
+Explorer.</p>
+
+<h3><span style='font-size:14.0pt'>RESOURCES<o:p></o:p></span></h3>
+
+<p>WIA information: <a
+href="http://www.microsoft.com/whdc/device/stillimage/default.mspx">http://www.microsoft.com/whdc/device/stillimage/default.mspx</a><span
+style='font-size:10.0pt;font-family:Arial'><o:p></o:p></span></p>
+
+<p>DDK information: <a href="http://www.microsoft.com/whdc/default.mspx">http://www.microsoft.com/whdc/default.mspx</a></p>
+
+<h3><span style='font-size:14.0pt'>CODE TOUR<o:p></o:p></span></h3>
+
+<h3>File Manifest</h3>
+
+<pre>Files<span style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>Description</pre><pre>------------ -------------------------------------------------------</pre><pre>classes.h<span style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp; </span>Defines interface for extensions</pre><pre>extend.cpp<span style='mso-spacerun:yes'>&nbsp;&nbsp; </span>Implements UI extensions</pre><pre>extend.def<span style='mso-spacerun:yes'>&nbsp;&nbsp; </span>Linker command file</pre><pre>extend.h<span style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp; </span>Header file for UI extensions</pre><pre>extend.rc<span style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp; </span>Resources for UI extensions</pre><pre>makefile<span style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp; </span>Used for building the UI extensions&#8212;do not modify</pre><pre>precomp.h<span style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp; </span>Precompiled header file containing all included headers</pre><pre>resource.h<span style='mso-spacerun:yes'>&nbsp;&nbsp; </span>Header file for resources</pre><pre>shellext.cpp Implements IcontextMenu and IShellPropSheetExt</pre><pre>sources<span style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp; </span><span style='mso-spacerun:yes'>&nbsp;&nbsp;</span>Controls building of UI extensions</pre><pre>stdafx.cpp<span style='mso-spacerun:yes'>&nbsp;&nbsp; </span>Includes standard header files</pre><pre>wiacamui.rgs Registry entries for UI extensions</pre><pre>extend.htm<span style='mso-spacerun:yes'>&nbsp;&nbsp; </span>This readme file</pre><pre>extidl.idl<span style='mso-spacerun:yes'>&nbsp;&nbsp; </span>MIDL interface definition file</pre><pre>readme.htm<span style='mso-spacerun:yes'>&nbsp;&nbsp; </span>Project readme file</pre><pre>tcamprop.h<span style='mso-spacerun:yes'>&nbsp;&nbsp; </span>Header file for private device properties</pre><pre>testdev.ico<span style='mso-spacerun:yes'>&nbsp;&nbsp; </span>Sample device icon</pre><pre><o:p>&nbsp;</o:p></pre>
+
+<p align=center style='text-align:center;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><a
+href="#top"><span style='font-size:10.0pt;font-family:Verdana'>Top of page</span></a><span
+style='font-size:10.0pt;font-family:Verdana'> <o:p></o:p></span></p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width=624
+ style='width:6.5in;mso-cellspacing:0in;mso-padding-alt:0in 0in 0in 0in'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes;
+  height:1.5pt'>
+  <td style='background:aqua;padding:.75pt .75pt .75pt .75pt;height:1.5pt'>
+  <p class=MsoNormal><o:p>&nbsp;</o:p></p>
+  </td>
+ </tr>
+</table>
+
+<p style='tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
+style='font-size:7.5pt;font-family:"MS Sans Serif"'>&copy; 2004 Microsoft
+Corporation</span><span style='font-size:10.0pt;font-family:Verdana'> <o:p></o:p></span></p>
+
+<pre><o:p>&nbsp;</o:p></pre></div>
+
+</body>
+
+</html>
+

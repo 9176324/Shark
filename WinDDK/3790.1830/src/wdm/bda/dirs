@@ -1,0 +1,4 @@
+DIRS= \
+     capturesample \
+     europa \
+     generictuner

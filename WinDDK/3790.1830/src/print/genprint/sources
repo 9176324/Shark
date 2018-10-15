@@ -1,0 +1,49 @@
+!IF 0
+
+Copyright (c) 1989-2003  Microsoft Corporation
+All Rights Reserved
+
+Module Name:
+
+    sources.
+
+Abstract:
+
+    This file specifies the target component being built and the list of
+    sources files needed to build that component.  Also specifies optional
+    compiler switches and libraries that are unique for the component being
+    built.
+
+!ENDIF
+
+C_DEFINES=-DUNICODE -DNO_STRICT
+
+!IFNDEF MSC_WARNING_LEVEL
+MSC_WARNING_LEVEL=/W3
+!ENDIF
+MSC_WARNING_LEVEL=$(MSC_WARNING_LEVEL) /WX
+
+USE_MSVCRT=1
+
+BUILD_PRODUCES=PrintscanPrintSpoolerPrtprocsWinprint
+TARGETPATH=obj
+TARGETNAME=genprint
+TARGETTYPE=DYNLINK
+DLLDEF=winprint.def
+DLLORDER=winprint.prf
+DLLENTRY=_DllMainCRTStartup
+TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
+           $(SDK_LIB_PATH)\spoolss.lib  \
+           $(SDK_LIB_PATH)\user32.lib   \
+           $(DDK_LIB_PATH)\gdi32.lib
+
+SOURCES=winprint.rc \
+        parsparm.c  \
+        support.c   \
+        winprint.c  \
+        emf.c       \
+        local.c     \
+        util.c      \
+        text.c      \
+        raw.c
+

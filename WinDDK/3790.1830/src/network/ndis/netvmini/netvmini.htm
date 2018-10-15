@@ -1,0 +1,145 @@
+<html>
+
+<head>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1252">
+<meta NAME="GENERATOR" CONTENT="Microsoft FrontPage 3.0">
+<title>NDIS Virtual Miniport Driver</title>
+<meta NAME="Template" CONTENT="C:\PROGRAM FILES\MICROSOFT OFFICE\OFFICE\html.dot">
+</head>
+
+<body TEXT="#000000" LINK="#0000ff" VLINK="#800080" BGCOLOR="#ffffff" leftmargin="8">
+<font FACE="Verdana">
+
+<h2><a NAME="NETVMINI">NDIS Virtual Miniport Driver</a> </h2>
+
+<h3>SUMMARY</h3>
+</font><font FACE="Verdana" SIZE="2">
+
+<p>The purpose of this sample is to illustrate functionality of a deserialized NDIS miniport driver without requiring a physical network adapter. This sample is based on E100BEX sample present in the DDK. It is basically a simplified version of E100bex driver. Since the driver does not interact with any hardware, it makes it very easy to understand the miniport interface and the usage of various NDIS functions without the clutter of hardware specific code normally found in a fully functional driver. The driver can be installed either manually using Add Hardware wizard as a root enumerated virtual miniport driver or on a virtual bus (like toaster bus). </p>
+
+
+<p><B>Note:</B> This sample provides an example of minimal driver intended for education purposes. Neither the driver or it's sample test programs are intended for use in a production environment. </p>
+
+<p>The driver can be built in the Windows&reg; 2000, XP, and Server 2003 DDK build environment</p>
+<p>The driver can be installed in the Windows&reg; 2000, XP, and Windows Server 2003 operating system. Windows 2000 supports only NDIS 5.0 version miniport driver. Windows XP and Windows Server 2003 supports NDIS 5.0 & 5.1 versions of miniport driver.
+</p>
+
+
+<h3>BUILDING THE SAMPLE</h3>
+
+<p>Click the Free Build Environment or Checked Build Environment icon under your 
+<b>Development Kits </b> program group to set basic environment variables needed 
+by the build utility. </p>
+
+<p>Change to the directory containing the device source code, such as CD
+Src\network\ndis\netvmini. </p>
+
+<p>Run <b>build -ceZ</b>, or use the macro <b>BLD</b>. This behavior invokes the Microsoft
+make routines that produce log files called Buildxxx_yyy_zzz.log, and also Buildxx_yyy_zzz.wrn and Buildxx_yyy_zzz.err if
+there are any warnings or errors. Where xxx stands for <b>fre</B> or <b>chk</b> depending
+on the environment chosen, yyy stands for the OS version (W2K, WXP or Wnet), and zzz stands for platform version (x86, IA64 or AMD64). <p>If the build succeeds, the driver, <I>vnetmini.sys</I>, will be placed in a platform specific subdirectory of your
+<b>%TargetPath%</b> directory specified in the Sources file. Depending on the build environment, the driver will be either an NDIS 5.0 or NDIS 5.1 miniport driver. If you build in the Windows 2000 build enviromnet, you will get NDIS 5.0 version of miniport driver. If you build under Windows XP or Windows Server 2003 environment, you will get NDIS 5.1 versions of miniport driver. </p>
+
+<h3>Driver Installation </h3>
+
+<p>To install the driver on Windows 2000, build the driver in Win2K build environment to get NDIS5.0 version of the driver and copy that and <I>NETVMINI.INF</I> file to a floppy or to a directory on the target test machine. Then: 
+
+<ol>
+  <li>Double-click the Add New Hardware Wizard applet in Control Panel.</li>
+  <li>Click Next.</li>
+  <li>Select Add a new device.</li>
+  <li>Select No, I Want to Select the Hardware from a list.</li>
+  <li>Select Network Devices and then click Next. </li>
+  <li>Click Have Disk and point to the directory that contains NETVMINI.INF file.</li>
+</ol>
+
+To install the driver on Windows XP and Windows Server 2003, copy the NDIS5.1 version of the driver and the INF file to a floppy or to a directory on the target machine: <p>
+
+<OL>
+
+<LI>
+      Double-click the ‘Add Hardware’ wizard in Control Panel.
+
+<LI>
+      At the 'Welcome to the Add Hardware Wizard', click ‘Next’.
+
+<LI>
+      Select 'Yes, I have already connected the hardware', then click Next.
+<LI>
+      Select ‘Add a new hardware device’ from the list, then click Next.
+
+<LI>
+      Select ‘Install the hardware that I manually select from a list(Advanced),' and then click next.
+
+<LI>
+      Select ‘Network Devices’, then click Next. 
+
+<LI>  Click 'Have Disk', make sure that 'A:\' is in the "Copy manufacturer's files from:" box, and click OK.
+
+<LI>  Click on the desired entry, and then click Next.
+
+<LI>  At 'The wizard is ready to install your hardware', click Next.
+
+<LI>  Click Finish at 'Completing the Add/Remove Hardware Wizard.'
+ </OL>
+<p>Alternatively, you can use the DEVCON.EXE from the DDK to install the driver programmatically.</P>
+
+<PRE>c:\>DEVCON.EXE   INSTALL   netvmini.inf   "root\netvmini"</PRE>
+
+<p>The system copies the netvmini.sys file to %systemroot%\system32\drivers directory and
+loads the driver.</p>
+<p>
+Instead of root-enumerating, you can also bus enumerate by using the virtual Toaster Bus driver from the DDK. You should first install the toaster bus driver, and then run Notify.exe to install this miniport driver. Make sure to update the Device ID in the "Plug In Device" dialog of the application to have "{b85b7c50-6a01-11d2-b841-00c04fad5171}\NetVMini". The advantage of bus enumerating the miniport is that you can test surprise-removal scenario which is not possible with root-enumerated drivers.</P>
+
+<h3>Testing driver</h3>
+
+<p>To test the miniport driver, install more than one instance of the miniport driver. You can repeat above installation steps to install more than one instance of the miniport. Then install NDIS Tester from WHQL website and run all Client tests.</p>
+
+
+<B>Testing IOCTL Interface</B>
+<P>You can test the ioctl interface provided by the miniport using the testapp.exe. The testapp is a PNP friendly application, in that it registers for PNP notification on the NDIS device and closes the handles at the right time to allow the device from being removed. Please note the PNP manager vetoes any request to disable or uninstall the device and pops-up a dialog to restart the machine if there are any open handles to the device.</P>
+<p>
+The deviceobject registered by the miniport using NdisMRegsiterDevice is a stand-alone control deviceobject and not part of the actual miniport's PNP device stack. When the device is removed, disabled or uninstalled, the PNP notifications are sent only to the interface registered on the PNP stack and not to the control deviceobject. As a result, if an application opens an handle to the control deviceobject, it also needs to have another handle open to the PNP interface registered by NDIS using GUID_NDIS_LAN_CLASS to listen for PNP device-change notification. 
+
+<P>The GUI application illustrates how to do this. First the application registers for interface-change notification on GUID_NDIS_LAN_CLASS. When it gets notified about an existing device-interface, it opens an handle to the device and registers for device-change notification using that handle. This is required to get notified about any kind of PNP activity on the target device. Now the user can optionally open the control deviceobject and send ioctls to it. When the application gets notified about device removal, it not only closes the handle to the NDIS device but also to the control device so that the PNP manager can remove the device. </P>
+</P>
+<h3>CODE TOUR</h3>
+
+<h3>Send & Receive Path Code Path:</h3>
+
+In order to excercise the send and receive code path of this driver, you should install more than one instance of the miniport. If there is only one instance installed, the driver throws the send packet on the floor and completes the send successfully. If there are more than one instances present, it indicates the incoming send packet to the other instances. For example, if there are 3 instances: A, B, & C installed. Packets coming in for A instance would be indicated to B & C; packets coming into B would be indicated to C, & A; and packets coming to C would be indicated to A & B. 
+
+<h3>RESOURCES</h3>
+
+<p>For the latest release of the Windows NT device driver kit, see <a
+HREF="http://www.microsoft.com/ddk/">http://www.microsoft.com/ddk/</a>.</p>
+
+<h4>File Manifest</h4>
+</font><u>
+
+<pre>File		Description
+</u>
+netVmini.htm	Sample Tour documentation for this sample (this file).
+Sources		Generic file for building the code sample.
+netVmini.inf	INF file for installing the driver.
+netVmini.RC	Resource file to specify driver version, etc.
+miniport.h	Include file for defining structures, constants and function prototypes.
+miniport.c	Main file that contains driver entry and other miniport functions.
+init.c	        Source file for allocating and initializing resources.
+sendrcv.c	Source file for handling Send & Receive packets.
+</pre>
+
+<p ALIGN="CENTER"><font FACE="Verdana" SIZE="2"><a HREF="#top">Top of page</a> </p>
+</font>
+
+<table CELLSPACING="0" BORDER="0" WIDTH="624">
+  <tr>
+    <td VALIGN="MIDDLE" BGCOLOR="#00ffff" HEIGHT="2"></td>
+  </tr>
+</table>
+<font FACE="MS Sans Serif" SIZE="1">
+
+<p>© 2003 Microsoft Corporation</font><font FACE="Verdana" SIZE="2"> </p>
+</font>
+</body>
+</html>

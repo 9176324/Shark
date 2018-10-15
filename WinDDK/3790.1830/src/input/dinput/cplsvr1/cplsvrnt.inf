@@ -1,0 +1,95 @@
+[version]
+Signature="$CHICAGO$"
+
+[DestinationDirs]
+Sample.CopyFiles = 11
+
+[DefaultInstall]
+CopyFiles = Sample.CopyFiles
+AddReg = Sample.AddReg
+
+[Sample.CopyFiles]
+Cplsvr1.dll
+
+[Sample.AddReg]
+;this register's the CLSID
+HKCR,CLSID\%CONFIGCLSID%\,,,%CPLSAMP%
+HKCR,CLSID\%CONFIGCLSID%\ProgID,,,%CPLSVR1NAME%
+HKCR,CLSID\%CONFIGCLSID%\InProcServer32,,,"%11%\cplsvr1.dll"
+HKCR,CLSID\%CONFIGCLSID%\InProcServer32,ThreadingModel,,"Apartment"
+
+;============================================================================
+;this registers the sample type (2-axis, 4-button)
+;============================================================================
+HKLM,%KEY_OEM%\%CPLSVR1NAME%,OEMName,,"%CPLSVR1NAME%"
+HKLM,%KEY_OEM%\%CPLSVR1NAME%,ConfigCLSID,,%CONFIGCLSID%
+;we are going to support 2 axes, 4 buttons
+HKLM,%KEY_OEM%\%CPLSVR1NAME%,OEMData,1, 00, 00, 00, 00, 04, 00, 00, 00
+;detailed axis information (name, attributes, etc)
+HKLM,%KEY_OEM%\%CPLSVR1NAME%\Axes\0,,,%XAXISDESC%
+HKLM,%KEY_OEM%\%CPLSVR1NAME%\Axes\0,Attributes,1,00,80,00,00,01,00,30,00
+HKLM,%KEY_OEM%\%CPLSVR1NAME%\Axes\1,,,%YAXISDESC%
+HKLM,%KEY_OEM%\%CPLSVR1NAME%\Axes\1,Attributes,1,00,80,00,00,01,00,31,00
+;detailed button information (name, attributes, etc)
+HKLM,%KEY_OEM%\%CPLSVR1NAME%\Buttons\0,,,%BTN0DESC%
+HKLM,%KEY_OEM%\%CPLSVR1NAME%\Buttons\0,Attributes,1,00,80,00,00,09,00,01,00
+HKLM,%KEY_OEM%\%CPLSVR1NAME%\Buttons\1,,,%BTN1DESC%
+HKLM,%KEY_OEM%\%CPLSVR1NAME%\Buttons\1,Attributes,1,00,80,00,00,09,00,02,00
+HKLM,%KEY_OEM%\%CPLSVR1NAME%\Buttons\2,,,%BTN2DESC%
+HKLM,%KEY_OEM%\%CPLSVR1NAME%\Buttons\2,Attributes,1,00,80,00,00,09,00,03,00
+HKLM,%KEY_OEM%\%CPLSVR1NAME%\Buttons\3,,,%BTN3DESC%
+HKLM,%KEY_OEM%\%CPLSVR1NAME%\Buttons\3,Attributes,1,00,80,00,00,09,00,04,00
+
+;============================================================================
+;this registers the sample type (2-axis, 4-button, has effects)
+;============================================================================
+HKLM,%KEY_OEM%\%CPLSVR1FFNAME%,OEMName,,"%CPLSVR1FFNAME%"
+HKLM,%KEY_OEM%\%CPLSVR1FFNAME%,ConfigCLSID,,%CONFIGCLSID%
+;we are going to support 2 axes, 4 buttons
+HKLM,%KEY_OEM%\%CPLSVR1FFNAME%,OEMData,1, 00, 00, 00, 00, 04, 00, 00, 00
+;detailed axis information (name, attributes, etc)
+HKLM,%KEY_OEM%\%CPLSVR1FFNAME%\Axes\0,,,%XAXISDESC%
+HKLM,%KEY_OEM%\%CPLSVR1FFNAME%\Axes\0,Attributes,1,01,81,00,00,01,00,30,00
+HKLM,%KEY_OEM%\%CPLSVR1FFNAME%\Axes\0,FFAttributes,1,0A,00,00,00,00,01,00,00
+HKLM,%KEY_OEM%\%CPLSVR1FFNAME%\Axes\1,,,%YAXISDESC%
+HKLM,%KEY_OEM%\%CPLSVR1FFNAME%\Axes\1,Attributes,1,01,81,00,00,01,00,31,00
+HKLM,%KEY_OEM%\%CPLSVR1FFNAME%\Axes\1,FFAttributes,1,0A,00,00,00,00,01,00,00
+;detailed button information (name, attributes, etc)
+HKLM,%KEY_OEM%\%CPLSVR1FFNAME%\Buttons\0,,,%BTN0DESC%
+HKLM,%KEY_OEM%\%CPLSVR1FFNAME%\Buttons\0,Attributes,1,02,80,00,00,09,00,01,00
+HKLM,%KEY_OEM%\%CPLSVR1FFNAME%\Buttons\1,,,%BTN1DESC%
+HKLM,%KEY_OEM%\%CPLSVR1FFNAME%\Buttons\1,Attributes,1,02,80,00,00,09,00,02,00
+HKLM,%KEY_OEM%\%CPLSVR1FFNAME%\Buttons\2,,,%BTN2DESC%
+HKLM,%KEY_OEM%\%CPLSVR1FFNAME%\Buttons\2,Attributes,1,02,80,00,00,09,00,03,00
+HKLM,%KEY_OEM%\%CPLSVR1FFNAME%\Buttons\3,,,%BTN3DESC%
+HKLM,%KEY_OEM%\%CPLSVR1FFNAME%\Buttons\3,Attributes,1,02,80,00,00,09,00,04,00
+;force feedback support details
+HKLM,%KEY_OEM%\%CPLSVR1FFNAME%\OEMForceFeedback,Attributes,1,00,00,00,00,E8,03,00,00,E8,03,00,00
+HKLM,%KEY_OEM%\%CPLSVR1FFNAME%\OEMForceFeedback,CLSID,,"%EFFECTDRVGUID%"
+HKLM,%KEY_OEM%\%CPLSVR1FFNAME%\OEMForceFeedback\Effects\%GUID_ConstantForce%,,,"%CONSTANTFORCEDESC%"
+HKLM,%KEY_OEM%\%CPLSVR1FFNAME%\OEMForceFeedback\Effects\%GUID_ConstantForce%,Attributes,1,73,01,00,00,01,06,00,00,ED,01,00,00,00,00,00,00,20,00,00,00
+HKLM,%KEY_OEM%\%CPLSVR1FFNAME%\OEMForceFeedback\Effects\%GUID_Sine%,,,"%SINEFORCEDESC%"
+HKLM,%KEY_OEM%\%CPLSVR1FFNAME%\OEMForceFeedback\Effects\%GUID_Sine%,Attributes,1,D3,02,00,00,03,06,00,00,ED,01,00,00,00,00,00,00,20,00,00,00
+HKLM,%KEY_OEM%\%CPLSVR1FFNAME%\OEMForceFeedback\Effects\%GUID_Spring%,,,"%SPRINGFORCEDESC%"
+HKLM,%KEY_OEM%\%CPLSVR1FFNAME%\OEMForceFeedback\Effects\%GUID_Spring%,Attributes,1,90,03,00,00,04,48,00,00,65,01,00,00,00,00,00,00,20,00,00,00
+
+
+[Strings]
+CPLSAMP            = "Sample Game Controllers Custom Property Sheet"
+CPLSVR1NAME        = "CPLSVR1 Sample (2-axis, 4-button)"
+CPLSVR1FFNAME      = "CPLSVR1 Sample (2-axis, 4-button with effects)"
+KEY_OEM            = "System\CurrentControlSet\Control\MediaProperties\PrivateProperties\Joystick\OEM"
+XAXISDESC          = "X Axis (West-East)"
+YAXISDESC          = "Y Axis (North-South)"
+BTN0DESC           = "Trigger"
+BTN1DESC           = "Thumb Trigger"
+BTN2DESC           = "Booster"
+BTN3DESC           = "Eject"
+CONFIGCLSID        = "{13BF4C10-E102-11D0-B3E3-0020AFD4290C}"
+EFFECTDRVGUID      = "{079A13E0-B5C4-11D0-9AD0-00A0C9A06E35}"
+GUID_ConstantForce = "{13541C20-8E33-11D0-9AD0-00A0C9A06E35}"
+GUID_Sine          = "{13541C23-8E33-11D0-9AD0-00A0C9A06E35}"
+GUID_Spring        = "{13541C27-8E33-11D0-9AD0-00A0C9A06E35}"
+CONSTANTFORCEDESC  = "Constant Force"
+SINEFORCEDESC      = "Sine"
+SPRINGFORCEDESC    = "Spring"

@@ -1,0 +1,547 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 10">
+<meta name=Originator content="Microsoft Word 10">
+<link rel=File-List href="demoups_files/filelist.xml">
+<title>Demo UPS minidriver</title>
+<!--[if gte mso 9]><xml>
+ <o:DocumentProperties>
+  <o:Author>Stephen R. Berard</o:Author>
+  <o:LastAuthor>Allen Marshall</o:LastAuthor>
+  <o:Revision>10</o:Revision>
+  <o:TotalTime>29</o:TotalTime>
+  <o:Created>2001-12-07T00:00:00Z</o:Created>
+  <o:LastSaved>2002-01-21T20:48:00Z</o:LastSaved>
+  <o:Pages>1</o:Pages>
+  <o:Words>490</o:Words>
+  <o:Characters>2796</o:Characters>
+  <o:Company>American Power Conversion</o:Company>
+  <o:Lines>23</o:Lines>
+  <o:Paragraphs>6</o:Paragraphs>
+  <o:CharactersWithSpaces>3280</o:CharactersWithSpaces>
+  <o:Version>10.3501</o:Version>
+ </o:DocumentProperties>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:View>Print</w:View>
+  <w:Zoom>BestFit</w:Zoom>
+  <w:SpellingState>Clean</w:SpellingState>
+  <w:GrammarState>Clean</w:GrammarState>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+ </w:WordDocument>
+</xml><![endif]-->
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;
+	mso-font-charset:2;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:0 268435456 0 0 -2147483648 0;}
+@font-face
+	{font-family:Verdana;
+	panose-1:2 11 6 4 3 5 4 4 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:536871559 0 0 0 415 0;}
+@font-face
+	{font-family:"MS Sans Serif";
+	panose-1:0 0 0 0 0 0 0 0 0 0;
+	mso-font-alt:"Times New Roman";
+	mso-font-charset:0;
+	mso-generic-font-family:roman;
+	mso-font-format:other;
+	mso-font-pitch:auto;
+	mso-font-signature:0 0 0 0 0 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0in;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";}
+h2
+	{mso-margin-top-alt:auto;
+	margin-right:0in;
+	mso-margin-bottom-alt:auto;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	mso-outline-level:2;
+	font-size:18.0pt;
+	font-family:"Times New Roman";
+	font-weight:bold;}
+h3
+	{mso-margin-top-alt:auto;
+	margin-right:0in;
+	mso-margin-bottom-alt:auto;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	mso-outline-level:3;
+	font-size:13.5pt;
+	font-family:"Times New Roman";
+	font-weight:bold;}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+p
+	{mso-margin-top-alt:auto;
+	margin-right:0in;
+	mso-margin-bottom-alt:auto;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";}
+span.SpellE
+	{mso-style-name:"";
+	mso-spl-e:yes;}
+span.GramE
+	{mso-style-name:"";
+	mso-gram-e:yes;}
+@page Section1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.25in 1.0in 1.25in;
+	mso-header-margin:.5in;
+	mso-footer-margin:.5in;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+ /* List Definitions */
+ @list l0
+	{mso-list-id:856621998;
+	mso-list-template-ids:-1887928766;}
+@list l0:level1
+	{mso-level-tab-stop:.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level2
+	{mso-level-tab-stop:1.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level3
+	{mso-level-tab-stop:1.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level4
+	{mso-level-tab-stop:2.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level5
+	{mso-level-tab-stop:2.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level6
+	{mso-level-tab-stop:3.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level7
+	{mso-level-tab-stop:3.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level8
+	{mso-level-tab-stop:4.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level9
+	{mso-level-tab-stop:4.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l1
+	{mso-list-id:917902133;
+	mso-list-template-ids:-204947600;}
+@list l1:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l1:level2
+	{mso-level-tab-stop:1.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l1:level3
+	{mso-level-tab-stop:1.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l1:level4
+	{mso-level-tab-stop:2.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l1:level5
+	{mso-level-tab-stop:2.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l1:level6
+	{mso-level-tab-stop:3.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l1:level7
+	{mso-level-tab-stop:3.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l1:level8
+	{mso-level-tab-stop:4.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l1:level9
+	{mso-level-tab-stop:4.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2
+	{mso-list-id:967275839;
+	mso-list-template-ids:-1783480048;}
+@list l2:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l2:level2
+	{mso-level-tab-stop:1.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2:level3
+	{mso-level-tab-stop:1.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2:level4
+	{mso-level-tab-stop:2.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2:level5
+	{mso-level-tab-stop:2.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2:level6
+	{mso-level-tab-stop:3.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2:level7
+	{mso-level-tab-stop:3.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2:level8
+	{mso-level-tab-stop:4.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2:level9
+	{mso-level-tab-stop:4.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l3
+	{mso-list-id:1010261280;
+	mso-list-template-ids:-1637157964;}
+@list l3:level1
+	{mso-level-tab-stop:.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l4
+	{mso-list-id:1246648340;
+	mso-list-template-ids:-2046270162;}
+@list l4:level1
+	{mso-level-tab-stop:.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l5
+	{mso-list-id:1731687321;
+	mso-list-template-ids:133613986;}
+@list l5:level1
+	{mso-level-tab-stop:.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l6
+	{mso-list-id:1732456476;
+	mso-list-template-ids:-860734320;}
+@list l6:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l7
+	{mso-list-id:1816294252;
+	mso-list-template-ids:1956828798;}
+@list l7:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l8
+	{mso-list-id:1819154669;
+	mso-list-template-ids:-311934658;}
+@list l8:level1
+	{mso-level-tab-stop:.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l8:level2
+	{mso-level-tab-stop:1.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l8:level3
+	{mso-level-tab-stop:1.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l8:level4
+	{mso-level-tab-stop:2.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l8:level5
+	{mso-level-tab-stop:2.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l8:level6
+	{mso-level-tab-stop:3.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l8:level7
+	{mso-level-tab-stop:3.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l8:level8
+	{mso-level-tab-stop:4.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l8:level9
+	{mso-level-tab-stop:4.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Table Normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0in 5.4pt 0in 5.4pt;
+	mso-para-margin:0in;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman";}
+</style>
+<![endif]-->
+<meta name=Author content="Stephen R. Berard">
+</head>
+
+<body lang=EN-US link=blue vlink=blue style='tab-interval:.5in'>
+
+<div class=Section1>
+
+<h2><span style='font-family:Verdana'>UPS <span class=SpellE>Minidriver</span> Demo<o:p></o:p></span></h2>
+
+<h3><span style='font-family:Verdana'>SUMMARY<o:p></o:p></span></h3>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>The&nbsp;Demo UPS&nbsp;sample
+provides an example of a UPS minidriver for use by the UPS service.&nbsp; It
+contains annotated code to assist in developing a UPS minidriver DLL.&nbsp;
+Detailed documentation may be found in the Windows 2000/XP DDK under Battery
+Devices.<o:p></o:p></span></p>
+
+<h3><span style='font-family:Verdana'>Introduction to UPS <span class=SpellE>Minidrivers</span><o:p></o:p></span></h3>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>A UPS minidriver provides
+a means for the standard UPS service to communicate with various UPS
+devices.&nbsp; Third parties may provide a minidriver to enable the UPS service
+to manage their proprietary hardware.&nbsp; A UPS minidriver&nbsp;is a
+user-mode DLL called by the UPS service.&nbsp; A UPS <span class=SpellE>minidriver</span>
+has the following responsibilities:<o:p></o:p></span></p>
+
+<ul type=disc>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l2 level1 lfo3;tab-stops:list .5in'><span style='font-size:10.0pt;
+     font-family:Verdana'>Initialize the communication path to the UPS. <o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l2 level1 lfo3;tab-stops:list .5in'><span style='font-size:10.0pt;
+     font-family:Verdana'>Update registry entries that are used to display
+     information to the user via <strong><span style='font-family:Verdana'>Power
+     Options</span></strong>. <o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l2 level1 lfo3;tab-stops:list .5in'><span style='font-size:10.0pt;
+     font-family:Verdana'>Monitor the UPS for state changes. <o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l2 level1 lfo3;tab-stops:list .5in'><span style='font-size:10.0pt;
+     font-family:Verdana'>Power off the UPS outlets upon shutdown (if supported
+     by the hardware). <o:p></o:p></span></li>
+</ul>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>Typically, a UPS
+minidriver communicates with a UPS device through a COM (serial) port by
+calling <span class=SpellE><strong><span style='font-family:Verdana'>CreateFile</span></strong></span>,
+<span class=SpellE><strong><span style='font-family:Verdana'>ReadFile</span></strong></span>,
+and <span class=SpellE><strong><span style='font-family:Verdana'>WriteFile</span></strong></span>.&nbsp;
+These functions are described in the Platform SDK documentation.&nbsp; The
+minidriver is responsible for implementing whatever communication protocol the
+UPS unit supports.</span></p>
+
+<p><b><span style='font-size:10.0pt;font-family:Verdana'>Note: </span></b><span
+style='font-size:10.0pt;font-family:Verdana'>This package is intended to
+demonstrate UPS minidriver concepts for educational purposes. It is not to be
+used in a production environment in its entirety.&nbsp;<o:p></o:p></span></p>
+
+<h3><span style='font-family:Verdana'>Introduction to the Demo UPS Sample<o:p></o:p></span></h3>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>This sample package
+consists of source code and an installation INF file. The sample contains
+following files: <o:p></o:p></span></p>
+
+<ul type=disc>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l1 level1 lfo6;tab-stops:list .5in'><span class=SpellE><span
+     class=GramE><i style='mso-bidi-font-style:normal'><span style='font-size:
+     10.0pt;font-family:Verdana'>demoups.cpp</span></i></span></span><span
+     class=GramE><span style='font-size:10.0pt;font-family:Verdana'> :</span></span><span
+     style='font-size:10.0pt;font-family:Verdana'>&nbsp; C/C++ source file.<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l1 level1 lfo6;tab-stops:list .5in'><span class=SpellE><span
+     class=GramE><i><span style='font-size:10.0pt;font-family:Verdana'>demoups.h</span></i></span></span><span
+     class=GramE><span style='font-size:10.0pt;font-family:Verdana'> :</span></span><span
+     style='font-size:10.0pt;font-family:Verdana'> C/C++ header file.<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l1 level1 lfo6;tab-stops:list .5in'><span class=SpellE><span
+     class=GramE><em><span style='font-size:10.0pt;font-family:Verdana'>demoups.def</span></em></span></span><span
+     class=GramE><span style='font-size:10.0pt;font-family:Verdana'> :</span></span><span
+     style='font-size:10.0pt;font-family:Verdana'> Module definitions file for
+     the project.<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l1 level1 lfo6;tab-stops:list .5in'><span class=SpellE><span
+     class=GramE><em><span style='font-size:10.0pt;font-family:Verdana'>demoups.inf</span></em></span></span><span
+     class=GramE><span style='font-size:10.0pt;font-family:Verdana'> :</span></span><span
+     style='font-size:10.0pt;font-family:Verdana'> Information&nbsp;file used
+     for installation.<o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l1 level1 lfo6;tab-stops:list .5in'><span class=GramE><em><span
+     style='font-size:10.0pt;font-family:Verdana'>demoups.htm</span></em><span
+     style='font-size:10.0pt;font-family:Verdana'> :</span></span><span
+     style='font-size:10.0pt;font-family:Verdana'> This file.<o:p></o:p></span></li>
+</ul>
+
+<h3><span style='font-family:Verdana'>BUILDING THE SAMPLE<o:p></o:p></span></h3>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>To build the sample
+drivers, you must first set up the DDK environment on your host machine.&nbsp;The
+“Installation and Release Notes” in the Windows 2000/XP DDK has a complete
+description on how to do this.&nbsp; <o:p></o:p></span></p>
+
+<ol start=1 type=1>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l8 level1 lfo9;tab-stops:list .5in'><span style='font-size:10.0pt;
+     font-family:Verdana'>Run the build –<span class=SpellE>ceZ</span> command
+     in the <span class=SpellE>DemoUPS</span> directory to build <i
+     style='mso-bidi-font-style:normal'>demoups.dll</i>.&nbsp;<o:p></o:p></span></li>
+</ol>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>This will build the
+sample. Any errors will be displayed in the Output window. <o:p></o:p></span></p>
+
+<h3><span style='font-family:Verdana'>INSTALLING THE SAMPLE<o:p></o:p></span></h3>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>To install the UPS demo
+minidriver: <o:p></o:p></span></p>
+
+<ol start=1 type=1>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l0 level1 lfo12;tab-stops:list .5in'><span style='font-size:10.0pt;
+     font-family:Verdana'>Using Windows Explorer, navigate to the directory
+     containing the Demo UPS files. <o:p></o:p></span></li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l0 level1 lfo12;tab-stops:list .5in'><span style='font-size:10.0pt;
+     font-family:Verdana'>Right click on&nbsp;<span class=SpellE><em><span
+     style='font-family:Verdana'>demoups.inf</span></em></span><em><span
+     style='font-family:Verdana'> </span></em>and select&nbsp;‘Install’.</span></li>
+</ol>
+
+<p class=MsoNormal><span style='font-size:10.0pt;font-family:Verdana'>This&nbsp;will
+copy the&nbsp;<em><span style='font-family:Verdana'>demoups.dll </span></em>file
+to the&nbsp;<em><span style='font-family:Verdana'>%SystemRoom$\system32</span></em>
+directory and make the appropriate registry entries. <o:p></o:p></span></p>
+
+<h3><span style='font-family:Verdana'>RUNNING THE SAMPLE<o:p></o:p></span></h3>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>Once the Demo UPS
+minidriver is installed, it needs to be&nbsp;configured and started from the <strong><span
+style='font-family:Verdana'>Power Options </span></strong>Control&nbsp;Panel
+applet.</span></p>
+
+<ol start=1 type=1>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l3 level1 lfo13;tab-stops:list .5in'><span style='font-size:10.0pt;
+     font-family:Verdana'>Open the Control Panel and select <strong><span
+     style='font-family:Verdana'>Power Options</span></strong>.</span></li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l3 level1 lfo13;tab-stops:list .5in'><span style='font-size:10.0pt;
+     font-family:Verdana'>Select the ‘UPS’&nbsp;tab and click ‘Select...’ to
+     open the UPS Selection dialog.&nbsp; This dialog allows the user to select
+     their UPS manufacturer, model, and COM port.&nbsp;</span></li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l3 level1 lfo13;tab-stops:list .5in'><span style='font-size:10.0pt;
+     font-family:Verdana'>Select ‘DDK Sample’ for the manufacturer and ‘DDK
+     Demo UPS’&nbsp;for the model and click ‘Finish’.&nbsp; The COM port value
+     is ignored by the Demo UPS minidriver.&nbsp;&nbsp;</span></li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l3 level1 lfo13;tab-stops:list .5in'><span style='font-size:10.0pt;
+     font-family:Verdana'>Click ‘Apply’ to start the UPS service.&nbsp; This
+     will take a few seconds and then the display will show the UPS details.<o:p></o:p></span></li>
+</ol>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>You can uninstall the
+Demo UPS minidriver by selecting ‘None’ for the manufacturer and clicking
+‘Finish’ and ‘<span class=GramE>Apply</span>’.&nbsp; This will remove the Demo
+UPS minidriver configuration and stop the UPS service.<o:p></o:p></span></p>
+
+<p align=center style='text-align:center'><a href="#top"><span
+style='font-size:10.0pt;font-family:Verdana'>Top of page</span></a> <span
+style='font-size:10.0pt;font-family:Verdana'><o:p></o:p></span></p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width=624
+ style='width:6.5in;mso-cellspacing:0in;mso-padding-alt:0in 5.4pt 0in 5.4pt'>
+ <tr style='mso-yfti-irow:0;mso-yfti-lastrow:yes;height:1.5pt'>
+  <td style='background:aqua;padding:.75pt .75pt .75pt .75pt;height:1.5pt;
+  -x-background-x-position: 0%;-x-background-y-position: 0%;background-attachment:
+  scroll'>
+  <p class=MsoNormal><span style='font-size:2.0pt'><o:p>&nbsp;</o:p></span></p>
+  </td>
+ </tr>
+</table>
+
+<p><span style='font-size:7.5pt;font-family:"MS Sans Serif"'>© Microsoft
+Corporation 2001</span><span style='font-size:10.0pt;font-family:Verdana'><o:p></o:p></span></p>
+
+</div>
+
+</body>
+
+</html>
+

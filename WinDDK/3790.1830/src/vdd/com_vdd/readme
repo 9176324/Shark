@@ -1,0 +1,83 @@
+
+This VDD sample implements serial port support for the Virtual DOS
+Machine (VDM) under Windows NT.
+
+The Windows NT VDM has a built-in Virtual Device Driver for serial
+communications, so this sample driver is completely redundant.  It
+illustrates how serial support might have been implemented using Win32
+and the Windows NT DDK.  This sample is based in part on the built-in
+serial driver, but it has been significantly modified and works
+differently.  You should not rely on any feature of this driver when
+writing serial I/O code that might be used under Windows NT.
+
+To install this VDD, use regedit to modify
+
+HKEY_LOCAL_MACHINE
+ \ SYSTEM
+  \ CurrentControlSet
+   \ Control
+    \ VirtualDeviceDrivers
+     \ VDD
+
+to include ddkroot\lib\*\com_vdd.dll from your DDK tree.  Shutdown and
+restart Windows NT to let this change take effect.  Note: once you
+install the DLL as a VDD you can only modify (rebuild) it when no
+VDM's are running.  Use regedit to uninstall the VDD from
+HKEY_LOCAL_MACHINE\...\VDD if you want to use the built-in serial
+support.
+
+An optional feature of a VDD is the direct dispatch function.  Your
+application can call this function directly instead of through the I/O
+instruction trap.  A sample direct dispatch function is included
+(VDDDispatch), but it has not been completed or tested at this time.
+You may use it as a guide, but be aware of its status.  Also, there is
+no equivalent to this function in the built-in serial support.
+
+The code is split into three modules.  The first module (COM_VDD.C) is
+the VDD interface.  This holds the code to install the VDM hooks and
+initialize the virtual UARTs, and to close and release them.  The
+second module (PC_COM.C) implements the DOS interface to the virtual
+UARTs.  It handles IN and OUT instructions to the UART ports and
+generates simulated interrupts as appropriate.  The final module
+(NT_COM.C) implements the interface to Win32.
+
+Unlike the built-in serial support there is no provision for this VDD
+to ever release the serial port once it is used.  As long as the VDM
+remains active you will be able to access the serial port from it, but
+otherwise the serial port is locked out.  You should consider whether
+this is the way you want your VDD to act, and how you might deal with
+this problem.  One option would be to dynamically load and unload your
+VDD rather than installing it permanently.
+
+This VDD is multithreaded.  Besides the thread that executes the DOS
+code there is a thread that monitors the serial port status and an
+optional thread for transmit buffering.  Multithreading is one way you
+can get better performance and reduce the drag on other apps.
+Transmit buffering is an example of how this works.  Through testing
+it was found that byte transmission offered the most room for
+improvement.  Each transmitted byte was being output using a WriteFile
+call.  By collecting several byt es into a buffer before doing the
+WriteFile the overhead can be reduced.  A separate transmit thread
+helps this work by delaying the actual write for a few milliseconds
+while trying to fill the buffer.
+
+Transmit buffering also shows an example of how queues can be
+implemented using Win32.  Queues are not supported directly by Win32,
+but they are easy to implement using a mutual exclusion object and a
+semaphore object.  The TX_enqueue and TX_dequeue functions and
+TX_queue structure show one way to do this.
+
+Overlapped I/O is another point that this VDD illustrates well.  Under
+Win32 you must specify overlapped I/O or any file operation will block
+all others until it completes.  For serial communications this
+includes WaitCommEvent as well as ReadFile and WriteFile.  In the VDD
+this would have prevented any reads or writes while the status
+monitoring thread was waiting for a comm event.  See the wait_comm,
+read_comm and write_comm routines for details.
+
+A CRITICAL_SECTION object is used to control access to the UART state.
+This allows the status monitoring thread to update the virtual UART
+state asynchronously.  A Mutex object could have been used as with the
+transmit buffers, but a critical section is more appropriate in this
+context.
+

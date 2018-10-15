@@ -1,0 +1,162 @@
+;/*++
+;
+;Copyright (c) Microsoft Corporation.  All rights reserved.
+;
+;Module Name:
+;
+;    TOASTERF.INF
+;
+;Abstract:
+;
+;    INF file for installing toaster class with upper and lower filters and
+;    toaster device driver with upper and lower filters.
+;    Note: In order for the Upper and Lower filter entry for the class to be 
+;          added to the registry, you must remove the existing Toaster class key 
+;          (HKLM\System\CurrentControlSet\Control\Class\{B85B7C50-6A01-11d2-B841-00C04FAD5171}) ;          from the registry if you had previously installed Toaster devices
+;          on the system. Otherwise the setup ignores the entire [ClassInstall32]
+;          section if it finds the toaster class guid in the registy.
+;
+;
+;--*/
+[Version]
+Signature="$WINDOWS NT$"
+Class=TOASTER
+ClassGuid={B85B7C50-6A01-11d2-B841-00C04FAD5171}
+Provider=%MSFT%
+DriverVer=12/10/2004,2.0.1403.0
+CatalogFile=toaster.cat
+
+[DestinationDirs]
+DefaultDestDir = 12
+ToasterClassInstallerCopyFiles = 11
+
+; ================= Class section =====================
+
+[ClassInstall32]
+Addreg=ToasterClassReg     
+CopyFiles=ToasterClassInstallerCopyFiles
+
+[ToasterClassReg]
+HKR,,,0,%ClassName%
+HKR,,Icon,,100
+HKR,,"UpperFilters",0x00010000,"clsupper"
+HKR,,"LowerFilters",0x00010000,"clslower"
+HKR,,Installer32,,"tostrcls.dll,ToasterClassInstaller"
+HKR,,DeviceCharacteristics,0x10001,0x100        ; Use same security checks on relative opens
+HKR,,Security,,"D:P(A;;GA;;;SY)(A;;GA;;;BA)" ;Allow generic all access to system and built-in Admin. 
+                                             ;This one overrides the security set by the driver
+
+[ToasterClassInstallerCopyFiles]
+tostrcls.dll
+
+;*****************************************
+; Toaster Device  Install Section
+;*****************************************
+
+[Manufacturer]
+%StdMfg%=Standard
+
+[Standard]
+; DisplayName       		Section           DeviceId
+; -----------       		-------           --------
+%ToasterDevice.DeviceDesc%=Toaster_Device, {b85b7c50-6a01-11d2-b841-00c04fad5171}\MsToaster
+
+[Toaster_Device.NT]
+CopyFiles=Toaster_Device.NT.Copy
+
+[Toaster_Device.NT.HW]
+AddReg=Toaster_Device.NT.HW.AddReg
+
+[Toaster_Device.NT.Copy]
+toaster.sys
+Devupper.sys
+Devlower.sys
+clsupper.sys
+clslower.sys
+
+
+[Toaster_Device.NT.HW.AddReg]
+HKR,,"UpperFilters",0x00010000,"devupper"
+HKR,,"LowerFilters",0x00010000,"devlower"
+
+;-------------- Service installation
+
+[Toaster_Device.NT.Services]
+AddService = toaster, %SPSVCINST_ASSOCSERVICE%, toaster_Service_Inst
+AddService = devupper,, devupper_Service_Inst
+AddService = devlower,, devlower_Service_Inst
+AddService = clslower,, classlower_Service_Inst
+AddService = clsupper,, classupper_Service_Inst
+
+; -------------- Toaster Driver install sections
+[toaster_Service_Inst]
+DisplayName    = %toaster.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START 
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\toaster.sys
+LoadOrderGroup = Extended Base
+
+; -------------- devupper Filter Driver install section
+[devupper_Service_Inst]
+DisplayName    = %devupper.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START 
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\devupper.sys
+LoadOrderGroup = PNP Filter
+
+; -------------- devlower Driver install section
+[devlower_Service_Inst]
+DisplayName    = %devlower.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START 
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\devlower.sys
+LoadOrderGroup = PNP Filter
+
+; -------------- class lower Driver install section
+[classlower_Service_Inst]
+DisplayName    = %classlower.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START 
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\clslower.sys
+LoadOrderGroup = PNP Filter
+
+; -------------- class upper Driver install section
+[classupper_Service_Inst]
+DisplayName    = %classupper.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START 
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\clsupper.sys
+LoadOrderGroup = PNP Filter
+
+[MySection]
+MySpecialFlag
+
+
+[SourceDisksNames]
+1 = %DiskId1%,,,""
+
+[SourceDisksFiles]
+toaster.sys  = 1,,
+Devupper.sys = 1,,
+Devlower.sys = 1,,
+clsupper.sys = 1,,
+clslower.sys = 1,,
+tostrcls.dll = 1,,
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+MSFT = "Microsoft"
+StdMfg = "(Standard system devices)"
+ClassName = "Toaster"
+DiskId1 = "Toaster Device Installation Disk #1"
+ToasterDevice.DeviceDesc = "Microsoft Toaster with class and device filters"
+toaster.SVCDESC = "Microsoft Toaster Device Driver"
+devupper.SVCDESC = "Toaster Device Upper Filter"
+devlower.SVCDESC = "Toaster Device Lower Filter"
+classupper.SVCDESC = "Toaster Class Upper Filter"
+classlower.SVCDESC = "Toaster Class Lower Filter"

@@ -1,0 +1,154 @@
+<XML>
+<HTMLHelpCollection>
+<masterchm value="=p_ddkint"/>
+<masterlangid value=1033/>
+<samplelocation value=""/>
+<collectionnum value=10001/>
+<refcount value=0/>
+<version value=0/>
+<findmergedchms value=0/>
+<Folders>
+<Folder>
+	<TitleString value="Windows DDK"/>
+	<FolderOrder value=0/>
+	<Folder>
+		<TitleString value="=p_ddkint"/>
+		<FolderOrder value=0/>
+		<LangId value=1033/>
+	</Folder>
+	<Folder>
+		<TitleString value="=p_ddkhowto"/>
+		<FolderOrder value=0/>
+		<LangId value=1033/>
+	</Folder>
+	<Folder>
+		<TitleString value="=p_GStart"/>
+		<FolderOrder value=0/>
+		<LangId value=1033/>
+	</Folder>
+	<Folder>
+		<TitleString value="General Driver Information"/>
+		<FolderOrder value=0/>
+		<Folder>
+			<TitleString value="=p_kmarch"/>
+			<FolderOrder value=0/>
+			<LangId value=1033/>
+		</Folder>
+		<Folder>
+			<TitleString value="=p_install"/>
+			<FolderOrder value=0/>
+			<LangId value=1033/>
+		</Folder>
+		<Folder>
+			<TitleString value="=p_gloss"/>
+			<FolderOrder value=0/>
+			<LangId value=1033/>
+		</Folder>
+	</Folder>
+	<Folder>
+		<TitleString value="Device Technologies"/>
+		<FolderOrder value=0/>
+		<Folder>
+			<TitleString value="=p_acpi"/>
+			<FolderOrder value=0/>
+			<LangId value=1033/>
+		</Folder>
+		<Folder>
+			<TitleString value="=p_graphics"/>
+			<FolderOrder value=0/>
+			<LangId value=1033/>
+		</Folder>
+		<Folder>
+			<TitleString value="=p_intinput"/>
+			<FolderOrder value=0/>
+			<LangId value=1033/>
+		</Folder>
+		<Folder>
+			<TitleString value="=p_modem"/>
+			<FolderOrder value=0/>
+			<LangId value=1033/>
+		</Folder>
+		<Folder>
+			<TitleString value="=p_multifnc"/>
+			<FolderOrder value=0/>
+			<LangId value=1033/>
+		</Folder>
+		<Folder>
+			<TitleString value="=p_network"/>
+			<FolderOrder value=0/>
+			<LangId value=1033/>
+		</Folder>
+		<Folder>
+			<TitleString value="=p_parallel"/>
+			<FolderOrder value=0/>
+			<LangId value=1033/>
+		</Folder>
+		<Folder>
+			<TitleString value="=p_serial"/>
+			<FolderOrder value=0/>
+			<LangId value=1033/>
+		</Folder>
+		<Folder>
+			<TitleString value="=p_smart"/>
+			<FolderOrder value=0/>
+			<LangId value=1033/>
+		</Folder>
+		<Folder>
+			<TitleString value="=p_still"/>
+			<FolderOrder value=0/>
+			<LangId value=1033/>
+		</Folder>
+		<Folder>
+			<TitleString value="=p_storage"/>
+			<FolderOrder value=0/>
+			<LangId value=1033/>
+		</Folder>
+		<Folder>
+			<TitleString value="=p_audstream"/>
+			<FolderOrder value=0/>
+			<LangId value=1033/>
+		</Folder>
+		<Folder>
+			<TitleString value="=p_vidcapstream"/>
+			<FolderOrder value=0/>
+			<LangId value=1033/>
+		</Folder>
+		<Folder>
+			<TitleString value="=p_other"/>
+			<FolderOrder value=0/>
+			<LangId value=1033/>
+		</Folder>
+		<Folder>
+			<TitleString value="=p_buses"/>
+			<FolderOrder value=0/>
+			<LangId value=1033/>
+		</Folder>
+	</Folder>
+	<Folder>
+		<TitleString value="Tools"/>
+		<FolderOrder value=0/>
+		<Folder>
+			<TitleString value="=p_ddtools"/>
+			<FolderOrder value=0/>
+			<LangId value=1033/>
+		</Folder>
+		<Folder>
+			<TitleString value="=p_utilities"/>
+			<FolderOrder value=0/>
+			<LangId value=1033/>
+		</Folder>
+	</Folder>
+	<Folder>
+		<TitleString value="=p_ddksamples"/>
+		<FolderOrder value=0/>
+		<LangId value=1033/>
+	</Folder>
+	<Folder>
+		<TitleString value="=p_w98ddk"/>
+		<FolderOrder value=0/>
+		<LangId value=1033/>
+	</Folder>
+</Folder>
+</Folders>
+</HTMLHelpCollection>
+</XML>

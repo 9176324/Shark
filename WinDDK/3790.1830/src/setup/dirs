@@ -1,0 +1,4 @@
+DIRS= \
+     cocpyinf \
+     devcon \
+     pnpports

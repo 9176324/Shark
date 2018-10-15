@@ -1,0 +1,6 @@
+!include ..\sources.inc
+
+TARGETNAME=devlower
+
+C_DEFINES= $(C_DEFINES)  -DDEVICE_LOWER=1
+

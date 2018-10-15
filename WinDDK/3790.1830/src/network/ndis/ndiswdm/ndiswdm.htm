@@ -1,0 +1,422 @@
+<html>
+
+<head>
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1252">
+<meta NAME="GENERATOR" CONTENT="Microsoft FrontPage 4.0">
+<title>Sample NDIS-WDM Miniport Driver</title>
+<meta NAME="Template" CONTENT="C:\PROGRAM FILES\MICROSOFT OFFICE\OFFICE\html.dot">
+</head>
+
+<body TEXT="#000000" LINK="#0000ff" VLINK="#800080" BGCOLOR="#ffffff" leftmargin="8">
+<font FACE="Verdana">
+
+<h2><a NAME="NETVMINI">Sample NDIS-WDM Miniport Driver</a> </h2>
+
+<h3>SUMMARY</h3>
+</font><font FACE="Verdana" SIZE="2">
+
+<p>The purpose of this sample is to illustrate functionality of an NDIS-WDM miniport driver. An NDIS-WDM driver exposes NDIS miniport interface at its upper edge and uses
+IRPs to interact with other WDM drivers such as USB, IEEE 1394,
+and serial at its lower edge. Unlike NDIS miniports, which can call only NDIS functions, an NDIS-WDM driver can call both NDIS and non-NDIS functions. However, whenever possible, the miniport driver should call NDIS functions. For example, a miniport driver that controls devices on either Universal Serial Bus (USB) or IEEE 1394 (firewire) buses must expose a standard NDIS miniport driver interface at its upper edge and use the class interface for the particular bus at its lower edge. Such a miniport driver communicates with devices that are attached to the bus by sending I/O request packets (IRPs) to the bus.</p>
+<p>
+This sample is built upon the NETVMINI sample available in the Windows Server 2003 DDK. Unlike the NETVMINI, this sample is fully functional. It uses the NDISPROT (NDIS protocol sample available in the Windows Server 2003 DDK) as its lower WDM edge driver to read
+and write packets to the physical network interface card (NIC) as shown in the diagram below. In order to test this sample, you should at least have one physical NIC on the test machine.
+</p>
+<pre>
+                   ---------------------
+                  |                     |
+                  |        TCP/IP       |
+                  |                     |
+                   ---------------------
+                            ^
+                            | &lt;-------------- NDIS Interface
+                            V
+                   ---------------------
+                  |                     |
+                  |    Sample NDISWDM   |
+                  |       Miniport      |
+                  |                     |
+                   ---------------------
+                            ^
+                            | &lt;--------------- IRPs
+                            V
+                   ---------------------
+                  |                     |
+                  |        NDISPROT     |
+                  |                     |
+                   ---------------------
+                            ^			   
+                            | &lt;--------------- NDIS Interface
+                            V
+                   ---------------------
+                  |                     |
+                  |    NDIS Miniport    |
+                  |    for physical NIC |
+                  |                     |
+                   ---------------------
+                            ^
+                            | &lt;-------------- Talk to the hardware using I/O resources			   
+                            V			   
+                      ---------------
+                     |    H/w NIC    |
+                      ---------------
+                             |||||||
+                             -------          
+                            </pre>
+
+
+<p><B>Note:</B> This sample provides an example of a minimal driver intended for educational purposes. Neither the driver
+nor
+its sample test programs are intended for use in a production environment. </p>
+
+<font face=Verdana>
+
+<table border="1" width="100%">
+  <tr>
+    <td width="25%">
+      <p align="center"><font face="Verdana" size="2"><b>Operating System</b></font></td>
+
+
+</font>
+
+</font>
+    <td width="25%"><b><font face="Verdana" size="2">Can sample be built in the
+      OS?</font></b></td>
+<font FACE="Verdana" SIZE="2">
+
+    <td width="25%"><b>Does sample </b><font face="Verdana" size="2"><b>work in the
+      OS?</b></font></td>
+    <td width="25%"><span style="letter-spacing: -1pt"><font face="Verdana" size="2"><b>Can
+      sample be used in a production environment for the OS?</b></font></span></td>
+  </tr>
+
+
+</font>
+  <tr>
+
+<td width="25%"><font face="Verdana" size="2">Windows Server 2003</font></td>
+<font face=Verdana>
+<font FACE="Verdana" SIZE="2">
+
+<td width="25%" align="center">Yes</td>
+<td width="25%" align="center">
+<font FACE="Verdana" SIZE="2">
+
+Yes
+</font>
+
+
+</td>
+<td width="25%" align="center">No</td>
+  </tr>
+  <tr>
+    <font FACE="Verdana" SIZE="2">
+
+<td width="25%">Windows XP</td>
+<td width="25%" align="center">
+<font FACE="Verdana" SIZE="2">
+
+Yes
+</font>
+
+
+</td>
+<td width="25%" align="center">
+<font FACE="Verdana" SIZE="2">
+
+Yes
+</font>
+
+
+</td>
+<td width="25%" align="center">No</td>
+</font>
+  </tr>
+  <tr>
+    <font FACE="Verdana" SIZE="2">
+
+<td width="25%">Windows 2000</td>
+<td width="25%" align="center">
+<font FACE="Verdana" SIZE="2">
+
+Yes
+</font>
+
+
+</td>
+<td width="25%" align="center">
+<font FACE="Verdana" SIZE="2">
+
+Yes
+</font>
+
+
+</td>
+<td width="25%" align="center">No</td>
+</font>
+  </tr>
+  <tr>
+    <font FACE="Verdana" SIZE="2">
+
+<td width="25%">Windows Me</td>
+</font>
+</font>
+
+
+</font>
+
+<td width="25%" align="center">
+  <p align="left"><font face="Verdana" size="1">See <b>Compatibility</b> below.</font></td>
+    <font FACE="Verdana" SIZE="2">
+
+<font face=Verdana>
+<font FACE="Verdana" SIZE="2">
+
+<td width="25%" align="center">
+  <p align="left"><font face="Verdana" size="1">See </font>
+</font>
+
+
+</font>
+
+</font>
+<b><font face="Verdana" size="1">C</font></b><font FACE="Verdana" SIZE="2"><font face="Verdana" size="1"><b>ompatibility</b>
+below.</font></font></td>
+<td width="25%" align="center">
+  <p align="center"><font FACE="Verdana" SIZE="2">No
+</font>
+</td>
+  </tr>
+  <tr>
+    <td width="25%"><font face="Verdana" size="2">Windows 98 SE</font></td>
+    <font FACE="Verdana" SIZE="2">
+
+<td width="25%" align="center">
+  <p align="left"><font face="Verdana" size="1">See </font>
+</font>
+    <b><font size="1">C</font></b><font FACE="Verdana" SIZE="2"><font face="Verdana" size="1"><b>ompatibility</b>
+below.</font></font></td>
+<td width="25%" align="center">
+  <p align="left"><font face="Verdana" size="1">See </font>
+</font><b><font size="1">C</font></b><font FACE="Verdana" SIZE="2"><font face="Verdana" size="1"><b>ompatibility</b>
+  below.</font></p>
+    </td>
+<td width="25%" align="center">
+  <p align="center"><font FACE="Verdana" SIZE="2">No
+</font>
+  </p>
+    </td>
+  </tr>
+</table>
+
+
+<p>The driver can be built in the Windows® 2000, Windows® XP, and Server 2003
+DDK build environment.</p>
+<p>The driver can be installed in the Windows 2000, XP, and Server 2003 operating
+systems. Windows 2000 supports only NDIS version 5.0 miniport driver. Windows XP and Server 2003
+support NDIS versions 5.0 and 5.1 of miniport driver.
+</p>
+
+
+<h3>BUILDING THE SAMPLE</h3>
+
+<p>Click the <b> Free Build Environment</b> or <b> Checked Build Environment</b> icon under your
+Development Kit's<b> </b> program group to set basic environment variables needed 
+by the build utility. </p>
+
+<p>Change to the directory containing the device source code, such as CD
+Src\network\ndis\NDISWDM. </p>
+
+<p>Run <b>build -ceZ</b>, or use the macro <b>BLD</b>. Using these tools invokes the Microsoft
+make routines that produce log files called Buildxxx_yyy_zzz.log, and also Buildxx_yyy_zzz.wrn and Buildxx_yyy_zzz.err if
+there are any warnings or errors. Where xxx stands for <b>fre</B> or <b>chk</b> depending
+on the environment chosen, yyy stands for the OS version (W2K, WXP, or Wnet), and zzz stands for platform version (x86, IA64, or AMD64).<p>If the build succeeds, the driver, <I>ndiswdm.sys</I>,<font color="#FF0000">
+</font>will be placed in a platform specific subdirectory of your
+<b>%TargetPath%</b> directory specified in the 'Sources' file. Depending on the build environment, the driver will be either an NDIS 5.0 or NDIS 5.1 miniport driver. If you build in the Windows 2000 build
+environment, you will get NDIS version 5.0 of the miniport driver. If you build
+in the Windows XP or Server 2003 environments, you will get NDIS version 5.1 of the miniport driver. </p>
+
+<h3>INSTALLATION </h3>
+<p>
+You can install the NDISWDM driver and use it as your primary miniport by doing <i>one</i>
+of the following:
+<UL>
+<LI>Disable the bindings of TCP/IP with the physical NIC's miniport and have the NDISWDM miniport to assume the MAC address of the physical NIC. This is the default case.
+<LI>Don't alter the bindings of TCP/IP with the physical NICs miniport. Instead,
+  have the NDISWDM miniport set the physical NIC into Promiscuous mode by using the Advanced Property dialog of NDISWDM in the
+  Device Manager. This way, the NDISWDM can send and receive packets that have different MAC addresses. In this mode, the NDISWDM miniport generates its own locally administered MAC address instead of
+  using the physical NIC's MAC address as its current address. 
+</UL>
+<B>Installation steps</B>
+<OL>
+<LI>Install the NDISPROT sample from the Windows Server 2003 DDK and start the driver. Instruction on how to install and load the driver is given in the NDISPROT.HTM that comes with the sample. Make sure to rebuild the driver with EX_CALLBACK interface defined in the
+  'Sources' file. This enables the driver to notify NDISWDM whenever it gets loaded. Read the
+  <b>Code Tour</b> section in this document for further information.
+<LI>Double-click <b> Network Connections</b> in Control panel, right-click
+  the <b> Local Area Connection</b> applet of the physical NIC, and select <b>Properties</b>.
+  Clear the <b> TCP/IP bindings</b> check box.
+<LI>Install the NDISWDM miniport driver. Steps for installing the driver on Windows 2000, XP,
+  and Server 2003 DDK are listed below:<p>To install the driver on a Windows
+  2000 machine 
+<p>
+&nbsp;
+<ol>
+  <li>Build the driver in a Win2K build environment to get the NDIS version 5.0 of the driver.</li>
+  <li>Copy the driver and the <I>NDISWDM.INF</I> file to a floppy disk or to a directory on the target test
+    machine.</li>
+  <li>Open Control Panel, and double-click <b> Add New Hardware</b>.</li>
+  <li>Click <b>Next</b>.</li>
+  <li>Select <b> Add a new device</b>.</li>
+  <li>Select <b> No, I Want to Select the Hardware from a list</b>.</li>
+  <li>Select <b> Network Devices</b>, and then click <b>Next</b>. </li>
+  <li>Click <b> Have Disk</b>, and point to the directory that contains NDISWDM.INF file.</li>
+</ol>
+<p>
+To install the driver on a Windows XP or Server 2003 machine <p>
+
+<OL>
+
+<LI>
+      Copy the NDIS version 5.1 of the driver and the INF file to a floppy disk or to a directory on the target
+      machine.
+
+<LI>
+      Open Control Panel and double-click <b>Add Hardware</b>.
+
+<LI>
+      At the Welcome to the Add Hardware Wizard screen, click <b>Next</b>.
+
+<LI>
+      Select <b>Yes, I have already connected the hardware</b>, and click <b>Next</b>.
+<LI>
+      Select <b>Add a new hardware device</b> from the list, and click <b>Next</b>.
+
+<LI>
+      Select <b>Install the hardware that I manually select from a list
+      (Advanced)</b>, and click <b>Next</b>.
+
+<LI>
+      Select <b>Network adapters</b>, and click <b>Next</b>. 
+
+<LI>  Click <b>Have Disk</b>, make sure that <b>A:\ </b> is in the <b>Copy manufacturer's files
+  from</b> box, and click <b>OK</b>.
+
+<LI>  Click on the desired entry, and click <b>Next</b>.
+
+<LI>  At <b>The wizard is ready to install your hardware</b> screen, click <b>Next</b>.
+
+<LI>  Click <b> Finish</b>.
+ </OL>
+<p>Alternatively, you can use the DEVCON.EXE from the DDK to install the driver programmatically.</P>
+
+<PRE>c:\&gt;DEVCON.EXE   INSTALL   ndiswdm.inf   &quot;root\ndiswdm&quot;</PRE>
+
+<p>The system copies the NDISWDM.sys file to %systemroot%\system32\drivers directory and
+loads the driver. Instead of root-enumerating the driver as described above, you can use the
+toaster bus driver to bus enumerate the driver.</p>
+<LI>Check the configuration of the miniport by running IPCONFIG /All. You should be able to browse the internet or copy files from another machine.
+</OL>
+This the default configuration - NDISPROT driver is started before NDISWDM miniport - and the miniport is using the MAC address of the real NIC. If you reboot the machine, you will notice that the network connectivity through the miniport is broken. This is because the NDISPROT hasn't been loaded or loaded after the miniport. When the miniport fails to open the NDISPROT interface during init, it reports a locally administered MAC address as the current address and completes the initialization. After that, even if the miniport is able to successfully open the NDISPROT interface in the ExCallback, it cannot report the Real NIC's MAC address. As a result, no network communication will take place because the real NIC will not receive or send packets that doesn't match with it's MAC address. In such a scenario, you can re-establish the network connectivity by disabling and re-enabling the miniport instance in the device manager to make sure that the miniport opens the target device during MiniportInitialize and reports the target NIC's MAC address. <p>
+If you like to get this configuration to work across reboots, you should configure the NDISWDM driver to set the target NIC filter to promiscuous mode. You can do that by using Advanced Property of the miniport in the device manager or by changing the value in the INF file before installing the miniport.
+
+<h3>TESTING</h3>
+
+<p>Install NDIS Tester from the <a href="http://www.microsoft.com/hwdq/hwtest/devices/default.asp?area=Network">WHQL
+Web site</a> and run all the client and server tests. </p>
+
+
+<h3>CODE TOUR</h3>
+The information below describes some of the key operations performed in the driver.<p>
+
+<B>Initialization</B>
+<OL>
+<LI>Allocates memory for miniport context structure. This is where the driver stores information about a specific instance of the device.
+<LI>In the NICInitializeAdapter, the driver tries to open the NDISPROT device by using ZwOpenFile("\Device\NdisProt"). 
+<LI>If the call fails because the NDISPROT is not loaded, the driver registers an executive callback interface to be notified whenever the NDISPROT loads. If the call succeeds,
+  the driver gets the target deviceobject related to the file handle returned by ZwOpenFile.
+  The driver then sends IOCTL_NDISPROT_QUERY_BINDING to query the list of miniport device names and
+  a message that NDISPROT is bound to in a loop. 
+<LI>At every iteration in the loop, the driver makes sure that the miniport name and description it received from the NDISPROT is not one of
+  its own (in case multiple instances of NDISWDM are installed). The driver then makes an IOCTL_NDISPROT_OPEN_DEVICE request to open the target device. If the
+  request fails, the driver continues the loop until it finds a free one. 
+<LI>If the IOCTL_NDISPROT_OPEN_DEVICE request succeeds, the driver allocates resources for handling send and receive requests, sends
+  IOCTL requests to NDISPROT to get the link speed, sets the miniport to
+  Promiscuous mode (if enabled in the registry), and finally creates a worker thread to poll for read packets from the NDISPROT.<p>
+</OL>
+
+<B>Resolving driver load order issue between NDISWDM and NDISPROT:</b>
+
+<p>NDISWDM and NDISPROT driver are two unrelated drivers. NDISWDM is a Plug and
+Play driver and NDISPROT is an Windows&reg;NT&reg;4.0 compatible non-Plug and Play driver. As a result, it's not possible to use
+a Plug and Play notification mechanism to resolve load order dependency between the drivers. If the NDISWDM is installed as a root-enumerated driver, then it will get loaded much earlier in the boot sequence than the NDISPROT driver. When the NDISWDM tries to open the NDISPROT in MiniportInitialize handler, it will fail with
+a STATUS_OBJECT_NAME_NOT_FOUND error because the NDISPROT device is not present.<p>Instead of using timer DPCs and
+work items to periodically retry opening NDISPROT, this driver uses a new executive callback mechanism to resolve the load order issue. Both NDISWDM and NDISPROT create a Callback object (ExCreateCallback) called
+\Callback\NdisProtCallbackObject and register their callback handlers (ExRegisterCallback). The driver that loads first
+creates the object and the drivers loaded afterwards open the same object,
+register, and then send notification to the other drivers. Based on the notification ID received in the callback, both NDISWDM and NDISPROT identify the source of notification and take appropriate action. For example, when the NDISWDM driver receives a notification, it checks to see if the source driver of this notification is NDISPROT and if so, it tries to complete its initialization and indicate the final media status of
+its miniport to NDIS.</p>
+<B>Request Handler</b><p>Most of the requests are handled directly by the NDISWDM and completed synchronously. The driver also has the ability to forward any requests to the target driver. For forwarding requests, such as link speed, it queues a
+work item to get to PASSIVE_LEVEL of execution, and from the workitem it sends an IOCTL request to NDISPROT and waits for the IRP
+to complete. When the IRP returns, it indicates to NDIS about the completion of the request.</p>
+<B>Send Packet Handler</B><p>In the SendPacket handler, the driver copies the packet into a free TCB block (because NDISPROT cannot handle chained MDLs), initializes a
+preallocated IRP (IRP_MJ_WRITE) and MDL to describe the TCB data buffer and sends the IRP to the NDISPROT driver asynchronously. When the write completes, the original send packet that was saved in the TCB control block is completed and the TCB and IRP is freed for reuse.</p>
+<B>Receive Packet handler:</B><p>The driver pre-allocates a certain number (NIC_MAX_BUSY_SENDS) of RCB (Receive Control Blocks) buffers, IRPs (IRP_MJ_READ) and MDLs (to describe the RCB data buffer) during Miniport Initialize for receiving packets from the target driver (NDISPROT). It then queues a workitmem (<b>NICPostReadsWorkItemCallBack</b>) to post all the read IRPs to the target driver. When a read request completes, the completion routine (<b>NICReadRequestCompletion</b>) is called. This routine checks to see whether the received packet is acceptable based on the current packet filter set by the protocol, and decides to either indicate the packet to NDIS or discard the packet. When the indicated packet returns from NDIS through <b>MPReturnPacket</b> handler, the driver reclaims the associated RCB block and the read IRP for reuse, and checks to see if the number of outstanding Read IRPs to the NDISPROT has gone below a certain thershold (NIC_SEND_LOW_WATERMARK). If so, it queues a workitem to post more read IRPs and keeps the read path going.</p>
+
+
+<h4>Adapting this driver for an USB device</h4>
+
+If you are using this sample to build an NDIS miniport driver for an USB device: 
+<UL> <LI>First, update the Hardware ID specified in the INF file to that of your USB device. As a result, when you plug in the device, and if the INF file is pre-installed (SetupCopyOEMInf), the PNP manager will automatically pickup your miniport as the driver for the USB device. </LI>
+<LI>
+Remove all the code that are specific to interacting with NDISPROT. You don't have to open a USB device by calling Zw function. Your driver will be part of the USB device stack and your TargetDeviceObject will be the NextDeviceObject received from NdisGetDeviceProperty call.
+<LI>In the NICInitAdapterWorker routine, right before you allocate send & receive side resources, configure your USB device. You can either follow the BULKUSB sample present in the DDK or Walter Oney's Programming Windows Driver Model, Second Edition, book sample code to learn about how to build and submit URB requests to configure your device. 
+<LI>Once you have all the worker routines for building and submitting URBs are in place, and all the appropriate transfer pipes are setup, you can convert read, write, and IOCTL requests to corresponding URB's and send it to the USB stack.
+</UL>
+
+<h3>RESOURCES</h3>
+
+<p>For the latest release of the Windows device Driver Development Kit, see <a
+HREF="http://www.microsoft.com/ddk/">http://www.microsoft.com/ddk/</a>.</p>
+<p>If you have questions on using or adapting this sample for your project, you can either contact  <a HREF="http://support.microsoft.com/">Microsoft Technical Support</a> or post your questions in
+the <a href="http://msdn.microsoft.com/newsgroups/default.asp?url=/newsgroups/loadframes.asp?icp=msdn&amp;slcid=us&amp;newsgroup=microsoft.public.development.device.drivers">Microsoft driver development newsgroup</a>.
+
+</p>
+
+<h3>COMPATIBILITY</h3>
+This driver has not been tested on Windows Me, Windows 98, Windows 95 or earlier
+systems. However, this driver can be easily made to work if there is an equivalent to NDISPROT that works on
+these systems. One of the <a HREF="http://www.microsoft.com/winhec/presents/driver22.ppt">WinHEC 2000</a> presentations discusses some of issues that should be addressed in this sample to make it work on Windows
+Me, Windows 98, Windows 95 or earlier systems. 
+
+<h3>FILE MANIFEST (Optional)</h3>
+<u>
+
+<pre>File		Description
+</u>
+ndiswdm.htm	Sample Tour documentation for this sample (this file).
+Sources		Generic file for building the code sample.
+ndiswdm.inf	INF file for installing the driver.
+ndiswdm.RC	Resource file to specify driver version, etc.
+ndiswdm.h	Include file for defining structures, constants and function prototypes.
+ndiswdm.c	Main file that contains driver entry and other miniport functions.
+init.c	        Source file for allocating and initializing resources.
+send.c	        Source file for handling Send requests from NDIS.
+receive.c	Source file for handling IRPs received by the lower WDM driver indicating to NDIS.
+request.c       Source file for handling set &amp; query information requests from NDIS.
+excallbk.c	Source file for handling ex callback notification to resolve driver load order.
+</pre>
+
+<p ALIGN="CENTER"><font FACE="Verdana" SIZE="2"><a HREF="#top">Top of page</a> </p>
+</font>
+
+<table CELLSPACING="0" BORDER="0" WIDTH="624">
+  <tr>
+    <td VALIGN="MIDDLE" BGCOLOR="#00ffff" HEIGHT="2"></td>
+  </tr>
+</table>
+<font FACE="MS Sans Serif" SIZE="1">
+
+<p>&copy; 2003 Microsoft Corporation. All rights reserved.</font>
+</font>
+</body>
+</html>

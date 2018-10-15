@@ -1,0 +1,43 @@
+TARGETNAME=passthru
+TARGETPATH=obj
+TARGETTYPE=DRIVER
+
+C_DEFINES=$(C_DEFINES) -DNDIS_MINIPORT_DRIVER -DNDIS_WDM=1
+
+
+!if "$(DDK_TARGET_OS)"=="Win2K"
+#
+# The driver is built in the Win2K build environment
+#
+C_DEFINES=$(C_DEFINES) -DNDIS40_MINIPORT=1
+C_DEFINES=$(C_DEFINES) -DNDIS40=1
+!else 
+#
+# The driver is built in the XP or .NET build environment
+# So let us build NDIS 5.1 version.
+#
+C_DEFINES=$(C_DEFINES) -DNDIS51_MINIPORT=1
+C_DEFINES=$(C_DEFINES) -DNDIS51=1
+!endif
+
+# Uncomment the following to build for Win98/SE/WinMe
+# This causes several APIs that are not present in Win9X to be
+# ifdef'ed out.
+# C_DEFINES=$(C_DEFINES) -DWIN9X=1
+
+PRECOMPILED_INCLUDE=precomp.h
+PRECOMPILED_PCH=precomp.pch
+PRECOMPILED_OBJ=precomp.obj
+
+TARGETLIBS=$(DDK_LIB_PATH)\ndis.lib
+
+USE_MAPSYM=1
+
+INCLUDES=
+
+SOURCES=\
+    miniport.c \
+    passthru.c \
+    passthru.rc \
+    protocol.c
+

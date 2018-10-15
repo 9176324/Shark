@@ -1,0 +1,5 @@
+DIRS= \
+     chajei \
+     eudc \
+     phon \
+     quick

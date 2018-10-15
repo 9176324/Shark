@@ -1,0 +1,4 @@
+DIRS= \
+     gsm610 \
+     imaadpcm \
+     msfilter

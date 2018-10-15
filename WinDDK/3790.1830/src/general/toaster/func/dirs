@@ -1,0 +1,5 @@
+DIRS= \
+     featured1 \
+     featured2 \
+     incomplete1 \
+     incomplete2

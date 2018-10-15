@@ -1,0 +1,63 @@
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1252">
+<META NAME="Generator" CONTENT="Microsoft Word 97">
+<TITLE>Game Controller Control Panel Applet Extension</TITLE>
+<META NAME="Template" CONTENT="C:\PROGRAM FILES\MICROSOFT OFFICE\OFFICE\html.dot">
+</HEAD>
+<BODY TEXT="#000000" LINK="#0000ff" VLINK="#800080" BGCOLOR="#ffffff" leftmargin="8">
+<FONT FACE="Verdana"><H2><A NAME="MYSAMPLE">Game Controller Control Panel Applet Extension</A> </H2>
+<H3>SUMMARY</H3></FONT><FONT FACE="Verdana" SIZE=2><P>
+The Game Controller Control Panel Extension provides IHV/ISV with a mechanism to display the attributes of their device while writing as little code as possible. This is a functional sample. <P>
+
+<H3>BUILDING THE SAMPLE</H3></FONT><FONT FACE="Verdana" SIZE=2><P>
+To build the sample using NMAKE, at the DOS prompt, type<B> NMAKE CPLSVR1.MAK</B>. To build it using BUILD, at the DOS prompt, type <B>BUILD</B>. (If you are using BUILD, you will also need to define TARGET_WIN95 for a Win9x version.)
+<P>
+Required headers and libraries include Dinput.h, Dinputd.h, and Dinput.lib.<P>
+
+The files that are necessary to build this sample include Cplsvr1.h, Dicpl.h, Dicputil.h, Pages.h, Resource.h, Resrc1.h, Cplsvr1.rc, Btndwn.ico, Btnup.ico, Config.ico, Winflag.ico, Button.cpp, Cplsvr1.cpp, Dicputil.cpp, Pages.cpp, and Cplsvr1.def. 
+
+<P>Once built, the sample produces one binary, a DLL. Checked and free builds are both available, and both functional. The sample is installed via an .inf: Cplsvrnt.inf.<P>
+
+<H3>RESOURCES</H3></FONT><FONT FACE="Verdana" SIZE=2><P>
+For information, tools, and other resources, see <A HREF="http://msdn.microsoft.com/developer ">http://msdn.microsoft.com/developer</A>.<P>
+
+
+<H3>CODE TOUR</H3>
+<H4>File Manifest</H4>
+</FONT><U><PRE>File&#9;&#9;Description
+</U>
+Cplsvr1.htm&#9;The documentation for this sample (this file)
+BtnDwn.ico&#9;Down state icon used in Button.cpp
+BtnUp.ico&#9;Up state icon used in Button.cpp 
+Button.cpp&#9;Example button custom control 
+Config.ico&#9;Icon displayed in application tabs 
+Cplsvr1.cpp&#9;Extension COM server code 
+Cplsvr1.def&#9;Application .def file 
+Cplsvr1.h&#9;Prototypes for Cplsvr1.cpp 
+Cplsvr1.inf&#9;Installation file for Win9x 
+Cplsvr1.mak&#9;Makefile to build file via NMAKE 
+Cplsvr1.rc&#9;Resource file for CPLSVR1 
+CplsvrNT.inf&#9;Installation file for Windows 2000 
+Dicpl.h&#9;	Prototype file for IID_IDIGameCntrlPropSheet interface
+Dicputil.h&#9;Prototype file for Dicputil.cpp  
+Pages.h&#9;	Prototype file for Pages.cpp 
+Resource.h&#9;Defines for resources  
+Resrc1.h&#9;Defines for resources 
+Winflag.ico&#9;Icon displayed in application titlebar  
+Makefile&#9;Makefile for BUILD environment 
+Dicputil.cpp&#9;DirectInput utility services implementation 
+Pages.cpp&#9;Property Sheet Page implementation 
+Sources&#9;	Sources file for BUILD environment 
+
+</FONT><P ALIGN="CENTER"><A HREF="#top"><FONT FACE="Verdana" SIZE=2>Top of page</FONT></A><FONT FACE="Verdana" SIZE=2> </P></FONT>
+<TABLE CELLSPACING=0 BORDER=0 WIDTH=624>
+<TR><TD VALIGN="MIDDLE" BGCOLOR="#00ffff" HEIGHT=2>
+<P></TD>
+</TR>
+</TABLE>
+
+<FONT FACE="MS Sans Serif" SIZE=1><P>&copy; 1998 Microsoft Corporation</FONT><FONT FACE="Verdana" SIZE=2> </P></FONT></BODY>
+</HTML>
+
+

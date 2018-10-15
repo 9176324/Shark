@@ -1,0 +1,57 @@
+TARGETNAME=toaster
+TARGETTYPE=DRIVER
+TARGETPATH=obj
+
+
+NTTARGETFILE0=mofcomp
+
+TARGETLIBS= $(DDK_LIB_PATH)\ntstrsafe.lib
+
+INCLUDES = ..\..\inc;..\shared
+
+SOURCES= toaster.rc \
+         toaster.c  \
+         power.c \
+         wmi.c \
+	 wake.c 
+
+#
+# Comment the below line to disable tracing. All the debug traces
+# will be sent to the kernel-debugger.
+#ENABLE_EVENT_TRACING=1
+
+
+!if !defined(DDK_TARGET_OS) || "$(DDK_TARGET_OS)"=="Win2K"
+#
+# The driver is built in the Win2K build environment
+#
+C_DEFINES = $(C_DEFINES) -DWIN2K
+USING_WIN2K_BUILD_ENV=1
+!endif
+
+
+!IFDEF ENABLE_EVENT_TRACING
+
+C_DEFINES = $(C_DEFINES) -DEVENT_TRACING
+
+!ifdef USING_WIN2K_BUILD_ENV
+#
+# Use the Win2K specific tracing template
+# $(SOURCES)   -- run software preprocessor on $(SOURCES) files
+# -km          -- use kernel mode
+# -func        -- define function we'll use for tracing
+#                 This would map all ToasterDebugPrint calls to 
+#                 DoTraceMessage.
+#
+RUN_WPP=$(SOURCES)\
+        -km -gen:{km-w2k.tpl}*.tmh\
+        -func:ToasterDebugPrint(LEVEL,MSG,...)
+!else
+
+RUN_WPP=$(SOURCES)\
+        -km\
+        -func:ToasterDebugPrint(LEVEL,MSG,...)
+!endif
+
+!ENDIF
+

@@ -1,0 +1,30 @@
+TARGETNAME=1394API
+TARGETTYPE=DYNLINK
+DLLENTRY=_DllMainCRTStartup
+
+TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
+           $(SDK_LIB_PATH)\user32.lib   \
+           $(SDK_LIB_PATH)\setupapi.lib \
+           $(SDK_LIB_PATH)\advapi32.lib
+
+TARGETPATH=obj
+
+USE_MAPSYM=1
+USE_MSVCRT=1
+UMTYPE=windows
+
+SYNCHRONIZE_BLOCK=1
+
+INCLUDES=..\..\inc;              \
+         ..\..\driver\common;
+
+SOURCES= 1394api.rc      \
+         1394api.c       \
+         1394main.c      \
+         asyncapi.c      \
+         debug.c         \
+         isochapi.c      \
+         util.c
+
+C_DEFINES=/DW32 /DWIN32
+

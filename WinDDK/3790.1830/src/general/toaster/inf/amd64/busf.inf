@@ -1,0 +1,107 @@
+;/*++
+;
+;Copyright (c) 1990-1999 Microsoft Corporation All rights Reserved
+;
+;Module Name:
+;
+;    BUSF.INF
+;
+;Abstract:
+;
+;    INF file for installing toaster bus enumerator driver with upper 
+;    lower filter.
+;
+;    
+;
+;--*/
+[Version]
+Signature="$WINDOWS NT$"
+Class=System
+ClassGuid={4D36E97D-E325-11CE-BFC1-08002BE10318}
+Provider=%MSFT%
+DriverVer=12/10/2004,2.0.1403.0
+CatalogFile=toaster.cat
+
+[DestinationDirs]
+DefaultDestDir = 12
+
+[SourceDisksNames]
+1 = %DiskId1%,,,""
+
+[SourceDisksFiles]
+busenum.sys  = 1,,
+BFdoLwr.sys  = 1,,
+BFdoUpr.sys  = 1,,
+
+;*****************************************
+; ToasterBus  Install Section
+;*****************************************
+
+[Manufacturer]
+%StdMfg%=Standard,NTamd64
+
+[Standard.NTamd64]
+%ToasterBus.DeviceDesc%=ToasterBus_Device, root\busenum
+
+[ToasterBus_Device.NT]
+CopyFiles=Drivers_Dir
+
+[ToasterBus_Device.NT.HW]
+AddReg=ToasterBus_Device.NT.HW.AddReg
+
+[Drivers_Dir]
+busenum.sys
+BFdoLwr.sys
+BFdoUpr.sys
+
+[ToasterBus_Device.NT.HW.AddReg]
+HKR,,DeviceCharacteristics,0x10001,0x0100         ; Use same security checks on relative opens
+HKR,,Security,,"D:P(A;;GA;;;BA)(A;;GA;;;SY)"      ; Allow generic-all access to Built-in administrators and Local system 
+HKR,,"UpperFilters",0x00010000,"BFdoUpr"
+HKR,,"LowerFilters",0x00010000,"BFdoLwr"
+
+
+;-------------- Service installation
+; Function and filter driver for the bus
+[ToasterBus_Device.NT.Services]
+AddService = busenum, %SPSVCINST_ASSOCSERVICE%, busenum_Service_Inst
+AddService = BFdoUpr,, busupper_Service_Inst
+AddService = BFdoLwr,, buslower_Service_Inst
+
+; -------------- busenum Toaster Bus Driver install sections
+[busenum_Service_Inst]
+DisplayName    = %busenum.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START 
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+
+ServiceBinary  = %12%\busenum.sys
+LoadOrderGroup = Extended Base
+
+; -------------- busupper Driver install section
+[busupper_Service_Inst]
+DisplayName    = %busupper.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START 
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\BFdoUpr.sys
+LoadOrderGroup = PNP Filter
+
+; -------------- buslower Driver install section
+[buslower_Service_Inst]
+DisplayName    = %buslower.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START 
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\BFdoLwr.sys
+LoadOrderGroup = PNP Filter
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+MSFT = "Microsoft"
+StdMfg = "(Standard system devices)"
+DiskId1 = "Toaster Bus Installation Disk #1"
+ToasterBus.DeviceDesc = "Toaster Bus Enumerator with filters"
+busenum.SVCDESC = "Toaster Bus Enumerator"
+busupper.SVCDESC = "Toaster Bus FDO Upper Filter"
+buslower.SVCDESC = "Toaster Bus FDO Lower Filter"

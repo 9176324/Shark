@@ -1,0 +1,5 @@
+DIRS= \
+     1394dcam \
+     atiwdm \
+     testcap \
+     usbintel

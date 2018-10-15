@@ -1,0 +1,172 @@
+<HTML>
+<!-- Copyright © 2001 Microsoft Corporation. All rights reserved. -->
+<HEAD>
+	<TITLE>Source Navigation</TITLE>
+
+	<STYLE>
+		img.btn
+		{
+			border  :      0px;
+			cursor  :     hand;
+			position: relative;
+		}
+
+	</STYLE>
+
+</HEAD>
+
+<BODY bgcolor="#cfcfcf" tabindex="-1">
+
+	<SCRIPT>
+		function contentWindow(frameElement)
+		{
+			// The contentWindow property works in IE >= 5.5
+			if (frameElement.contentWindow)
+				return frameElement.contentWindow;
+
+			var strIndex = frameElement.name;
+			if (!strIndex || !strIndex.length)
+				strIndex = frameElement.id;
+
+			return frameElement.document.frames(strIndex);
+		}
+
+
+		function btn_onmousedown()
+		{
+			var elem = event.srcElement;
+			elem.style.top   = "1px";
+			elem.style.left  = "1px";
+		}
+		function btn_onmouseup()
+		{
+			var elem = event.srcElement;
+			elem.style.top   = "0px";
+			elem.style.left  = "0px";
+		}
+
+		function showFuncOrFile_onclick(fShowFunc)
+		{
+			parent.parent.ShowOnlyFunction(fShowFunc);
+			UpdateFuncOrFileButtons();
+		}
+
+		function UpdateFuncOrFileButtons()
+		{
+			if (parent.parent.GetShowOnlyFunction())
+			{
+				showFunc.style.display = "none";
+				showFile.style.display = "";
+			}
+			else
+			{
+				showFile.style.display = "none";
+				showFunc.style.display = "";
+			}
+		}
+
+		function btnGoto_onclick(strAnchor, boolTop)
+		{
+			var defectViewFrame = parent.document.all("defectViewFrame");
+			var defectViewFrameWnd = contentWindow(defectViewFrame);
+			defectViewFrameWnd.Goto(strAnchor, boolTop);
+            parent.focus();
+		}
+
+
+	</SCRIPT>
+
+	<P><font face="arial" size="2"><b>View ...</b></font>
+	<BR/>&nbsp;
+
+	<TABLE cellspacing="0" cellpadding="0">
+		<TR id="showFunc" style="display:none;">
+			<td width="130" align="left" valign="top">
+				&nbsp;&nbsp;<img class="btn"
+					src="../images/showfunc.jpg"
+					alt="Show function only"
+					onmousedown="btn_onmousedown()"
+					onmouseup="btn_onmouseup()"
+					onmouseout="btn_onmouseup()"
+					onkeypress="showFuncorfile_onclick(true)"
+					onclick="showFuncOrFile_onclick(true)"
+					tabindex="1"
+					/>
+			</td>
+		</TR>
+		<TR id="showFile">
+			<td width="130" align="left" valign="top">
+				&nbsp;&nbsp;<img class="btn"
+					src="../images/showfile.jpg"
+					alt="Show entire file"
+					onmousedown="btn_onmousedown()"
+					onmouseup="btn_onmouseup()"
+					onmouseout="btn_onmouseup()"
+					onkeypress="showFuncOrFile_onclick(false)"
+					onclick="showFuncOrFile_onclick(false)"
+					tabindex="2"
+					/>
+			</td>
+		</TR>
+	</TABLE>
+
+
+	<P><font face="arial" size="2"><b>Go to ...</b></font>
+	<BR/>&nbsp;
+
+	<TABLE cellspacing="0" cellpadding="0">
+		<TR>
+			<td width="130" align="left" valign="top">
+				&nbsp;&nbsp;<img class="btn"
+					src="../images/functionstart2.jpg"
+					alt="Go to start of function"
+					onmousedown="btn_onmousedown()"
+					onmouseup="btn_onmouseup()"
+					onmouseout="btn_onmouseup()"
+					onkeypress="btnGoto_onclick('_funcstart', 1)"
+					onclick="btnGoto_onclick('_funcstart', 1)"
+					tabindex="3"
+					/>
+			</td>
+		</TR>
+
+		<TR>
+			<td width="130" align="left" valign="top">
+				&nbsp;&nbsp;<img class="btn"
+					src="../images/pathstart2.jpg"
+					alt="Go to start of path"
+					onmousedown="btn_onmousedown()"
+					onmouseup="btn_onmouseup()"
+					onmouseout="btn_onmouseup()"
+					onkeypress="btnGoto_onclick('_pathstart', 1)"
+					onclick="btnGoto_onclick('_pathstart', 1)"
+					tabindex="4"
+					/>
+			</td>
+		</TR>
+
+		<TR>
+			<td width="130" align="left" valign="top">
+				&nbsp;&nbsp;<img class="btn"
+					src="../images/warnline2.jpg"
+					alt="Go to line where warning was issued"
+					onmousedown="btn_onmousedown()"
+					onmouseup="btn_onmouseup()"
+					onmouseout="btn_onmouseup()"
+					onkeypress="btnGoto_onclick('_warning', 0)"
+					onclick="btnGoto_onclick('_warning', 0)"
+					tabindex="5"
+					/>
+			</td>
+		</TR>
+	</TABLE>
+
+	<SCRIPT
+		FOR="window" EVENT="onload">
+		{
+			UpdateFuncOrFileButtons()
+		}
+	</SCRIPT>
+
+</BODY>
+</HTML>

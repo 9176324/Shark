@@ -1,0 +1,5 @@
+[all]
+examples=yes
+
+[Exclude]
+examples=yes

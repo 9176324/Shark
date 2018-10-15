@@ -1,0 +1,159 @@
+; Copyright (c) Microsoft Corporation.  All rights reserved.
+;
+; Dcam_w2k.INF -- This file contains installation information for IEEE 1394 digital cameras.
+;           
+; Note:
+;    
+;     This is a modified version of the production image.inf installation file.
+;     The Device IDs specified in this INF are compat IDs, and will not override the
+;     IDs in image.inf on initial device installation. Once installed however, this
+;     INF can be used to update the driver (by choosing the "Have Disk" option).
+;     Customize this INF to use your device's hardware ID.
+;
+;     This INF expects the following hierarchy in the installation folder:
+;
+;     \
+;         dcam_w2k.inf
+;         objfre_x86\
+;             sonydcam.sys
+;
+
+[Version]
+LayoutFile=layout.inf
+Signature="$CHICAGO$"
+Class=Image
+ClassGUID={6bdd1fc6-810f-11d0-bec7-08002be2092f}
+Provider=%OrganizationName%
+;CatalogFile=sonydcam.cat
+DriverVer=09/30/2004,1.0.0.0
+
+[SourceDisksNames]
+1000 = %cdname%,,,
+
+[SourceDisksFiles]
+sonydcam.sys = 1000,\objfre_x86
+
+[ControlFlags]
+; All PnP devices should be excluded from manual AddDevice Applet list
+ExcludeFromSelect=*
+
+[Manufacturer]
+%GenericMfg%=Generic
+
+[DestinationDirs]
+DCam.CopyDrivers=10,system32\drivers
+
+;---------------------------------------------------------------
+;                G E N E R I C 
+;
+;                      1 3 9 4 D C a m
+;---------------------------------------------------------------
+
+[Generic]
+%1394\Generic1394DCam.DeviceDesc%=Generic.1394DCam,1394\A02D&100
+%1394\Generic1394DCam.DeviceDesc%=Generic.1394DCam,1394\A02D&101
+%1394\Generic1394DCam.DeviceDesc%=Generic.1394DCam,1394\A02D&102
+
+[Generic.1394DCam.NT]
+Include=ks.inf,kscaptur.inf
+Needs=KS.Registration,KSCAPTUR.Registration.NT
+AddReg=Generic.1394DCam.AddReg,DCam.WIA.AddReg,DCam.AddReg
+CopyFiles=DCam.CopyDrivers
+; WIA
+SubClass=     StillImage
+DeviceType=   3
+DeviceSubType=0x1
+Capabilities= 0x00000031
+DeviceData=   DCam.DeviceData
+ICMProfiles=  "sRGB Color Space Profile.icm"
+
+[Generic.1394DCam.AddReg]
+; Due to decoder availability, we only enable some video modes
+HKR,Settings,VModeInq0,0x00010001,0x00000050          ; 0101 0000; UYVY(320x240,640x480)
+; Device-specific defaults (commented out purposly)
+;HKR,Settings,Brightness,0x00010001,12
+;HKR,Settings,BrightnessDef,0x00010001,12
+;HKR,Settings,Hue,0x00010001,128
+;HKR,Settings,HueDef,0x00010001,128
+;HKR,Settings,Saturation,0x00010001,25
+;HKR,Settings,SaturationDef,0x00010001,25
+;HKR,Settings,Sharpness,0x00010001,15
+;HKR,Settings,SharpnessDef,0x00010001,15
+;HKR,Settings,WhiteBalance,0x00010001,0x010000a0
+;HKR,Settings,WhiteBalanceDef,0x00010001,0x010000a0
+;HKR,Settings,Zoom,0x00010001,640
+;HKR,Settings,ZoomDef,0x00010001,640
+;HKR,Settings,Focus,0x00010001,1600
+;HKR,Settings,FocusDef,0x00010001,1600
+
+[Generic.1394DCam.NT.Interfaces]
+AddInterface=%KSCATEGORY_CAPTURE%,GLOBAL,Generic.1394DCam.Interface
+AddInterface=%KSCATEGORY_VIDEO%,GLOBAL,Generic.1394DCam.Interface
+
+[Generic.1394DCam.Interface]
+AddReg=Generic.1394DCam.Intf.AddReg
+
+[Generic.1394DCam.Intf.AddReg]
+HKR,,CLSID,,%ProxyVCap.CLSID%
+HKR,,FriendlyName,,%1394DCam.FriendlyName%     ; 1394 Desktop Camera "Class" FrendilyName
+HKR,,Description,,%1394\Generic1394DCam.DeviceDesc%
+
+[Generic.1394DCam.NT.Services]
+AddService = sonydcam,0x00000002,Generic.1394DCam.ServiceInstall
+
+[Generic.1394DCam.ServiceInstall]
+DisplayName  = %1394\Generic1394DCam.DeviceDesc%
+ServiceType   = %SERVICE_KERNEL_DRIVER%
+StartType       = %SERVICE_DEMAND_START%
+ErrorControl   = %SERVICE_ERROR_NORMAL%
+ServiceBinary = %12%\sonydcam.sys
+
+;----------------
+; C o m m o n
+;----------------
+
+[DCam.AddReg]
+HKR,,OkToHibernate,3,01
+HKR,,DontSuspendIfStreamsAreRunning,3,01
+
+[DCam.WIA.AddReg]
+HKR,,HardwareConfig,1,1
+HKR,,USDClass,,"{0527d1d0-88c2-11d2-82c7-00c04f8ec183}"
+
+[DCam.DeviceData]
+Server=local
+UI Class ID={5d8ef5a3-ac13-11d2-a093-00c04f72dc3c}
+
+[DCam.CopyDrivers]
+sonydcam.sys
+stream.sys
+
+[Strings]
+
+;----------------
+; Non-Localizable
+;----------------
+
+ProxyVCap.CLSID="{17CCA71B-ECD7-11D0-B908-00A0C9223196}"
+KSCATEGORY_CAPTURE="{65E8773D-8F56-11D0-A3B9-00A0C9223196}"
+KSCATEGORY_VIDEO="{6994AD05-93EF-11D0-A3CC-00A0C9223196}"
+SERVICE_KERNEL_DRIVER=1
+SERVICE_DEMAND_START=3
+SERVICE_ERROR_NORMAL=1
+
+; Do not localize FriendlyName; applications may depend on this.
+1394DCam.FriendlyName="1394 Desktop Video Camera"
+
+;----------------
+; Localizable
+;----------------
+
+OrganizationName="OrganizationName"
+
+GenericMfg="Generic"
+1394\Generic1394DCam.DeviceDesc="Generic 1394 Desktop Camera"
+
+cdname="Disk 1"
+
+
+

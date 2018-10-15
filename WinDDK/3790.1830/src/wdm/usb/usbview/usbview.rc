@@ -1,0 +1,118 @@
+#include <windows.h>
+#include <commctrl.h>
+#include "resource.h"
+
+
+
+#if WINNT
+#include <ntverp.h>
+#else
+#include <version.h>
+#endif
+
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// VERSION
+//
+#define VER_FILEDESCRIPTION_STR     "Microsoft\256 Windows(TM) USB Device Viewer"
+#define VER_INTERNALNAME_STR        "USBVIEW"
+#define VER_ORIGINALFILENAME_STR    "USBVIEW.EXE"
+#define VER_LEGALCOPYRIGHT_STR      "Copyright \251 Microsoft Corporation 1996-1998.  All Rights Reserved."
+
+#define VER_FILETYPE     VFT_APP
+#define VER_FILESUBTYPE  VFT2_UNKNOWN
+
+#include <common.ver>
+
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// ICON
+//
+IDI_ICON                ICON    DISCARDABLE     "USB.ICO"
+IDI_BADICON				ICON	DISCARDABLE		"BANG.ICO"
+IDI_COMPUTER			ICON	DISCARDABLE		"MONITOR.ICO"
+IDI_HUB					ICON	DISCARDABLE		"HUB.ICO"
+IDI_NODEVICE			ICON	DISCARDABLE		"PORT.ICO"
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// Cursor
+//
+IDC_SPLIT               CURSOR  DISCARDABLE     "SPLIT.CUR"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_MAINDIALOG DIALOGEX 0, 0, 415, 243
+STYLE WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU | 
+    WS_THICKFRAME
+CAPTION "USB View"
+MENU IDR_MENU
+FONT 8, "MS Shell Dlg"
+BEGIN
+    CONTROL         "Tree1",IDC_TREE,"SysTreeView32",TVS_HASBUTTONS | 
+                    TVS_HASLINES | TVS_LINESATROOT | WS_BORDER | WS_TABSTOP,
+                    0,0,120,234,WS_EX_CLIENTEDGE
+    EDITTEXT        IDC_EDIT,120,0,295,234,ES_MULTILINE | ES_READONLY | 
+                    WS_VSCROLL | WS_HSCROLL
+    CONTROL         "Devices Connected: 0",IDC_STATUS,"msctls_statusbar32",
+                    SBARS_SIZEGRIP,
+                    0,235,415,8
+END
+
+
+IDD_ABOUT DIALOG DISCARDABLE  0, 0, 212, 82
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About USBView"
+FONT 8, "MS Shell Dlg"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,80,62,50,14
+    LTEXT           "USB Device Viewer",IDC_STATIC,54,15,64,8
+    LTEXT           "Copyright (c) 1996-1998 Microsoft Corporation",
+                    IDC_STATIC,54,30,145,8
+#ifndef WINNT
+    LTEXT           "Version",IDC_STATIC,55,45,24,8
+    LTEXT           VER_PRODUCTVERSION_STR,IDC_STATIC,87,45,33,8
+#endif
+    ICON            IDI_ICON,IDC_STATIC,15,15,21,20
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MENU MENU DISCARDABLE 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Refresh\tF5",                ID_REFRESH
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_EXIT
+    END
+    POPUP "&Options"
+    BEGIN
+        MENUITEM "&Auto Refresh",               ID_AUTO_REFRESH
+        MENUITEM "&Config Descriptors",         ID_CONFIG_DESCRIPTORS
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About",                      ID_ABOUT
+    END
+END
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDACCEL ACCELERATORS DISCARDABLE 
+BEGIN
+    VK_F5,          ID_REFRESH,             VIRTKEY,NOINVERT
+END
+

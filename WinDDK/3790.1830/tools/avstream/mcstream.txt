@@ -1,0 +1,33 @@
+MultiChannel Streaming Tool (MFC)
+
+Copyright (c) Microsoft Corporation. All rights reserved.
+
+
+
+What does MCStream do
+=========================
+
+	MCStream is a MFC based app that allows the user to generate and render multiple channel wave tones.  
+The user has the ability to specify the audible frequency of each channel, to select the sample rate, bit depth and speaker configuration, to select a suitable device and to render the generated tone. The tone is in WAVE_FORMAT_EXTENSIBLE format and the dialog displays the value of each attribute.
+
+
+How to build the sample
+=========================
+	Install the DDK, run setenv.bat and then run nmake.exe in this directory.
+
+
+How to run the sample
+=========================
+
+	- Run MCStream.exe. 
+	- Specify an audio frequency (between 50 and 20,000 Hz), select an available speaker and click the 'Add' button to add a single channel tone to the mix.
+	- Select various devices that support the current format.
+	- Select different values for the bit depth and sample rate fields; the related fields will be updated.
+	- Render the current mix.
+	- Remove one or all of the single channel tones by clicking on the respective buttons.
+
+Targeted platforms
+=========================
+
+	MCStream is runnable on WinME, Windows2000, WindowsXP and Windows Server 2003 (i386 and ia64) platforms.
+	

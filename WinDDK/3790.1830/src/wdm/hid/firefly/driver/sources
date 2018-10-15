@@ -1,0 +1,17 @@
+TARGETNAME=firefly
+TARGETPATH=..\disk\$(BUILD_ALT_DIR)
+TARGETTYPE=DRIVER
+
+NTTARGETFILE0=mofcomp
+
+INCLUDES=..\shared
+
+TARGETLIBS=                               \
+        $(DDK_LIB_PATH)\hidparse.lib      
+        
+
+SOURCES=firefly.c \
+        vfeature.c \
+        firefly.rc
+
+

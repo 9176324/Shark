@@ -1,0 +1,17 @@
+..      = cd ..\$*
+...     = cd ..\..\$*
+....    = cd ..\..\..\$*
+BLD     = build -cfeg $*
+BZZ     = build -ZPg $*
+BZ      = build -ZPg $*
+BCZ     = build -cZMg $*
+USE     = net use $*
+NUSE    = net use $* /d
+QF      = format a: /q /u /v:""
+VIEW    = net view \\$*
+WINDIR  = cd %windir% $T %homedrive%
+LINK32  = link $*
+COFF    = link $*
+MAKE    = nmake /c $*
+MK      = nmake /c $*
+up      = if "$1"=="" (cd ..) else (for /L %i in (1,1,$1) do cd ..)

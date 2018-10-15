@@ -1,0 +1,68 @@
+; HPSSTAPE.INF -- This is a sample INF that installs support
+;                 for a Hewlett Packard tape drive under
+;                 Windows NT/2000.
+
+; Copyright (c) 1993,1997,2000 Microsoft Corporation
+
+[version]
+signature="$Windows NT$"
+Class=TapeDrive
+ClassGUID={6D807884-7D21-11CF-801C-08002BE10318}
+Provider=%INF_PROVIDER%
+DriverVer=06/27/2000, 1.0
+
+;
+; diskid = description[,[tagfile][,<unused>,subdir]]
+;
+[SourceDisksNames.x86]
+1 = %FLOPPY_DESCRIPTION%,\hpssdrv.tag,,\i386
+
+;
+; filename_on_source = diskid[,[subdir][,size]]
+;
+[SourceDisksFiles]
+hpsstape.sys = 1,,18432
+
+[DestinationDirs]
+DefaultDestDir = 12 ; DIRID_DRIVERS
+
+[Manufacturer]
+%HP%=HP
+
+;********************************
+;HP tape drives device list
+[HP]
+%SCSI\HP______HP35470A________T.DeviceDesc% = hpsstape_Inst, SCSI\HP______HP35470A________T
+
+[ControlFlags]
+ExcludeFromSelect=SCSI\HP______HP35470A________T
+
+[hpsstape_Inst]
+CopyFiles = @hpsstape.sys
+
+[hpsstape_Inst.Services]
+AddService = hpsstape, 2, hpsstape_Service_Inst, hpsstape_EventLog_Inst
+
+[hpsstape_Service_Inst]
+ServiceType    = 1  ; SERVICE_KERNEL_DRIVER
+StartType      = 1  ; SERVICE_SYSTEM_START
+ErrorControl   = 1  ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\hpsstape.sys
+LoadOrderGroup = SCSI Class
+Dependencies   = +SCSI Miniport
+
+[hpsstape_EventLog_Inst]
+AddReg = hpsstape_EventLog_AddReg
+
+[hpsstape_EventLog_AddReg]
+HKR,,EventMessageFile,0x00020000,"%%SystemRoot%%\System32\IoLogMsg.dll;%%SystemRoot%%\System32\drivers\hpsstape.sys"
+HKR,,TypesSupported,0x00010001,7
+
+
+[Strings]
+INF_PROVIDER="Hewlett Packard"
+HP="Hewlett Packard"
+FLOPPY_DESCRIPTION="Hewlett Packard SureStore Tape 2000 Driver Disk"
+SCSI\HP______HP35470A________T.DeviceDesc="Hewlett Packard SureStore Tape 2000 tape drive"
+
+

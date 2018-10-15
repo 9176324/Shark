@@ -1,0 +1,9 @@
+LIBRARY IOCTLVDD
+
+;DESCRIPTION 'Sample ISV VDD for NT-MVDM'
+
+EXPORTS
+        VDDInitialize
+        VDDRegisterInit
+        VDDDispatch
+

@@ -1,0 +1,9 @@
+DIRS= \
+     cpsuisam \
+     genprint \
+     mini \
+     monitors \
+     msplot \
+     oemdll \
+     pp \
+     tty

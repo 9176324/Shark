@@ -1,0 +1,437 @@
+<?xml version="1.0"?>
+<component>
+
+<?component error="false" debug="true"?>
+
+<comment>
+This component manages a set of sort keys, including the persistence of the
+current sort keys. This object does not perform any sorting. It simply
+manages the sort keys that can then be used for sorting by some other means.
+
+To use this object, you must call the init method after creating an instance.
+
+The current sort keys are always available through the currentKeyString
+property as an XSL sort string.
+
+When the primaryKey property is set, the current sort keys are changed to
+correspond. If the specified primary key is already the primary key, its
+order is reversed by inverting leading '+' characters to '-' characters and
+vice versa. Otherwise, the current keys are made secondary to the primary key,
+unless the specified primary key is always unique (as specified in the init
+method). In that case the current sort keys are entirely replaced with the
+specified primary key.
+
+The properties that return a list of keys, as well as their corresponding
+input parameters to the init method
+
+Several properties return a list of sort keys. These are currentKeys,
+validKeys, uniqueKeys, and defaultKeys. The latter three are also input
+parameters to the init method. These 'lists' are composed of a string
+containing each sort key with multiple keys delimited with a linefeed ('\n')
+character. Note that each sort key may itself be a compound key, in which
+case the XML fields are separated by semicolons. As an example, consider the
+following list string:
+    @enabled\n
+    number(@id)\n
+    format;display
+This list contains three sort keys, and the last key is a compound key made
+up of multiple fields.
+</comment>
+
+<registration
+	description="PREfast Sort Keys"
+	progid="PREfast.SortKeys"
+	version="1.00"
+	classid="{C2FD7616-6B0C-4311-9ABB-945D59DB1B5C}"
+>
+</registration>
+
+<public>
+	<property name="primaryKey"       get put />
+	<property name="currentKeyString" get />
+	<property name="currentKeys"      get />
+	<property name="persistencePath"  get />
+	<property name="validKeys"        get />
+	<property name="uniqueKeys"       get />
+	<property name="defaultKeys"      get />
+
+
+	<comment>
+	Description: Initializes an instance of the object by reading the previous
+	values from the specified location in the persistence mechanism and saving
+	the specified sort keys.
+
+	Parameters:
+		strValidKeys - The list of sort keys that are valid for this instance
+	of the component. This is used to validate the specified strUniqueKeys and
+	strDefaultKeys parameters of this method, as well as to validate the input
+	to the primaryKey property.
+		strUniqueKeys - The list of sort keys that are always unique for this
+	instance of the component. When such a sort key is selected as the primary
+	key, since it is always unique, the current sort keys are entirely
+	replaced with the primary key.
+		strDefaultKeys - The list of sort keys to be used when none exist in
+	the persistence mechanism, or if reading from the persistence mechanism
+	fails.
+		strPersistencePath - The path into the persistence mechanism where
+	the current sort keys are loaded from and saved to. This is always under
+	the persistence hierarchy specified by the PREfast Execution Environment.
+	Currently, this hierarchy is the registry path specified by the
+	RegistryKey property of the PREfast.ExecEnvironment component.
+	</comment>
+	<method name="init">
+		<parameter name="strValidKeys" />
+		<parameter name="strUniqueKeys" />
+		<parameter name="strDefaultKeys" />
+		<parameter name="strPersistencePath" />
+	</method>
+
+    <method name="FinalConstruct">
+        <parameter name="funcCreateObject" />
+        <parameter name="objPREfast" />
+    </method>
+
+    <method name="connectEvents">
+        <parameter name="objListener" />
+    </method>
+
+	<event name="onChange" />
+
+</public>
+
+<script language="JScript">
+<![CDATA[
+/////////////////////////////////////////////////////////////////////////////
+// Beginning of script block
+//
+
+/////////////////////////////////////////////////////////////////////////////
+// Construction
+var description = new PREfastSortKeys;
+function PREfastSortKeys()
+{
+	// Initialize the class
+	this.get_primaryKey = get_primaryKey;
+	this.put_primaryKey = put_primaryKey;
+	this.get_currentKeyString = get_currentKeyString;
+	this.get_currentKeys = get_currentKeys;
+	this.get_persistencePath = get_persistencePath;
+	this.get_validKeys = get_validKeys;
+	this.get_uniqueKeys = get_uniqueKeys;
+	this.get_defaultKeys = get_defaultKeys;
+    this.FinalConstruct = FinalConstruct;
+    this.connectEvents = connectEvents;
+
+    m_objListeners = new Array();
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+function get_primaryKey()
+{
+	// Ensure that the object has been initialized
+	EnsureInitialized();
+
+	return m_arrCurrentKeys.length ? m_arrCurrentKeys[0] : null;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//
+function put_primaryKey(strPrimaryKey)
+{
+	// Ensure that the object has been initialized
+	EnsureInitialized();
+
+	// Validate the specified sort key
+	if (!IsKeyInArray(strPrimaryKey, m_arrValidKeys))
+		throw new Error(0, "Specified primary key is not valid: " + strPrimaryKey);
+
+	// Create the ascending and descending key pattern for the specified key
+	var arrKeys = AbsoluteKey(strPrimaryKey).split(';');
+	var strKeysAscending = "";
+	var strKeysDescending = "";
+	for (var i in arrKeys)
+	{
+		if (i > 0)
+		{
+			strKeysAscending += ';';
+			strKeysDescending += ';';
+		}
+		strKeysAscending  += '+' + arrKeys[i];
+		strKeysDescending += '-' + arrKeys[i];
+	}
+
+	// Reverse the column's sort order if it is listed first
+	if (m_arrCurrentKeys[0] == strKeysAscending)
+	{
+		m_arrCurrentKeys[0] = strKeysDescending;
+	}
+	else if (m_arrCurrentKeys[0] == strKeysDescending)
+	{
+		m_arrCurrentKeys[0] = strKeysAscending;
+	}
+	else if (IsKeyInArray(strKeysAscending, m_arrUniqueKeys))
+	{
+		m_arrCurrentKeys = new Array(strKeysAscending);
+	}
+	else
+	{
+		// Set the column as the primary key
+		var arr = new Array(strKeysAscending);
+		for (var i in m_arrCurrentKeys)
+		{
+			if (m_arrCurrentKeys[i] != strKeysAscending &&
+				m_arrCurrentKeys[i] != strKeysDescending)
+			{
+				arr[arr.length] = m_arrCurrentKeys[i];
+			}
+		}
+		m_arrCurrentKeys = arr;
+	}
+
+	// Persist the updated keys
+	if (m_strPersistencePath)
+	{
+		var strRegPath = m_objPREfast.RegistryKey + m_strPersistencePath;
+        try
+        {
+		    m_objShell.RegWrite(strRegPath, m_arrCurrentKeys.join('\n'));
+        }
+        catch (e)
+        {
+            // forget about it if we can't write to the registry
+        }
+	}
+
+	// Fire an event
+	fireOnChange();
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+function get_currentKeyString()
+{
+	// Ensure that the object has been initialized
+	EnsureInitialized();
+
+	return m_arrCurrentKeys.join(';');
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//
+function get_currentKeys()
+{
+	// Ensure that the object has been initialized
+	EnsureInitialized();
+
+	return m_arrCurrentKeys.join('\n');
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//
+function get_persistencePath()
+{
+	// Ensure that the object has been initialized
+	EnsureInitialized();
+
+	return m_strPersistencePath;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//
+function get_validKeys()
+{
+	// Ensure that the object has been initialized
+	EnsureInitialized();
+
+	return m_arrValidKeys.join('\n');
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//
+function get_uniqueKeys()
+{
+	// Ensure that the object has been initialized
+	EnsureInitialized();
+
+	return m_arrUniqueKeys.join('\n');
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//
+function get_defaultKeys()
+{
+	// Ensure that the object has been initialized
+	EnsureInitialized();
+
+	return m_arrDefaultKeys.join('\n');
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+function init(strValidKeys, strUniqueKeys, strDefaultKeys, strPersistencePath)
+{
+	// Parse the specified keys
+	m_arrValidKeys = strValidKeys.split('\n');
+	m_arrUniqueKeys = strUniqueKeys.split('\n');
+	m_arrDefaultKeys = strDefaultKeys.split('\n');
+
+	// Ensure that the specified unique keys are all valid
+	for (var i in m_arrUniqueKeys)
+		if (!IsKeyInArray(m_arrUniqueKeys[i], m_arrValidKeys))
+			throw new Error(0, "Specified unique key is not valid: " + m_arrUniqueKeys[i]);
+
+	// Ensure that the specified default keys are all valid
+	for (var i in m_arrDefaultKeys)
+		if (!IsKeyInArray(m_arrDefaultKeys[i], m_arrValidKeys))
+			throw new Error(0, "Specified default key is not valid: " + m_arrDefaultKeys[i]);
+
+	// Load the persisted keys, if a persistence path was specified
+	if (strPersistencePath)
+	{
+		// Remove any leading backslashes from the specified persistence path
+		while (strPersistencePath.substr(0, 1) == "\\")
+			strPersistencePath = strPersistencePath.substr(1);
+
+		// Save the persistence path
+		m_strPersistencePath = strPersistencePath;
+
+		try
+		{
+			// Read the persisted keys
+			var strRegPath = m_objPREfast.RegistryKey + m_strPersistencePath;
+            var strCurrentKeys = m_objShell.RegRead(strRegPath);
+
+			// Parse the persisted keys
+			m_arrCurrentKeys = strCurrentKeys.split('\n');
+
+			// Ensure that the persisted keys are all valid
+			for (var i in m_arrCurrentKeys)
+				if (!IsKeyInArray(m_arrCurrentKeys[i], m_arrValidKeys))
+					throw new Error(0, "Persisted key is not valid: " + m_arrCurrentKeys[i]);
+
+			// Return
+			return;
+		}
+		catch (e)
+		{
+			// Fall through
+		}
+	}
+
+	// Use the default keys if we're not getting them from persistence
+	m_arrCurrentKeys = strDefaultKeys.split('\n');
+}
+
+function FinalConstruct( funcCreateObject, objPREfast )
+{
+    m_objPREfast = objPREfast;
+}
+
+function connectEvents( objListener )
+{
+    m_objListeners.push( objListener );
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//
+function IsKeyInArray(strKey, arr)
+{
+	// Break apart the specified key
+	var arrKey = strKey.split(';');
+	for (var i in arrKey)
+	{
+		// Remove any leading '+' or '-' signs
+		while (arrKey[i].substr(0, 1) == '+' || arrKey[i].substr(0, 1) == '-')
+			arrKey[i] = arrKey[i].substr(1);
+	}
+	strKey = arrKey.join(';');
+
+	// Look for the specified key in the specified array
+	for (var i in arr)
+		if (arr[i] == strKey)
+			return true;
+	return false;
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+function EnsureInitialized()
+{
+	// Ensure that the object has been initialized
+	if (!m_arrValidKeys || !m_arrUniqueKeys || !m_arrDefaultKeys || !m_arrCurrentKeys)
+		throw new Error(0, "PREfast.SortKeys object not initialized");
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+function AbsoluteKey(strKey)
+{
+	// Break apart the specified key
+	var arrKey = strKey.split(';');
+	for (var i in arrKey)
+	{
+		// Remove any leading '+' or '-' signs
+		var strSubKey = arrKey[i];
+		while (strSubKey.substr(0, 1) == '+' || strSubKey.substr(0, 1) == '-')
+			strSubKey = strSubKey.substr(1);
+		arrKey[i] = strSubKey;
+	}
+	return arrKey.join(';');
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+function SignedKey(strKey)
+{
+	// Break apart the specified key
+	var arrKey = strKey.split(';');
+	for (var i in arrKey)
+	{
+		// Ensure that the subkey begins with a '+' or '-'
+		var strSign = arrKey[i].substr(0, 1);
+		if (strSign != '+' && strSign != '-')
+			arrKey[i] = '+' + arrKey[i];
+	}
+	return arrKey.join(';');
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//
+function fireOnChange()
+{
+    for ( var i in m_objListeners )
+    {        
+        if ( "undefined" != typeof( m_objListeners[i].SortKeys_onChange ) )
+            m_objListeners[i].SortKeys_onChange();
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Data Members
+
+var m_strPersistencePath;
+var m_arrValidKeys;
+var m_arrUniqueKeys;
+var m_arrDefaultKeys;
+var m_arrCurrentKeys;
+
+var m_objPREfast;
+
+// These variables are used to send fake events
+var m_objListeners;
+//
+// End of script block
+/////////////////////////////////////////////////////////////////////////////
+]]>
+</script>
+
+<object id="m_objShell"   progid="WScript.Shell"           />
+
+</component>

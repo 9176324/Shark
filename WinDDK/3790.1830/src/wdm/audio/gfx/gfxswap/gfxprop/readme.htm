@@ -1,0 +1,194 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 11">
+<meta name=Originator content="Microsoft Word 11">
+<link rel=File-List href="readme149_files/filelist.xml">
+<title>GFX Property Page</title>
+<!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:SpellingState>Clean</w:SpellingState>
+  <w:GrammarState>Clean</w:GrammarState>
+  <w:ValidateAgainstSchemas/>
+  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
+  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
+  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+ </w:WordDocument>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:LatentStyles DefLockedState="false" LatentStyleCount="156">
+ </w:LatentStyles>
+</xml><![endif]-->
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Verdana;
+	panose-1:2 11 6 4 3 5 4 4 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:536871559 0 0 0 415 0;}
+@font-face
+	{font-family:"MS Sans Serif";
+	panose-1:0 0 0 0 0 0 0 0 0 0;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-format:other;
+	mso-font-pitch:variable;
+	mso-font-signature:3 0 0 0 1 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0in;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+p
+	{font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";}
+span.SpellE
+	{mso-style-name:"";
+	mso-spl-e:yes;}
+span.GramE
+	{mso-style-name:"";
+	mso-gram-e:yes;}
+@page Section1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.25in 1.0in 1.25in;
+	mso-header-margin:.5in;
+	mso-footer-margin:.5in;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Table Normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0in 5.4pt 0in 5.4pt;
+	mso-para-margin:0in;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman";
+	mso-ansi-language:#0400;
+	mso-fareast-language:#0400;
+	mso-bidi-language:#0400;}
+</style>
+<![endif]-->
+</head>
+
+<body lang=EN-US link=blue vlink=blue style='tab-interval:.5in'>
+
+<div class=Section1>
+
+<h2><span style='font-family:Verdana'>GFX Property Page<o:p></o:p></span></h2>
+
+<h3><span style='font-family:Verdana'>SUMMARY<o:p></o:p></span></h3>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>This sample demonstrates
+the basics of writing a GFX property page. It can be used as a starting point
+for writing your own GFX property dialog. The sample works only in conjunction
+with the audio GFX filter sample, which is tied to the Microsoft DSS 80 USB
+speakers. To adapt the sample to work with a different set of USB speakers,
+modify the INF file by replacing the Plug and Play device ID of the Microsoft
+DSS 80 USB speakers with the device ID of your USB speakers. <o:p></o:p></span></p>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>After you have installed
+both the audio GFX filter and this sample, the property dialog will appear when
+you open the <b>Advanced Audio Properties</b> dialog and click on the <b>Properties</b>
+button for the USB speakers in the <b>Effects</b> tab. Through this dialog, you
+can enable or disable channel-swapping by the GFX filter. <o:p></o:p></span></p>
+
+<h3><span style='font-family:Verdana'>BUILDING THE SAMPLE<o:p></o:p></span></h3>
+
+<p><b><span style='font-size:10.0pt;font-family:Verdana'>NOTE:</span></b><span
+style='font-size:10.0pt;font-family:Verdana'> This sample will only build for
+32-bit Microsoft® Windows® XP and later platforms. <o:p></o:p></span></p>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>To build this sample,
+enter the <i>free</i> or <i>checked</i> Windows XP build environment and run
+the <b>build</b> command from the main GFX sample directory (parent directory),
+rather than from this subdirectory. This command also builds the audio GFX
+filter sample, which this sample requires to work properly. <o:p></o:p></span></p>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>After you have built the
+sample, use the INF file <span class=SpellE>gfxswap.inf</span>, which is
+included in the parent directory, to install the sample. Simply copy the INF
+file, the binary file for this sample, and the GFX filter binary to a floppy
+disk. Next, to install the samples, display the floppy contents in Windows
+Explorer, right-click the INF file, and choose to <span class=GramE><b>Install</b></span>
+on your test machine. For more information, see the readme.htm file in the
+parent directory. <o:p></o:p></span></p>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>After the INF file has
+installed the driver, you can update and test your new versions of the <span
+class=GramE>sample</span> by copying the binary into the %SystemRoot%\system32
+directory on the target machine and rebooting. This technique is sufficient
+unless you also make changes to the INF file. <o:p></o:p></span></p>
+
+<h3><span style='font-family:Verdana'>SAMPLE ISSUES<o:p></o:p></span></h3>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>This sample works only
+with the Windows XP (or later) operating system. <o:p></o:p></span></p>
+
+<h3><span style='font-family:Verdana'>ADDITIONAL INFORMATION ABOUT THE SAMPLE<o:p></o:p></span></h3>
+
+<p class=MsoNormal><span style='font-size:10.0pt;font-family:Verdana'>The GFX
+property dialog sample communicates with the GFX filter by sending property
+requests. The sample sends a property request to the GFX filter's single node.
+Because the node type is new (specific to the GFX filter sample), the property
+is new (private) as well. <o:p></o:p></span></p>
+
+<h3><span style='font-family:Verdana'>CODE TOUR<o:p></o:p></span></h3>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>The project was generated
+using the ATL Wizard in Microsoft Visual C++® 6.0. The project workspace file is
+included in the sample files so that you can open the project with Microsoft
+Visual C++ 6.0 (or later). If you want to create your own project, the
+preferred method is to use the wizard to create a new project instead of
+renaming this project and modifying it. If you choose to do the latter anyway,
+be sure to read the discussion of GUID dependencies in the readme.htm file in
+the parent directory. </span></p>
+
+<p align=center style='text-align:center'><a href="#top"><span
+style='font-size:10.0pt;font-family:Verdana'>Top of page</span></a> <span
+style='font-size:10.0pt;font-family:Verdana'><o:p></o:p></span></p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width=800
+ style='width:600.0pt;mso-cellspacing:0in'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes;
+  height:2.25pt'>
+  <td style='background:aqua;padding:.75pt .75pt .75pt .75pt;height:2.25pt'>
+  <p class=MsoNormal><span style='font-size:2.0pt;mso-bidi-font-size:12.0pt'><o:p>&nbsp;</o:p></span></p>
+  </td>
+ </tr>
+</table>
+
+<p><span style='font-size:7.5pt;font-family:"MS Sans Serif"'>© 2004 Microsoft
+Corporation</span> <span style='font-size:10.0pt;font-family:Verdana'><o:p></o:p></span></p>
+
+</div>
+
+</body>
+
+</html>
+

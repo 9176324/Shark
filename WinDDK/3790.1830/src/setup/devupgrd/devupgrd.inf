@@ -1,0 +1,35 @@
+; Microsoft Device Driver Upgrade Pack
+; Migration DLL INF file.
+;
+; Copyright 2000 Microsoft Corporation
+;
+
+[Version]
+Signature = "$CHICAGO$"
+
+[DestinationDirs]
+DevUpgrd-Files = 10, win9xmig\DevUpgrd
+W2KDriver-Files = 10, win9xmig\DevUpgrd\FOOW2K	; Replace "FOO" with your vendor name
+
+[DefaultInstall]
+AddReg = DevUpgrd-AddReg
+CopyFiles = DevUpgrd-Files, W2KDriver-Files
+
+[DevUpgrd-AddReg]
+HKLM,"Software\Microsoft\Windows\CurrentVersion\Setup\Migration DLLs","Microsoft Device Upgrade Pack",,%10%\win9xmig\DevUpgrd
+HKLM,"Software\Microsoft\Windows\CurrentVersion\Setup\UpgradeDrivers","<Plug and Play ID>",,%10%\win9xmig\DevUpgrd\FOOW2K\Foo.INF
+
+[DevUpgrd-Files]
+Migrate.dll
+
+[W2KDriver-Files]
+Foo.inf	; Name of your INF goes here
+Foo.sys	; Name of your driver file(s) goes here
+
+[SourceDisksNames]
+"Foo driver Windows 2000 upgrade pack" = 1	; Replace with your media description
+
+[SourceDisksFiles]
+1 = Migrate.dll
+1 = Foo.inf
+1 = Foo.sys

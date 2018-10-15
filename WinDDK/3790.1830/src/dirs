@@ -1,0 +1,14 @@
+DIRS= \
+     general \
+     ime \
+     input \
+     kernel \
+     mmedia \
+     network \
+     print \
+     setup \
+     smartcrd \
+     storage \
+     vdd \
+     video \
+     wdm

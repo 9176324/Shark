@@ -1,0 +1,19 @@
+TARGETNAME=tostrco1
+TARGETTYPE=DYNLINK
+
+!IFNDEF BUILD_ALT_DIR
+SAMPLE_COMMON_DIR=..\disk
+!ELSE
+SAMPLE_COMMON_DIR=..\disk\$(BUILD_ALT_DIR)
+!ENDIF
+
+TARGETPATH=$(SAMPLE_COMMON_DIR)
+
+SOURCES=coinst.c 
+
+TARGETLIBS= $(SDK_LIB_PATH)\setupapi.lib \
+            $(SDK_LIB_PATH)\kernel32.lib \
+            $(SDK_LIB_PATH)\advapi32.lib \
+            $(SDK_LIB_PATH)\user32.lib
+
+DLLBASE=0x2000000

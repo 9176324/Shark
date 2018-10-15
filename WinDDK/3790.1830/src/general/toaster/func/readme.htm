@@ -1,0 +1,113 @@
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-
+1252">
+<META NAME="Generator" CONTENT="Microsoft Word 97">
+<TITLE>Toaster function driver (Illustrative samples)</TITLE>
+</HEAD>
+<BODY LINK="#0000ff">
+
+<FONT FACE="Verdana" SIZE=5><H3>Toaster function driver</H3>
+</FONT><FONT FACE="Verdana" SIZE=2>
+
+<H4>func</H4>
+
+ <BLOCKQUOTE> All the sub-directories under this one contain the source code of the function driver (Toaster.sys) for standard toaster devices. To be illustrative and useful learning sample for beginners to driver development, the sample has been built from almost nothing (skeletal) to fully functional, adding useful features at each step. When built, all the different versions produce toaster.sys file. You can use the standard toaster.inf or toastco.inf to install and test. You can either manually install the driver (root-enumerations) or bus enumerate the driver using the toaster bus driver. They all share one common header file present in the <I>shared</I> directory. Let us assume that the function driver owns the power policy of the toaster device and supports D0, D1 and D3 power states, and also the toaster device is capable of waking the system from D1 state. 
+<OL>
+<LI> <I>Incomplete1</I>: This is the simplest form of a WDM driver. It shows bare minimum functionality required to get installed and loaded in the system. You cannot open the device or talk to it. As the name suggests, this is not complete and safe enough to be used as a model for a production level driver.
+<LI> <I>Incomplete2</I>: This version is slightly advanced than the incomplete1 version. This version shows how to track I/O IRPs and handle stop and remove PNP request safely with respect to driver unload. Instead of using remlocks, this sample implements its own locking scheme to be more general purpose and compatible with 9x systems. You can open the registered interface from usermode and send read, write and IOCTL requests. This is a still an incomplete sample because it doesn't handle power IRPs and do the necessary S to D power IRP conversion required by the bus driver.
+<LI> <I>Featured1</I>: This is a complete version with full fledged power management and WMI support.
+<LI> <I>Featured2</I>: This version contains Wait-wake support and Event Tracing support in addition to all the features supported by featured1.</BLOCKQUOTE>
+
+<H4>Installing the toaster.sys as a root-enumerated driver</H4></FONT><FONT FACE="Verdana" 
+SIZE=2><P>
+
+
+The toaster.htm file describes how to install this driver for a toaster bus enumerated device. You can also manually install the func driver (root-enumeration) using Add hardware wizard. 
+
+<P>
+<B>Files Requiered</B>: Depending on which inf file you choose to install, different set of files are required.
+
+<UL>
+<LI> If you use toaster.inf, you need any one version of toaster.sys & tostrcls.dll. Copy that to a floopy or to a directory on the target machine and follow the install instruction given below. 
+
+<LI> If you use toastco.inf to install, you also need tostrco1.dll. 
+
+<LI>If you use toasterf.inf, you also need devupper.sys, devlower.sys, clasuppr.sys, classlwr.sys filter drivers along with toaster.sys and tostrcls.dll. You must make sure that toaster class hasn't been already installed on that machine. Otherwise, system will not install the class filter drivers. Just for testing purposes, if the toaster class is already installed, first uninstall all the devices and then manually delete the class registry (HKLM\System\CurrentControlSet\Control\Class\{B85B7C50-6A01-11d2-B841-00C04FAD5171}), before installing the driver with toasterf.inf.</UL> 
+
+<P>
+Following is the step by step instructions of how to install the toaster.sys driver on  XP and Server 2003: <p>
+<OL>
+
+<LI>
+      Double-click the ‘Add Hardware’ wizard in Control Panel.
+
+<LI>
+      At the 'Welcome to the Add Hardware Wizard', click ‘Next’.
+
+<LI>
+      Select 'Yes, I have already connected the hardware', then click Next.
+<LI>
+      Select ‘Add a new hardware device’ from the list, then click Next.
+
+<LI>
+      Select ‘Install the hardware that I manually select from a list(Advanced),' and then click next.
+
+<LI>
+      Select ‘Show all system devices’, then click Next. 
+
+<LI>  Click 'Have Disk', make sure that 'A:\' is in the "Copy manufacturer's files from:" box, and click OK.
+
+<LI>  Click on the desired entry, and then click Next.
+
+<LI>  At 'The wizard is ready to install your hardware', click Next.
+
+<LI>  Click Finish at 'Completing the Add/Remove Hardware Wizard.'
+ </OL>
+
+On Windows 2000:<p><OL>
+
+<LI>
+      Double-click the ‘Add/Remove Hardware’ wizard in Control Panel.
+<LI>
+      At the Add/Remove Hardware Wizard, click Next.
+<LI>
+      Choose the ‘Add/Troubleshoot a device’, then click Next.
+
+<LI>
+      Select ‘Add a new device’ from the list, then click Next.
+
+<LI>
+      Select ‘No, I Want to Select the Hardware from a list’ and then click Next.
+
+<LI>
+      Select ‘Other Devices’ and then click Next. NOTE: This might take a few minutes.
+
+
+<LI>  Click 'Have Disk', make sure that 'A:\' is in the "Copy manufacturer's files from:" box, and click OK.
+
+<LI>  Click on the desired of the two entries, and then click Next.
+
+<LI>  At 'Start Hardware Installation,' click Next.
+
+<LI>  Click Finish at 'Completing the Add/Remove Hardware Wizard.'
+ </OL>	 
+<p>
+<H4>Testing the driver</H4></FONT><FONT FACE="Verdana" 
+SIZE=2><P>
+To test the root-enumerated driver, you can use the <I>toast.exe</I> application. This application basically enumerates all the toaster class devices, displays its properties such as FriendlyName, InstanceId, and opens the last enumerated device to perform a read operation and send a DeviceIoControl to the device depending on the user command line option. 
+<P>
+If you invoke without any option, it basically opens the last enumerated interface and prompts you to initiate a Read operation in a loop. You press any key to continue the read loop or press ‘q’ to break out of the loop. If you use the –h option it opens the last enumerated interface and sends a DeviceIoControl to hide the device from the Device Manager before performing read. 
+<PRE>
+Usage: Toast <–h> {-h option causes the device to hide from Device Manager UI} </PRE>
+<P>
+</FONT><P ALIGN="CENTER"><A HREF="#top"><FONT FACE="Verdana" SIZE=2>Top of page</FONT></A><FONT FACE="Verdana" SIZE=2> </P></FONT>
+<TABLE CELLSPACING=0 BORDER=0 WIDTH=624>
+<TR><TD VALIGN="MIDDLE" BGCOLOR="#00ffff" HEIGHT=2>
+<P></TD>
+</TR>
+</TABLE>
+
+<FONT FACE="MS Sans Serif" SIZE=1><P>&copy; Microsoft Corporation 2002</FONT><FONT FACE="Verdana" SIZE=2> </P></FONT></BODY>
+</HTML>
+

@@ -1,0 +1,311 @@
+;
+; cdrom.inf -- INF file for installing CDROM drives
+;
+; Copyright (c) 1993-1997, Microsoft Corporation
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=CDROM
+ClassGuid={4D36E965-E325-11CE-BFC1-08002BE10318}
+
+Provider=%DDK_SAMPLE%
+DriverVer=03/15/2001,5.1.2462.0
+CatalogFile=ddk_sample.cat
+
+[changer_copyfiles]
+changer.sys
+
+[cdrom_copyfiles]
+cdrom.sys
+redbook.sys
+imapi.sys
+
+[storprop_copyfiles]
+storprop.dll
+
+[DestinationDirs]
+cdrom_copyfiles   = 12
+changer_copyfiles = 12
+storprop_copyfiles = 11
+
+[Manufacturer]
+%ATAPI_CHGR%      = atapi_chgr, NTx86, NTia64, NTamd64
+%MITSUMI%         = mitsumi_cdrom, NTx86, NTia64, NTamd64
+%GenManufacturer% = cdrom_device, NTx86, NTia64, NTamd64
+
+[atapi_chgr]
+%NecChanger_devdesc%       = changer_install,IDE\CdRomNEC_CD-ROM_DRIVE:251____________________
+%NecChanger_devdesc%       = changer_install,SCSI\CdRomNEC_____CD-ROM_DRIVE:251
+%NecChanger_devdesc%       = changer_install,IDE\CdRomNEC_CD-ROM_DRIVE:253____________________
+%NecChanger_devdesc%       = changer_install,SCSI\CdRomNEC_____CD-ROM_DRIVE:253
+%NecChanger_devdesc%       = changer_install,SCSI\CdRomNEC_____CD-ROM_DRIVE:252
+%AlpsChanger_devdesc%      = changer_install,IDE\CdRomALPS_DC544______________________________
+%TorisanChanger_devdesc%   = changer_install,IDE\CdRomTORiSAN_CD-ROM_CDR-C3G__________________
+%TorisanChanger_devdesc%   = changer_install,SCSI\CdRomTORiSAN_CD-ROM_CDR-C3G__
+%TorisanChanger_devdesc%   = changer_install,IDE\CdRomTORiSAN_CD-ROM_CDR_C36__________________
+%PanasonicChanger_devdesc% = changer_install,IDE\CdRomMATSHITA_RD-DRC001-M____________________
+%PanasonicChanger_devdesc% = changer_install,IDE\CdRomMATSHITA_RD-DRC002-S____________________
+%PanasonicChanger_devdesc% = changer_install,SCSI\CdRomNAKAMICHMJ-5.16_________
+
+[atapi_chgr.NTx86]
+%NecChanger_devdesc%       = changer_install,IDE\CdRomNEC_CD-ROM_DRIVE:251____________________
+%NecChanger_devdesc%       = changer_install,SCSI\CdRomNEC_____CD-ROM_DRIVE:251
+%NecChanger_devdesc%       = changer_install,IDE\CdRomNEC_CD-ROM_DRIVE:253____________________
+%NecChanger_devdesc%       = changer_install,SCSI\CdRomNEC_____CD-ROM_DRIVE:253
+%NecChanger_devdesc%       = changer_install,SCSI\CdRomNEC_____CD-ROM_DRIVE:252
+%AlpsChanger_devdesc%      = changer_install,IDE\CdRomALPS_DC544______________________________
+%TorisanChanger_devdesc%   = changer_install,IDE\CdRomTORiSAN_CD-ROM_CDR-C3G__________________
+%TorisanChanger_devdesc%   = changer_install,SCSI\CdRomTORiSAN_CD-ROM_CDR-C3G__
+%TorisanChanger_devdesc%   = changer_install,IDE\CdRomTORiSAN_CD-ROM_CDR_C36__________________
+%PanasonicChanger_devdesc% = changer_install,IDE\CdRomMATSHITA_RD-DRC001-M____________________
+%PanasonicChanger_devdesc% = changer_install,IDE\CdRomMATSHITA_RD-DRC002-S____________________
+%PanasonicChanger_devdesc% = changer_install,SCSI\CdRomNAKAMICHMJ-5.16_________
+
+[atapi_chgr.NTia64]
+%NecChanger_devdesc%       = changer_install,IDE\CdRomNEC_CD-ROM_DRIVE:251____________________
+%NecChanger_devdesc%       = changer_install,SCSI\CdRomNEC_____CD-ROM_DRIVE:251
+%NecChanger_devdesc%       = changer_install,IDE\CdRomNEC_CD-ROM_DRIVE:253____________________
+%NecChanger_devdesc%       = changer_install,SCSI\CdRomNEC_____CD-ROM_DRIVE:253
+%NecChanger_devdesc%       = changer_install,SCSI\CdRomNEC_____CD-ROM_DRIVE:252
+%AlpsChanger_devdesc%      = changer_install,IDE\CdRomALPS_DC544______________________________
+%TorisanChanger_devdesc%   = changer_install,IDE\CdRomTORiSAN_CD-ROM_CDR-C3G__________________
+%TorisanChanger_devdesc%   = changer_install,SCSI\CdRomTORiSAN_CD-ROM_CDR-C3G__
+%TorisanChanger_devdesc%   = changer_install,IDE\CdRomTORiSAN_CD-ROM_CDR_C36__________________
+%PanasonicChanger_devdesc% = changer_install,IDE\CdRomMATSHITA_RD-DRC001-M____________________
+%PanasonicChanger_devdesc% = changer_install,IDE\CdRomMATSHITA_RD-DRC002-S____________________
+%PanasonicChanger_devdesc% = changer_install,SCSI\CdRomNAKAMICHMJ-5.16_________
+
+[atapi_chgr.NTamd64]
+%NecChanger_devdesc%       = changer_install,IDE\CdRomNEC_CD-ROM_DRIVE:251____________________
+%NecChanger_devdesc%       = changer_install,SCSI\CdRomNEC_____CD-ROM_DRIVE:251
+%NecChanger_devdesc%       = changer_install,IDE\CdRomNEC_CD-ROM_DRIVE:253____________________
+%NecChanger_devdesc%       = changer_install,SCSI\CdRomNEC_____CD-ROM_DRIVE:253
+%NecChanger_devdesc%       = changer_install,SCSI\CdRomNEC_____CD-ROM_DRIVE:252
+%AlpsChanger_devdesc%      = changer_install,IDE\CdRomALPS_DC544______________________________
+%TorisanChanger_devdesc%   = changer_install,IDE\CdRomTORiSAN_CD-ROM_CDR-C3G__________________
+%TorisanChanger_devdesc%   = changer_install,SCSI\CdRomTORiSAN_CD-ROM_CDR-C3G__
+%TorisanChanger_devdesc%   = changer_install,IDE\CdRomTORiSAN_CD-ROM_CDR_C36__________________
+%PanasonicChanger_devdesc% = changer_install,IDE\CdRomMATSHITA_RD-DRC001-M____________________
+%PanasonicChanger_devdesc% = changer_install,IDE\CdRomMATSHITA_RD-DRC002-S____________________
+%PanasonicChanger_devdesc% = changer_install,SCSI\CdRomNAKAMICHMJ-5.16_________
+
+[mitsumi_cdrom]
+%Mitsumi_cdrom_devdesc%    = mitsumi_install,IDE\CdRomMITSUMI_CD-ROM________!A________________
+
+[mitsumi_cdrom.NTx86]
+%Mitsumi_cdrom_devdesc%    = mitsumi_install,IDE\CdRomMITSUMI_CD-ROM________!A________________
+
+[mitsumi_cdrom.NTia64]
+%Mitsumi_cdrom_devdesc%    = mitsumi_install,IDE\CdRomMITSUMI_CD-ROM________!A________________
+
+[mitsumi_cdrom.NTamd64]
+%Mitsumi_cdrom_devdesc%    = mitsumi_install,IDE\CdRomMITSUMI_CD-ROM________!A________________
+
+;;
+;; if none of the above matched, then only cdrom.sys is required for this drive
+;;
+[cdrom_device]
+%gencdrom_devdesc%         = cdrom_install,SCSI\WormPIONEER_CD-WO_DR-R504X__
+%gencdrom_devdesc%         = cdrom_install,SCSI\WormSONY____CD-R___CDU920S__
+%gencdrom_devdesc%         = cdrom_install,SCSI\WormSONY____CD-R___CDU948S__
+%gencdrom_devdesc%         = cdrom_install,GenCdRom
+
+[cdrom_device.NTx86]
+%gencdrom_devdesc%         = cdrom_install,SCSI\WormPIONEER_CD-WO_DR-R504X__
+%gencdrom_devdesc%         = cdrom_install,SCSI\WormSONY____CD-R___CDU920S__
+%gencdrom_devdesc%         = cdrom_install,SCSI\WormSONY____CD-R___CDU948S__
+%gencdrom_devdesc%         = cdrom_install,GenCdRom
+
+[cdrom_device.NTia64]
+%gencdrom_devdesc%         = cdrom_install,SCSI\WormPIONEER_CD-WO_DR-R504X__
+%gencdrom_devdesc%         = cdrom_install,SCSI\WormSONY____CD-R___CDU920S__
+%gencdrom_devdesc%         = cdrom_install,SCSI\WormSONY____CD-R___CDU948S__
+%gencdrom_devdesc%         = cdrom_install,GenCdRom
+
+[cdrom_device.NTamd64]
+%gencdrom_devdesc%         = cdrom_install,SCSI\WormPIONEER_CD-WO_DR-R504X__
+%gencdrom_devdesc%         = cdrom_install,SCSI\WormSONY____CD-R___CDU920S__
+%gencdrom_devdesc%         = cdrom_install,SCSI\WormSONY____CD-R___CDU948S__
+%gencdrom_devdesc%         = cdrom_install,GenCdRom
+
+;;
+;; Use to add filter drivers for the device
+;;
+
+[changer_addreg]
+HKR,,"UpperFilters",0x00010008,"changer"
+
+[mitsumi_addreg]
+HKR,,"FriendlyName",,%Mitsumi_Generic_FriendlyName%
+
+;;
+;; more addreg sections
+;;
+
+[dvd_property_provider_AddReg]
+HKR,,EnumPropPages32,,"storprop.dll,DvdPropPageProvider"
+
+;;
+;; The AutoRunAlwaysDisable key is only for use when the hardware cannot
+;; accepts  TEST_UNIT_READY  commands.  Disabling 'AutoRun' or including
+;; devices in this list will prevent removable media services from being
+;; able to properly handle these devices.
+;;
+
+[autorun_addreg]
+HKLM,"System\CurrentControlSet\Services\cdrom","AutoRun",0x00010003,1
+HKLM,"System\CurrentControlSet\Services\cdrom","AutoRunAlwaysDisable", 0x00010008, "NEC     MBR-7   "
+HKLM,"System\CurrentControlSet\Services\cdrom","AutoRunAlwaysDisable", 0x00010008, "NEC     MBR-7.4 "
+HKLM,"System\CurrentControlSet\Services\cdrom","AutoRunAlwaysDisable", 0x00010008, "PIONEER CHANGR DRM-1804X"
+HKLM,"System\CurrentControlSet\Services\cdrom","AutoRunAlwaysDisable", 0x00010008, "PIONEER CD-ROM DRM-6324X"
+HKLM,"System\CurrentControlSet\Services\cdrom","AutoRunAlwaysDisable", 0x00010008, "PIONEER CD-ROM DRM-624X "
+HKLM,"System\CurrentControlSet\Services\cdrom","AutoRunAlwaysDisable", 0x00010008, "TORiSAN CD-ROM CDR_C36"
+
+;;
+;; Use to disable synchronous transfers to this device.  Sync transfers will
+;; always be turned off by default in this INF for any cdrom-type device
+;;
+
+[nosync_addreg]
+HKR,,"DefaultRequestFlags",0x00010001,8
+
+;;
+;; Installation section for changer
+;;
+
+[changer_install]
+Needs=cdrom_install
+
+[changer_install.HW]
+Needs=cdrom_install.HW
+AddReg=changer_addreg
+
+[changer_install.Services]
+Needs=cdrom_install.Services
+AddService=changer,,changer_ServiceInstallSection
+
+;;
+;; Installation section for mitsumi.
+;;
+
+[mitsumi_install]
+Needs=cdrom_install
+
+[mitsumi_install.HW]
+Needs=cdrom_install.HW
+AddReg=mitsumi_addreg
+
+[mitsumi_install.Services]
+Needs=cdrom_install.Services
+
+;;
+;; Installation section for generic cdrom.
+;;
+
+[cdrom_install]
+CopyFiles=cdrom_copyfiles,storprop_copyfiles
+AddReg=dvd_property_provider_AddReg
+
+[cdrom_install.HW]
+AddReg=nosync_addreg
+
+[cdrom_install.Services]
+AddService=cdrom,0x00000002,cdrom_ServiceInstallSection
+AddService=redbook,,redbook_ServiceInstallSection,redbook_InstallEventLogSection
+AddService=imapi,,imapi_ServiceInstallSection
+
+;;
+;; Service install sections
+;;
+
+[cdrom_ServiceInstallSection]
+DisplayName   = %cdrom_ServiceDesc%
+ServiceType   = 1
+StartType     = 1
+ErrorControl  = 1
+ServiceBinary = %12%\cdrom.sys
+LoadOrderGroup = "SCSI CDROM Class"
+AddReg=autorun_addreg
+
+[changer_ServiceInstallSection]
+DisplayName   = %changer_ServiceDesc%
+ServiceType   = 1
+StartType     = 1
+ErrorControl  = 1
+ServiceBinary = %12%\changer.sys
+LoadOrderGroup = "Pnp Filter"
+
+[redbook_ServiceInstallSection]
+DisplayName   = %redbook_ServiceDesc%
+ServiceType   = 1
+StartType     = 1
+ErrorControl  = 1
+ServiceBinary = %12%\redbook.sys
+LoadOrderGroup = "Pnp Filter"
+
+[redbook_InstallEventLogSection]
+AddReg = redbook_EventLog_addreg
+
+[redbook_EventLog_addreg]
+HKR,,"EventMessageFile",0x00020000,"%%SystemRoot%%\System32\IoLogMsg.dll;%%SystemRoot%%\System32\drivers\redbook.sys"
+HKR,,"TypesSupported",0x00010001,7
+
+[imapi_ServiceInstallSection]
+DisplayName   = %imapi_ServiceDesc%
+ServiceType   = 1
+StartType     = 1
+ErrorControl  = 1
+ServiceBinary = %12%\imapi.sys
+LoadOrderGroup = "Pnp Filter"
+
+
+;
+; Source file information
+;
+
+[SourceDisksNames.x86]
+1 = %DiskId%,,,\i386
+
+[SourceDisksNames.ia64]
+1 = %DiskId%,,,\ia64
+
+[SourceDisksNames.amd64]
+1 = %DiskId%,,,\amd64
+
+
+[SourceDisksFiles]
+cdrom.sys    = 1,,
+redbook.sys  = 1,,
+imapi.sys    = 1,,
+storprop.dll = 1,,
+
+
+
+[Strings]
+DDK_SAMPLE  = "DDK Sample Provider"
+CDClassName = "DVD/CD-ROM drives"
+DiskId      = "CDROM Driver Installation Disk"
+
+;; Manufacturer specific strings
+ATAPI_CHGR      = "Atapi 2.5 Changer Devices"
+MITSUMI         = "Mitsumi"
+GenManufacturer = "(Standard CD-ROM drives)"
+
+;; Descriptions for enumerated brands and models
+AlpsChanger_devdesc      = "Alps CD-ROM Changer"
+Mitsumi_cdrom_devdesc    = "Mitsumi CD-ROM Drive"
+NecChanger_devdesc       = "NEC CD-ROM Changer"
+PanasonicChanger_devdesc = "Panasonic CD-ROM Changer"
+TorisanChanger_devdesc   = "Torisan CD-ROM Changer"
+gencdrom_devdesc         = "CD-ROM Drive"
+
+;; Mitsumi Friendly name explictly listed
+Mitsumi_Generic_FriendlyName = "Mitsumi CD-ROM Drive"
+
+;; Service descriptions
+cdrom_ServiceDesc   = "CD-ROM Driver"
+changer_ServiceDesc = "CD-Changer Filter Driver"
+redbook_ServiceDesc = "Digital CD Audio Playback Filter Driver"
+imapi_ServiceDesc   = "CD-Burning Filter Driver"
+
+

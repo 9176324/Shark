@@ -1,0 +1,12 @@
+#include <windows.h>
+
+#include "ntverp.h"
+
+#define	VER_FILETYPE                 VFT_DRV
+#define	VER_FILESUBTYPE              VFT2_UNKNOWN
+#define VER_FILEDESCRIPTION_STR      "Universal Serial Bus Camera Driver\0"
+#define VER_INTERNALNAME_STR         "usbintel.sys\0"
+#define VER_ORIGINALFILENAME_STR     "usbintel.sys\0"
+#define VER_LEGALCOPYRIGHT_STR       "Copyright (C) 2000 Intel Corporation\0"
+
+#include "common.ver"

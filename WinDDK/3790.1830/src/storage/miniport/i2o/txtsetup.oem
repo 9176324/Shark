@@ -1,0 +1,70 @@
+#
+# format for txtsetup.oem.
+#
+# General format:
+#
+# [section]
+# key = value1,value2,...
+#
+#
+# The hash ('#') introduces a comment.
+# Strings with embedded spaces, commas, or hashes should be double-quoted
+#
+
+
+[Disks]
+
+# This section lists all disks in the disk set.
+#
+# <description> is a descriptive name for a disk, used when
+#   prompting for the disk
+# <tagfile> is a file whose presence allows setup to recognize
+#   that the disk is inserted.
+# <directory> is where the files are located on the disk.
+#
+
+d1 = "I2O installation support driver", \iirmptag, \
+
+
+[Defaults]
+
+# This section lists the default selection for each 'required'
+# hardware component.  If a line is not present for a component,
+# the default defaults to the first item in the [<component_name>]
+# section (see below).
+#
+# <component_name> is one of computer, display, keyboard, mouse, scsi
+# <id> is a unique <within the component> string to be associated
+#   with an option.
+
+SCSI = i2omp 
+
+
+
+[scsi]
+
+# This section lists the options available for a particular component.
+#
+# <id> is the unique string for the option
+# <description> is a text string, presented to the user in a menu
+# <key_name> gives the name of the key to be created for the component in
+#   HKEY_LOCAL_MACHINE\ControlSet001\Services
+
+i2omp = "I2O miniport (Driver for use during installation)"
+
+
+[Files.scsi.i2omp]
+driver = d1, i2omp.sys, i2omp
+inf    = d1, oemsetup.inf
+
+
+[HardwareIds.scsi.i2omp]
+id = "PCI\VEN_8086&DEV_9621&SUBSYS_00018086", "i2omp"
+id = "PCI\VEN_8086&DEV_9641&SUBSYS_00018086", "i2omp"
+id = "PCI\VEN_8086&DEV_96A1&SUBSYS_00018086", "i2omp"
+id = "PCI\VEN_8086&DEV_3092&SUBSYS_00018086", "i2omp"
+
+[Config.i2omp]
+value = Parameters\PnpInterface,5,REG_DWORD,1
+
+

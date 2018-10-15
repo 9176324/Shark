@@ -1,0 +1,127 @@
+###################################################################################
+#  Copyright (c) Microsoft Corporation. All rights reserved.
+#
+# *******************************************************************************
+# **** NOTE: If you're looking for the 'real' makefile.def, you want to look ****
+# **** at makefile.new in the same directory as this file.                   ****
+# *******************************************************************************
+#
+# This is just a stub to intercept the real makefile.def in order for the DDK
+# to support samples and features that are OS-release specific.
+#
+# To enable skip building OS-release specific items, just set MINIMUM_NT_TARGET_VERSION
+# and/or MAXIMUM_NT_TARGET_VERSION inside your makefile BEFORE the line with:
+#     !include $(NTMAKEENV)\makefile.def
+#
+# If neither variable is set, the DDK assumes the sample is supported for ALL
+# values on _NT_TARGET_VERSION.
+#
+###################################################################################
+
+#
+# check if _NT_TARGET_VERSION is defined
+#
+!IF DEFINED(_NT_TARGET_VERSION)
+#
+# is there a minimum supported version?
+#
+!   IF DEFINED(MINIMUM_NT_TARGET_VERSION)
+#
+# is there also a maximum version?
+#
+!       IF DEFINED(MAXIMUM_NT_TARGET_VERSION)
+!           IF ( $(_NT_TARGET_VERSION) >= $(MINIMUM_NT_TARGET_VERSION) ) && \
+               ( $(_NT_TARGET_VERSION) <= $(MAXIMUM_NT_TARGET_VERSION) ) 
+#
+# the statement
+#     MINIMUM_NT_TARGET_VERSION <= _NT_TARGET_VERSION <= MAXIMUM_NT_TARGET_VERSION
+# holds true.
+#
+NT_TARGET_SUPPORTED=TRUE
+!           ELSE
+#
+# _NT_TARGET_VERSION is not (inclusively) between MINIMUM_NT_TARGET_VERSION and
+# MAXIMUM_NT_TARGET_VERSION
+#
+NT_TARGET_SUPPORTED=FALSE
+!           ENDIF
+!       ELSE
+#
+# only a minimum target version is defined
+#
+!           IF $(_NT_TARGET_VERSION) >= $(MINIMUM_NT_TARGET_VERSION)
+#
+# MINUMUM_NT_TARGET_VERSION <= _NT_TARGET_VERSION holds true
+#
+NT_TARGET_SUPPORTED=TRUE
+!           ELSE
+#
+# _NT_TARGET_VERSION is less than MINIMUM_NT_TARGET_VERSION
+#
+NT_TARGET_SUPPORTED=FALSE
+!           ENDIF
+!       ENDIF
+!   ELSEIF DEFINED(MAXIMUM_NT_TARGET_VERSION)
+#
+# only a MAXIMUM_NT_TARGET_VERSION is defined
+#
+!       IF $(_NT_TARGET_VERSION) <= $(MAXIMUM_NT_TARGET_VERSION)
+#
+# MAXIMUM_NT_TARGET_VERSION >= _NT_TARGET_VERSION holds true
+#
+NT_TARGET_SUPPORTED=TRUE
+!       ELSE
+#
+# _NT_TARGET_VERSION is greater than MAXIMUM_NT_TARGET_VERSION
+#
+NT_TARGET_SUPPORTED=FALSE
+!       ENDIF
+!   ELSE
+#
+# neither MINIMUM_NT_TARGET_VERSION nor MAXIMUM_NT_TARGET_VERSION is defined
+#
+NT_TARGET_SUPPORTED=TRUE
+!   ENDIF
+!ELSE
+#
+# if _NT_TARGET_VERSION isn't defined, just include the 'real' makefile.def.
+#
+NT_TARGET_SUPPORTED=TRUE
+!ENDIF
+
+#
+# Ensure CUV is supported in the Build Environment
+#
+DDK_BLD_MSG=
+#
+!IF DEFINED(_NT_TARGET_VERSION)
+!    IF $(_NT_TARGET_VERSION) < 0X502           # 0x502 is Windows Server 2003
+!        IF DEFINED(VERIFIER_DDK_EXTENSIONS)
+DDK_BLD_MSG=BUILDMSG: Warning : CUV is not supported in this build environment
+!        ENDIF
+!    ENDIF
+!ENDIF
+#
+#
+!IF "$(NT_TARGET_SUPPORTED)"!="TRUE"
+DDK_BLD_MSG=BUILDMSG: Warning : The sample $(MAKEDIR) is not valid for the current OS target.
+!ENDIF
+
+#
+# If there's a message to display, display it and skip building this directory
+#
+!IF "$(DDK_BLD_MSG)"!=""
+#
+#
+# grab makefile.plt and check BUILD_PASS so a warning is only issued once per directory
+#
+!    INCLUDE $(NTMAKEENV)\makefile.plt
+!    IF "$(BUILD_PASS)"=="PASS1"
+!        message BUILDMSG: $(DDK_BLD_MSG)
+!    ENDIF
+!ELSE
+#
+# build this directory
+#
+!    INCLUDE $(NTMAKEENV)\makefile.new
+!ENDIF

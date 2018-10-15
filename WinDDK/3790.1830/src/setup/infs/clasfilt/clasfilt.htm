@@ -1,0 +1,122 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD><TITLE>ClasFilt Sample INF File</TITLE>
+<META content="text/html; charset=windows-1252" http-equiv=Content-Type>
+<META content="MSHTML 5.00.3103.1000" name=GENERATOR></HEAD>
+<BODY link=#0000ff><FONT face=Verdana size=5>
+<H2>ClasFilt Sample INF File</H2></FONT><FONT face=Verdana size=2>
+<P><SPAN style="COLOR: #ff0000; FONT-FAMILY: Arial; FONT-SIZE: 10pt">[This is 
+preliminary documentation and subject to change.]</SPAN></P>
+
+<H3>SUMMARY</H3>
+<P>ClasFilt.inf is a sample INF file that demonstrates the installation of a class filter driver that will
+be applied as an upper or lower filter to all devices of a specific device setup class.</P>
+
+<H3>USING THE SAMPLE</H3>
+<P>Before ClasFilt.inf can be used to install a class filter driver, the following changes need to be made:
+
+<BLOCKQUOTE><P>Change the name of the INF file. It is recommended to use the same filename as the binary 
+that the INF file installs.
+</BLOCKQUOTE></P>
+
+<BLOCKQUOTE><P>Change the name of the driver file itself to the name of the actual driver. In ClasFilt.inf,
+this binary is called "ClasFilt.sys", and is listed in four different locations - the <I>SourceDisksFiles</I> section, the <I>DefaultInstall</I> 
+section, the Service Installation section (<I>clasfilt_Service_Inst</I>), and the EventLog AddReg 
+(<I>clasfilt_EventLog_AddReg</I>) section.
+</BLOCKQUOTE><P>
+
+<BLOCKQUOTE><P> Change <I>{setup-ClassGUID}</I> in the <I>ClassFilter_AddReg</I> section to the string form
+of the device <I>ClassGUID</I> on which you are installing the filter driver. <I>ClassGUID</I> values are 
+listed in the Windows DDK Documentation.
+</BLOCKQUOTE></P>
+
+<BLOCKQUOTE></P>In the <I>ClassFilter_AddReg</I> section, change UpperFilters to LowerFilters if this is 
+a lower class filter.
+</BLOCKQUOTE></P>
+
+<BLOCKQUOTE><P>Update the service description (string <I>ClasFilt.SvcDesc</I> in the <I>Strings</I> section)
+to better describe your driver.
+</BLOCKQUOTE></P>
+
+<BLOCKQUOTE><P>Update the media description (string <I>ClasFilt.MediaDesc</I> in the <I>Strings</I> section)
+to better describe your media.
+</BLOCKQUOTE></P>
+
+<BLOCKQUOTE><P>Replace "Microsoft" with your organization's name in the copyright notice in the first comment block.
+</BLOCKQUOTE></P>
+
+<H4>Installing the INF File Programmatically</H4>
+<P>A device installation program can install the class filter driver programmatically by executing the 
+following two lines of code:</P>
+
+<BLOCKQUOTE><P>
+    TCHAR szCommandLine[] = TEXT("DefaultInstall 132 .\\clasfilt.inf");
+</BLOCKQUOTE></P>
+<BLOCKQUOTE><P>
+    InstallHinfSection(NULL, NULL, szCommandLine, SW_SHOW);
+</BLOCKQUOTE></P>
+
+<P>This code makes use of the <I>InstallHinfSection</I> API, which reads the indicated INF file and 
+installs the driver installed by the indicated <I>DefaultInstall</I> section. In the code fragment
+above, the <I>szCommandLine</I> argument that is passed to the <I>InstallHinfSection</I> API contains 
+the following:</P>
+
+<LI>"DefaultInstall" is the installation section in the INF file.
+<LI>"132" is a flags field that indicates whether or not a reboot is needed. The value "132" indicates that Windows will determine if a reboot is required.
+<LI>".\\clasfilt.inf", which is the INF file that installs the class filter driver. The full path to this INF file should
+also be included.
+
+<P><B>Note:</B>  The InstallHinfSection API is to be used for installing <I>class</I> filter drivers only. This API and the methodology
+demonstrated by this sample cannot be used to install device drivers or device filter drivers.</P>
+
+
+<P>For more information and a detailed function description of the <I>InstallHinfSection</I> API, see the
+Platform SDK documentation.</P>
+
+<P>For more information on the <I>DefaultInstall</I> section in INF files, consult the Windows DDK documentation, specifically the Device Installation Reference - INF File Sections and Directives.</P>
+
+<P>For more information on writing device install programs, see the topic entitled "Writing a 
+Device Installation Application" in the Windows DDK documentation.</P>
+
+<H4>Installing the INF File Manually</H4>
+<P>Users can install an INF file based on ClasFilt.INF by using right-click installation as follows:</P>
+<LI>Right click on the INF file in Windows Explorer.
+<LI>Select "Install" from the menu that is displayed.
+
+
+<H3>LIMITATIONS</H3>
+<P>As discussed above in "Using the Sample", several items in the INF file must be must be modified 
+before the INF file can be used for installing a class filter driver.</P>
+
+<P>In order to have Windows load the class filter driver, the user must either reboot the system,
+or restart all of the devices of the class in question.</P>
+
+<P>If a class filter driver is updated, restarting the devices may not be sufficient for the 
+devices of that class to use the updated driver.</P>
+
+
+<H3>CODE TOUR</H3>
+<H4>File Manifest</H4></FONT><FONT face=Courier size=3>
+</font><font FACE="Courier" SIZE="3">
+<TABLE BORDER=0 CELLSPACING=10 CELLPADDING=0>
+<TR><TD><u>File</u></TD><TD><u>Description<u></TD></TR>
+<TR><TD><I>ClasFilt.htm</I></TD><TD>     Readme for ClasFilt.inf (this file).</TD></TR>
+<TR><TD><I>ClasFilt.inf</I></TD><TD>     Sample class filter INF file.</TD></TR>
+</TABLE>
+
+
+<FONT face=Verdana size=2>
+<H3>FEEDBACK</H3>
+  <P>We welcome your comments, problem reports and wish-list requests. Please 
+  submit them by pointing your Internet browser to <A 
+  href="http://www.microsoft.com/ddk">http://www.microsoft.com/ddk</A>. 
+  </FONT></P>
+  <P align=center><FONT face=Verdana size=2><A 
+  href="file:///D:/INF/Readmes%20-%20Post%20WinHEC%202000/ChkInf.htm#top">Top of 
+  page</A> </P></FONT>
+  <TABLE border=0 cellSpacing=0 width=624>
+    <TBODY>
+    <TR>
+      <TD bgColor=#00ffff height=2 vAlign=center></TD></TR></TBODY></TABLE><FONT 
+  face="MS Sans Serif" size=1>
+  <P>© Microsoft Corporation 2001</FONT><FONT face=Verdana size=2> 
+  </P></FONT></FONT></LI></UL></BODY></HTML>

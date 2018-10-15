@@ -1,0 +1,20 @@
+TARGETNAME=canclapp
+TARGETPATH=obj
+TARGETTYPE=PROGRAM
+
+INCLUDES=..\sys
+
+# Make sure we are building a multi-threaded app
+!IF "$(NTDEBUG)" == "retail" || "$(NTDEBUG)" == "" || "$(NTDEBUG)" == "ntsdnodbg"
+#...release
+CFLAGS=$(CFLAGS) /MT
+!ELSE
+#...debug
+CFLAGS=$(CFLAGS) /MTd
+!ENDIF
+
+
+SOURCES=testapp.c install.c
+
+UMTYPE=console
+UMBASE=0x0400000

@@ -1,0 +1,104 @@
+; Copyright (c) 2000, Microsoft
+
+[Version]
+ Signature  = "$Windows NT$"
+ Class      = Net
+ ClassGUID  = {4d36e972-e325-11ce-bfc1-08002be10318}
+ Provider   = %Msft%
+ LayoutFile = layout.inf
+DriverVer=10/20/2000,3.0.4
+
+[Manufacturer]
+ %Toshiba% = Toshiba,NTx86,NTia64,NTamd64
+
+; pnp cards should be excluded from select
+[ControlFlags]
+ ExcludeFromSelect = PCI\VEN_102F&DEV_0020, PCI\VEN_102F&DEV_0020&SUBSYS_00F8102F
+
+; For Win2k
+[Toshiba]
+ ; DisplayName           Section        DeviceID
+ ; -----------           -------        --------
+ %PCI\VEN_102F&DEV_0020.DeviceDesc% = TBATM155.ndi,  PCI\VEN_102F&DEV_0020
+ %PCI\VEN_102F&DEV_0020.DeviceDesc% = TBATM155.ndi,  PCI\VEN_102F&DEV_0020&SUBSYS_00F8102F
+
+; For XP and later
+[Toshiba.NTx86]
+ ; DisplayName           Section        DeviceID
+ ; -----------           -------        --------
+ %PCI\VEN_102F&DEV_0020.DeviceDesc% = TBATM155.ndi,  PCI\VEN_102F&DEV_0020
+ %PCI\VEN_102F&DEV_0020.DeviceDesc% = TBATM155.ndi,  PCI\VEN_102F&DEV_0020&SUBSYS_00F8102F
+
+[Toshiba.NTia64]
+ ; DisplayName           Section        DeviceID
+ ; -----------           -------        --------
+ %PCI\VEN_102F&DEV_0020.DeviceDesc% = TBATM155.ndi,  PCI\VEN_102F&DEV_0020
+ %PCI\VEN_102F&DEV_0020.DeviceDesc% = TBATM155.ndi,  PCI\VEN_102F&DEV_0020&SUBSYS_00F8102F
+
+[Toshiba.NTamd64]
+ ; DisplayName           Section        DeviceID
+ ; -----------           -------        --------
+ %PCI\VEN_102F&DEV_0020.DeviceDesc% = TBATM155.ndi,  PCI\VEN_102F&DEV_0020
+ %PCI\VEN_102F&DEV_0020.DeviceDesc% = TBATM155.ndi,  PCI\VEN_102F&DEV_0020&SUBSYS_00F8102F
+
+
+[TBATM155.ndi.NT]
+ BusType         = 5
+ AddReg          = TBATM155.ndi.reg
+ Characteristics = 0x84  ; NCF_PHYSICAL | NCF_HAS_UI
+ CopyFiles       = tbatm155.CopyFiles
+
+[TBATM155.ndi.reg]
+ HKR,    ,                                  BusNumber,  0,  "0"
+ HKR, Ndi,                                  Service,    0,  "tbatm155"
+ HKR, Ndi\Interfaces,                       LowerRange, 0,  "atm"
+ HKR, Ndi\Interfaces,                       UpperRange, 0,  "ndisatm"
+ 
+ 
+[tbatm155.CopyFiles]
+ tbatm155.sys,,,2
+
+[tbatm155.ndi.NT.Services]
+ AddService = tbatm155, 2, tbatm155.Service, tbatm155.AddEventLog
+
+[tbatm155.Service]
+ DisplayName    = %tbatm155.Service.DispName%
+ ServiceType    = 1    ;SERVICE_KERNEL_DRIVER
+ StartType      = 3    ;SERVICE_AUTO_START
+ ErrorControl   = 1    ;NORMAL
+ ServiceBinary  = %12%\tbatm155.sys
+ LoadOrderGroup = NDIS
+
+[tbatm155.AddEventLog]
+ AddReg =  tbatm155.AddEventLog.Reg
+
+[tbatm155.AddEventLog.Reg]
+ HKR, , EventMessageFile, 0x00020000, "%%SystemRoot%%\System32\netevent.dll"
+ HKR, , TypesSupported,   0x00010001, 7
+
+
+
+;-----------------------------------------------------------------------------
+; DestinationDirs
+;
+[DestinationDirs]
+ DefaultDestDir    = 12 ; Drivers directory 
+ tbatm155.CopyFiles = 12
+
+;
+; Translatable strings
+;
+
+[Strings]
+Msft    = "Microsoft"
+Toshiba = "Toshiba"
+
+TotalRxBuffs           = "Receive Buffers"
+BigReceiveBufferSize   = "BIG Receive Buffer Size"
+SmallReceiveBufferSize = "SmallReceiveBufferSize"
+VcHashTableSize        = "Vc Hash Table Entries"
+NumberOfMapRegisters   = "Map Registers"
+
+PCI\VEN_102F&DEV_0020.DeviceDesc = "Toshiba ATM Meteor 155 PCI Adapter"
+
+tbatm155.Service.DispName  = "Toshiba ATM Meteor 155 Adapter Driver"

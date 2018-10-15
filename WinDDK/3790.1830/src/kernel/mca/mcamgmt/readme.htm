@@ -1,0 +1,275 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>MCA Management Application</title>
+<style>
+<!--
+div.Section1
+	{page:Section1;}
+span.GramE
+	{}
+-->
+</style>
+</head>
+
+<body>
+
+<font face="Verdana">
+<h2><a name="MYSAMPLE">MCA Management Application</a> </h2>
+<hr>
+<h3>SUMMARY:</h3>
+</font><font face="Verdana" size="2">
+<p>The &quot;MCA Management Application&quot; is a command-line application, which 
+queries, retrieves, parses and displays machine check error records on IA64 class 
+computer systems running a 64-bit (IA64) version of Windows XP or Windows Server 2003 Family. 
+The application provides the same support also for machine check exception 
+information on X86 and x64 platforms running 32-bit (X86)  versions of Windows Server 2003 Family 
+and future releases of Windows correspondingly. The sample application 
+demonstrates system developers how to make use of the MCA infrastructure on 
+Windows Server 2003 and Windows XP platforms to identify hardware problems. More sophisticated system 
+management applications may further enhance the basic functionality of this 
+sample to also log, analyze and report these hardware problems.</p>
+<h3>DETAILED INFORMATION:</h3>
+<p>Machine Check Architecture (MCA) mainly attempts to increase the RAS 
+(reliability, availability and scalability) features of large enterprise-class 
+computer systems. Therefore, management applications need to make use of the MCA 
+technology intensively to identify, analyze and solve hardware problems more 
+efficiently. This sample application demonstrates the current OS MCA support on 
+32-bit and 64-bit versions of Windows Server 2003 Family and 64-bit version of 
+Windows XP that might be utilized to achieve 
+these maintenance goals.<br>
+<br>
+The application primarily uses Windows Management Instrumentation (WMI) to query 
+and retrieve MCA Error Records from the OS. MCA Error 
+Records on 64-bit (IA64) versions of Windows Server 2003 Family and Windows XP are standard and are 
+defined in &quot;Intel SAL 3.0 Specification&quot;. Thus, system applications may take 
+advantage of this standardization of hardware error reporting to manage their 
+IA-64 server systems more efficiently and accurately. See &lt;mce.h&gt; for the MCA Error 
+Record definitions.</p>
+<p>On the other hand, Machine Check Exception information is retrieved from WMI 
+on X86 and x64 systems running 32-bit (X86)  versions of 
+Windows Server 2003 Family and future Windows releases, rather than MCA Error Records as in 
+IA64 class systems. The Machine Check Exception information is very similar on 
+X86 and x64 and can also be found in &lt;mce.h&gt;.<br>
+<br>
+Machine check errors can be classified into two main categories:<br>
+<br>
+- Fatal errors<br>
+- Corrected errors<br>
+<br>
+Fatal errors are hardware failures that cannot be recovered from thus a reboot 
+is required after the system bugchecks (blue-screen). The machine check error 
+record that encapsulates the error information is made available to application 
+through WMI and the System Event-Log upon reboot. Therefore, management 
+applications must query the OS via WMI after every reboot to check for possible 
+fatal machine check errors.<br>
+<br>
+Corrected errors are hardware failures that are corrected by the hardware and/or 
+firmware (PAL/SAL). These errors are reported to the OS for informational 
+purposes that might be used to diagnose the failing hardware and prevent future 
+problems. These errors do not cause the system to bugcheck so management 
+applications can retrieve these corrected machine check error record real-time 
+through WMI.<br>
+<br>
+This sample demonstrates how to query, retrieve, parse and display fatal and 
+corrected machine check errors.</p>
+<h3>SYSTEM REQUIREMENTS:</h3>
+<p><b>Software:</b><br>
+This sample can  be build for and run on both 32-bit and 64-bit versions of Windows Server 2003 Family 
+and 64-bit version of Windows XP 
+as long as the hardware requirements are satisfied as explained below. Windows 
+2000, Windows XP (32-bit) and all other earlier releases of Windows are not 
+supported.<br>
+<br>
+<b>Hardware:<br>
+</b>This sample can only be run on the following hardware platforms:&nbsp;&nbsp;&nbsp; </p>
+<ul>
+  <li>All IA64 systems.</li>
+  <li>All x64 systems.</li>
+  <li>Some X86 systems, specifically Pentium 4 and higher.</li>
+</ul>
+<h3>BUILDING THE SAMPLE:</h3>
+<p><span style="FONT-SIZE: 10pt; FONT-FAMILY: Verdana">The sample can be build 
+through the DDK build environment. Just select the appropriate build window for 
+your platform and run <b>build</b> in the &quot;src\kernel\mca\mcamgmt&quot; directory. 
+When the build operation successfully completes, an executable file called: &quot;mcamgmt.exe&quot; 
+is created. </span></p>
+<h3>CODE TOUR:</h3>
+<table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="738" id="AutoNumber1">
+  <tr>
+    <td width="160" align="center" bgcolor="#CCCCCC"><b><font size="2">File</font></b></td>
+    <td width="575" align="center" bgcolor="#CCCCCC"><b><font size="2">
+    Description</font></b></td>
+  </tr>
+  <tr>
+    <td width="160"><font size="2" color="#0000FF">&nbsp;Common.cpp</font></td>
+    <td width="575"><font size="2">&nbsp;Common functions that are needed by both 
+    fatal and corrected error retrieval. </font></td>
+  </tr>
+  <tr>
+    <td width="160"><font size="2" color="#0000FF">&nbsp;Common.h</font></td>
+    <td width="575"><font size="2">&nbsp;Header file for Common.cpp</font></td>
+  </tr>
+  <tr>
+    <td width="160"><font size="2" color="#0000FF">&nbsp;CorrectedEngine.cpp</font></td>
+    <td width="575"><font size="2">&nbsp;Corrected error retrieval functions.</font></td>
+  </tr>
+  <tr>
+    <td width="160"><font size="2" color="#0000FF">&nbsp;CorrectedEngine.h</font></td>
+    <td width="575"><font size="2" face="Verdana">&nbsp;Header file for 
+    CorrectedEngine.cpp</font></td>
+  </tr>
+  <tr>
+    <td width="160"><font size="2" color="#0000FF">&nbsp;FatalEngine.cpp</font></td>
+    <td width="575"><font size="2" face="Verdana">&nbsp;Fatal error 
+    retrieval functions.</font></td>
+  </tr>
+  <tr>
+    <td width="160"><font size="2" color="#0000FF">&nbsp;FatalEngine.h</font></td>
+    <td width="575"><font size="2" face="Verdana">&nbsp;Header file for 
+    FatalEngine.cpp</font></td>
+  </tr>
+  <tr>
+    <td width="160"><font size="2" color="#0000FF">&nbsp;Mca.cpp</font></td>
+    <td width="575"><font size="2">&nbsp;User interaction, argument parsing, and 
+    general control function of the application.</font></td>
+  </tr>
+  <tr>
+    <td width="160"><font size="2" color="#0000FF">&nbsp;Mca.h</font></td>
+    <td width="575"><font size="2">&nbsp;Header file for Mca.cpp</font></td>
+  </tr>
+  <tr>
+    <td width="160"><font size="2" color="#0000FF">&nbsp;MCAObjectSink.cpp</font></td>
+    <td width="575"><font size="2">&nbsp;Implementation for the MCAObjectSink class 
+    used for WMI notifications.</font></td>
+  </tr>
+  <tr>
+    <td width="160"><font size="2" color="#0000FF">&nbsp;MCAObjectSink.h</font></td>
+    <td width="575"><font size="2">&nbsp;Header file for MCAObjectSink.cpp</font></td>
+  </tr>
+</table>
+</font>
+<h3 align="left"><font face="Verdana">USAGE:</font></h3>
+<p align="left"><font face="Verdana" size="2">The sample can be run according to 
+the following command-line usage:<br>
+<br>
+<b><font color="#008000">mcamgmt [ /fatal | {/corrected &lt;TimeOut&gt;} | /? | /usage 
+] </font></b></font></p>
+<table border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="100%" id="AutoNumber2">
+  <tr>
+    <td width="20%"><font color="#008000" face="Verdana" size="2">/fatal</font></td>
+    <td width="80%"><font face="Verdana" size="2">Queries the system for a fatal 
+    error (machine check abort).</font></td>
+  </tr>
+  <tr>
+    <td width="20%"><font color="#008000" face="Verdana" size="2">/corrected 
+    &lt;TimeOut&gt;</font></td>
+    <td width="80%"><font face="Verdana" size="2">Queries the system for a 
+    corrected error (CMC and CPE). The <font color="#008000">&lt;TimeOut&gt;</font> 
+    parameter specifies the number of minutes to wait for an error to occur. If 
+    no corrected error is retrieved in <font color="#008000">&lt;TimeOut&gt;</font> 
+    minutes, then the application exits. </font></td>
+  </tr>
+  <tr>
+    <td width="20%"><font face="Verdana" size="2"><font color="#008000">/?</font> 
+    or <font color="#008000">/usage</font></font></td>
+    <td width="80%"><font face="Verdana" size="2">Shows the command-line usage 
+    of the tool.</font></td>
+  </tr>
+</table>
+<h3 align="left"><font face="Verdana">WHAT THE SAMPLE DOES NOT DEMONSTRATE:</font></h3>
+<p align="left"><font face="Verdana" size="2">
+This sample does not demonstrate how to parse the MCA Error Record or MCA 
+Exception data into a more readable and friendly description, how to log this 
+data to a file or any other data repository, and how to analyze the data to 
+predict and prevent future 
+system failures. However, these sophisticated features might be integrated 
+easily upon the basic infrastructure provided in this sample.
+<span style="background-color: #FFFFFF"><br>
+&nbsp;</span></font></p>
+<h3 align="left"><font face="Verdana">NOTES:</font></h3>
+<p align="left"><font face="Verdana" size="2">Keep in mind that in order for 
+this sample to work, that is, retrieve, parse and display the MCA Error Record 
+or MCA Exception, 
+a machine check error should occur on your system. Otherwise, you will not get 
+any data from the system. In case of corrected error retrieval, the application 
+will simply exit after <font color="#008000">
+<span style="background-color: #FFFFFF">&lt;TimeOut&gt;</span></font> minutes if no 
+corrected machine check error occurs during that timeframe. On the other hand, 
+in case of fatal error retrieval, the application will simply report that no 
+error record is present if no fatal machine check error has occurred before the 
+reboot.</font></p>
+<p align="left"><font face="Verdana" size="2">You may use the latest Hardware 
+Compatibility Test (HCT) Kit provided by Microsoft to inject fatal and corrected 
+machine check errors to IA64 systems. The HCT Kit includes a test tool (<i>mcatest.exe</i>) 
+for verifying the MCA support of the hardware and firmware of IA64 class server 
+systems. This test tool 
+injects fatal and machine check errors to the system and verifies the 
+corresponding data records upon retrieval. You can use this tool to inject these 
+errors and then use this sample to retrieve and display their data record.</font></p>
+<h3 align="left"><font face="Verdana">REFERENCE:</font></h3>
+<p align="left"><font face="Verdana" size="2">For more information about the 
+Machine Check Architecture (MCA) and Windows support for this technology, please 
+visit the following websites.</font></p>
+<table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="100%" id="AutoNumber3">
+  <tr>
+    <td width="56%" align="center" bgcolor="#C0C0C0"><b>
+    <font face="Verdana" size="2">Name</font></b></td>
+    <td width="56%" align="center" bgcolor="#C0C0C0"><b>
+    <font face="Verdana" size="2">Link</font></b></td>
+  </tr>
+  <tr>
+    <td width="56%"><span style="font-size: 10.0pt; font-family: Verdana">Intel 
+    System Abstraction Layer (SAL) Specification 3.0 <i>(Specifically, check out
+    <font color="#008000">Section&nbsp; 4 - Machine Checks</font>)</i></span></td>
+    <td width="56%">
+    <p class="MsoNormal"><span style="font-size:10.0pt;font-family:Verdana">
+    <a href="http://www.intel.com/design/Itanium/Downloads/245359.htm" style="color: blue; text-decoration: underline; text-underline: single">
+    http://www.intel.com/design/Itanium/Downloads/245359.htm</a></span></td>
+  </tr>
+  <tr>
+    <td width="56%"><span style="font-size: 10.0pt; font-family: Verdana">MCA 
+    Support in 64-bit Windows</span></td>
+    <td width="56%">
+    <p class="MsoNormal"><span style="font-size:10.0pt;font-family:Verdana">
+    <a href="http://www.microsoft.com/hwdev/platform/64bit/MCAsupport.asp" style="color: blue; text-decoration: underline; text-underline: single">
+    http://www.microsoft.com/hwdev/platform/64bit/MCAsupport.asp</a></span></td>
+  </tr>
+  <tr>
+    <td width="56%"><span style="font-size: 10.0pt; font-family: Verdana">MCA 
+    Implementation guide for 64-bit Windows</span></td>
+    <td width="56%">
+    <p class="MsoNormal"><span style="font-size:10.0pt;font-family:Verdana">
+    <a href="http://www.microsoft.com/hwdev/platform/64bit/MCAimpguide.asp" style="color: blue; text-decoration: underline; text-underline: single">
+    http://www.microsoft.com/hwdev/platform/64bit/MCAimpguide.asp</a></span></td>
+  </tr>
+  <tr>
+    <td width="56%"><span style="font-size: 10.0pt; font-family: Verdana">
+    Windows Logo program for 64-bit hardware&nbsp; (Latest HCT Server Tests)</span></td>
+    <td width="56%">
+    <p class="MsoNormal"><font face="Verdana" size="2">
+    <a href="http://www.microsoft.com/hwdq/hwtest/devices/systems.asp?area=syssrv-srvr">
+    http://www.microsoft.com/hwdq/hwtest/devices/systems.asp?area=syssrv-srvr</a></font></td>
+  </tr>
+  <tr>
+    <td width="56%"><span style="font-size: 10.0pt; font-family: Verdana">Design 
+    guidelines for 64-bit systems</span></td>
+    <td width="56%">
+    <p class="MsoNormal"><span style="font-size:10.0pt;font-family:Verdana">
+    &nbsp;<a href="http://www.microsoft.com/hwdev/platform/pcdesign/desguide/serverdg.asp#Design3" style="color: blue; text-decoration: underline; text-underline: single">http://www.microsoft.com/hwdev/platform/pcdesign/desguide/serverdg.asp#Design3</a></span></td>
+  </tr>
+</table>
+<p align="center"><a href="#top"><font face="Verdana" size="2">Top of page</font></a><font face="Verdana" size="2">
+</font>
+</p>
+<hr><font SIZE="2" face="Verdana">
+<p><i>Copyright (c) 2002 Microsoft Corporation. All rights reserved.</i></p>
+</font>
+
+</body>
+
+</html>

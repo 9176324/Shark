@@ -1,0 +1,435 @@
+;
+;   INF file for sample force feedback joystick driver
+;
+
+;------------------------------------------------------------------------------
+;
+;   General information, file layout.
+;
+
+[Version]
+Signature="$CHICAGO$"
+SetupClass=MEDIA
+
+[DefaultInstall]
+CopyFiles=FFDrv1.CopyList.System
+AddReg=FFDrv1.AddReg
+
+[DefaultUninstall]
+DelFiles=FFDrv1.CopyList.System
+DelReg=FFDrv1.AddReg
+
+
+;------------------------------------------------------------------------------
+;
+;   Details for installing the force feedback driver.
+;
+[FFDrv1.CopyList.System]
+FFDrv1.dll,,
+
+;
+;   This section specifies the registry keys that are installed when
+;   our INF is installed.
+;
+;   XYZZY.FFDrv1 is our joystick type name.  Type names are not
+;   localized and should incorporate the company name in order to avoid
+;   unintentional collisions with joysticks from other companies.
+;
+[FFDrv1.AddReg]
+
+;---------------------------------------
+;
+;   Installing the registry keys for COM.
+;
+HKCR,CLSID\%CLSID%,,,%FFDrv1.CLSID.Desc%
+HKCR,CLSID\%CLSID%\InProcServer32,,,%11%\FFdrv1.dll
+HKCR,CLSID\%CLSID%\InProcServer32,ThreadingModel,,"Both"
+
+;---------------------------------------
+;
+;   Installing the registry keys for DINPUT/VJOYD.
+;
+;
+;   The OEMData value contains a JOYREGHWSETTINGS structure
+;   which describes general attributes of the device.
+;
+;   dwFlags      = 0x00000000   = 00,00,00,00
+;   dwNumButtons = 2            = 02,00,00,00
+;
+HKLM,%KEY_OEM%\XYZZY.FFDrv1,OEMData,1,00,00,00,00,02,00,00,00
+
+;
+;   The OEMName contains the friendly (localized) name for the device.
+;
+
+HKLM,%KEY_OEM%\XYZZY.FFDrv1,OEMName,,%FFDrv1.DeviceDesc%
+
+;---------------------------------------
+;
+;   Axis 0 is the X axis
+;
+HKLM,%KEY_OEM%\XYZZY.FFDrv1\Axes\0,,,%FFDrv1.XAxis.Desc%
+
+;
+;   The Attributes value contains a DIOBJECTATTRIBUTES structure.
+;
+;   The X axis contains an actuator (can have forces applied to it),
+;   it requires polling, and it reports position information.
+;
+;   Its HID usage is as a generic X axis.
+;
+;   dwFlags    = DIDOI_FFACTUATOR | DIDOI_POLLED | DIDOI_ASPECTPOSITION
+;              = 0x00008101     = 01,81,00,00
+;   wUsagePage = HID_USAGE_PAGE_GENERIC
+;              = 0x01           = 01,00
+;   wUsage     = HID_USAGE_GENERIC_X
+;              = 0x30           = 30,00
+;
+HKLM,%KEY_OEM%\XYZZY.FFDrv1\Axes\0,Attributes,1,01,81,00,00,01,00,30,00
+
+;
+;   The FFAttributes value contains a DIFFOBJECTATTRIBUTES structure,
+;   which is required only if the DIDOI_FFACTUATOR flag is set in the
+;   object attributes.
+;
+;   The actuator on the X axis supports a force of up to 10 newtons
+;   with 256 levels of force (0 to 255).
+;
+;   dwFFMaxForce        = 10    = 0A,00,00,00
+;   dwFFForceResolution = 256   = 00,01,00,00
+;
+HKLM,%KEY_OEM%\XYZZY.FFDrv1\Axes\0,FFAttributes,1,0A,00,00,00,00,01,00,00
+
+;---------------------------------------
+;
+;   Axis 1 is the Y axis
+;
+HKLM,%KEY_OEM%\XYZZY.FFDrv1\Axes\1,,,%FFDrv1.YAxis.Desc%
+
+;
+;   The Attributes value contains a DIOBJECTATTRIBUTES structure.
+;
+;   The Y axis contains an actuator (can have forces applied to it),
+;   it requires polling, and it reports position information.
+;
+;   Its HID usage is as a generic Y axis.
+;
+;   dwFlags    = DIDOI_FFACTUATOR | DIDOI_POLLED | DIDOI_ASPECTPOSITION
+;              = 0x00008101     = 01,81,00,00
+;   wUsagePage = HID_USAGE_PAGE_GENERIC
+;              = 0x01           = 01,00
+;   wUsage     = HID_USAGE_GENERIC_Y
+;              = 0x31           = 31,00
+;
+HKLM,%KEY_OEM%\XYZZY.FFDrv1\Axes\1,Attributes,1,01,81,00,00,01,00,31,00
+
+;
+;   The FFAttributes value contains a DIFFOBJECTATTRIBUTES structure,
+;   which is required only if the DIDOI_FFACTUATOR flag is set in the
+;   object attributes.
+;
+;   The actuator on the Y axis supports a force of up to 10 newtons
+;   with 256 levels of force (0 to 255).
+;
+;   dwFFMaxForce        = 10    = 0A,00,00,00
+;   dwFFForceResolution = 256   = 00,01,00,00
+;
+HKLM,%KEY_OEM%\XYZZY.FFDrv1\Axes\1,FFAttributes,1,0A,00,00,00,00,01,00,00
+
+;---------------------------------------
+;
+;   Button 0 is the index finger trigger.
+;
+HKLM,%KEY_OEM%\XYZZY.FFDrv1\Buttons\0,,,%FFDrv1.Button0.Desc%
+
+;
+;   The Attributes value contains a DIOBJECTATTRIBUTES structure.
+;
+;   Button 0 can be used as an effect trigger.  It requires polling.
+;
+;   Its HID usage is as a generic button.
+;
+;   dwFlags    = DIDOI_FFEFFECTTRIGGER | DIDOI_POLLED
+;              = 0x00008002     = 02,80,00,00
+;   wUsagePage = HID_USAGE_PAGE_BUTTON
+;              = 0x09           = 09,00
+;   wUsage     = primary button =
+;              = 0x01           = 01,00
+;
+HKLM,%KEY_OEM%\XYZZY.FFDrv1\Buttons\0,Attributes,1,02,80,00,00,09,00,01,00
+
+;---------------------------------------
+;
+;   Button 1 is the thumb button.
+;
+HKLM,%KEY_OEM%\XYZZY.FFDrv1\Buttons\1,,,%FFDrv1.Button1.Desc%
+
+;
+;   The Attributes value contains a DIOBJECTATTRIBUTES structure.
+;
+;   Button 0 cannot be used as an effect trigger.  It requires polling.
+;
+;   Its HID usage is as a generic button.
+;
+;   dwFlags    = DIDOI_POLLED
+;              = 0x00008000     = 00,80,00,00
+;   wUsagePage = HID_USAGE_PAGE_BUTTON
+;              = 0x09           = 09,00
+;   wUsage     = secondary button =
+;              = 0x02           = 02,00
+;
+HKLM,%KEY_OEM%\XYZZY.FFDrv1\Buttons\1,Attributes,1,00,80,00,00,09,00,02,00
+
+;---------------------------------------
+;
+;   Force feedback registry settings.
+;
+;   The Attributes value contains a DIFFDEVICEATTRIBUTES structure.
+;
+;   dwFlags               = must be zero  = 00,00,00,00
+;   dwFFSamplePeriod      = 1ms = 1000us  = E8,03,00,00
+;   dwFFMinTimeResolution = 1ms = 1000us  = E8,03,00,00
+;
+;
+HKLM,%KEY_OEM%\XYZZY.FFDrv1\OEMForceFeedback,Attributes,1,00,00,00,00,E8,03,00,00,E8,03,00,00
+
+;
+;   The CLSID value contains the stringified CLSID that DirectInput
+;   will CoCreateInstance to access the force feedback effect driver.
+;
+HKLM,%KEY_OEM%\XYZZY.FFDrv1\OEMForceFeedback,CLSID,,"%CLSID%"
+
+;---------------------------------------
+;
+;   Force feedback registry settings for GUID_ConstantForce.
+;
+;   GUID_ConstantForce is a predefined GUID; applications which want
+;   to use a constant-force effect independent of hardware will
+;   request a GUID_ConstantForce.
+;
+;   The default value is the friendly name for the effect.
+;
+HKLM,%KEY_OEM%\XYZZY.FFDrv1\OEMForceFeedback\Effects\%GUID_ConstantForce%,,,"%ConstantForce.Desc%"
+
+;
+;   The Attributes value contains a DIEFFECTATTRIBUTES structure.
+;
+;   The effect ID is the number that is passed by DirectInput to the
+;   effect driver to identify the effect (thereby saving the effect
+;   driver the trouble of parsing GUIDs all the time).
+;
+;   Our effect is a constant-force effect whose optional envelope
+;   supports attack and fade.
+;
+;   Our hardware supports changing the following parameters when
+;   the effect is not playing (static): Duration, gain, trigger button,
+;   axes, direction, envelope, type-specific parameters.  We do not
+;   support sample period or trigger repeat interval.
+;
+;   Our hardware does not support changing any parameters while an
+;   effect is playing (dynamic).
+;
+;   Our hardware prefers receiving multiple-axis direction information
+;   in polar coordinates.
+;
+;   dwEffectId      = EFFECT_CONSTANT
+;                   = 371               = 73,01,00,00
+;   dwEffType       = DIEFT_CONSTANTFORCE | DIEFT_FFATTACK | DIEFT_FFFADE
+;                   = 0x00000601        = 01,06,00,00
+;   dwStaticParams  = DIEP_DURATION | DIEP_GAIN | DIEP_TRIGGERBUTTON |
+;                     DIEP_AXES | DIEP_DIRECTION | DIEP_ENVELOPE |
+;                     DIEP_TYPESPECIFICPARAMS
+;                   = 0x000001ED        = ED,01,00,00
+;   dwDynamicParams = 0x00000000        = 00,00,00,00
+;   dwCoords        = DIEFF_POLAR
+;                   = 0x00000020        = 20,00,00,00
+;
+HKLM,%KEY_OEM%\XYZZY.FFDrv1\OEMForceFeedback\Effects\%GUID_ConstantForce%,Attributes,1,73,01,00,00,01,06,00,00,ED,01,00,00,00,00,00,00,20,00,00,00
+
+;---------------------------------------
+;
+;   Force feedback registry settings for GUID_Sine.
+;
+;   GUID_Sine is a predefined GUID; applications which want
+;   to use a sine effect independent of hardware will
+;   request a GUID_Sine.
+;
+;   The default value is the friendly name for the effect.
+;
+HKLM,%KEY_OEM%\XYZZY.FFDrv1\OEMForceFeedback\Effects\%GUID_Sine%,,,"%Sine.Desc%"
+
+;
+;   The Attributes value contains a DIEFFECTATTRIBUTES structure.
+;
+;   The effect ID is the number that is passed by DirectInput to the
+;   effect driver to identify the effect (thereby saving the effect
+;   driver the trouble of parsing GUIDs all the time).
+;
+;   Our effect is a periodic effect whose optional envelope
+;   supports attack and fade.
+;
+;   Our hardware supports changing the following parameters when
+;   the effect is not playing (static): Duration, gain, trigger button,
+;   axes, direction, envelope, type-specific parameters.  We do not
+;   support sample period or trigger repeat interval.
+;
+;   Our hardware does not support changing any parameters while an
+;   effect is playing (dynamic).
+;
+;   Our hardware prefers receiving multiple-axis direction information
+;   in polar coordinates.
+;
+;   dwEffectId      = EFFECT_SINE
+;                   = 723               = D3,02,00,00
+;   dwEffType       = DIEFT_PERIODIC | DIEFT_FFATTACK | DIEFT_FFFADE
+;                   = 0x00000603        = 03,06,00,00
+;   dwStaticParams  = DIEP_DURATION | DIEP_GAIN | DIEP_TRIGGERBUTTON |
+;                     DIEP_AXES | DIEP_DIRECTION | DIEP_ENVELOPE |
+;                     DIEP_TYPESPECIFICPARAMS
+;                   = 0x000001ED        = ED,01,00,00
+;   dwDynamicParams = 0x00000000        = 00,00,00,00
+;   dwCoords        = DIEFF_POLAR
+;                   = 0x00000020        = 20,00,00,00
+;
+HKLM,%KEY_OEM%\XYZZY.FFDrv1\OEMForceFeedback\Effects\%GUID_Sine%,Attributes,1,D3,02,00,00,03,06,00,00,ED,01,00,00,00,00,00,00,20,00,00,00
+
+;---------------------------------------
+;
+;   Force feedback registry settings for GUID_Spring.
+;
+;   GUID_Spring is a predefined GUID; applications which want
+;   to use a spring effect independent of hardware will
+;   request a GUID_Spring.
+;
+;   The default value is the friendly name for the effect.
+;
+HKLM,%KEY_OEM%\XYZZY.FFDrv1\OEMForceFeedback\Effects\%GUID_Spring%,,,"%Spring.Desc%"
+
+;
+;   The Attributes value contains a DIEFFECTATTRIBUTES structure.
+;
+;   The effect ID is the number that is passed by DirectInput to the
+;   effect driver to identify the effect (thereby saving the effect
+;   driver the trouble of parsing GUIDs all the time).
+;
+;   Our effect is a condition effect which supports saturation
+;   and dead band.  But it doesn't support separate positive and
+;   negative coefficients or separate positive and negative
+;   saturations.
+;
+;   Our hardware supports changing the following parameters when
+;   the effect is not playing (static): Duration, gain,
+;   axes, direction, type-specific parameters.  We do not
+;   support sample period, envelope, or any triggers for
+;   the spring effect.
+;
+;   Our hardware does not support changing any parameters while an
+;   effect is playing (dynamic).
+;
+;   Our hardware prefers receiving multiple-axis direction information
+;   in polar coordinates.
+;
+;   dwEffectId      = EFFECT_SPRING
+;                   = 912               = 90,03,00,00
+;   dwEffType       = DIEFT_CONDITION | DIEFT_SATURATION | DIEFT_DEADBAND
+;                   = 0x00004804        = 04,48,00,00
+;   dwStaticParams  = DIEP_DURATION | DIEP_GAIN |  DIEP_AXES |
+;                     DIEP_DIRECTION | DIEP_TYPESPECIFICPARAMS
+;                   = 0x00000165        = 65,01,00,00
+;   dwDynamicParams = 0x00000000        = 00,00,00,00
+;   dwCoords        = DIEFF_POLAR
+;                   = 0x00000020        = 20,00,00,00
+;
+HKLM,%KEY_OEM%\XYZZY.FFDrv1\OEMForceFeedback\Effects\%GUID_Spring%,Attributes,1,90,03,00,00,04,48,00,00,65,01,00,00,00,00,00,00,20,00,00,00
+
+;---------------------------------------
+;
+;   Force feedback registry settings for GUID_Bisine.
+;
+;   GUID_Bisine is a hardware-specific GUID.  Applications which want
+;   to use the bisine effect would have to use the header file supplied
+;   in effpub.h to specify the type-specific data.
+;
+;   The default value is the friendly name for the effect.
+;
+HKLM,%KEY_OEM%\XYZZY.FFDrv1\OEMForceFeedback\Effects\%GUID_Bisine%,,,"%Bisine.Desc%"
+
+;
+;   The Attributes value contains a DIEFFECTATTRIBUTES structure.
+;
+;   The effect ID is the number that is passed by DirectInput to the
+;   effect driver to identify the effect (thereby saving the effect
+;   driver the trouble of parsing GUIDs all the time).
+;
+;   Our effect is a periodic effect whose optional envelope
+;   supports attack and fade.
+;
+;   Our hardware supports changing the following parameters when
+;   the effect is not playing (static): Duration, gain, trigger button,
+;   axes, direction, envelope, type-specific parameters.  We do not
+;   support sample period or trigger repeat interval.
+;
+;   Our hardware does not support changing any parameters while an
+;   effect is playing (dynamic).
+;
+;   Our hardware prefers receiving multiple-axis direction information
+;   in polar coordinates.
+;
+;   dwEffectId      = EFFECT_BISINE
+;                   = 615               = 67,02,00,00
+;   dwEffType       = DIEFT_PERIODIC | DIEFT_FFATTACK | DIEFT_FFFADE
+;                   = 0x00000603        = 03,06,00,00
+;   dwStaticParams  = DIEP_DURATION | DIEP_GAIN | DIEP_TRIGGERBUTTON |
+;                     DIEP_AXES | DIEP_DIRECTION | DIEP_ENVELOPE |
+;                     DIEP_TYPESPECIFICPARAMS
+;                   = 0x000001ED        = ED,01,00,00
+;   dwDynamicParams = 0x00000000        = 00,00,00,00
+;   dwCoords        = DIEFF_POLAR
+;                   = 0x00000020        = 20,00,00,00
+;
+HKLM,%KEY_OEM%\XYZZY.FFDrv1\OEMForceFeedback\Effects\%GUID_Bisine%,Attributes,1,67,02,00,00,03,06,00,00,ED,01,00,00,00,00,00,00,20,00,00,00
+
+;------------------------------------------------------------------------------
+;
+;   Strings for localization.
+;
+[Strings]
+FFDrv1.DeviceDesc="XYZZY Force Feedback Joystick"
+FFDrv1.CLSID.Desc="XYZZY Force Feedback Joystick Effect Driver"
+FFDrv1.XAxis.Desc="X axis"
+FFDrv1.YAxis.Desc="Y axis"
+FFDrv1.Button0.Desc="Trigger"
+FFDrv1.Button1.Desc="Thumb Button"
+
+;
+; Description strings for effects (see below).
+;
+ConstantForce.Desc="Constant Force"
+Sine.Desc="Sine"
+Spring.Desc="Spring"
+Bisine.Desc="Bisine"
+
+;------------------------------------------------------------------------------
+;
+;   Strings that should not be localized.
+;
+
+KEY_OEM="System\CurrentControlSet\Control\MediaProperties\PrivateProperties\Joystick\OEM"
+
+;!!IHV!! This is the CLSID for the IDirectInputEffectDriver we implement.
+;!!IHV!! It must match CLSID_MyServer in main.c!
+
+CLSID="{079A13E0-B5C4-11D0-9AD0-00A0C9A06E35}"
+
+;
+; These GUIDs are predefined by DirectInput and shouldn't be changed.
+;
+GUID_ConstantForce="{13541C20-8E33-11D0-9AD0-00A0C9A06E35}"
+GUID_Sine         ="{13541C23-8E33-11D0-9AD0-00A0C9A06E35}"
+GUID_Spring       ="{13541C27-8E33-11D0-9AD0-00A0C9A06E35}"
+
+;
+; These GUIDs are hardware-defined and came from our private
+; effpub.h header file.
+;
+GUID_Bisine       ="{67EE5040-E1A1-11D0-9AD0-0000C001580E}"

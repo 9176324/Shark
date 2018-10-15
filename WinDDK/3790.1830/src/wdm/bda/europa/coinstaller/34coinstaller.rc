@@ -1,0 +1,22 @@
+//+-------------------------------------------------------------------------
+//
+//  Microsoft Windows
+//
+//  Copyright (C) Microsoft Corporation, 1999 - 2001
+//
+//  File:      34coinstaller.dll
+//
+//--------------------------------------------------------------------------
+
+#include <windows.h>
+
+#include <ntverp.h>
+
+#define VER_FILETYPE                VFT_DRV
+#define VER_FILESUBTYPE             VFT2_UNKNOWN
+#define VER_FILEDESCRIPTION_STR     "Philips Europa Coinstaller"
+#define VER_INTERNALNAME_STR        "34coinstaller.dll"
+#define VER_ORIGINALFILENAME_STR    "34coinstaller.dll"
+
+#include "common.ver"
+

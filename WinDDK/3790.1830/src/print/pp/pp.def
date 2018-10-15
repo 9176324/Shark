@@ -1,0 +1,6 @@
+LIBRARY pp
+
+EXPORTS
+    InitializePrintProvidor
+    DllMain
+

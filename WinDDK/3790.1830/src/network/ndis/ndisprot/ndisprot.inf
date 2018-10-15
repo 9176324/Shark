@@ -1,0 +1,87 @@
+;-------------------------------------------------------------------------
+; NDISPROT.INF -- Sample NDIS Protocol Driver
+;
+; Copyright (c) 2003, Microsoft Corporation
+;-------------------------------------------------------------------------
+[version]
+Signature   = "$Windows NT$"
+Class       = NetTrans
+ClassGUID   = {4d36e975-e325-11ce-bfc1-08002be10318}
+Provider    = %Msft%
+LayoutFile  = layout.inf
+DriverVer   = 10/01/2002,6.0.4063.0
+
+[Manufacturer]
+%Msft%=MSFT,NTx86,NTia64,NTamd64
+
+; For Win2k
+[MSFT]
+%NDISPROT_Desc%=Install, MS_NDISPROT
+
+; For XP and later
+[MSFT.NTx86]
+%NDISPROT_Desc%=Install, MS_NDISPROT
+
+[MSFT.NTia64]
+%NDISPROT_Desc%=Install, MS_NDISPROT
+
+[MSFT.NTamd64]
+%NDISPROT_Desc%=Install, MS_NDISPROT
+
+;-------------------------------------------------------------------------
+; Installation Section
+;-------------------------------------------------------------------------
+[Install]
+AddReg=Inst_Ndi
+Characteristics=0x0 ; 
+CopyFiles=CpyFiles_Sys
+
+;-------------------------------------------------------------------------
+; Ndi installation support
+;-------------------------------------------------------------------------
+[Inst_Ndi]
+HKR,Ndi,Service,,"Ndisprot"
+HKR,Ndi,HelpText,,%NDISPROT_HelpText%
+HKR, Ndi\Interfaces, UpperRange,, noupper
+HKR,"Ndi\Interfaces","LowerRange",,"ndis5,ndis4,ndis5_prot"
+
+;-------------------------------------------------------------------------
+; Service installation support
+;-------------------------------------------------------------------------
+[Install.Services]
+AddService=Ndisprot,,NDISPROT_Service_Inst
+
+[NDISPROT_Service_Inst]
+DisplayName     = %NDISPROT_Desc%
+ServiceType     = 1 ;SERVICE_KERNEL_DRIVER
+StartType       = 3 ;SERVICE_MANUAL_START
+ErrorControl    = 1 ;SERVICE_ERROR_NORMAL
+ServiceBinary   = %12%\ndisprot.sys
+LoadOrderGroup  = NDIS
+Description     = %NDISPROT_Desc%
+
+[Install.Remove.Services]
+DelService=Ndisprot,0x200
+
+;-------------------------------------------------------------------------
+; Declare Destination Directories for file copy/deletion
+;-------------------------------------------------------------------------
+[DestinationDirs]
+CpyFiles_Sys    = 12    ; DIRID_DRIVERS
+
+
+;-------------------------------------------------------------------------
+; Files to Copy/Delete - Referenced by Install and Remove sections above
+;-------------------------------------------------------------------------
+[CpyFiles_Sys]
+Ndisprot.sys,,,2
+
+[Strings]
+Msft = "Microsoft"
+NDISPROT_Desc = Sample NDIS Protocol Driver"
+NDISPROT_HelpText = "A driver to support user-mode I/O on NDIS devices"
+
+
+
+
+

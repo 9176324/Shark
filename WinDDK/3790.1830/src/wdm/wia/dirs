@@ -1,0 +1,6 @@
+DIRS= \
+     extend \
+     microcam \
+     microdrv \
+     wiacam \
+     wiascanr

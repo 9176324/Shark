@@ -1,0 +1,3 @@
+DIRS= \
+     addfilter \
+     diskperf

@@ -1,0 +1,17 @@
+LIBRARY plotui
+
+EXPORTS
+    DllMain
+    DrvDeviceCapabilities
+    DevQueryPrintEx
+    PrinterProperties
+    DrvDevicePropertySheets
+
+    DrvSplDeviceCaps @ 254
+
+    DrvDocumentPropertySheets
+    DrvConvertDevMode
+    DrvPrinterEvent
+
+
+

@@ -1,0 +1,378 @@
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 11">
+<meta name=Originator content="Microsoft Word 11">
+<link rel=File-List href="pscr_files/filelist.xml">
+<title>PSCR.SYS—PCMCIA Smart Card Driver</title>
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Courier;
+	panose-1:2 7 4 9 2 2 5 2 4 4;
+	mso-font-charset:0;
+	mso-generic-font-family:modern;
+	mso-font-format:other;
+	mso-font-pitch:fixed;
+	mso-font-signature:3 0 0 0 1 0;}
+@font-face
+	{font-family:Verdana;
+	panose-1:2 11 6 4 3 5 4 4 2 4;
+	mso-font-alt:"Device Font 10cpi";
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:536871559 0 0 0 415 0;}
+@font-face
+	{font-family:"MS Sans Serif";
+	panose-1:0 0 0 0 0 0 0 0 0 0;
+	mso-font-alt:"Times New Roman";
+	mso-font-charset:0;
+	mso-generic-font-family:roman;
+	mso-font-format:other;
+	mso-font-pitch:auto;
+	mso-font-signature:0 0 0 0 0 0;}
+@font-face
+	{font-family:"MS Shell Dlg";
+	panose-1:2 11 6 4 2 2 2 2 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:auto;
+	mso-font-format:other;
+	mso-font-pitch:auto;
+	mso-font-signature:3 0 0 0 1 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0in;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";}
+h2
+	{mso-margin-top-alt:auto;
+	margin-right:0in;
+	mso-margin-bottom-alt:auto;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	mso-outline-level:2;
+	font-size:18.0pt;
+	font-family:"Times New Roman";
+	font-weight:bold;}
+h3
+	{mso-margin-top-alt:auto;
+	margin-right:0in;
+	mso-margin-bottom-alt:auto;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	mso-outline-level:3;
+	font-size:13.5pt;
+	font-family:"Times New Roman";
+	font-weight:bold;}
+h4
+	{mso-margin-top-alt:auto;
+	margin-right:0in;
+	mso-margin-bottom-alt:auto;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	mso-outline-level:4;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	font-weight:bold;}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:purple;
+	text-decoration:underline;
+	text-underline:single;}
+p
+	{mso-margin-top-alt:auto;
+	margin-right:0in;
+	mso-margin-bottom-alt:auto;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";}
+pre
+	{margin:0in;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt;
+	font-size:10.0pt;
+	font-family:"Courier New";
+	mso-fareast-font-family:"Times New Roman";}
+@page Section1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.25in 1.0in 1.25in;
+	mso-header-margin:.5in;
+	mso-footer-margin:.5in;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+ /* List Definitions */
+ @list l0
+	{mso-list-id:15930134;
+	mso-list-template-ids:-1420535286;}
+@list l0:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l1
+	{mso-list-id:2081292955;
+	mso-list-template-ids:708373308;}
+@list l1:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l1:level2
+	{mso-level-tab-stop:1.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l1:level3
+	{mso-level-tab-stop:1.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l1:level4
+	{mso-level-tab-stop:2.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l1:level5
+	{mso-level-tab-stop:2.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l1:level6
+	{mso-level-tab-stop:3.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l1:level7
+	{mso-level-tab-stop:3.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l1:level8
+	{mso-level-tab-stop:4.0in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l1:level9
+	{mso-level-tab-stop:4.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Table Normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0in 5.4pt 0in 5.4pt;
+	mso-para-margin:0in;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman";
+	mso-ansi-language:#0400;
+	mso-fareast-language:#0400;
+	mso-bidi-language:#0400;}
+</style>
+<![endif]--><!--[if gte mso 9]><xml>
+ <u1:shapedefaults u2:ext="edit" spidmax="4098"/>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <u3:shapelayout u4:ext="edit">
+  <u3:idmap u4:ext="edit" data="1"/>
+ </u3:shapelayout>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <u1:shapedefaults u2:ext="edit" spidmax="3074"/>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <u3:shapelayout u4:ext="edit">
+  <u3:idmap u4:ext="edit" data="1"/>
+ </u3:shapelayout>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <o:shapedefaults v:ext="edit" spidmax="2050"/>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <o:shapelayout v:ext="edit">
+  <o:idmap v:ext="edit" data="1"/>
+ </o:shapelayout></xml><![endif]-->
+</head>
+
+<body bgcolor=white lang=EN-US link=blue vlink=purple style='tab-interval:.5in'
+leftmargin=8>
+
+<div class=Section1>
+
+<h2><a name=MYSAMPLE></a><a name="_top"></a><span style='mso-bookmark:MYSAMPLE'><span
+style='font-family:Verdana'>PSCR.SYS—PCMCIA Smart Card Driver</span></span><u5:p></u5:p><o:p></o:p></h2>
+
+<u6:p></u6:p>
+
+<h3><span style='font-family:Verdana'>SUMMARY<u6:p></u6:p></span></h3>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>The PCMCIA Smart Card
+Driver is used for the SCM PCMCIA smart card reader. <u6:p></u6:p></span></p>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>This driver implements
+Plug and Play and Power Management and is compliant with 64-bit versions of
+Microsoft®&nbsp;Windows®.<u6:p></u6:p></span></p>
+
+<h3><span style='font-family:Verdana'>BUILDING PSCR.SYS<u6:p></u6:p></span></h3>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>To build the Pscr.sys
+driver, select either the checked or free DDK environment, navigate to the
+Bulltlp3 directory, and type <b>build</b>.&nbsp;This driver uses services
+provided by the smart card driver library (Smclib.sys), which are explained in
+detail in the accompanying documentation.<u6:p></u6:p></span></p>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>To install the driver,
+simply insert the smart card reader into a PCMCIA slot. The Found New Hardware
+wizard will appear. You will need to provide the INF file (on a disk) and the
+driver file, which will be copied to your System32\Drivers directory. The
+driver will start automatically. To stop the driver, either eject the reader or
+select the appropriate taskbar icon. The driver will not unload as long as you
+have Ifdtest.exe running and connected to the driver. <u6:p></u6:p></span></p>
+
+<h3><span style='font-family:Verdana'>TOOLS</span></h3>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>Microsoft offers a test
+tool (Ifdtest.exe) that allows you to use a smart card reader directly from the
+command line. Normally, the smart card resource manager is connected to a
+reader. To use Ifdtest.exe, you must stop the smart card resource manager
+(Scardsvr.exe) by typing <b>net stop scardsvr</b> at the command line.
+Ifdtest.exe is also used for the smart card reader logo test.<u6:p></u6:p></span></p>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>You can download
+Ifdtest.exe from </span><span style='font-size:10.0pt;font-family:Verdana;
+mso-bidi-font-family:"MS Shell Dlg"'><a
+href="http://www.microsoft.com/whdc/whql/default.mspx">http://www.microsoft.com/whdc/whql/default.mspx</a></span><span
+style='font-size:10.0pt;font-family:Verdana'> by following the links for smart
+cards. You need to order special test smart cards to have your smart card
+reader qualify for the &quot;Designed for Windows&quot; logo. You can find
+ordering information at </span><span style='font-size:10.0pt;font-family:Verdana;
+mso-bidi-font-family:"MS Shell Dlg"'><a
+href="http://www.microsoft.com/whdc/whql/default.mspx">http://www.microsoft.com/whdc/whql/default.mspx</a></span><span
+style='font-size:10.0pt;font-family:Verdana'>. <u6:p></u6:p>&nbsp;<u6:p></u6:p></span></p>
+
+<h3><span style='font-family:Verdana'>RESOURCES<u6:p></u6:p></span></h3>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>ISO 7816 Part 3 describes
+smart cards and smart card protocols in detail. Refer to the PC99 Handbook for
+smart card reader requirements.<u6:p></u6:p></span></p>
+
+<h3><span style='font-family:Verdana'>CODE TOUR<u6:p></u6:p></span></h3>
+
+<h4><span style='font-family:Verdana'>File Manifest<u6:p></u6:p></span></h4>
+
+<pre><u>Files<span style='mso-spacerun:yes'>         </span>Description<u6:p></u6:p></u></pre><pre>PSCR.HTM<span style='mso-spacerun:yes'>      </span>The documentation for this sample (this file).</pre><pre>PSCR.RC<span style='mso-spacerun:yes'>       </span>Resource definition file for driver.</pre><pre><span
+style='font-family:Courier'>SOURCES<span style='mso-spacerun:yes'>       </span>The generic file for building the code sample.<u6:p></u6:p></span></pre><pre><span
+style='font-family:Courier'>MAKEFILE<span style='mso-spacerun:yes'>      </span>Makefile required to build the driver.<u6:p></u6:p></span></pre><pre><span
+style='font-family:Courier'>PSCR.INF<span style='mso-spacerun:yes'>      </span>The INF file for installing the code sample.<u6:p></u6:p></span></pre><pre><span
+style='font-family:Courier'>PSCRCB.C<span style='mso-spacerun:yes'>      </span>Source file that contains the callback functions for the smart card library.<u6:p></u6:p></span></pre><pre><span
+style='font-family:Courier'>PSCRCB.H<span style='mso-spacerun:yes'>      </span>Function prototypes for the previous file.<u6:p></u6:p></span></pre><pre><span
+style='font-family:Courier'>PSCRCMD.C<span style='mso-spacerun:yes'>     </span>Implements the reader commands.<u6:p></u6:p></span></pre><pre><span
+style='font-family:Courier'>PSCRCMD.H<span style='mso-spacerun:yes'>     </span>Function prototypes for the previous file.<u6:p></u6:p></span></pre><pre><span
+style='font-family:Courier'>PSCRLOG.MC<span style='mso-spacerun:yes'>    </span>Error messages for this driver.<u6:p></u6:p></span></pre><pre><span
+style='font-family:Courier'>PSCRNT.C<span style='mso-spacerun:yes'>      </span>The main source file (load, unload, Plug and Play, Power Management).<u6:p></u6:p></span></pre><pre><span
+style='font-family:Courier'>PSCRNT.H<span style='mso-spacerun:yes'>      </span>Data definitions and prototypes for the previous file.<u6:p></u6:p></span></pre><pre><span
+style='font-family:Courier'>PSCRRDWR.C<span style='mso-spacerun:yes'>    </span>Implements read/write operations.<u6:p></u6:p></span></pre><pre><span
+style='font-family:Courier'>PSCRRDWR.H<span style='mso-spacerun:yes'>    </span>Data definitions and constant definitions for this reader.<u6:p></u6:p></span></pre><pre><span
+style='font-family:Courier'>PSCRVERS.H<span style='mso-spacerun:yes'>    </span>Driver-specific version information.<u6:p></u6:p></span></pre><pre><span
+style='font-family:Verdana'> </span><o:p></o:p></pre><u5:p></u5:p>
+
+<h4 style='tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
+style='font-family:Verdana'><u6:p></u6:p>Programming Tour<u6:p></u6:p></span></h4>
+
+<p style='tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
+style='font-size:10.0pt;font-family:Verdana'>The major topics covered in this
+tour are: <u6:p></u6:p></span></p>
+
+<ul type=disc>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l1 level1 lfo3;tab-stops:list .5in'><span style='font-size:10.0pt;
+     font-family:Verdana'>Plug and Play <u6:p></u6:p></span></li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l1 level1 lfo3;tab-stops:list .5in'><span style='font-size:10.0pt;
+     font-family:Verdana'>Power Management <u6:p></u6:p></span></li>
+</ul>
+
+<p style='tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><b><span
+style='font-size:10.0pt;font-family:Verdana'>Plug and Play</span></b><u5:p></u5:p><o:p></o:p></p>
+
+<u6:p></u6:p>
+
+<p style='tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
+style='font-size:10.0pt;font-family:Verdana'>With PCMCIA, Plug and Play is
+fairly easy to implement, because the PCMCIA bus supports device insertion and
+removal detection by design. However, when a user removes a PCMCIA card from
+the slot, an application may still be connected to the device. You should fail
+all subsequent requests, but you need to prevent the driver from unloading
+while the connection still exists. Defer unloading of the driver until the
+connection has been closed.<u6:p></u6:p></span></p>
+
+<p style='tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><b><span
+style='font-size:10.0pt;font-family:Verdana'>Power Management</span></b><u5:p></u5:p><o:p></o:p></p>
+
+<u6:p></u6:p>
+
+<p style='tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
+style='font-size:10.0pt;font-family:Verdana'>Power Management is described in
+detail in the DDK documentation. There is, however, one situation that is
+specific to smart card readers: how to deal with smart card insertions and
+removals while the system is in standby or hibernation mode. <u6:p></u6:p></span></p>
+
+<p style='tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
+style='font-size:10.0pt;font-family:Verdana'>Your reader will not see any card
+insertion or removal events in these modes, because the bus might not even have
+power. You must save the card state before your reader goes into standby or
+hibernation mode. After the system returns from these modes, you need to determine
+what the state of the card is. You must complete card tracking calls whenever
+there was a card in the reader before standby or hibernation mode <i>or</i>
+whenever there is a card in the reader after these modes. This step is
+necessary because the user could have changed the card while the system was in
+a low-power mode. <u6:p></u6:p></span></p>
+
+<p style='tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'>&nbsp;</p>
+
+<p align=center style='text-align:center;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><a
+href="#_top"><span style='font-size:10.0pt;font-family:Verdana'>Top of page</span></a><span
+style='font-size:10.0pt;font-family:Verdana'> </span><o:p></o:p></p>
+
+<u5:p></u5:p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width=499
+ style='width:5.2in;mso-cellspacing:0in;mso-padding-alt:0in 5.4pt 0in 5.4pt'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes;
+  height:1.2pt'>
+  <td style='background:aqua;padding:.75pt .75pt .75pt .75pt;height:1.2pt'>
+  <p class=MsoNormal><span style='color:black'><u6:p><u6:p></u6:p>&nbsp;</u6:p></span></p>
+  </td>
+ </tr>
+</table>
+
+<p style='tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
+style='font-size:7.5pt;font-family:"MS Sans Serif"'>© 2004 Microsoft
+Corporation</span><span style='font-size:10.0pt;font-family:Verdana'> </span><o:p></o:p></p>
+
+<u5:p></u5:p></div>
+
+<u6:p></u6:p>
+</body>
+
+</html>
+

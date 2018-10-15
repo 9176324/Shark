@@ -1,0 +1,211 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html                                                                                                                                            >
+
+<head>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 9">
+<meta name=Originator content="Microsoft Word 9">
+
+<title>GenINF</title>
+
+<style>
+<!--
+                       
+font-face
+	{font-family:"MS Sans Serif";}
+font-face
+	{font-family:Verdana;}
+                        
+p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{
+	margin:0in;
+	margin-bottom:.0001pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman";}
+p.MsoBodyText, li.MsoBodyText, div.MsoBodyText
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:12.0pt;
+	margin-left:.75in;
+	line-height:12.0pt;
+	font-size:10.0pt;
+	font-family:Arial;
+	letter-spacing:-.25pt;}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:blue;
+	text-decoration:underline;}
+p
+	{margin-right:0in;
+	margin-left:0in;
+	font-size:12.0pt;
+	font-family:"Times New Roman";}
+pre
+	{margin:0in;
+	margin-bottom:.0001pt;
+	font-size:10.0pt;
+	font-family:"Courier New";}
+
+div.Section1
+	{page:Section1;}
+-->
+</style>
+</head>
+
+<body lang=EN-US link=blue vlink=blue style=''>
+
+<div class=Section1>
+
+<h2><span style='font-family:Verdana'>GenINF: INF Generator Wizard</span></h2>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>GenINF, the INF Generator Wizard (<I>geninf.exe</I>) is a wizard program that generates the structure and partial content of INF files for Plug and Play-compatible devices on Windows 2000 and later systems. GenINF can create files for devices designed for x86, x64, and Itanium-based processor architectures. It also generates partial txtsetup.oem files for devices in the SCSIAdapter class.</span></p>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>Although the files that GenINF creates are not complete, the content is valid INF syntax, and provides a head start for creating INF and setup files. Users should review all
+INF files created by GenINF and complete them. For detailed documentation of INF file format, see the &quot;Creating an INF File&quot; topic in the Windows DDK.</span></p>
+
+<P><span style='font-size:10.0pt;font-family:Verdana'>The GenINF executable file, <I>geninf.exe</I>, and a help file, <I>geninf.hlp</I> are included in the %DDKROOT%\tools\geninf subdirectory of the Windows DDK. To start the tool, double-click the icon of the executable file.</span></P>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>The tool has not been
+extensively tested. Use it at your own risk. </span></p>
+
+<TABLE></TABLE>
+
+<h3><span style='font-family:Verdana'>Device Setup Class Support</span></h3>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>GenINF can create files for devices in all device setup classes, but it generates the required elements only for devices in the following setup classes.</span></p>
+
+<p class=MsoBodyText style='margin-left:1.25in;text-indent:-.25in;'><span style='font-family:Symbol'>·</span><span style='font-size:
+7.0pt;font-family:"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>1394 host bus controllers (class = 1394)</p>
+
+<p class=MsoBodyText style='margin-left:1.25in;text-indent:-.25in;'><span style='font-family:Symbol'>·</span><span style='font-size:
+7.0pt;font-family:"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Battery devices (class = Battery)</p>
+
+<p class=MsoBodyText style='margin-left:1.25in;text-indent:-.25in;'><span style='font-family:Symbol'>·</span><span style='font-size:
+7.0pt;font-family:"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>CD-ROMs (class = CDROM)</p>
+
+<p class=MsoBodyText style='margin-left:1.25in;text-indent:-.25in;'><span style='font-family:Symbol'>·</span><span style='font-size:
+7.0pt;font-family:"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Disk drives (class = DiskDrive)</p>
+
+<p class=MsoBodyText style='margin-left:1.25in;text-indent:-.25in;'><span style='font-family:Symbol'>·</span><span style='font-size:
+7.0pt;font-family:"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Floppy disk controllers (class = FDC)</p>
+
+<p class=MsoBodyText style='margin-left:1.25in;text-indent:-.25in;'><span style='font-family:Symbol'>·</span><span style='font-size:
+7.0pt;font-family:"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Floppy disk drives (class = FloppyDisk)</p>
+
+<p class=MsoBodyText style='margin-left:1.25in;text-indent:-.25in;'><span style='font-family:Symbol'>·</span><span style='font-size:
+7.0pt;font-family:"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Hard disk controllers (class = HDC)</p>
+
+<p class=MsoBodyText style='margin-left:1.25in;text-indent:-.25in;'><span style='font-family:Symbol'>·</span><span style='font-size:
+7.0pt;font-family:"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Human input devices (class = HID)</p>
+
+<p class=MsoBodyText style='margin-left:1.25in;text-indent:-.25in;'><span style='font-family:Symbol'>·</span><span style='font-size:
+7.0pt;font-family:"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Memory technology drivers (class = MTD)</p>
+
+<p class=MsoBodyText style='margin-left:1.25in;text-indent:-.25in;'><span style='font-family:Symbol'>·</span><span style='font-size:
+7.0pt;font-family:"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Multifunction devices (class = Multifunction)</p>
+
+<p class=MsoBodyText style='margin-left:1.25in;text-indent:-.25in;'><span style='font-family:Symbol'>·</span><span style='font-size:
+7.0pt;font-family:"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Multi-port serial adapters (class = MultiportSerial)</p>
+
+<p class=MsoBodyText style='margin-left:1.25in;text-indent:-.25in;'><span style='font-family:Symbol'>·</span><span style='font-size:
+7.0pt;font-family:"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>PCMCIA adapters (class = PCMCIA)</p>
+
+<p class=MsoBodyText style='margin-left:1.25in;text-indent:-.25in;'><span style='font-family:Symbol'>·</span><span style='font-size:
+7.0pt;font-family:"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Ports (class = Ports)</p>
+
+<p class=MsoBodyText style='margin-left:1.25in;text-indent:-.25in;'><span style='font-family:Symbol'>·</span><span style='font-size:
+7.0pt;font-family:"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Smart card readers (class = SmartCardReader)</p>
+
+<p class=MsoBodyText style='margin-top:12.0pt;margin-right:0in;margin-bottom:
+12.0pt;margin-left:1.25in;text-indent:-.25in;'><span
+style='font-family:Symbol'>·</span><span style='font-size:7.0pt;font-family:
+"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>Storage
+volumes (class = Volume)</p>
+
+<p class=MsoBodyText style='margin-left:1.25in;text-indent:-.25in;'><span style='font-family:Symbol'>·</span><span style='font-size:
+7.0pt;font-family:"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>System devices (class = System)</p>
+
+<p class=MsoBodyText style='margin-left:1.25in;text-indent:-.25in;'><span style='font-family:Symbol'>·</span><span style='font-size:
+7.0pt;font-family:"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>USB (class = USB)</p>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>In
+addition, GenINF provides limited device-specific support for devices in the following classes: </span></p>
+
+<p class=MsoBodyText style='margin-left:1.25in;text-indent:-.25in;'><span style='font-family:Symbol'>·</span><span style='font-size:
+7.0pt;font-family:"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Display adapters (class = Display) </p>
+
+<p class=MsoBodyText style='margin-left:1.25in;text-indent:-.25in;'><span style='font-family:Symbol'>·</span><span style='font-size:
+7.0pt;font-family:"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Keyboards (class = Keyboard) </p>
+
+<p class=MsoBodyText style='margin-left:1.25in;text-indent:-.25in;'><span style='font-family:Symbol'>·</span><span style='font-size:
+7.0pt;font-family:"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Multimedia devices (class = Media) </p>
+
+<p class=MsoBodyText style='margin-left:1.25in;text-indent:-.25in;'><span style='font-family:Symbol'>·</span><span style='font-size:
+7.0pt;font-family:"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Mice (class = Mouse) </p>
+
+<p class=MsoBodyText style='margin-left:1.25in;text-indent:-.25in;'><span style='font-family:Symbol'>·</span><span style='font-size:
+7.0pt;font-family:"Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>SCSI and RAID controllers (class = SCSIAdapter) </p>
+
+
+<h3><span style='font-family:Verdana'>GenINF Files</span></h3>
+
+<pre><u>File<span style=''>           </span>Description</u></pre><pre>&nbsp;</pre><pre>Geninf.exe<span
+style=''>     </span>The executable file.</pre><pre>Geninf.htm<span
+style=''>     </span>The documentation for this tool (this file).</pre><pre>Geninf.cnt<span
+style=''>     </span>The help contents file.</pre><pre>Geninf.hlp<span
+style=''>     </span>The help file.</pre>
+
+<h3 style=''><span
+style='font-family:Verdana'>Feedback</span></h3>
+
+<p style=''><span
+style='font-size:10.0pt;font-family:Verdana'>We welcome your comments, problem reports, and requests. Send feedback to the Device Management and Installation Team at <A HREF="mailto:devinstf@microsoft.com">devinstf@microsoft.com</A>.</span></p>
+
+<p align=center style='text-align:center;'><a
+href="..\Local%20Settings\Documents%20and%20Settings\kksharma%20(NTDEV)\Local%20Settings\Temp\GenINF5.htm#top" onClick="return (false);"><span
+style='font-size:10.0pt;font-family:Verdana'>Top of page</span></a><span
+style='font-size:10.0pt;font-family:Verdana'> </span></p>
+
+<table border=0 cellspacing=0 cellpadding=0 width=624 style='width:6.5in;
+ '>
+ <tr style='height:1.5pt'>
+  <td style='background:aqua;padding:.75pt .75pt .75pt .75pt;height:1.5pt'>
+  <p class=MsoNormal>&nbsp;<span style='font-size:2.0pt;'></span></p>
+  </td>
+ </tr>
+</table>
+
+<p style=''><span
+style='font-size:7.5pt;font-family:"MS Sans Serif"'>© Microsoft Corporation
+2004</span><span style='font-size:10.0pt;font-family:Verdana'></span></p>
+
+</div>
+
+</body>
+
+</html>

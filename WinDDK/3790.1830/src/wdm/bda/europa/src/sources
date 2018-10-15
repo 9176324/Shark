@@ -1,0 +1,87 @@
+TARGETNAME=34BDACap
+TARGETTYPE=DRIVER
+
+TARGETPATH=obj
+
+TARGETLIBS= $(DDK_LIB_PATH)\ks.lib\
+            $(DDK_LIB_PATH)\bdasup.lib\
+            ..\lib\bin\$(TARGET_DIRECTORY)\34kmproxy.lib \
+            ..\hal\bin\$(TARGET_DIRECTORY)\34HAL.lib 
+
+INCLUDES=..\Inc;\
+    ..\lib\inc;\
+    ..\hal\inc;\
+    $(DDK_INC_PATH);\
+    $(SDK_INC_PATH);
+
+DRIVERTYPE=WDM
+
+MSC_WARNING_LEVEL=/W3 /WX
+
+C_DEFINES=$(C_DEFINES) -DUNICODE -D_UNICODE -DDEBUG_LEVEL=DEBUGLVL_BLAB -DTD1316 -DEFINES 
+
+USE_MAPSYM=1
+
+LINKER_FLAGS=$(LINKER_FLAGS) -map -merge:PAGECONST=PAGE
+
+SOURCES=34bdacap.rc                         \
+        device.cpp                          \
+        VampDevice.cpp                      \
+        SynchIrpCall.cpp                    \
+        OSDependDebug.cpp                   \
+        OSDependMemory.cpp                  \
+        OSDependRegisterAccess.cpp          \
+        OSDependRegistry.cpp                \
+        AVSyncCall.cpp                      \
+        ProxyOSDepend.cpp                   \
+        AVDependDelayExecution.cpp          \
+        AVDependQueryPerformanceCounter.cpp \
+        AVDependSpinLock.cpp                \
+        AVDependTimeOut.cpp                 \
+        AVFactory.cpp                       \
+        AnlgCaptureFilterInterface.cpp      \
+        AnlgCaptureFilter.cpp               \
+        AnlgPropVideoDecoderInterface.cpp   \
+        AnlgPropVideoDecoder.cpp            \
+        AnlgPropProcampInterface.cpp        \
+        AnlgPropProcamp.cpp                 \
+        AnlgVideoCapInterface.cpp           \
+        AnlgVideoCap.cpp                    \
+        AnlgVideoPrevInterface.cpp          \
+        AnlgVideoPrev.cpp                   \
+        AnlgVBIOutInterface.cpp             \
+        AnlgVBIOut.cpp                      \
+        AnlgAudioOutInterface.cpp           \
+        AnlgAudioOut.cpp                    \
+        AnlgVideoIn.cpp                     \
+        AnlgXBarFilterInterface.cpp         \
+        AnlgXBarFilter.cpp                  \
+        AnlgPropXBarInterface.cpp           \
+        AnlgPropXBar.cpp                    \
+        AnlgTVAudioFilterInterface.cpp      \
+        AnlgTVAudioFilter.cpp               \
+        AnlgPropTVAudioInterface.cpp        \
+        AnlgPropTVAudio.cpp                 \
+        AnlgEventHandler.cpp                \
+        BaseStream.cpp                      \
+        BasePinInterface.cpp                \
+        BaseClass.cpp                       \
+        DgtlCaptureFilterInterface.cpp      \
+        DgtlCaptureFilter.cpp               \
+        DgtlTransportOutInterface.cpp       \
+        DgtlTransportOut.cpp                \
+        DgtlTunerFilterInterface.cpp        \
+        DgtlTunerFilter.cpp                 \
+        DgtlPropTunerInterface.cpp          \
+        DgtlPropTuner.cpp                   \
+        DgtlMethodsTunerInterface.cpp       \
+        DgtlMethodsTuner.cpp                \
+        DgtlTunerOutInterface.cpp           \
+        DgtlTunerOut.cpp                    \
+        AnlgTunerFilterInterface.cpp        \
+        AnlgTunerFilter.cpp                 \
+        AnlgPropTunerInterface.cpp          \
+        AnlgPropTuner.cpp                   \
+        AnlgMethodsTunerInterface.cpp       \
+        AnlgMethodsTuner.cpp                \
+

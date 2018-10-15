@@ -1,0 +1,106 @@
+<HTML>
+<HEAD>
+<TITLE>Co-installer for Processing DDInstall.WMI</TITLE>
+<META content="text/html; charset=windows-1252" http-equiv=Content-Type>
+<META content="Microsoft FrontPage 5.0" name=GENERATOR>
+</HEAD>
+
+<BODY link=#0000ff><FONT face=Verdana size=5>
+<H2>Co-installer for Processing DDInstall.WMI</H2></FONT><FONT face=Verdana size=2>
+<P><SPAN style="COLOR: #ff0000; FONT-FAMILY: Arial; FONT-SIZE: 10pt">[This is 
+preliminary documentation and subject to change.]</SPAN></P>
+<P><b><i style="mso-bidi-font-style:normal"><span style="font-size:9.5pt;mso-bidi-font-size:10.0pt;font-family:Arial">Abstract:
+</span></i></b>This document accompanies the redistributable co-installer that 
+can be used inside an INF file to process the [<i><u>DDInstall</u></i>.WMI] on 
+Windows 2000 and Windows XP. The functionality is already included in Windows 
+Server 2003 and later.<H3>SUMMARY</H3>
+<p>It is crucial to set WMI security correctly for any WMI Interface classes 
+installed by the driver package. This has been done in the past by writing 
+directly to the registry. A new syntax was added to Windows Server 2003 to 
+provide a more convenient way of setting security on WMI Interfaces as follows:<p>&nbsp;<p>
+<b>&nbsp;&nbsp;&nbsp; [</b><i>install-section-name</i><b>.WMI]</b> |<br>
+<b>&nbsp;&nbsp;&nbsp; [</b><i>install-section-name</i><b>.nt.WMI]</b> | <br>
+<b>&nbsp;&nbsp;&nbsp; [</b><i>install-section-name</i><b>.ntx86.WMI]</b> <br>
+<b>&nbsp;&nbsp;&nbsp; [</b><i>install-section-name</i><b>.ntia64.WMI]</b> <br>
+&nbsp;<br>
+<b>&nbsp;&nbsp;&nbsp; WMIInterface={</b><i>WmiClassGUID</i><b>},</b> [<i>flags</i>]<b>,</b>
+<i>WMI-class-section<br>
+</i><b>&nbsp;</b><br>
+<b>&nbsp;</b></p>
+<p><b>&nbsp;&nbsp;&nbsp; [</b><i>WMI-class-section</i><b>]</b> <br>
+<b>&nbsp;&nbsp;&nbsp; Security=&quot;</b><i>security-descriptor-string</i><b>&quot;</b>
+</p>
+<p>This document accompanies and describes a redistributable
+co-installer that can be used to process the <u>[</u><i>DDInstall</i>.WMI] 
+install section in an INF. The [<i>DDInstall</i>.WMI] section is supported on 
+Windows Server 2003 and later. The co-installer is only required to support 
+this syntax on Windows 2000 and Windows XP.<H3>USING THE CO-INSTALLER</H3>
+<h5>To use the co-installer for driver installation and registration:</h5>
+<p style="margin-left:0in;tab-stops:.5in">Copy the WMIInst.dll redistributable binary to the directory
+where you are assembling your driver package. You should use this following
+version of wmiinst.dll:
+<blockquote>
+<p><b>tools\coinstallers\</b><i>&lt;platform&gt;</i><b>\WMIInst.dll</b></blockquote>
+<p>To use this co-installer, add the following sections to the INF:
+
+<p><span style="font-family:Symbol">·<span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Add a [<i>DDInstall</i>.CoInstallers] section for each device
+specified in the INF. This section must include the following two lines:
+<blockquote>
+<p><style="margin-left:.5in">AddReg = WMIInst.AddReg<br>
+CopyFiles= WMIInst.CopyFiles
+</blockquote>
+
+<blockquote>
+<p><style="margin-left:.5in">For example:
+</blockquote>
+
+<blockquote>
+<p><style="margin-left:.5in">[InstallA.NT.CoInstallers]<br>
+AddReg = WMIInst.AddReg<br>
+CopyFiles= WMIInst.CopyFiles
+</blockquote>
+
+<p>&nbsp;<span style="font-family:Symbol">·<span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Add the following sections:
+
+<blockquote>
+<p><style="margin-left:.5in">[WMIInst.AddReg]<br>
+HKR,,CoInstallers32,0x10000,&quot;WMIInst.DLL,WmiGuidSecurityINF&quot;<br style="mso-special-character:line-break">
+<br style="mso-special-character:line-break">
+<style="margin-left:.5in">[WMIInst.CopyFiles]<br>
+WMIInst.dll,,,0x10
+</blockquote>
+
+<p style="tab-stops:list .25in"><span style="font-family:Symbol">·<span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Add a reference to the CopyFiles section in the [DestinationDirs]
+section. For example:
+
+<blockquote>
+<p><style="margin-left:.5in">[DestinationDirs]<br>
+WMIInst.CopyFiles = 11
+</blockquote>
+
+<p><span style="font-family:Symbol">·<span style="font:7.0pt &quot;Times New Roman&quot;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span>Add sections to install the drivers and set WMI security.<br style="mso-special-character:line-break">
+<br style="mso-special-character:line-break">
+File Manifest</FONT><FONT face="Courier" size="3"><TABLE BORDER=0 CELLSPACING=1 CELLPADDING=0 width="744">
+<TR><TD width="200"><U>File</u></TD><TD width="534"><u>Description<u></TD></TR>
+<TR><TD width="200"><i><FONT face=Verdana size=2>
+  WMIInst</FONT>.htm</i></TD><TD width="534">Documentation for this binary (this file).</TD></TR>
+<TR><TD width="200"><i>&lt;platform&gt;\WMIInst.dll</i></TD><TD width="534">Redistributable 
+  32-bit co-installer binary.</TD></TR>
+</TABLE>
+
+<H3>FEEDBACK</H3>
+<P>We welcome your comments, problem reports and wish-list requests. Please 
+submit them by pointing your Internet browser to <A href="http://www.microsoft.com/ddk">http://www.microsoft.com/ddk</A>. 
+</FONT></P>
+<P align=center><FONT face=Verdana size=2><A href="#top">Top of page</A></P></FONT>
+<TABLE border=0" cellSpacing="0" width="624">
+<TR>
+<TD bgColor="#00ffff" height="2" vAlign="middle"></TD></TR></TABLE>
+<FONT face="MS Sans Serif" size=1>
+<P>© Microsoft Corporation 2002</FONT><FONT face=Verdana size=2> 
+</P></FONT>
+</BODY>

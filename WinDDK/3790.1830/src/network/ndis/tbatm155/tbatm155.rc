@@ -1,0 +1,38 @@
+#include <windows.h>
+#include <ntverp.h>
+
+#include "version.h"
+
+/*-----------------------------------------------*/
+/* the following lines are specific to this file */
+/*-----------------------------------------------*/
+
+#define VER_FILETYPE                    VFT_DRV
+
+#define VER_FILESUBTYPE                 VFT2_DRV_NETWORK
+
+#define VER_FILEDESCRIPTION_STR         "Toshiba ATM 155 Adapter Driver"
+#define VER_INTERNALNAME_STR            "TBATM155.SYS"
+#define VER_ORIGINALFILENAME_STR        "TBATM155.SYS"
+
+#define VER_LEGALCOPYRIGHT_YEARS        "1996-2000"
+#define VER_LEGALCOPYRIGHT_STR "Copyright (C) Toshiba Corp. " VER_LEGALCOPYRIGHT_YEARS
+
+#ifdef  VER_COMPANYNAME_STR
+ #undef VER_COMPANYNAME_STR
+#endif  
+#define VER_COMPANYNAME_STR             "Toshiba Corporation"
+
+#ifdef  VER_PRODUCTVERSION_STR
+ #undef VER_PRODUCTVERSION_STR
+#endif  
+#define VER_PRODUCTVERSION_STR          DRIVER_VERSION_STR
+
+#ifdef  VER_PRODUCTVERSION
+ #undef VER_PRODUCTVERSION
+#endif  
+#define VER_PRODUCTVERSION              DRIVER_VERSION
+
+#include "common.ver"
+
+

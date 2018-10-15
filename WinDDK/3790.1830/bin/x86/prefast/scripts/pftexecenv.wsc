@@ -1,0 +1,413 @@
+<?xml version="1.0"?>
+<component>
+
+<?component error="true" debug="true"?>
+
+<comment>
+/////////////////////////////////////////////////////////////////////////////
+// Description: Enables or disables the Windows Installer-based UPDATE
+// functionality in the script.
+//
+// This should be set to one of the following values:
+//
+//     false - UPDATE functionality is disabled. This is accomplished by having
+// the GetLatestBuildNum() function always return the build number of the
+// installed version, thus keeping the UPDATE functionality from ever
+// being executed. *This is the setting that should be used when PREfast is
+// checked-into a source control system.*
+//
+//     true - UPDATE functionality is enabled. /Default./
+//
+</comment>
+<resource id="enable_update">false</resource>
+
+
+<comment>
+/////////////////////////////////////////////////////////////////////////////
+// Description: Enables or disables the feedback mechanism.
+//
+// This should be set to one of the following values:
+//
+//     false - FEEDBACK functionality is disabled. The /FEEDBACK and /NOFEEDBACK
+// switches are ignored when this is zero.
+//
+//     true - FEEDBACK functionality is enabled. The /NOFEEDBACK switch can
+// still be specified by a user to disable feedback.
+//
+</comment>
+<resource id="enable_feedback">false</resource>
+
+
+<comment>
+/////////////////////////////////////////////////////////////////////////////
+// Description: Specifies the base UNC location for the UPDATE mechanism.
+//
+</comment>
+<resource id="UpdateUNCBase">\\server\share\</resource>
+
+
+<registration
+	description="PREfast Execution Environment"
+	progid="PREfast.ExecEnvironment"
+	version="1.00"
+	classid="{2aaef3cc-690e-4976-b7e1-f80165fb55a0}" />
+
+<public>
+	<property name="IsUpdateEnabled"         ><get /></property>
+	<property name="IsFeedbackEnabled"       ><get /></property>
+	<property name="IsDevelopmentEnvironment"><get /></property>
+	<property name="ScriptsDirectory"        ><get /></property>
+	<property name="ModulesDirectory"        ><get /></property>
+	<property name="DocumentationDirectory"  ><get /></property>
+	<property name="RegistryKey"             ><get /></property>
+	<property name="InstalledBuildNumber"    ><get /></property>
+	<property name="LatestBuildNumber"       ><get /></property>
+	<property name="UpdateUNCBase"           ><get /></property>
+    <property name="ModelsDirectory"         ><get /></property>
+    
+	<method name="ComposeVersionString">
+		<parameter name="strBuildNum" />
+	</method>
+
+	<method name="LaunchHTA">
+		<parameter name="strHTAFile" />
+		<parameter name="fWait" />
+	</method>
+
+	<method name="DownloadUNCAsString">
+		<parameter name="strUNC" />
+	</method>
+
+	<method name="DownloadUNCToTextFile">
+		<parameter name="strUNC" />
+		<parameter name="strDestFile" />
+		<parameter name="fOverwrite" />
+	</method>
+
+	<method name="GetXMLWithinWSC">
+		<parameter name="strWSC" />
+		<parameter name="strID" />
+	</method>
+</public>
+
+<script language="JScript">
+<![CDATA[
+/////////////////////////////////////////////////////////////////////////////
+// Beginning of script block
+//
+
+// Construction
+var description = new PREfastExecutionEnvironment;
+function PREfastExecutionEnvironment()
+{
+	// Initialize the class
+	this.get_IsUpdateEnabled = get_IsUpdateEnabled;
+	this.get_IsFeedbackEnabled = get_IsFeedbackEnabled;
+	this.get_IsDevelopmentEnvironment = get_IsDevelopmentEnvironment;
+	this.get_ScriptsDirectory = get_ScriptsDirectory;
+	this.get_ModulesDirectory = get_ModulesDirectory;
+	this.get_DocumentationDirectory = get_DocumentationDirectory;
+	this.get_RegistryKey = get_RegistryKey;
+	this.get_InstalledBuildNumber = get_InstalledBuildNumber;
+	this.get_LatestBuildNumber = get_LatestBuildNumber;
+	this.get_UpdateUNCBase = get_UpdateUNCBase;
+    this.get_ModelsDirectory = get_ModelsDirectory;
+
+	this.ComposeVersionString = ComposeVersionString;
+	this.LaunchHTA = LaunchHTA;
+	this.DownloadUNCAsString = DownloadUNCAsString;
+	this.DownloadUNCToTextFile = DownloadUNCToTextFile;
+	this.GetXMLWithinWSC = GetXMLWithinWSC;
+
+	// Create a helper object
+	var objProcEnv = new ActiveXObject("WScript.Shell").Environment("Process");
+
+	// Determine if the user is running in the PREfast development environment
+	m_fDevEnv = false;
+	if (objProcEnv("PREFAST_DEVENV"))
+		if (0 != (new Number(objProcEnv("PREFAST_DEVENV"))))
+			m_fDevEnv = true;
+
+	// Initialize the environment and global variables
+	var strPREfastHome;
+	var strScriptPath;
+	if (m_fDevEnv)
+	{
+		// Registry key path
+		m_strRegistryKey = "HKCU\\Software\\Microsoft\\PREfast\\";
+
+		// Determine the root
+		strPREfastHome = objProcEnv("PREFAST_ROOT");
+		if (strPREfastHome.lastIndexOf("\\") != strPREfastHome.length - 1)
+			strPREfastHome += "\\";
+
+		// The location of PREfast scripts, modules, and documents
+		m_strScriptsDirectory       = strPREfastHome + "bin\\scripts";
+		m_strModulesDirectory       = strPREfastHome + "bin\\modules";
+		m_strDocumentationDirectory = strPREfastHome + "doc";
+        m_strModelsDirectory = strPREfastHome + "src\\Model";
+
+		// The location of the AST binaries
+		SetEnvVar(objProcEnv, "PREFASTAST", strPREfastHome + "..\\clients\\public\\bin\\ast");
+
+		// The location of the PREfast driver
+		SetEnvVar(objProcEnv, "PREFASTDRIVER", m_strModulesDirectory + "\\driver.dll");
+
+		// The PREfast components require these to work correctly
+		SetEnvVar(objProcEnv, "PREFASTLOG"   , strPREfastHome + "bin\\log\\defects.xml");
+		SetEnvVar(objProcEnv, "PREFASTCONFIG", strPREfastHome + "src\\Driver\\pcfg.xml");
+		SetEnvVar(objProcEnv, "PREFASTMODEL" , m_strModelsDirectory + "\\PfxModel.xml");
+	}
+	else
+	{
+		// Registry key path
+		m_strRegistryKey = "HKCU\\Software\\Microsoft\\PREfast\\";
+
+		// Determine the root
+		strPREfastHome = objProcEnv("PREFAST_ROOT");
+		if (strPREfastHome.lastIndexOf("\\") != strPREfastHome.length - 1)
+			strPREfastHome += "\\";
+
+		// The location of PREfast scripts, modules, and documents
+		m_strScriptsDirectory       = strPREfastHome + "scripts";
+		m_strModulesDirectory       = strPREfastHome + "bin\\modules";
+		m_strDocumentationDirectory = strPREfastHome + "doc";
+        m_strModelsDirectory        = strPREfastHome + "bin\\modules";
+
+		// The location of the AST binaries
+		SetEnvVar(objProcEnv, "PREFASTAST", strPREfastHome + "bin\\parser");
+		
+		// The location of the PREfast driver
+		SetEnvVar(objProcEnv, "PREFASTDRIVER", m_strModulesDirectory + "\\driver.dll");
+		
+		// The PREfast components require these to work correctly
+		SetEnvVar(objProcEnv, "PREFASTLOG"   , strPREfastHome + "defects.xml");
+		SetEnvVar(objProcEnv, "PREFASTCONFIG", strPREfastHome + "config.xml");
+		SetEnvVar(objProcEnv, "PREFASTMODEL" , m_strModelsDirectory + "\\PfxModel.xml");
+	}
+}
+
+// Implementation
+
+function SetEnvVar(objProcEnv, strName, strValue)
+{
+	if (!objProcEnv(strName))
+		objProcEnv(strName) = strValue;
+}
+
+
+// Properies
+function get_IsUpdateEnabled()
+{
+	return getResource("enable_update") == "true";
+}
+
+function get_IsFeedbackEnabled()
+{
+	return getResource("enable_feedback") == "true";
+}
+
+function get_IsDevelopmentEnvironment()
+{
+	return m_fDevEnv;
+}
+
+function get_ScriptsDirectory()
+{
+	return m_strScriptsDirectory;
+}
+
+function get_ModulesDirectory()
+{
+	return m_strModulesDirectory;
+}
+
+function get_ModelsDirectory()
+{
+	return m_strModelsDirectory;
+}
+
+function get_DocumentationDirectory()
+{
+	return m_strDocumentationDirectory;
+}
+
+function get_RegistryKey()
+{
+	return m_strRegistryKey;
+}
+
+function get_InstalledBuildNumber()
+{
+	// Return immediately if value has already been computed
+	if (m_strInstalledBuildNum)
+		return m_strInstalledBuildNum;
+
+	// Create a helper object
+	var objFSO = new ActiveXObject("Scripting.FileSystemObject");
+
+	// Compose the entire path
+	var strVersionTxt = get_ModulesDirectory() + "\\Version.txt";
+
+	try
+	{
+		// Attempt to open the installed Version.txt file
+		var objFile = objFSO.GetFile(strVersionTxt);
+		var objTS = objFile.OpenAsTextStream(1, 0);
+		var strLine = objTS.ReadLine().replace(/\s/g, "");
+		m_strInstalledBuildNum = strLine;
+	}
+	catch (e)
+	{
+		// Return bogus string if file could not be read
+		m_strInstalledBuildNum = "????";
+	}
+
+	return m_strInstalledBuildNum;
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+function get_LatestBuildNumber()
+{
+	// If Update is not enabled, we will say that the latest build number is
+	// the same as the installed build number.
+	if (!get_IsUpdateEnabled())
+		return get_InstalledBuildNumber();
+
+	// Compose the entire path
+	var strUNC = get_UpdateUNCBase() + "Version.txt";
+
+	try
+	{
+		// Read the text as the build number
+		var strLine = DownloadUNCAsString(strUNC);
+		return strLine.replace(/\s/g, "");
+	}
+	catch (e)
+	{
+		// Return bogus string if file could not be read
+		return "????";
+	}
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+function get_UpdateUNCBase()
+{
+	// Create a helper object
+	var objProcEnv = new ActiveXObject("WScript.Shell").Environment("Process");
+
+	// Check to see if the user has specified a test location
+	var strUNCBase = getResource("UpdateUNCBase");
+	if (objProcEnv("PREFAST_TESTUNC"))
+		strUNCBase = objProcEnv("PREFAST_TESTUNC");
+	var iLastFwd = strUNCBase.lastIndexOf('/');
+	var iLastBwd = strUNCBase.lastIndexOf('\\');
+	var strLastSlash = (iLastFwd > iLastBwd) ? '/' : '\\';
+	var strLastChar = strUNCBase.charAt(strUNCBase.length - 1);
+	if (strLastSlash != strLastChar)
+		strUNCBase += strLastSlash;
+	return strUNCBase;
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+function ComposeVersionString(strBuildNum)
+{
+	// Get the installed build number, if nothing was specified
+	if (!strBuildNum || !strBuildNum.length)
+		strBuildNum = get_InstalledBuildNumber();
+
+	return "1.5." + strBuildNum;
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+function LaunchHTA(strHTAFile, fWait)
+{
+	// Compose the entire path
+	var strHTA = get_ScriptsDirectory() + "\\" + strHTAFile;
+
+	// Create a helper object
+	var objFSO = new ActiveXObject("Scripting.FileSystemObject");
+
+	// Get the system directory
+	var strSys = objFSO.GetSpecialFolder(1).Path; // SystemFolder = 1
+
+	// Compose the command line
+	var strCmdLine = strSys + '\\mshta.exe "' + strHTA + '"';
+
+	// Create a helper object
+	var objShell = new ActiveXObject("WScript.Shell");
+
+	// Launch the command
+	return objShell.Run(strCmdLine, 1, fWait);
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+function DownloadUNCAsString(strUNC)
+{
+	// Create a helper object
+	var objFSO = new ActiveXObject("Scripting.FileSystemObject");
+
+	// Open a text stream on the specified file
+	var objTS = objFSO.OpenTextFile(strUNC, 1, false, 0);
+
+	// Return the text
+	return objTS.ReadAll();
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+function DownloadUNCToTextFile(strUNC, strDestFile, fOverwrite)
+{
+	// Create a helper object
+	var objFSO = new ActiveXObject("Scripting.FileSystemObject");
+
+	// Just a file copy, really
+	objFSO.CopyFile(strUNC, strDestFile, fOverwrite);
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+function GetXMLWithinWSC(strWSC, strID)
+{
+	// Get the full path to the WSC file
+	var strPath = get_ScriptsDirectory() + "\\" + strWSC;
+
+	// Open the WSC file in a DOM object
+	var objDoc = new ActiveXObject("Microsoft.XMLDOM");
+	if (!objDoc.load(strPath))
+		throw new Error(objDoc.parseError.errorCode, objDoc.parseError.reason);
+
+	// Select the specified <XML> element within the <comment> element
+	return objDoc.selectSingleNode(".//comment/XML[@id='" + strID + "']").firstChild;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Data Members
+
+var m_fDevEnv;
+var m_strScriptsDirectory;
+var m_strModulesDirectory;
+var m_strDocumentationDirectory;
+var m_strRegistryKey;
+var m_strInstalledBuildNum;
+var m_strModelsDirectory;
+
+//
+// End of script block
+/////////////////////////////////////////////////////////////////////////////
+]]>
+</script>
+
+</component>

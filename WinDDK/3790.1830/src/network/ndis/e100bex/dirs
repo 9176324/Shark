@@ -1,0 +1,4 @@
+DIRS= \
+     kd \
+     sys \
+     testwmi

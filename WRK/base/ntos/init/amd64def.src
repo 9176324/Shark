@@ -1,0 +1,82 @@
+//
+// Copyright (c) Microsoft Corporation. All rights reserved. 
+//
+// You may only use this code if you agree to the terms of the Windows Research Kernel Source Code License agreement (see License.txt).
+// If you do not agree to the terms, do not use the code.
+//
+
+    KeExpandKernelStackAndCallout
+
+    KeInvalidateAllCaches
+    KeQueryMultiThreadProcessorSet
+
+    KeQueryPrcbAddress
+
+    KeGetCurrentIrql PRIVATE
+    KeLowerIrql PRIVATE
+    KfRaiseIrql PRIVATE
+    KeRaiseIrqlToDpcLevel PRIVATE
+
+    KeAcquireSpinLockRaiseToDpc
+    KeAcquireSpinLockRaiseToSynch
+    KeReleaseSpinLock
+
+    KeAcquireQueuedSpinLock
+    KeAcquireQueuedSpinLockRaiseToSynch
+    KeReleaseQueuedSpinLock
+    KeTryToAcquireQueuedSpinLock
+    KeTryToAcquireQueuedSpinLockRaiseToSynch
+
+    KeAcquireInStackQueuedSpinLockRaiseToSynch
+
+    KeSaveFloatingPointState PRIVATE
+    KeRestoreFloatingPointState PRIVATE
+
+    InitializeSListHead
+    ExQueryDepthSList
+    ExpInterlockedFlushSList
+    ExpInterlockedPopEntrySList
+    ExpInterlockedPushEntrySList
+
+    ExAllocateFromPagedLookasideList
+    ExFreeToPagedLookasideList
+
+    ExQueryDepthSList
+
+    KeSetProfileIrql
+
+    KeLastBranchMSR CONSTANT            // data - use pointer for access
+    MmLockPageableImageSection=MmLockPageableDataSection
+    MmLockPagableDataSection=MmLockPageableDataSection
+    MmLockPagableImageSection=MmLockPageableDataSection
+    MmHighestUserAddress CONSTANT       // data - use pointer for access
+    MmSystemRangeStart CONSTANT         // data - use pointer for access
+    MmUserProbeAddress CONSTANT         // data - use pointer for access
+
+    KeGetCurrentThread PRIVATE
+
+    RtlCaptureContext
+    RtlCopyMemory = memcpy
+    RtlCopyMemoryNonTemporal
+    RtlPcToFileHeader
+    RtlRestoreContext
+    RtlLookupFunctionEntry
+    RtlVirtualUnwind
+    RtlUnwindEx
+    __C_specific_handler
+    _local_unwind
+
+    __chkstk
+    __misaligned_access
+    _setjmp
+    _setjmpex
+    longjmp
+
+    KiCpuId
+
+    memcmp PRIVATE
+    memcpy PRIVATE
+    memmove PRIVATE
+    memset PRIVATE
+
+

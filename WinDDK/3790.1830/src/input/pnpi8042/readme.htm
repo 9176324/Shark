@@ -1,0 +1,224 @@
+<html xmlns:v="urn:schemas-microsoft-com:vml"
+xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 11">
+<meta name=Originator content="Microsoft Word 11">
+<link rel=File-List href="readme_files/filelist.xml">
+<title>PNPI8042</title>
+<!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:SpellingState>Clean</w:SpellingState>
+  <w:GrammarState>Clean</w:GrammarState>
+  <w:ValidateAgainstSchemas/>
+  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
+  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
+  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+ </w:WordDocument>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:LatentStyles DefLockedState="false" LatentStyleCount="156">
+ </w:LatentStyles>
+</xml><![endif]-->
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Verdana;
+	panose-1:2 11 6 4 3 5 4 4 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:536871559 0 0 0 415 0;}
+@font-face
+	{font-family:"MS Sans Serif";
+	panose-1:0 0 0 0 0 0 0 0 0 0;
+	mso-font-alt:"Times New Roman";
+	mso-font-charset:0;
+	mso-generic-font-family:roman;
+	mso-font-format:other;
+	mso-font-pitch:auto;
+	mso-font-signature:0 0 0 0 0 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0in;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";
+	color:black;}
+h2
+	{color:black;}
+h3
+	{color:black;}
+h4
+	{color:black;}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:purple;
+	text-decoration:underline;
+	text-underline:single;}
+p
+	{font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";
+	color:black;}
+pre
+	{margin-top:0in;
+	margin-bottom:0in;
+	margin-bottom:.0001pt;
+	font-size:10.0pt;
+	font-family:"Courier New";
+	mso-fareast-font-family:"Times New Roman";
+	color:black;}
+span.SpellE
+	{mso-style-name:"";
+	mso-spl-e:yes;}
+span.GramE
+	{mso-style-name:"";
+	mso-gram-e:yes;}
+@page Section1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.25in 1.0in 1.25in;
+	mso-header-margin:.5in;
+	mso-footer-margin:.5in;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Table Normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0in 5.4pt 0in 5.4pt;
+	mso-para-margin:0in;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman";
+	mso-ansi-language:#0400;
+	mso-fareast-language:#0400;
+	mso-bidi-language:#0400;}
+</style>
+<![endif]-->
+<meta name=Template content="C:\PROGRAM FILES\MICROSOFT OFFICE\OFFICE\html.dot">
+<!--[if gte mso 9]><xml>
+ <o:shapedefaults v:ext="edit" spidmax="2050"/>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <o:shapelayout v:ext="edit">
+  <o:idmap v:ext="edit" data="1"/>
+ </o:shapelayout></xml><![endif]-->
+</head>
+
+<body bgcolor=white lang=EN-US link=blue vlink=purple style='tab-interval:.5in'
+leftmargin=8>
+
+<div class=Section1>
+
+<h2><a name=MYSAMPLE><span style='font-family:Verdana'>PNPI8042</span></a><span
+style='font-family:Verdana'> <o:p></o:p></span></h2>
+
+<h3><span style='font-family:Verdana'>SUMMARY<o:p></o:p></span></h3>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>This i8042 (PS/2) device
+driver implements the Windows® 2000-style keyboard and mouse ports. It differs
+from Windows NT® 4.0 in that instead of writing the device object's name to the
+registry and relying on the class driver (either <span class=SpellE>mouclass</span>
+or <span class=SpellE>kbdclass</span>) to load after it and look at these
+names, it is in the same driver stack as the class driver itself. Almost all
+the other interactions with the class driver are the same.<o:p></o:p></span></p>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>The code works on Windows
+2000 or later platforms. This code will not work on previous versions Windows
+NT due to support for Plug and Play, Power, and the new class drivers.<o:p></o:p></span></p>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>The driver supports Plug
+and Play with respect to the Plug and Play IRP. The driver does not perform
+device detection or support hot plugging. As for power, i8042prt supports low
+power states by reinitializing the devices upon resumption to normal power.<o:p></o:p></span></p>
+
+<h3><span style='font-family:Verdana'>BUILDING THE SAMPLE<o:p></o:p></span></h3>
+
+<p><span style='font-size:10.0pt;font-family:Verdana'>This sample builds
+i8042prt.sys. Necessary files include those in this directory and <span
+class=SpellE>Kbdmou.h</span>, Ntdd8042.h, <span class=SpellE>Ntddmou.h</span>, <span
+class=SpellE>Ntddkbd.h</span>, <span class=SpellE>PoClass.h</span>, and <span
+class=SpellE>wmistr.h</span>. Both free and checked builds are available. <b>NOTE:</b>
+<span class=SpellE>Wmilib.sys</span> must be present on the target machine for
+the binary to load properly. KEYBOARD.INF (the <span class=SpellE><span
+class=GramE>inf</span></span> required to load this driver) is a system INF. <o:p></o:p></span></p>
+
+<h3><span style='font-family:Verdana'>CODE TOUR<o:p></o:p></span></h3>
+
+<h4><span style='font-family:Verdana'>File Manifest<o:p></o:p></span></h4>
+
+<pre><u>File<span style='mso-tab-count:3'>                   </span>Description<o:p></o:p></u></pre><pre><o:p>&nbsp;</o:p></pre><pre>Pnpi8042.htm<span
+style='mso-tab-count:2'>           </span>The documentation for this sample (this file).</pre><pre><span
+class=GramE>Sources<span style='mso-tab-count:3'>                </span>The generic file for building this code sample.</span></pre><pre><span
+class=SpellE>Hook.c</span><span style='mso-tab-count:3'>                 </span>Callback functions for upper hook filters</pre><pre>I8042cfg.h<span
+style='mso-tab-count:2'>             </span>Configuration information</pre><pre>I8042cmn.c<span
+style='mso-tab-count:2'>             </span>IOCTL dispatch, DPC completion routines, <span
+class=SpellE>StartIO</span></pre><pre>I8042dep.c<span style='mso-tab-count:
+2'>             </span><span class=SpellE>DriverEntry</span>, Hardware initialization routines</pre><pre>I8042log.mc<span
+style='mso-tab-count:2'>            </span>Definition for i8042prt errors</pre><pre>I8042prt.h<span
+style='mso-tab-count:2'>             </span>Global i8042prt header file</pre><pre>I8042prt.rc<span
+style='mso-tab-count:2'>            </span>Resources</pre><pre>I8042str.c<span
+style='mso-tab-count:2'>             </span>String constants</pre><pre>I8042str.h<span
+style='mso-tab-count:2'>             </span>String constants definitions</pre><pre><span
+class=SpellE>Kbdcmn.c</span><span style='mso-tab-count:2'>               </span>Keyboard packet reporting</pre><pre><span
+class=SpellE>Kbddep.c</span><span style='mso-tab-count:2'>               </span>Keyboard specific initialization</pre><pre><span
+class=SpellE>Kbdpnp.c</span><span style='mso-tab-count:2'>               </span>Keyboard specific PnP routines</pre><pre><span
+class=SpellE>Moucmn.c</span><span style='mso-tab-count:2'>               </span>Mouse <span
+class=SpellE>mapcket</span> reporting</pre><pre><span class=SpellE>Moudep.c</span><span
+style='mso-tab-count:2'>               </span>Mouse-specific initialization</pre><pre><span
+class=SpellE>Moupnp.c</span><span style='mso-tab-count:2'>               </span>Mouse-specific PnP routines</pre><pre><span
+class=SpellE>Pnp.c</span><span style='mso-tab-count:3'>                  </span>Plug and Play and Power dispatch functions</pre><pre><span
+class=SpellE>SysBtn.c</span><span style='mso-tab-count:2'>               </span>System (i.e., power) button support </pre><pre><span
+class=SpellE>Wmi.c</span><span style='mso-tab-count:3'>                  </span>System Control/WMI dispatch</pre><pre><o:p>&nbsp;</o:p></pre><pre><o:p>&nbsp;</o:p></pre>
+
+<p align=center style='text-align:center;tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
+style='font-size:10.0pt;font-family:"Courier New"'><a href="#top"><span
+style='font-family:Verdana'>Top of page</span></a></span><span
+style='font-size:10.0pt;font-family:Verdana;mso-bidi-font-family:"Courier New"'>
+<o:p></o:p></span></p>
+
+<pre><o:p>&nbsp;</o:p></pre>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width=624
+ style='width:6.5in;mso-cellspacing:0in'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes;
+  height:1.5pt'>
+  <td style='background:aqua;padding:.75pt .75pt .75pt .75pt;height:1.5pt'>
+  <p class=MsoNormal><o:p>&nbsp;</o:p></p>
+  </td>
+ </tr>
+</table>
+
+<pre><o:p>&nbsp;</o:p></pre><pre><o:p>&nbsp;</o:p></pre>
+
+<p style='tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
+style='font-size:7.5pt;font-family:"MS Sans Serif";mso-bidi-font-family:"Courier New"'>©
+2004 Microsoft Corporation</span><span style='font-size:10.0pt;font-family:
+Verdana;mso-bidi-font-family:"Courier New"'> <o:p></o:p></span></p>
+
+</div>
+
+</body>
+
+</html>
+

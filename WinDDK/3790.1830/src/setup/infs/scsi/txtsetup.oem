@@ -1,0 +1,83 @@
+
+# 
+# Sample txtsetup.oem file for a SCSI miniport driver.
+#
+# Refer to the DDK documentation for details.
+#
+
+#
+# Comments...
+#
+
+[Disks]
+
+#
+# diskN = "description", tagfile, directory
+#
+
+d1 = "OEM DISK (SCSI)", \disk1, \
+
+[Defaults]
+
+#
+# component = ID
+#
+
+scsi = OEMSCSI
+
+[scsi]
+
+#
+# ID = "description"
+#
+
+OEMSCSI = "Acme Corporation PCI Device"
+
+[Files.scsi.OEMSCSI]
+
+#
+# filetype = diskN, filename[, DriverKey]
+#
+
+driver = d1, oemscsi.sys, OemScsi
+inf    = d1, oemsetup.inf
+catalog= d1, oemscsi.cat
+
+[Config.OEMSCSI]
+
+#
+# value = subkey_name, value_name, value_type, value
+#
+
+#
+# Add registry value:
+#
+#  HKLM\System\CurrentControlSet\OemScsi\Parameters\PnPInterface\5
+#
+# with value of 1. "5" is the registry subkey name with a value of 1.
+#
+# The subkey name should be 5 for PCIBus, 1 for ISA, 2 for EISA, and 
+# 8 for PCMCIABus.  See the SCSI miniport DDK documentation for details
+# on this registry key.
+#
+
+#
+# The value of the subkey should be 1 for PnP enabled or 0 for disabled.
+# 
+
+value = Parameters\PnpInterface, 5 ,REG_DWORD, 1
+
+
+[HardwareIds.scsi.OEMSCSI]
+
+# 
+# id = "deviceID", "service"
+#
+
+#
+# Vendor 9004 = Acme PCI Vendor ID
+# Device 8111 = Acme PCI Device ID
+#
+
+# PnP ID must match the associated driver                              
+id = "PCI\VEN_9004&DEV_8111", "OemScsi"

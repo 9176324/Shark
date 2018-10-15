@@ -1,0 +1,4 @@
+LIBRARY        WMARKUI
+EXPORTS        DllGetClassObject   PRIVATE
+               DllCanUnloadNow     PRIVATE
+

@@ -1,0 +1,78 @@
+;/*++
+;
+;Copyright (c) 1990-1999 Microsoft Corporation All rights Reserved
+;
+;Module Name:
+;
+;    BUS.INF
+;
+;Abstract:
+;    INF file for installing toaster bus enumerator driver
+;
+;--*/
+[Version]
+Signature="$WINDOWS NT$"
+Class=System
+ClassGuid={4D36E97D-E325-11CE-BFC1-08002BE10318}
+Provider=%MSFT%
+DriverVer=12/10/2004,2.0.1403.0
+CatalogFile=toaster.cat
+
+[DestinationDirs]
+DefaultDestDir = 12
+
+[SourceDisksNames]
+1 = %DiskId1%,,,""
+
+[SourceDisksFiles]
+busenum.sys  = 1,,
+
+;*****************************************
+; ToasterBus  Install Section
+;*****************************************
+
+[Manufacturer]
+%StdMfg%=Standard,NTamd64
+
+[Standard.NTamd64]
+;
+; These are the toaster bus pnp ids
+;
+
+%ToasterBus.DeviceDesc%=ToasterBus_Device, root\busenum
+
+[ToasterBus_Device.NT]
+CopyFiles=Drivers_Dir
+
+[ToasterBus_Device.NT.HW]
+AddReg=ToasterBus_Device.NT.AddReg
+
+[ToasterBus_Device.NT.AddReg]                            
+HKR,,DeviceCharacteristics,0x10001,0x0100         ; Use same security checks on relative opens
+HKR,,Security,,"D:P(A;;GA;;;BA)(A;;GA;;;SY)"      ; Allow generic-all access to Built-in administrators and Local system 
+
+[Drivers_Dir]
+busenum.sys
+
+
+;-------------- Service installation
+[ToasterBus_Device.NT.Services]
+AddService = busenum,%SPSVCINST_ASSOCSERVICE%, busenum_Service_Inst
+
+; -------------- busenum driver install sections
+[busenum_Service_Inst]
+DisplayName    = %busenum.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START 
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\busenum.sys
+LoadOrderGroup = Extended Base
+
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+MSFT = "Microsoft"
+StdMfg = "(Standard system devices)"
+DiskId1 = "Toaster Bus Installation Disk #1"
+ToasterBus.DeviceDesc = "Toaster Bus Enumerator"
+busenum.SVCDESC = "Toaster Bus Enumerator"

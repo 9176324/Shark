@@ -1,0 +1,120 @@
+
+
+ARCH=X86
+archdir=i386
+targarch=WIN32
+
+ROOT=C:\PROBERT\WORK\ProjectOZ
+
+cincs=/I$(WRK)\crt /I$(WRK) /I..\Include
+cdefs=/D_$(targarch) /D_$(ARCH)_ /D$(ARCH) /D_WIN32_WINNT=0x0600 /DWINVER=0x0600 /DWIN32_LEAN_AND_MEAN=1
+copts=/Zl /Zp8 /Gy  /W3 /WX       /WX /EHs-c-  /GR- /GF /GS /Od  /GL /Zi
+ignorance=4010,4037,4039,4065,4070,4078,4087,4089,4221,4198,4108,4088,4218,4235 /WX
+warnopts= /IGNORE:$(ignorance) /WX
+
+CFLAGS= $(cdefs) $(cincs) $(copts) $(warnopts)
+
+lib=/LIBPATH:$(LIB) libcmt.lib kernel32.lib ntdll.lib bufferoverflowU.lib
+lopts=/DEBUG /incremental:no /IGNORE:$(ignorance) /WX /nodefaultlib /machine:$(ARCH) /ltcg 
+
+CC=cl.exe /nologo
+MASM=ml.exe /nologo /X /Cp /Cx /Sn /Zi /Zf /Fl /I..\Include
+
+bootstrapbase=0x71000000
+bootstrapentry=bootspacecpu
+
+MASMLINK=/DEBUG /FIXED /MAP /nodefaultlib /machine:$(ARCH) /SUBSYSTEM:NATIVE /BASE:$(bootstrapbase) /ENTRY:$(bootstrapentry)
+
+bootcopts=/Zp8 /Gy /W3 /WX /EHs-c- /GR- /GF- /Od /GL- /GS- /Zi
+
+default: makeDEVICES Bootstrap.exe SPACE.exe
+
+Bootstrap.exe: Bootstrap.asm SystemLib.obj
+	@$(MASM) Bootstrap.asm /link $(MASMLINK) SystemLib.obj
+
+SystemLib.c: ..\Include\SystemLib.h
+Bootstrap.asm: ..\Include\TrapValues.inc
+
+DEVICEOBJS=Devices.obj
+SPACEOBJS=SPACE.obj LoadKernel.obj Memory.obj CPU.obj Trap.obj Portal.obj Emulation.obj IO.obj Interrupt.obj Util.obj Processor.obj Debug.obj
+
+makeDEVICES:
+	cd DEVICES && $(MAKE) /$(MAKEFLAGS)
+
+SPACE.exe: $(SPACEOBJS) BasicOZ.exe
+	@echo Linking SPACE.exe ...
+	$(CC) $(CFLAGS) $(SPACEOBJS) $(DEVICEOBJS) /FdSPACE.pdb /FeSPACE.exe /FmSPACE.map /link $(lib) $(lopts) 
+
+BasicOZ.exe:  ..\BASICOZ\BasicOZ.exe
+	@echo copying kernel...
+	-@xcopy /d /Y ..\BasicOZ\BasicOZ.exe .
+
+SystemLib.obj: SystemLib.c
+	@$(CC) $(cdefs) $(cincs) $(bootcopts) /c $?
+
+.c.obj:
+	@$(CC) $(CFLAGS) /c $?
+
+.c.i:
+	@$(CC) $(CFLAGS) /P $?
+
+SPACE.c:		Defs.h
+LoadKernel.c: 	Defs.h
+Memory.c:		Defs.h
+CPU.c:			Defs.h
+Trap.c:			Defs.h
+Portal.c:		Defs.h
+Emulation.c:	Defs.h
+IO.c:			Defs.h
+Interrupt.c:	Defs.h
+Util.c:			Defs.h
+Processor.c:	Defs.h
+Debug.c:		Defs.h
+
+Devices.c:		Devices.h ..\Include\DeviceDefs.h Debug.h
+
+Defs.h:			Config.h Defs-crt.h TrapValues.h Debug.h Devices.h ..\Include\DeviceDefs.h ..\Include\SpaceOps.h makefile
+
+clean:
+	@if exist SPACE.suo  attrib -h SPACE.suo
+	@del *.pdb *.map *.exe *.obj *.lst mllink*.lnk  *.i "*~" foo-* SPACE.sln SPACE.suo
+	
+
+ARCH=X86
+archdir=i386
+targarch=WIN32
+
+ROOT=C:\PROBERT\WORK\ProjectOZ
+LIB=$(ROOT)-Version0\davepr30\LIB\$(archdir)
+WRK=C:\PROBERT\WORK\Asia-January2006\FROM-ARKADYR\WRK\WRK-v1.0\public\sdk\inc
+
+cincs=/I$(WRK)\crt /I$(WRK) /I.. /I..\..\Include
+cdefs=/D_$(targarch) /D_$(ARCH)_ /D$(ARCH) /D_WIN32_WINNT=0x0600 /DWINVER=0x0600 /DWIN32_LEAN_AND_MEAN=1
+copts=/Zp8 /Gy /W3 /WX /EHs-c- /GR- /GF- /Zi /Od /GL- /GS-
+ignorance=
+
+CC=cl.exe /nologo
+CFLAGS= $(cdefs) $(cincs) $(copts)
+
+default: ConsoleDevice.obj SimpleFileDevice.obj TimerDevice.obj
+
+.c.obj:
+	@$(CC) $(CFLAGS) /c $?
+
+.c.i:
+	@$(CC) $(CFLAGS) /P $?
+
+ConsoleDevice.c:		..\Devices.h ..\..\Include\DeviceDefs.h ..\Debug.h
+SimpleFileDevice.c:		..\Devices.h ..\..\Include\DeviceDefs.h ..\Debug.h
+TimerDevice.c:			..\Devices.h ..\..\Include\DeviceDefs.h ..\Debug.h
+
+clean:
+	@if exist SPACE.suo  attrib -h SPACE.suo
+	@del *.pdb *.map *.exe *.obj *.lst mllink*.lnk  *.i "*~" foo-* SPACE.sln SPACE.suo
+	
+
+
+clean:
+	@del *.pdb *.map *.exe *.obj *.lst mllink*.lnk  "*~" foo-*
+
+

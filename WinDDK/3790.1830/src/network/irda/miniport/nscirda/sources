@@ -1,0 +1,39 @@
+TARGETNAME=nscirda
+TARGETPATH=obj
+TARGETTYPE=DRIVER
+
+C_DEFINES=$(C_DEFINES) -DNDIS_MINIPORT_DRIVER -DNDIS50_MINIPORT -DIRDA -DNDIS_WDM=1
+DRIVER_ALIGNMENT=0x200
+
+TARGETLIBS=$(DDK_LIB_PATH)\ndis.lib
+
+RUN_WPP=$(SOURCES) -km \
+    -func:LOG_ERROR{LEVEL=DBG_LOG_ERROR}(MSG,...) \
+    -func:LOG{LEVEL=DBG_LOG_INFO}(MSG,...) \
+    -func:LOG_INFO{LEVEL=DBG_LOG_INFO}(MSG,...) \
+    -func:LOG_FIR{LEVEL=DBG_LOG_FIR}(MSG,...) \
+    -func:LOG_SIR{LEVEL=DBG_LOG_SIR}(MSG,...) \
+
+INCLUDES= $(BASE_INC_PATH)
+
+SOURCES=\
+    irql.c \
+    dmautil.c \
+    comm.c \
+    convert.c  \
+    dongle.c \
+    fcs.c \
+    init.c \
+    nsc.c \
+    nscfir.c \
+    nscirda.rc \
+    request.c \
+    resource.c \
+    settings.c \
+    sync.c
+
+
+#PRECOMPILED_INCLUDE=nsc.h
+#PRECOMPILED_PCH=nsc.pch
+#PRECOMPILED_OBJ=nsc.obj
+
