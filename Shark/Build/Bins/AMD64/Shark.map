@@ -1,14 +1,14 @@
  Shark
 
- Timestamp is 5bc49a9e (Mon Oct 15 21:48:14 2018)
+ Timestamp is 5bc9a34a (Fri Oct 19 17:26:34 2018)
 
  Preferred load address is 0000000000400000
 
  Start         Length     Name                   Class
- 0001:00000000 000072f6H .text                   CODE
- 0001:00007300 0000037eH .text$00                CODE
- 0001:00007680 00000eefH .text$mn                CODE
- 0001:00008570 000015e7H .text$s                 CODE
+ 0001:00000000 00007826H .text                   CODE
+ 0001:00007830 0000037eH .text$00                CODE
+ 0001:00007bb0 00000eefH .text$mn                CODE
+ 0001:00008aa0 00001607H .text$s                 CODE
  0002:00000000 00000059H INIT                    CODE
  0003:00000000 000001f0H .idata$5                DATA
  0003:00000200 000023b0H .rdata                  DATA
@@ -37,363 +37,365 @@
  0001:000001c0       MiGetVirtualAddressMappedByPte 00000000004011c0 f   PatchGuardAMD64.obj
  0001:00000230       GetKeyOffset               0000000000401230 f   PatchGuardAMD64.obj
  0001:00000330       InitializePatchGuardBlock  0000000000401330 f   PatchGuardAMD64.obj
- 0001:000021a0       SetNewEntryForEncryptedContext 00000000004031a0 f   PatchGuardAMD64.obj
- 0001:000024c0       CompareEncryptedContextFields 00000000004034c0 f   PatchGuardAMD64.obj
- 0001:000027e0       ClearPagesEncryptedContext 00000000004037e0 f   PatchGuardAMD64.obj
- 0001:00002a90       ClearPoolEncryptedContext  0000000000403a90 f   PatchGuardAMD64.obj
- 0001:00002c40       GetVirtualAddressRegion    0000000000403c40 f   PatchGuardAMD64.obj
- 0001:00002e10       CheckWorkerThread          0000000000403e10 f   PatchGuardAMD64.obj
- 0001:00003110       CheckAllWorkerThread       0000000000404110 f   PatchGuardAMD64.obj
- 0001:00003450       ULongToPtr                 0000000000404450 f i PatchGuardAMD64.obj
- 0001:00003460       ClearPatchGuardWorker      0000000000404460 f   PatchGuardAMD64.obj
- 0001:000034b0       DisablePatchGuard          00000000004044b0 f   PatchGuardAMD64.obj
- 0001:00003970       WalkFrameChain             0000000000404970 f   StackAMD64.obj
- 0001:00003b40       DriverEntry                0000000000404b40 f   Shark.obj
- 0001:00003d30       DriverUnload               0000000000404d30 f   Shark.obj
- 0001:00003d90       DeviceCreate               0000000000404d90 f   Shark.obj
- 0001:00003de0       DeviceClose                0000000000404de0 f   Shark.obj
- 0001:00003e30       DeviceWrite                0000000000404e30 f   Shark.obj
- 0001:00003e80       DeviceRead                 0000000000404e80 f   Shark.obj
- 0001:00003ed0       DeviceControl              0000000000404ed0 f   Shark.obj
- 0001:00003fa0       RemoteDispatcher           0000000000404fa0 f   Ctx.obj
- 0001:00004020       RemoteCall                 0000000000405020 f   Ctx.obj
- 0001:000042b0       KeGetCurrentThread         00000000004052b0 f i Ctx.obj
- 0001:000042c0       EncodeSystemPointer32      00000000004052c0 f   Except.obj
- 0001:00004370       DecodeSystemPointer32      0000000000405370 f   Except.obj
- 0001:00004420       CaptureImageExceptionValues 0000000000405420 f   Except.obj
- 0001:000045e0       LongToPtr                  00000000004055e0 f i Except.obj
- 0001:000045f0       DetourGetInstructionLength 00000000004055f0 f   Jump.obj
- 0001:00004690       BuildJumpCode32            0000000000405690 f   Jump.obj
- 0001:000047c0       BuildJumpCode64            00000000004057c0 f   Jump.obj
- 0001:000048f0       BuildJumpCode              00000000004058f0 f   Jump.obj
- 0001:00004a20       ProbeAndLockPages          0000000000405a20 f   Lock.obj
- 0001:00004c80       UnlockPages                0000000000405c80 f   Lock.obj
- 0001:00004cf0       InitializeLoadedModuleList 0000000000405cf0 f   KernelReload.obj
- 0001:00004ed0       InitializeListHead         0000000000405ed0 f i KernelReload.obj
- 0001:00004f00       InsertTailList             0000000000405f00 f i KernelReload.obj
- 0001:00004f60       FindEntryForPrivateSystemImage 0000000000405f60 f   KernelReload.obj
- 0001:00005020       FindEntryForSystemImage    0000000000406020 f   KernelReload.obj
- 0001:000050c0       FindEntryForPrivateSystemImageAddress 00000000004060c0 f   KernelReload.obj
- 0001:00005190       FindEntryForSystemImageAddress 0000000000406190 f   KernelReload.obj
- 0001:00005240       GetPlatform                0000000000406240 f   KernelReload.obj
- 0001:00005290       GetAddressOfEntryPoint     0000000000406290 f   KernelReload.obj
- 0001:00005330       GetTimeStamp               0000000000406330 f   KernelReload.obj
- 0001:00005380       GetSubsystem               0000000000406380 f   KernelReload.obj
- 0001:00005400       GetSizeOfImage             0000000000406400 f   KernelReload.obj
- 0001:00005480       SectionTableFromVirtualAddress 0000000000406480 f   KernelReload.obj
- 0001:000055f0       GetForwarder               00000000004065f0 f   KernelReload.obj
- 0001:00005820       GetProcedureAddress        0000000000406820 f   KernelReload.obj
- 0001:00005a10       RelocationBlock            0000000000406a10 f   KernelReload.obj
- 0001:00005c00       RelocateImage              0000000000406c00 f   KernelReload.obj
- 0001:00005cd0       GetRelocCount              0000000000406cd0 f i KernelReload.obj
- 0001:00005d00       DereferenceKernelImage     0000000000406d00 f   KernelReload.obj
- 0001:00005dc0       DereferenceKernelImports   0000000000406dc0 f   KernelReload.obj
- 0001:00005e50       ReferenceKernelImage       0000000000406e50 f   KernelReload.obj
- 0001:00005f30       SnapThunk                  0000000000406f30 f   KernelReload.obj
- 0001:00006160       AllocateImage              0000000000407160 f   KernelReload.obj
- 0001:00006210       MapImageNtSection          0000000000407210 f   KernelReload.obj
- 0001:000063d0       LoadPrivateSystemImage     00000000004073d0 f   KernelReload.obj
- 0001:000065d0       UnloadPrivateSystemImage   00000000004075d0 f   KernelReload.obj
- 0001:00006640       RemoveEntryList            0000000000407640 f i KernelReload.obj
- 0001:000066a0       TrimBytes                  00000000004076a0 f   Scan.obj
- 0001:00006af0       CompareBytes               0000000000407af0 f   Scan.obj
- 0001:00006bc0       ScanBytes                  0000000000407bc0 f   Scan.obj
- 0001:00006d18       DbgPrint                   0000000000407d18 f   ntoskrnl:ntoskrnl.exe
- 0001:00006d30       memmove                    0000000000407d30     ntoskrnl:memcpy.obj
- 0001:00006d30       memcpy                     0000000000407d30 f   ntoskrnl:memcpy.obj
- 0001:00007064       RtlImageNtHeader           0000000000408064 f   ntoskrnl:ntoskrnl.exe
- 0001:0000706a       ZwClose                    000000000040806a f   ntoskrnl:ntoskrnl.exe
- 0001:00007070       ZwUnmapViewOfSection       0000000000408070 f   ntoskrnl:ntoskrnl.exe
- 0001:00007076       RtlLookupFunctionEntry     0000000000408076 f   ntoskrnl:ntoskrnl.exe
- 0001:0000707c       ZwMapViewOfSection         000000000040807c f   ntoskrnl:ntoskrnl.exe
- 0001:00007082       ZwCreateSection            0000000000408082 f   ntoskrnl:ntoskrnl.exe
- 0001:00007088       ZwOpenFile                 0000000000408088 f   ntoskrnl:ntoskrnl.exe
- 0001:0000708e       RtlInitUnicodeString       000000000040808e f   ntoskrnl:ntoskrnl.exe
- 0001:00007094       PsGetVersion               0000000000408094 f   ntoskrnl:ntoskrnl.exe
- 0001:0000709a       MmIsAddressValid           000000000040809a f   ntoskrnl:ntoskrnl.exe
- 0001:000070a0       ExFreePoolWithTag          00000000004080a0 f   ntoskrnl:ntoskrnl.exe
- 0001:000070a6       IoGetInitialStack          00000000004080a6 f   ntoskrnl:ntoskrnl.exe
- 0001:000070ac       IoGetStackLimits           00000000004080ac f   ntoskrnl:ntoskrnl.exe
- 0001:000070b2       ExAllocatePool             00000000004080b2 f   ntoskrnl:ntoskrnl.exe
- 0001:000070b8       PsGetCurrentThreadId       00000000004080b8 f   ntoskrnl:ntoskrnl.exe
- 0001:000070be       PsGetCurrentProcessId      00000000004080be f   ntoskrnl:ntoskrnl.exe
- 0001:000070c4       ZwQuerySystemInformation   00000000004080c4 f   ntoskrnl:ntoskrnl.exe
- 0001:000070e0       memset                     00000000004080e0 f   ntoskrnl:memset.obj
- 0001:000071ca       KeSetEvent                 00000000004081ca f   ntoskrnl:ntoskrnl.exe
- 0001:000071d0       KeWaitForSingleObject      00000000004081d0 f   ntoskrnl:ntoskrnl.exe
- 0001:000071d6       ExQueueWorkItem            00000000004081d6 f   ntoskrnl:ntoskrnl.exe
- 0001:000071dc       KeInitializeEvent          00000000004081dc f   ntoskrnl:ntoskrnl.exe
- 0001:000071e2       __C_specific_handler       00000000004081e2 f   ntoskrnl:ntoskrnl.exe
- 0001:000071e8       RtlVirtualUnwind           00000000004081e8 f   ntoskrnl:ntoskrnl.exe
- 0001:000071ee       RtlCaptureContext          00000000004081ee f   ntoskrnl:ntoskrnl.exe
- 0001:000071f4       IoDeleteDevice             00000000004081f4 f   ntoskrnl:ntoskrnl.exe
- 0001:000071fa       IoCreateSymbolicLink       00000000004081fa f   ntoskrnl:ntoskrnl.exe
- 0001:00007200       IoCreateDevice             0000000000408200 f   ntoskrnl:ntoskrnl.exe
- 0001:00007206       IoDeleteSymbolicLink       0000000000408206 f   ntoskrnl:ntoskrnl.exe
- 0001:0000720c       IofCompleteRequest         000000000040820c f   ntoskrnl:ntoskrnl.exe
- 0001:00007212       ObfDereferenceObject       0000000000408212 f   ntoskrnl:ntoskrnl.exe
- 0001:00007218       KeInsertQueueApc           0000000000408218 f   ntoskrnl:ntoskrnl.exe
- 0001:0000721e       KeInitializeApc            000000000040821e f   ntoskrnl:ntoskrnl.exe
- 0001:00007224       PsLookupThreadByThreadId   0000000000408224 f   ntoskrnl:ntoskrnl.exe
- 0001:0000722a       RtlImageDirectoryEntryToData 000000000040822a f   ntoskrnl:ntoskrnl.exe
- 0001:00007230       MmMapLockedPagesSpecifyCache 0000000000408230 f   ntoskrnl:ntoskrnl.exe
- 0001:00007236       IoFreeMdl                  0000000000408236 f   ntoskrnl:ntoskrnl.exe
- 0001:0000723c       MmProbeAndLockPages        000000000040823c f   ntoskrnl:ntoskrnl.exe
- 0001:00007242       IoAllocateMdl              0000000000408242 f   ntoskrnl:ntoskrnl.exe
- 0001:00007248       MmUnlockPages              0000000000408248 f   ntoskrnl:ntoskrnl.exe
- 0001:0000724e       RtlAssert                  000000000040824e f   ntoskrnl:ntoskrnl.exe
- 0001:00007254       RtlEqualUnicodeString      0000000000408254 f   ntoskrnl:ntoskrnl.exe
- 0001:0000725a       ObReferenceObjectByName    000000000040825a f   ntoskrnl:ntoskrnl.exe
- 0001:00007260       RtlCharToInteger           0000000000408260 f   ntoskrnl:ntoskrnl.exe
- 0001:00007266       RtlFreeUnicodeString       0000000000408266 f   ntoskrnl:ntoskrnl.exe
- 0001:0000726c       RtlAnsiStringToUnicodeString 000000000040826c f   ntoskrnl:ntoskrnl.exe
- 0001:00007272       RtlInitAnsiString          0000000000408272 f   ntoskrnl:ntoskrnl.exe
- 0001:00007278       strchr                     0000000000408278 f   ntoskrnl:ntoskrnl.exe
- 0001:0000727e       _stricmp                   000000000040827e f   ntoskrnl:ntoskrnl.exe
- 0001:00007284       MmAllocateContiguousMemory 0000000000408284 f   ntoskrnl:ntoskrnl.exe
- 0001:0000728a       wcslen                     000000000040828a f   ntoskrnl:ntoskrnl.exe
- 0001:00007290       wcscat                     0000000000408290 f   ntoskrnl:ntoskrnl.exe
- 0001:00007296       wcscpy                     0000000000408296 f   ntoskrnl:ntoskrnl.exe
- 0001:0000729c       wcsrchr                    000000000040829c f   ntoskrnl:ntoskrnl.exe
- 0001:000072a2       MmFreeContiguousMemory     00000000004082a2 f   ntoskrnl:ntoskrnl.exe
- 0001:000072a8       isxdigit                   00000000004082a8 f   ntoskrnl:ntoskrnl.exe
- 0001:000072ae       strlen                     00000000004082ae f   ntoskrnl:ntoskrnl.exe
- 0001:000072b4       RtlCompareMemory           00000000004082b4 f   ntoskrnl:ntoskrnl.exe
- 0001:000072c0       __report_gsfailure         00000000004082c0 f   bufferoverflowk:gs_support.obj
- 0001:000072f0       KeBugCheckEx               00000000004082f0 f   ntoskrnl:ntoskrnl.exe
- 0001:00007310       _CmpByte                   0000000000408310 f   CmpAMD64.obj
- 0001:00007320       _CmpShort                  0000000000408320 f   CmpAMD64.obj
- 0001:00007330       _CmpLong                   0000000000408330 f   CmpAMD64.obj
- 0001:00007340       _CmpLongLong               0000000000408340 f   CmpAMD64.obj
- 0001:00007360       _btc64                     0000000000408360 f   PatchGuardInlineAMD64.obj
- 0001:00007370       _MakePgFire                0000000000408370 f   PatchGuardInlineAMD64.obj
- 0001:000073a0       _ClearEncryptedContext     00000000004083a0 f   PatchGuardInlineAMD64.obj
- 0001:000073e0       _RevertWorkerToSelf        00000000004083e0 f   PatchGuardInlineAMD64.obj
- 0001:00007440       _CheckPatchGuardCode       0000000000408440 f   PatchGuardInlineAMD64.obj
- 0001:00007490       _GuardCall                 0000000000408490 f   PatchGuardInlineAMD64.obj
- 0001:00007660       __security_check_cookie    0000000000408660 f   bufferoverflowk:amdsecgs.obj
- 0001:00007680       DetourCopyInstruction      0000000000408680 f   disasm.obj
- 0001:00007700       ??0CDetourDis@@QEAA@PEAPEAEPEAJ@Z 0000000000408700 f   disasm.obj
- 0001:000077d0       ?CopyInstruction@CDetourDis@@QEAAPEAEPEAE0@Z 00000000004087d0 f   disasm.obj
- 0001:00007860       ?SanityCheckSystem@CDetourDis@@SAHXZ 0000000000408860 f   disasm.obj
- 0001:00007950       ?CopyBytes@CDetourDis@@IEAAPEAEPEBUCOPYENTRY@1@PEAE1@Z 0000000000408950 f   disasm.obj
- 0001:00007c80       ?CopyBytesPrefix@CDetourDis@@IEAAPEAEPEBUCOPYENTRY@1@PEAE1@Z 0000000000408c80 f   disasm.obj
- 0001:00007d10       ?CopyBytesRax@CDetourDis@@IEAAPEAEPEBUCOPYENTRY@1@PEAE1@Z 0000000000408d10 f   disasm.obj
- 0001:00007dc0       ?CopyBytesJump@CDetourDis@@IEAAPEAEPEBUCOPYENTRY@1@PEAE1@Z 0000000000408dc0 f   disasm.obj
- 0001:00007f60       ?Invalid@CDetourDis@@IEAAPEAEPEBUCOPYENTRY@1@PEAE1@Z 0000000000408f60 f   disasm.obj
- 0001:00007f90       ?AdjustTarget@CDetourDis@@IEAAPEAEPEAE0JJJ@Z 0000000000408f90 f   disasm.obj
- 0001:00008150       ?Copy0F@CDetourDis@@IEAAPEAEPEBUCOPYENTRY@1@PEAE1@Z 0000000000409150 f   disasm.obj
- 0001:000081e0       ?Copy66@CDetourDis@@IEAAPEAEPEBUCOPYENTRY@1@PEAE1@Z 00000000004091e0 f   disasm.obj
- 0001:00008230       ?Copy67@CDetourDis@@IEAAPEAEPEBUCOPYENTRY@1@PEAE1@Z 0000000000409230 f   disasm.obj
- 0001:00008280       ?CopyF6@CDetourDis@@IEAAPEAEPEBUCOPYENTRY@1@PEAE1@Z 0000000000409280 f   disasm.obj
- 0001:00008320       ?CopyF7@CDetourDis@@IEAAPEAEPEBUCOPYENTRY@1@PEAE1@Z 0000000000409320 f   disasm.obj
- 0001:000083c0       ?CopyFF@CDetourDis@@IEAAPEAEPEBUCOPYENTRY@1@PEAE1@Z 00000000004093c0 f   disasm.obj
- 0001:000084f0       __GSHandlerCheck           00000000004094f0 f   gshandler.obj
- 0001:00008510       __GSHandlerCheckCommon     0000000000409510 f   gshandler.obj
- 0001:00008570       ??_C@_0DG@EKEKEHKN@?4text?$CFs?$CI?$CFd?$CJ?3?5Soft?5assertion?5fail@ 0000000000409570     PatchGuardAMD64.obj
- 0001:000085b0       ??_C@_0BN@DJGBAOFG@?4textAMD64?2PatchGuardAMD64?4c?$AA@ 00000000004095b0     PatchGuardAMD64.obj
- 0001:000085d0       ??_C@_0BF@GFBKFCGE@?4textNULL?5?$CB?$DN?5PxeBase?$AA@ 00000000004095d0     PatchGuardAMD64.obj
- 0001:000085e0       ??_C@_0BF@FGPFBMAD@?4textNULL?5?$CB?$DN?5PpeBase?$AA@ 00000000004095e0     PatchGuardAMD64.obj
- 0001:000085f0       ??_C@_0BF@MFGEKENO@?4textNULL?5?$CB?$DN?5PdeBase?$AA@ 00000000004095f0     PatchGuardAMD64.obj
- 0001:00008600       ??_C@_0BF@KCLKDIBA@?4textNULL?5?$CB?$DN?5PteBase?$AA@ 0000000000409600     PatchGuardAMD64.obj
- 0001:00008610       ??_C@_0DJ@JPHJKELN@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409610     PatchGuardAMD64.obj
- 0001:00008650       ??_C@_0BA@DGECJDLH@?4textExFreePool?$AA@ 0000000000409650     PatchGuardAMD64.obj
- 0001:00008660       ??_C@_0DO@MFOFLLCN@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409660     PatchGuardAMD64.obj
- 0001:000086a0       ??_C@_0BF@EGPKCEME@?4textExQueueWorkItem?$AA@ 00000000004096a0     PatchGuardAMD64.obj
- 0001:000086b0       ??_C@_0EA@IOLFICJC@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 00000000004096b0     PatchGuardAMD64.obj
- 0001:000086f0       ??_C@_0BH@DAKAAOPK@?4textRtlRestoreContext?$AA@ 00000000004096f0     PatchGuardAMD64.obj
- 0001:00008710       ??_C@_0DP@IGGJGOIE@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409710     PatchGuardAMD64.obj
- 0001:00008750       ??_C@_0BG@PJCMBGOE@?4textRtlCompareMemory?$AA@ 0000000000409750     PatchGuardAMD64.obj
- 0001:00008770       ??_C@_0DH@HADJLDCM@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409770     PatchGuardAMD64.obj
- 0001:000087b0       ??_C@_0O@MGENOOJB@?4textDbgPrint?$AA@ 00000000004097b0     PatchGuardAMD64.obj
- 0001:000087c0       ??_C@_0EG@PLGFHINJ@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 00000000004097c0     PatchGuardAMD64.obj
- 0001:00008810       ??_C@_0BN@BNKLPBHK@?4textExReleaseSpinLockShared?$AA@ 0000000000409810     PatchGuardAMD64.obj
- 0001:00008830       ??_C@_0EG@BLADABNG@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409830     PatchGuardAMD64.obj
- 0001:00008880       ??_C@_0BN@KODLOAHA@?4textExAcquireSpinLockShared?$AA@ 0000000000409880     PatchGuardAMD64.obj
- 0001:000088a0       ??_C@_0EA@OKPGPIKK@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 00000000004098a0     PatchGuardAMD64.obj
- 0001:000088e0       ??_C@_0BH@BIHCPGOD@?4textIoGetInitialStack?$AA@ 00000000004098e0     PatchGuardAMD64.obj
- 0001:00008900       ??_C@_0EB@DOEACDCP@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409900     PatchGuardAMD64.obj
- 0001:00008940       ??_C@_0BI@OHIDMMON@?4textMmSystemRangeStart?$AA@ 0000000000409940     PatchGuardAMD64.obj
- 0001:00008960       ??_C@_0ED@MJELOBEJ@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409960     PatchGuardAMD64.obj
- 0001:000089a0       ??_C@_0BK@HIGODKHI@?4textMmHighestUserAddress?$AA@ 00000000004099a0     PatchGuardAMD64.obj
- 0001:000089c0       ??_C@_0EL@KAHCMAMC@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 00000000004099c0     PatchGuardAMD64.obj
- 0001:00008a10       ??_C@_0EK@OKFHAJJE@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409a10     PatchGuardAMD64.obj
- 0001:00008a60       ??_C@_0BO@PLBPMKEP@?4textMmAllocateMappingAddress?$AA@ 0000000000409a60     PatchGuardAMD64.obj
- 0001:00008a80       ??_C@_0EE@GIDIPBDL@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409a80     PatchGuardAMD64.obj
- 0001:00008ac0       ??_C@_0ED@HCKDIKHE@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409ac0     PatchGuardAMD64.obj
- 0001:00008b00       ??_C@_0DP@BDOAIIDB@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409b00     PatchGuardAMD64.obj
- 0001:00008b40       ??_C@_0EC@EKEBDCAK@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409b40     PatchGuardAMD64.obj
- 0001:00008b80       ??_C@_0DF@JAFKMCFJ@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409b80     PatchGuardAMD64.obj
- 0001:00008bb0       ??_C@_0DG@NDEJCHAM@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409bb0     PatchGuardAMD64.obj
- 0001:00008bf0       ??_C@_0DF@KDLFIMDO@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409bf0     PatchGuardAMD64.obj
- 0001:00008c20       ??_C@_0DG@KMDMLJ@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409c20     PatchGuardAMD64.obj
- 0001:00008c60       ??_C@_0DF@DACEDEOD@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409c60     PatchGuardAMD64.obj
- 0001:00008c90       ??_C@_0DG@PIFNADGI@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409c90     PatchGuardAMD64.obj
- 0001:00008cd0       ??_C@_0DF@FHPKKICN@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409cd0     PatchGuardAMD64.obj
- 0001:00008d00       ??_C@_0DG@IEOGDCED@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409d00     PatchGuardAMD64.obj
- 0001:00008d40       ??_C@_0EF@OLNHNNHC@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409d40     PatchGuardAMD64.obj
- 0001:00008d80       ??_C@_0EC@IIAEGNJF@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409d80     PatchGuardAMD64.obj
- 0001:00008dc0       ??_C@_0DO@DOMHGACK@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409dc0     PatchGuardAMD64.obj
- 0001:00008e00       ??_C@_0DP@MIHFMKFO@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409e00     PatchGuardAMD64.obj
- 0001:00008e40       ??_C@_0DP@HAMJKNDL@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409e40     PatchGuardAMD64.obj
- 0001:00008e80       ??_C@_0DP@GCHMACNF@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409e80     PatchGuardAMD64.obj
- 0001:00008ec0       ??_C@_0DP@NKMAGFLA@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409ec0     PatchGuardAMD64.obj
- 0001:00008f00       ??_C@_0DP@HAPGBPLE@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409f00     PatchGuardAMD64.obj
- 0001:00008f40       ??_C@_0ED@CFFKLBJE@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409f40     PatchGuardAMD64.obj
- 0001:00008f80       ??_C@_0EI@GDFEMHLK@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409f80     PatchGuardAMD64.obj
- 0001:00008fd0       ??_C@_1EK@IFNEFFGJ@t?4xe?$AAt?$AA?2?$AAS?$AAy?$AAs?$AAt?$AAe?$AAm?$AAR?$AAo?$AAo?$AAt?$AA?2?$AAS?$AAy?$AAs?$AAt?$AAe?$AAm?$AA3?$AA2?$AA?2?$AAn?$AAt?$AAo?$AAs?$AAk?$AAr?$AAn?$AAl@ 0000000000409fd0     PatchGuardAMD64.obj
- 0001:00009020       ??_C@_1CA@EKPDKKMH@t?4xe?$AAt?$AAn?$AAt?$AAo?$AAs?$AAk?$AAr?$AAn?$AAl?$AA?4?$AAe?$AAx?$AAe?$AA?$AA@ 000000000040a020     PatchGuardAMD64.obj
- 0001:00009040       ??_C@_0DO@JAJIAHLP@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 000000000040a040     PatchGuardAMD64.obj
- 0001:00009080       ??_C@_0DG@JNOLKHOO@?4textShark?5?9?5PatchGuard?5declassi@ 000000000040a080     PatchGuardAMD64.obj
- 0001:000090c0       ??_C@_0DD@OFKGGODJ@?4textShark?5?9?5PatchGuard?5encrypte@ 000000000040a0c0     PatchGuardAMD64.obj
- 0001:000090f0       ??_C@_0CP@BIKPJGM@?4textff?50f?500?500?50f?585?5?$DP?$DP?5?$DP?$DP?5?$DP?$DP?5@ 000000000040a0f0     PatchGuardAMD64.obj
- 0001:00009120       ??_C@_0BB@KNKPKDPK@?4text48?58b?5?$DP?$DP?5e8?$AA@ 000000000040a120     PatchGuardAMD64.obj
- 0001:00009130       ??_C@_0GC@BFLCFAGB@?4text48?5c1?5e9?509?548?5b8?5f8?5ff?5ff?5@ 000000000040a130     PatchGuardAMD64.obj
- 0001:00009190       ??_C@_0BN@BMHONOCG@?4texteb?5?$DP?$DP?5b9?51e?500?500?500?5e8?$AA@ 000000000040a190     PatchGuardAMD64.obj
- 0001:000091b0       ??_C@_0DL@BLOPFGCK@?4textb9?501?500?500?500?544?50f?522?5c1?5@ 000000000040a1b0     PatchGuardAMD64.obj
- 0001:000091f0       ??_C@_0DL@FMGABGHE@?4text48?581?5ec?5c0?502?500?500?548?58d?5@ 000000000040a1f0     PatchGuardAMD64.obj
- 0001:00009230       ??_C@_0EE@FJAGBHFC@?4text?$DP?$DP?589?5?$DP?$DP?500?501?500?500?548?58D?5@ 000000000040a230     PatchGuardAMD64.obj
- 0001:00009270       ??_C@_0BB@EIDDKCKH@?4textfb?548?58d?505?$AA@ 000000000040a270     PatchGuardAMD64.obj
- 0001:00009280       ??_C@_0DF@GNJNIBHH@?4text2e?548?531?511?548?531?551?508?548?5@ 000000000040a280     PatchGuardAMD64.obj
- 0001:000092b0       ??_C@_0DN@DEIMHDI@?4textShark?5?9?5set?5new?5entry?5for?5P@ 000000000040a2b0     PatchGuardAMD64.obj
- 0001:000092f0       ??_C@_0CC@NIPOJBPD@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5first?5rorkey@ 000000000040a2f0     PatchGuardAMD64.obj
- 0001:00009310       ??_C@_0DI@BMDPGN@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5found?5PatchG@ 000000000040a310     PatchGuardAMD64.obj
- 0001:00009350       ??_C@_0DL@MGMHIEPM@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5found?5PatchG@ 000000000040a350     PatchGuardAMD64.obj
- 0001:00009390       ??_C@_0DC@JAOMONMC@?4textShark?5?9?5insert?5worker?5threa@ 000000000040a390     PatchGuardAMD64.obj
- 0001:000093c0       ??_C@_0ED@HLDBPPJF@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5found?5noimag@ 000000000040a3c0     PatchGuardAMD64.obj
- 0001:00009400       ??_C@_0DC@KNDODOMC@?4textNULL?5?$CB?$DN?5PatchGuardBlock?9?$DOMm@ 000000000040a400     PatchGuardAMD64.obj
- 0001:00009430       ??_C@_0DE@IEDKNJIM@?4textPatchGuardBlock?9?$DOMmDetermin@ 000000000040a430     PatchGuardAMD64.obj
- 0001:00009460       ??_C@_0DL@KMAGEEBL@?4textNULL?5?$CB?$DN?5PatchGuardBlock?9?$DOMi@ 000000000040a460     PatchGuardAMD64.obj
- 0001:000094a0       ??_C@_0DK@PNFFFNPD@?4textNULL?5?$CB?$DN?5PatchGuardBlock?9?$DOMi@ 000000000040a4a0     PatchGuardAMD64.obj
- 0001:000094e0       ??_C@_0DA@LNEHHBOA@?4textPatchGuardBlock?9?$DOSystemPtes@ 000000000040a4e0     PatchGuardAMD64.obj
- 0001:00009510       ??_C@_0DE@NADCACGP@?4textNULL?5?$CB?$DN?5PatchGuardBlock?9?$DOEx@ 000000000040a510     PatchGuardAMD64.obj
- 0001:00009540       ??_C@_0DG@DGNCDOJL@?4textPatchGuardBlock?9?$DOExpLargePo@ 000000000040a540     PatchGuardAMD64.obj
- 0001:00009580       ??_C@_0DA@CLAFGOLJ@?4text0?5?$CB?$DN?5PatchGuardBlock?9?$DOPoolB@ 000000000040a580     PatchGuardAMD64.obj
- 0001:000095b0       ??_C@_0DF@IMAIHNOA@?4textPatchGuardBlock?9?$DOPoolBigPag@ 000000000040a5b0     PatchGuardAMD64.obj
- 0001:000095e0       ??_C@_0CP@LOOADPFK@?4textNULL?5?$CB?$DN?5PatchGuardBlock?9?$DOPo@ 000000000040a5e0     PatchGuardAMD64.obj
- 0001:00009610       ??_C@_0DB@KMGPPPHC@?4textPatchGuardBlock?9?$DOPoolBigPag@ 000000000040a610     PatchGuardAMD64.obj
- 0001:00009640       ??_C@_0CL@IGHHDOLI@?4text0?5?$CB?$DN?5PatchGuardBlock?9?$DOSizeO@ 000000000040a640     PatchGuardAMD64.obj
- 0001:00009670       ??_C@_0DA@LJMGOFGB@?4textPatchGuardBlock?9?$DOSizeOfNtSe@ 000000000040a670     PatchGuardAMD64.obj
- 0001:000096a0       ??_C@_0DF@JGKOCKBF@?4text0?5?$CB?$DN?5PatchGuardBlock?9?$DOSizeO@ 000000000040a6a0     PatchGuardAMD64.obj
- 0001:000096d0       ??_C@_0DK@GFOEFFNH@?4textPatchGuardBlock?9?$DOSizeOfCmpA@ 000000000040a6d0     PatchGuardAMD64.obj
- 0001:00009710       ??_C@_0CM@HNCKBGDL@?4text0?5?$CB?$DN?5PatchGuardBlock?9?$DORvaOf@ 000000000040a710     PatchGuardAMD64.obj
- 0001:00009740       ??_C@_0DB@CPIGNDJK@?4textPatchGuardBlock?9?$DORvaOffsetO@ 000000000040a740     PatchGuardAMD64.obj
- 0001:00009770       ??_C@_0DG@OBHOMHDE@?4textNULL?5?$CB?$DN?5PatchGuardBlock?9?$DOEx@ 000000000040a770     PatchGuardAMD64.obj
- 0001:000097b0       ??_C@_0DG@DDOKBAGO@?4textPatchGuardBlock?9?$DOReleaseSpi@ 000000000040a7b0     PatchGuardAMD64.obj
- 0001:000097f0       ??_C@_0DG@FCOONGDO@?4textNULL?5?$CB?$DN?5PatchGuardBlock?9?$DOEx@ 000000000040a7f0     PatchGuardAMD64.obj
- 0001:00009830       ??_C@_0DG@KBGODHFJ@?4textPatchGuardBlock?9?$DOAcquireSpi@ 000000000040a830     PatchGuardAMD64.obj
- 0001:00009870       ??_C@_0EF@DGOCKBNM@?4text?$CFs?$CI?$CFd?$CJ?3?5Soft?5assertion?5fail@ 000000000040a870     PatchGuardAMD64.obj
- 0001:000098b0       ??_C@_0DA@KBGFECPE@?4textNULL?5?$CB?$DN?5PatchGuardBlock?9?$DOIo@ 000000000040a8b0     PatchGuardAMD64.obj
- 0001:000098e0       ??_C@_0DC@PJLONBBP@?4textPatchGuardBlock?9?$DOIoGetIniti@ 000000000040a8e0     PatchGuardAMD64.obj
- 0001:00009910       ??_C@_0BI@MIAGNGMH@?4textAMD64?2StackAMD64?4c?$AA@ 000000000040a910     StackAMD64.obj
- 0001:00009930       ??_C@_0CE@NMLBNFAI@?4textNT_SUCCESS?$CIGetExceptionCode@ 000000000040a930     StackAMD64.obj
- 0001:00009950       ??_C@_0BD@LMDEBGPF@?4textShark?5?9?5load?6?$AA@ 000000000040a950     Shark.obj
- 0001:00009960       ??_C@_1CK@FFECKLHO@t?4xe?$AAt?$AA?2?$AAD?$AAo?$AAs?$AAD?$AAe?$AAv?$AAi?$AAc?$AAe?$AAs?$AA?2?$AAS?$AAh?$AAa?$AAr?$AAk?$AA?$AA@ 000000000040a960     Shark.obj
- 0001:00009990       ??_C@_0N@EEGDJDAH@?4textShark?4c?$AA@ 000000000040a990     Shark.obj
- 0001:000099a0       ??_C@_0BI@IIBFDAEC@?4textNT_SUCCESS?$CIStatus?$CJ?$AA@ 000000000040a9a0     Shark.obj
- 0001:000099c0       ??_C@_1CC@NNCCLFIJ@t?4xe?$AAt?$AA?2?$AAD?$AAe?$AAv?$AAi?$AAc?$AAe?$AA?2?$AAS?$AAh?$AAa?$AAr?$AAk?$AA?$AA@ 000000000040a9c0     Shark.obj
- 0001:000099e0       ??_C@_0BF@MKMEOEJC@?4textShark?5?9?5unload?6?$AA@ 000000000040a9e0     Shark.obj
- 0001:000099f0       ??_C@_0L@JJEAJAOG@?4textCtx?4c?$AA@ 000000000040a9f0     Ctx.obj
- 0001:00009a00       ??_C@_0BE@JNPFBIIC@?4text?$PP?$CF?$AA?$AA?$AA?$AA?$PP?$PP?$PP?$PP?$PP?$PP?$PP?$PP?$AA@ 000000000040aa00     Jump.obj
- 0001:00009a10       ??_C@_0M@FLMBKNAH@?4textLock?4c?$AA@ 000000000040aa10     Lock.obj
- 0001:00009a20       ??_C@_0BH@LKAALDFE@?4textNULL?5?$CB?$DN?5MdlLocker?$AA@ 000000000040aa20     Lock.obj
- 0001:00009a40       ??_C@_1CA@NNPKNADH@t?4xe?$AAt?$AA?2?$AAD?$AAr?$AAi?$AAv?$AAe?$AAr?$AA?2?$AAd?$AAi?$AAs?$AAk?$AA?$AA@ 000000000040aa40     KernelReload.obj
- 0001:00009a60       ??_C@_0CH@GDMIEPNM@?4textShark?5?9?5import?5dll?5?$CFhs?5not?5@ 000000000040aa60     KernelReload.obj
- 0001:00009a90       ??_C@_0CN@FPKINCK@?4textShark?5?9?5import?5procedure?5?$CFh@ 000000000040aa90     KernelReload.obj
- 0001:00009ac0       ??_C@_0DE@CGNBAOIH@?4textShark?5?9?5import?5procedure?5or@ 000000000040aac0     KernelReload.obj
- 0001:00009af0       ??_C@_1DA@LBGKEKNN@t?4xe?$AAt?$AA?2?$AAS?$AAy?$AAs?$AAt?$AAe?$AAm?$AAR?$AAo?$AAo?$AAt?$AA?2?$AAS?$AAy?$AAs?$AAt?$AAe?$AAm?$AA3?$AA2?$AA?$AA@ 000000000040aaf0     KernelReload.obj
- 0001:00009b20       ??_C@_0BE@BIKGKBIC@?4textKernelReload?4c?$AA@ 000000000040ab20     KernelReload.obj
- 0001:00009b30       ??_C@_0BM@GMFMBAAC@?4textNULL?5?$CB?$DN?5DataTableEntry?$AA@ 000000000040ab30     KernelReload.obj
- 0001:00009b50       ??_C@_0M@PAILCCAJ@?4textScan?4c?$AA@ 000000000040ab50     Scan.obj
- 0002:00000000       GsDriverEntry              000000000040b000 f   bufferoverflowk:gs_support.obj
- 0003:00000000       __imp_DbgPrint             000000000040c000     ntoskrnl:ntoskrnl.exe
- 0003:00000008       __imp_RtlImageNtHeader     000000000040c008     ntoskrnl:ntoskrnl.exe
- 0003:00000010       __imp_ZwClose              000000000040c010     ntoskrnl:ntoskrnl.exe
- 0003:00000018       __imp_ZwUnmapViewOfSection 000000000040c018     ntoskrnl:ntoskrnl.exe
- 0003:00000020       __imp_RtlLookupFunctionEntry 000000000040c020     ntoskrnl:ntoskrnl.exe
- 0003:00000028       __imp_ZwMapViewOfSection   000000000040c028     ntoskrnl:ntoskrnl.exe
- 0003:00000030       __imp_ZwCreateSection      000000000040c030     ntoskrnl:ntoskrnl.exe
- 0003:00000038       __imp_ZwOpenFile           000000000040c038     ntoskrnl:ntoskrnl.exe
- 0003:00000040       __imp_RtlInitUnicodeString 000000000040c040     ntoskrnl:ntoskrnl.exe
- 0003:00000048       __imp_PsGetVersion         000000000040c048     ntoskrnl:ntoskrnl.exe
- 0003:00000050       __imp_MmIsAddressValid     000000000040c050     ntoskrnl:ntoskrnl.exe
- 0003:00000058       __imp_ExFreePoolWithTag    000000000040c058     ntoskrnl:ntoskrnl.exe
- 0003:00000060       __imp_IoGetInitialStack    000000000040c060     ntoskrnl:ntoskrnl.exe
- 0003:00000068       __imp_IoGetStackLimits     000000000040c068     ntoskrnl:ntoskrnl.exe
- 0003:00000070       __imp_ExAllocatePool       000000000040c070     ntoskrnl:ntoskrnl.exe
- 0003:00000078       __imp_PsGetCurrentThreadId 000000000040c078     ntoskrnl:ntoskrnl.exe
- 0003:00000080       __imp_PsGetCurrentProcessId 000000000040c080     ntoskrnl:ntoskrnl.exe
- 0003:00000088       __imp_ZwQuerySystemInformation 000000000040c088     ntoskrnl:ntoskrnl.exe
- 0003:00000090       __imp_KeSetEvent           000000000040c090     ntoskrnl:ntoskrnl.exe
- 0003:00000098       __imp_KeWaitForSingleObject 000000000040c098     ntoskrnl:ntoskrnl.exe
- 0003:000000a0       __imp_ExQueueWorkItem      000000000040c0a0     ntoskrnl:ntoskrnl.exe
- 0003:000000a8       __imp_KeInitializeEvent    000000000040c0a8     ntoskrnl:ntoskrnl.exe
- 0003:000000b0       __imp___C_specific_handler 000000000040c0b0     ntoskrnl:ntoskrnl.exe
- 0003:000000b8       __imp_RtlVirtualUnwind     000000000040c0b8     ntoskrnl:ntoskrnl.exe
- 0003:000000c0       __imp_RtlCaptureContext    000000000040c0c0     ntoskrnl:ntoskrnl.exe
- 0003:000000c8       __imp_IoDeleteDevice       000000000040c0c8     ntoskrnl:ntoskrnl.exe
- 0003:000000d0       __imp_IoCreateSymbolicLink 000000000040c0d0     ntoskrnl:ntoskrnl.exe
- 0003:000000d8       __imp_IoCreateDevice       000000000040c0d8     ntoskrnl:ntoskrnl.exe
- 0003:000000e0       __imp_IoDeleteSymbolicLink 000000000040c0e0     ntoskrnl:ntoskrnl.exe
- 0003:000000e8       __imp_IofCompleteRequest   000000000040c0e8     ntoskrnl:ntoskrnl.exe
- 0003:000000f0       __imp_ObfDereferenceObject 000000000040c0f0     ntoskrnl:ntoskrnl.exe
- 0003:000000f8       __imp_KeInsertQueueApc     000000000040c0f8     ntoskrnl:ntoskrnl.exe
- 0003:00000100       __imp_KeInitializeApc      000000000040c100     ntoskrnl:ntoskrnl.exe
- 0003:00000108       __imp_PsLookupThreadByThreadId 000000000040c108     ntoskrnl:ntoskrnl.exe
- 0003:00000110       __imp_RtlImageDirectoryEntryToData 000000000040c110     ntoskrnl:ntoskrnl.exe
- 0003:00000118       __imp_MmMapLockedPagesSpecifyCache 000000000040c118     ntoskrnl:ntoskrnl.exe
- 0003:00000120       __imp_IoFreeMdl            000000000040c120     ntoskrnl:ntoskrnl.exe
- 0003:00000128       __imp_MmProbeAndLockPages  000000000040c128     ntoskrnl:ntoskrnl.exe
- 0003:00000130       __imp_IoAllocateMdl        000000000040c130     ntoskrnl:ntoskrnl.exe
- 0003:00000138       __imp_MmUnlockPages        000000000040c138     ntoskrnl:ntoskrnl.exe
- 0003:00000140       __imp_RtlAssert            000000000040c140     ntoskrnl:ntoskrnl.exe
- 0003:00000148       __imp_RtlEqualUnicodeString 000000000040c148     ntoskrnl:ntoskrnl.exe
- 0003:00000150       __imp_ObReferenceObjectByName 000000000040c150     ntoskrnl:ntoskrnl.exe
- 0003:00000158       IoDriverObjectType         000000000040c158     ntoskrnl:ntoskrnl.exe
- 0003:00000158       __imp_IoDriverObjectType   000000000040c158     ntoskrnl:ntoskrnl.exe
- 0003:00000160       MmHighestUserAddress       000000000040c160     ntoskrnl:ntoskrnl.exe
- 0003:00000160       __imp_MmHighestUserAddress 000000000040c160     ntoskrnl:ntoskrnl.exe
- 0003:00000168       __imp_RtlCharToInteger     000000000040c168     ntoskrnl:ntoskrnl.exe
- 0003:00000170       __imp_RtlFreeUnicodeString 000000000040c170     ntoskrnl:ntoskrnl.exe
- 0003:00000178       __imp_RtlAnsiStringToUnicodeString 000000000040c178     ntoskrnl:ntoskrnl.exe
- 0003:00000180       __imp_RtlInitAnsiString    000000000040c180     ntoskrnl:ntoskrnl.exe
- 0003:00000188       __imp_strchr               000000000040c188     ntoskrnl:ntoskrnl.exe
- 0003:00000190       __imp__stricmp             000000000040c190     ntoskrnl:ntoskrnl.exe
- 0003:00000198       __imp_MmAllocateContiguousMemory 000000000040c198     ntoskrnl:ntoskrnl.exe
- 0003:000001a0       __imp_wcslen               000000000040c1a0     ntoskrnl:ntoskrnl.exe
- 0003:000001a8       __imp_wcscat               000000000040c1a8     ntoskrnl:ntoskrnl.exe
- 0003:000001b0       __imp_wcscpy               000000000040c1b0     ntoskrnl:ntoskrnl.exe
- 0003:000001b8       __imp_wcsrchr              000000000040c1b8     ntoskrnl:ntoskrnl.exe
- 0003:000001c0       __imp_MmFreeContiguousMemory 000000000040c1c0     ntoskrnl:ntoskrnl.exe
- 0003:000001c8       __imp_isxdigit             000000000040c1c8     ntoskrnl:ntoskrnl.exe
- 0003:000001d0       __imp_strlen               000000000040c1d0     ntoskrnl:ntoskrnl.exe
- 0003:000001d8       __imp_RtlCompareMemory     000000000040c1d8     ntoskrnl:ntoskrnl.exe
- 0003:000001e0       __imp_KeBugCheckEx         000000000040c1e0     ntoskrnl:ntoskrnl.exe
- 0003:000001e8       \177ntoskrnl_NULL_THUNK_DATA 000000000040c1e8     ntoskrnl:ntoskrnl.exe
- 0003:00000240       KiFindFirstSetRight        000000000040c240     PatchGuardAMD64.obj
- 0003:00000340       KiFindFirstSetLeft         000000000040c340     PatchGuardAMD64.obj
- 0003:00000440       RtlAlternateDosPathSeparatorString 000000000040c440     PatchGuardAMD64.obj
- 0003:00000450       ??_C@_13CGOKJPIL@?$AA?1?$AA?$AA@ 000000000040c450     PatchGuardAMD64.obj
- 0003:00000458       RtlDosPathSeparatorsString 000000000040c458     PatchGuardAMD64.obj
- 0003:00000468       ??_C@_15MNCACJLI@?$AA?2?$AA?1?$AA?$AA@ 000000000040c468     PatchGuardAMD64.obj
- 0003:00000470       RtlNtPathSeparatorString   000000000040c470     PatchGuardAMD64.obj
- 0003:00000480       ??_C@_13FPGAJAPJ@?$AA?2?$AA?$AA@ 000000000040c480     PatchGuardAMD64.obj
- 0003:00000490       ?s_rceCopyTable@CDetourDis@@1QBUCOPYENTRY@1@B 000000000040c490     disasm.obj
- 0003:000014a0       ?s_rceCopyTable0F@CDetourDis@@1QBUCOPYENTRY@1@B 000000000040d4a0     disasm.obj
- 0003:000024b0       ?s_rbModRm@CDetourDis@@1QBEB 000000000040e4b0     disasm.obj
- 0003:0000293c       __IMPORT_DESCRIPTOR_ntoskrnl 000000000040e93c     ntoskrnl:ntoskrnl.exe
- 0003:00002950       __NULL_IMPORT_DESCRIPTOR   000000000040e950     ntoskrnl:ntoskrnl.exe
- 0004:00000000       HotPatchBuffer             0000000000410000     HOTPATCH.obj
- 0004:00000400       __security_cookie_complement 0000000000410400     bufferoverflowk:gs_support.obj
- 0004:00000408       __security_cookie          0000000000410408     bufferoverflowk:gs_support.obj
- 0004:00000438       MmPfnOwner                 0000000000410438     <common>
- 0004:00000440       MmSessionFailureCauses     0000000000410440     <common>
+ 0001:000022f0       SetNewEntryForEncryptedContext 00000000004032f0 f   PatchGuardAMD64.obj
+ 0001:00002610       CompareEncryptedContextFields 0000000000403610 f   PatchGuardAMD64.obj
+ 0001:00002a60       ClearSystemPtesEncryptedContext 0000000000403a60 f   PatchGuardAMD64.obj
+ 0001:00002cc0       ClearPoolEncryptedContext  0000000000403cc0 f   PatchGuardAMD64.obj
+ 0001:00002e70       GetVirtualAddressRegion    0000000000403e70 f   PatchGuardAMD64.obj
+ 0001:00003340       CheckWorkerThread          0000000000404340 f   PatchGuardAMD64.obj
+ 0001:00003640       CheckAllWorkerThread       0000000000404640 f   PatchGuardAMD64.obj
+ 0001:00003980       ULongToPtr                 0000000000404980 f i PatchGuardAMD64.obj
+ 0001:00003990       ClearPatchGuardWorker      0000000000404990 f   PatchGuardAMD64.obj
+ 0001:000039e0       DisablePatchGuard          00000000004049e0 f   PatchGuardAMD64.obj
+ 0001:00003ea0       WalkFrameChain             0000000000404ea0 f   StackAMD64.obj
+ 0001:00004070       DriverEntry                0000000000405070 f   Shark.obj
+ 0001:00004260       DriverUnload               0000000000405260 f   Shark.obj
+ 0001:000042c0       DeviceCreate               00000000004052c0 f   Shark.obj
+ 0001:00004310       DeviceClose                0000000000405310 f   Shark.obj
+ 0001:00004360       DeviceWrite                0000000000405360 f   Shark.obj
+ 0001:000043b0       DeviceRead                 00000000004053b0 f   Shark.obj
+ 0001:00004400       DeviceControl              0000000000405400 f   Shark.obj
+ 0001:000044d0       RemoteDispatcher           00000000004054d0 f   Ctx.obj
+ 0001:00004550       RemoteCall                 0000000000405550 f   Ctx.obj
+ 0001:000047e0       KeGetCurrentThread         00000000004057e0 f i Ctx.obj
+ 0001:000047f0       EncodeSystemPointer32      00000000004057f0 f   Except.obj
+ 0001:000048a0       DecodeSystemPointer32      00000000004058a0 f   Except.obj
+ 0001:00004950       CaptureImageExceptionValues 0000000000405950 f   Except.obj
+ 0001:00004b10       LongToPtr                  0000000000405b10 f i Except.obj
+ 0001:00004b20       DetourGetInstructionLength 0000000000405b20 f   Jump.obj
+ 0001:00004bc0       BuildJumpCode32            0000000000405bc0 f   Jump.obj
+ 0001:00004cf0       BuildJumpCode64            0000000000405cf0 f   Jump.obj
+ 0001:00004e20       BuildJumpCode              0000000000405e20 f   Jump.obj
+ 0001:00004f50       ProbeAndLockPages          0000000000405f50 f   Lock.obj
+ 0001:000051b0       UnlockPages                00000000004061b0 f   Lock.obj
+ 0001:00005220       InitializeLoadedModuleList 0000000000406220 f   KernelReload.obj
+ 0001:00005400       InitializeListHead         0000000000406400 f i KernelReload.obj
+ 0001:00005430       InsertTailList             0000000000406430 f i KernelReload.obj
+ 0001:00005490       FindEntryForPrivateSystemImage 0000000000406490 f   KernelReload.obj
+ 0001:00005550       FindEntryForSystemImage    0000000000406550 f   KernelReload.obj
+ 0001:000055f0       FindEntryForPrivateSystemImageAddress 00000000004065f0 f   KernelReload.obj
+ 0001:000056c0       FindEntryForSystemImageAddress 00000000004066c0 f   KernelReload.obj
+ 0001:00005770       GetPlatform                0000000000406770 f   KernelReload.obj
+ 0001:000057c0       GetAddressOfEntryPoint     00000000004067c0 f   KernelReload.obj
+ 0001:00005860       GetTimeStamp               0000000000406860 f   KernelReload.obj
+ 0001:000058b0       GetSubsystem               00000000004068b0 f   KernelReload.obj
+ 0001:00005930       GetSizeOfImage             0000000000406930 f   KernelReload.obj
+ 0001:000059b0       SectionTableFromVirtualAddress 00000000004069b0 f   KernelReload.obj
+ 0001:00005b20       GetForwarder               0000000000406b20 f   KernelReload.obj
+ 0001:00005d50       GetProcedureAddress        0000000000406d50 f   KernelReload.obj
+ 0001:00005f40       RelocationBlock            0000000000406f40 f   KernelReload.obj
+ 0001:00006130       RelocateImage              0000000000407130 f   KernelReload.obj
+ 0001:00006200       GetRelocCount              0000000000407200 f i KernelReload.obj
+ 0001:00006230       DereferenceKernelImage     0000000000407230 f   KernelReload.obj
+ 0001:000062f0       DereferenceKernelImports   00000000004072f0 f   KernelReload.obj
+ 0001:00006380       ReferenceKernelImage       0000000000407380 f   KernelReload.obj
+ 0001:00006460       SnapThunk                  0000000000407460 f   KernelReload.obj
+ 0001:00006690       AllocateImage              0000000000407690 f   KernelReload.obj
+ 0001:00006740       MapImageNtSection          0000000000407740 f   KernelReload.obj
+ 0001:00006900       LoadPrivateSystemImage     0000000000407900 f   KernelReload.obj
+ 0001:00006b00       UnloadPrivateSystemImage   0000000000407b00 f   KernelReload.obj
+ 0001:00006b70       RemoveEntryList            0000000000407b70 f i KernelReload.obj
+ 0001:00006bd0       TrimBytes                  0000000000407bd0 f   Scan.obj
+ 0001:00007020       CompareBytes               0000000000408020 f   Scan.obj
+ 0001:000070f0       ScanBytes                  00000000004080f0 f   Scan.obj
+ 0001:00007248       DbgPrint                   0000000000408248 f   ntoskrnl:ntoskrnl.exe
+ 0001:00007260       memmove                    0000000000408260     ntoskrnl:memcpy.obj
+ 0001:00007260       memcpy                     0000000000408260 f   ntoskrnl:memcpy.obj
+ 0001:00007594       RtlImageNtHeader           0000000000408594 f   ntoskrnl:ntoskrnl.exe
+ 0001:0000759a       ZwClose                    000000000040859a f   ntoskrnl:ntoskrnl.exe
+ 0001:000075a0       ZwUnmapViewOfSection       00000000004085a0 f   ntoskrnl:ntoskrnl.exe
+ 0001:000075a6       RtlLookupFunctionEntry     00000000004085a6 f   ntoskrnl:ntoskrnl.exe
+ 0001:000075ac       ZwMapViewOfSection         00000000004085ac f   ntoskrnl:ntoskrnl.exe
+ 0001:000075b2       ZwCreateSection            00000000004085b2 f   ntoskrnl:ntoskrnl.exe
+ 0001:000075b8       ZwOpenFile                 00000000004085b8 f   ntoskrnl:ntoskrnl.exe
+ 0001:000075be       RtlInitUnicodeString       00000000004085be f   ntoskrnl:ntoskrnl.exe
+ 0001:000075c4       PsGetVersion               00000000004085c4 f   ntoskrnl:ntoskrnl.exe
+ 0001:000075ca       MmIsAddressValid           00000000004085ca f   ntoskrnl:ntoskrnl.exe
+ 0001:000075d0       ExFreePoolWithTag          00000000004085d0 f   ntoskrnl:ntoskrnl.exe
+ 0001:000075d6       IoGetInitialStack          00000000004085d6 f   ntoskrnl:ntoskrnl.exe
+ 0001:000075dc       IoGetStackLimits           00000000004085dc f   ntoskrnl:ntoskrnl.exe
+ 0001:000075e2       ExAllocatePool             00000000004085e2 f   ntoskrnl:ntoskrnl.exe
+ 0001:000075e8       PsGetCurrentThreadId       00000000004085e8 f   ntoskrnl:ntoskrnl.exe
+ 0001:000075ee       PsGetCurrentProcessId      00000000004085ee f   ntoskrnl:ntoskrnl.exe
+ 0001:000075f4       ZwQuerySystemInformation   00000000004085f4 f   ntoskrnl:ntoskrnl.exe
+ 0001:00007610       memset                     0000000000408610 f   ntoskrnl:memset.obj
+ 0001:000076fa       KeSetEvent                 00000000004086fa f   ntoskrnl:ntoskrnl.exe
+ 0001:00007700       KeWaitForSingleObject      0000000000408700 f   ntoskrnl:ntoskrnl.exe
+ 0001:00007706       ExQueueWorkItem            0000000000408706 f   ntoskrnl:ntoskrnl.exe
+ 0001:0000770c       KeInitializeEvent          000000000040870c f   ntoskrnl:ntoskrnl.exe
+ 0001:00007712       __C_specific_handler       0000000000408712 f   ntoskrnl:ntoskrnl.exe
+ 0001:00007718       RtlVirtualUnwind           0000000000408718 f   ntoskrnl:ntoskrnl.exe
+ 0001:0000771e       RtlCaptureContext          000000000040871e f   ntoskrnl:ntoskrnl.exe
+ 0001:00007724       IoDeleteDevice             0000000000408724 f   ntoskrnl:ntoskrnl.exe
+ 0001:0000772a       IoCreateSymbolicLink       000000000040872a f   ntoskrnl:ntoskrnl.exe
+ 0001:00007730       IoCreateDevice             0000000000408730 f   ntoskrnl:ntoskrnl.exe
+ 0001:00007736       IoDeleteSymbolicLink       0000000000408736 f   ntoskrnl:ntoskrnl.exe
+ 0001:0000773c       IofCompleteRequest         000000000040873c f   ntoskrnl:ntoskrnl.exe
+ 0001:00007742       ObfDereferenceObject       0000000000408742 f   ntoskrnl:ntoskrnl.exe
+ 0001:00007748       KeInsertQueueApc           0000000000408748 f   ntoskrnl:ntoskrnl.exe
+ 0001:0000774e       KeInitializeApc            000000000040874e f   ntoskrnl:ntoskrnl.exe
+ 0001:00007754       PsLookupThreadByThreadId   0000000000408754 f   ntoskrnl:ntoskrnl.exe
+ 0001:0000775a       RtlImageDirectoryEntryToData 000000000040875a f   ntoskrnl:ntoskrnl.exe
+ 0001:00007760       MmMapLockedPagesSpecifyCache 0000000000408760 f   ntoskrnl:ntoskrnl.exe
+ 0001:00007766       IoFreeMdl                  0000000000408766 f   ntoskrnl:ntoskrnl.exe
+ 0001:0000776c       MmProbeAndLockPages        000000000040876c f   ntoskrnl:ntoskrnl.exe
+ 0001:00007772       IoAllocateMdl              0000000000408772 f   ntoskrnl:ntoskrnl.exe
+ 0001:00007778       MmUnlockPages              0000000000408778 f   ntoskrnl:ntoskrnl.exe
+ 0001:0000777e       RtlAssert                  000000000040877e f   ntoskrnl:ntoskrnl.exe
+ 0001:00007784       RtlEqualUnicodeString      0000000000408784 f   ntoskrnl:ntoskrnl.exe
+ 0001:0000778a       ObReferenceObjectByName    000000000040878a f   ntoskrnl:ntoskrnl.exe
+ 0001:00007790       RtlCharToInteger           0000000000408790 f   ntoskrnl:ntoskrnl.exe
+ 0001:00007796       RtlFreeUnicodeString       0000000000408796 f   ntoskrnl:ntoskrnl.exe
+ 0001:0000779c       RtlAnsiStringToUnicodeString 000000000040879c f   ntoskrnl:ntoskrnl.exe
+ 0001:000077a2       RtlInitAnsiString          00000000004087a2 f   ntoskrnl:ntoskrnl.exe
+ 0001:000077a8       strchr                     00000000004087a8 f   ntoskrnl:ntoskrnl.exe
+ 0001:000077ae       _stricmp                   00000000004087ae f   ntoskrnl:ntoskrnl.exe
+ 0001:000077b4       MmAllocateContiguousMemory 00000000004087b4 f   ntoskrnl:ntoskrnl.exe
+ 0001:000077ba       wcslen                     00000000004087ba f   ntoskrnl:ntoskrnl.exe
+ 0001:000077c0       wcscat                     00000000004087c0 f   ntoskrnl:ntoskrnl.exe
+ 0001:000077c6       wcscpy                     00000000004087c6 f   ntoskrnl:ntoskrnl.exe
+ 0001:000077cc       wcsrchr                    00000000004087cc f   ntoskrnl:ntoskrnl.exe
+ 0001:000077d2       MmFreeContiguousMemory     00000000004087d2 f   ntoskrnl:ntoskrnl.exe
+ 0001:000077d8       isxdigit                   00000000004087d8 f   ntoskrnl:ntoskrnl.exe
+ 0001:000077de       strlen                     00000000004087de f   ntoskrnl:ntoskrnl.exe
+ 0001:000077e4       RtlCompareMemory           00000000004087e4 f   ntoskrnl:ntoskrnl.exe
+ 0001:000077f0       __report_gsfailure         00000000004087f0 f   bufferoverflowk:gs_support.obj
+ 0001:00007820       KeBugCheckEx               0000000000408820 f   ntoskrnl:ntoskrnl.exe
+ 0001:00007840       _CmpByte                   0000000000408840 f   CmpAMD64.obj
+ 0001:00007850       _CmpShort                  0000000000408850 f   CmpAMD64.obj
+ 0001:00007860       _CmpLong                   0000000000408860 f   CmpAMD64.obj
+ 0001:00007870       _CmpLongLong               0000000000408870 f   CmpAMD64.obj
+ 0001:00007890       _btc64                     0000000000408890 f   PatchGuardInlineAMD64.obj
+ 0001:000078a0       _MakePgFire                00000000004088a0 f   PatchGuardInlineAMD64.obj
+ 0001:000078d0       _ClearEncryptedContext     00000000004088d0 f   PatchGuardInlineAMD64.obj
+ 0001:00007910       _RevertWorkerToSelf        0000000000408910 f   PatchGuardInlineAMD64.obj
+ 0001:00007970       _CheckPatchGuardCode       0000000000408970 f   PatchGuardInlineAMD64.obj
+ 0001:000079c0       _GuardCall                 00000000004089c0 f   PatchGuardInlineAMD64.obj
+ 0001:00007b90       __security_check_cookie    0000000000408b90 f   bufferoverflowk:amdsecgs.obj
+ 0001:00007bb0       DetourCopyInstruction      0000000000408bb0 f   disasm.obj
+ 0001:00007c30       ??0CDetourDis@@QEAA@PEAPEAEPEAJ@Z 0000000000408c30 f   disasm.obj
+ 0001:00007d00       ?CopyInstruction@CDetourDis@@QEAAPEAEPEAE0@Z 0000000000408d00 f   disasm.obj
+ 0001:00007d90       ?SanityCheckSystem@CDetourDis@@SAHXZ 0000000000408d90 f   disasm.obj
+ 0001:00007e80       ?CopyBytes@CDetourDis@@IEAAPEAEPEBUCOPYENTRY@1@PEAE1@Z 0000000000408e80 f   disasm.obj
+ 0001:000081b0       ?CopyBytesPrefix@CDetourDis@@IEAAPEAEPEBUCOPYENTRY@1@PEAE1@Z 00000000004091b0 f   disasm.obj
+ 0001:00008240       ?CopyBytesRax@CDetourDis@@IEAAPEAEPEBUCOPYENTRY@1@PEAE1@Z 0000000000409240 f   disasm.obj
+ 0001:000082f0       ?CopyBytesJump@CDetourDis@@IEAAPEAEPEBUCOPYENTRY@1@PEAE1@Z 00000000004092f0 f   disasm.obj
+ 0001:00008490       ?Invalid@CDetourDis@@IEAAPEAEPEBUCOPYENTRY@1@PEAE1@Z 0000000000409490 f   disasm.obj
+ 0001:000084c0       ?AdjustTarget@CDetourDis@@IEAAPEAEPEAE0JJJ@Z 00000000004094c0 f   disasm.obj
+ 0001:00008680       ?Copy0F@CDetourDis@@IEAAPEAEPEBUCOPYENTRY@1@PEAE1@Z 0000000000409680 f   disasm.obj
+ 0001:00008710       ?Copy66@CDetourDis@@IEAAPEAEPEBUCOPYENTRY@1@PEAE1@Z 0000000000409710 f   disasm.obj
+ 0001:00008760       ?Copy67@CDetourDis@@IEAAPEAEPEBUCOPYENTRY@1@PEAE1@Z 0000000000409760 f   disasm.obj
+ 0001:000087b0       ?CopyF6@CDetourDis@@IEAAPEAEPEBUCOPYENTRY@1@PEAE1@Z 00000000004097b0 f   disasm.obj
+ 0001:00008850       ?CopyF7@CDetourDis@@IEAAPEAEPEBUCOPYENTRY@1@PEAE1@Z 0000000000409850 f   disasm.obj
+ 0001:000088f0       ?CopyFF@CDetourDis@@IEAAPEAEPEBUCOPYENTRY@1@PEAE1@Z 00000000004098f0 f   disasm.obj
+ 0001:00008a20       __GSHandlerCheck           0000000000409a20 f   gshandler.obj
+ 0001:00008a40       __GSHandlerCheckCommon     0000000000409a40 f   gshandler.obj
+ 0001:00008aa0       ??_C@_0DG@EKEKEHKN@?4text?$CFs?$CI?$CFd?$CJ?3?5Soft?5assertion?5fail@ 0000000000409aa0     PatchGuardAMD64.obj
+ 0001:00008ae0       ??_C@_0BN@DJGBAOFG@?4textAMD64?2PatchGuardAMD64?4c?$AA@ 0000000000409ae0     PatchGuardAMD64.obj
+ 0001:00008b00       ??_C@_0BF@GFBKFCGE@?4textNULL?5?$CB?$DN?5PxeBase?$AA@ 0000000000409b00     PatchGuardAMD64.obj
+ 0001:00008b10       ??_C@_0BF@FGPFBMAD@?4textNULL?5?$CB?$DN?5PpeBase?$AA@ 0000000000409b10     PatchGuardAMD64.obj
+ 0001:00008b20       ??_C@_0BF@MFGEKENO@?4textNULL?5?$CB?$DN?5PdeBase?$AA@ 0000000000409b20     PatchGuardAMD64.obj
+ 0001:00008b30       ??_C@_0BF@KCLKDIBA@?4textNULL?5?$CB?$DN?5PteBase?$AA@ 0000000000409b30     PatchGuardAMD64.obj
+ 0001:00008b40       ??_C@_0DJ@JPHJKELN@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409b40     PatchGuardAMD64.obj
+ 0001:00008b80       ??_C@_0BA@DGECJDLH@?4textExFreePool?$AA@ 0000000000409b80     PatchGuardAMD64.obj
+ 0001:00008b90       ??_C@_0DO@MFOFLLCN@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409b90     PatchGuardAMD64.obj
+ 0001:00008bd0       ??_C@_0BF@EGPKCEME@?4textExQueueWorkItem?$AA@ 0000000000409bd0     PatchGuardAMD64.obj
+ 0001:00008be0       ??_C@_0EA@IOLFICJC@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409be0     PatchGuardAMD64.obj
+ 0001:00008c20       ??_C@_0BH@DAKAAOPK@?4textRtlRestoreContext?$AA@ 0000000000409c20     PatchGuardAMD64.obj
+ 0001:00008c40       ??_C@_0DP@IGGJGOIE@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409c40     PatchGuardAMD64.obj
+ 0001:00008c80       ??_C@_0BG@PJCMBGOE@?4textRtlCompareMemory?$AA@ 0000000000409c80     PatchGuardAMD64.obj
+ 0001:00008ca0       ??_C@_0DH@HADJLDCM@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409ca0     PatchGuardAMD64.obj
+ 0001:00008ce0       ??_C@_0O@MGENOOJB@?4textDbgPrint?$AA@ 0000000000409ce0     PatchGuardAMD64.obj
+ 0001:00008cf0       ??_C@_0EG@PLGFHINJ@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409cf0     PatchGuardAMD64.obj
+ 0001:00008d40       ??_C@_0BN@BNKLPBHK@?4textExReleaseSpinLockShared?$AA@ 0000000000409d40     PatchGuardAMD64.obj
+ 0001:00008d60       ??_C@_0EG@BLADABNG@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409d60     PatchGuardAMD64.obj
+ 0001:00008db0       ??_C@_0BN@KODLOAHA@?4textExAcquireSpinLockShared?$AA@ 0000000000409db0     PatchGuardAMD64.obj
+ 0001:00008dd0       ??_C@_0EA@OKPGPIKK@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409dd0     PatchGuardAMD64.obj
+ 0001:00008e10       ??_C@_0BH@BIHCPGOD@?4textIoGetInitialStack?$AA@ 0000000000409e10     PatchGuardAMD64.obj
+ 0001:00008e30       ??_C@_0EB@DOEACDCP@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409e30     PatchGuardAMD64.obj
+ 0001:00008e70       ??_C@_0BI@OHIDMMON@?4textMmSystemRangeStart?$AA@ 0000000000409e70     PatchGuardAMD64.obj
+ 0001:00008e90       ??_C@_0ED@MJELOBEJ@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409e90     PatchGuardAMD64.obj
+ 0001:00008ed0       ??_C@_0BK@HIGODKHI@?4textMmHighestUserAddress?$AA@ 0000000000409ed0     PatchGuardAMD64.obj
+ 0001:00008ef0       ??_C@_0DM@MKNLEIKP@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409ef0     PatchGuardAMD64.obj
+ 0001:00008f30       ??_C@_0CE@FPECEIIF@?4textKeCapturePersistentThreadSt@ 0000000000409f30     PatchGuardAMD64.obj
+ 0001:00008f50       ??_C@_0EB@OKJDECO@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409f50     PatchGuardAMD64.obj
+ 0001:00008f90       ??_C@_0EA@OAMJKPHM@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409f90     PatchGuardAMD64.obj
+ 0001:00008fd0       ??_C@_0BO@PLBPMKEP@?4textMmAllocateMappingAddress?$AA@ 0000000000409fd0     PatchGuardAMD64.obj
+ 0001:00008ff0       ??_C@_0EE@GIDIPBDL@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 0000000000409ff0     PatchGuardAMD64.obj
+ 0001:00009030       ??_C@_0ED@HCKDIKHE@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 000000000040a030     PatchGuardAMD64.obj
+ 0001:00009070       ??_C@_0DP@BDOAIIDB@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 000000000040a070     PatchGuardAMD64.obj
+ 0001:000090b0       ??_C@_0EC@EKEBDCAK@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 000000000040a0b0     PatchGuardAMD64.obj
+ 0001:000090f0       ??_C@_0DF@JAFKMCFJ@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 000000000040a0f0     PatchGuardAMD64.obj
+ 0001:00009120       ??_C@_0DG@NDEJCHAM@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 000000000040a120     PatchGuardAMD64.obj
+ 0001:00009160       ??_C@_0DF@KDLFIMDO@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 000000000040a160     PatchGuardAMD64.obj
+ 0001:00009190       ??_C@_0DG@KMDMLJ@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 000000000040a190     PatchGuardAMD64.obj
+ 0001:000091d0       ??_C@_0DF@DACEDEOD@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 000000000040a1d0     PatchGuardAMD64.obj
+ 0001:00009200       ??_C@_0DG@PIFNADGI@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 000000000040a200     PatchGuardAMD64.obj
+ 0001:00009240       ??_C@_0DF@FHPKKICN@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 000000000040a240     PatchGuardAMD64.obj
+ 0001:00009270       ??_C@_0DG@IEOGDCED@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 000000000040a270     PatchGuardAMD64.obj
+ 0001:000092b0       ??_C@_0EF@OLNHNNHC@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 000000000040a2b0     PatchGuardAMD64.obj
+ 0001:000092f0       ??_C@_0EC@IIAEGNJF@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 000000000040a2f0     PatchGuardAMD64.obj
+ 0001:00009330       ??_C@_0DO@DOMHGACK@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 000000000040a330     PatchGuardAMD64.obj
+ 0001:00009370       ??_C@_0DP@MIHFMKFO@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 000000000040a370     PatchGuardAMD64.obj
+ 0001:000093b0       ??_C@_0DP@HAMJKNDL@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 000000000040a3b0     PatchGuardAMD64.obj
+ 0001:000093f0       ??_C@_0DP@GCHMACNF@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 000000000040a3f0     PatchGuardAMD64.obj
+ 0001:00009430       ??_C@_0DP@NKMAGFLA@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 000000000040a430     PatchGuardAMD64.obj
+ 0001:00009470       ??_C@_0DP@HAPGBPLE@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 000000000040a470     PatchGuardAMD64.obj
+ 0001:000094b0       ??_C@_0ED@CFFKLBJE@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 000000000040a4b0     PatchGuardAMD64.obj
+ 0001:000094f0       ??_C@_0EI@GDFEMHLK@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 000000000040a4f0     PatchGuardAMD64.obj
+ 0001:00009540       ??_C@_1EK@IFNEFFGJ@t?4xe?$AAt?$AA?2?$AAS?$AAy?$AAs?$AAt?$AAe?$AAm?$AAR?$AAo?$AAo?$AAt?$AA?2?$AAS?$AAy?$AAs?$AAt?$AAe?$AAm?$AA3?$AA2?$AA?2?$AAn?$AAt?$AAo?$AAs?$AAk?$AAr?$AAn?$AAl@ 000000000040a540     PatchGuardAMD64.obj
+ 0001:00009590       ??_C@_1CA@EKPDKKMH@t?4xe?$AAt?$AAn?$AAt?$AAo?$AAs?$AAk?$AAr?$AAn?$AAl?$AA?4?$AAe?$AAx?$AAe?$AA?$AA@ 000000000040a590     PatchGuardAMD64.obj
+ 0001:000095b0       ??_C@_0DO@JAJIAHLP@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5PatchGuard?5c@ 000000000040a5b0     PatchGuardAMD64.obj
+ 0001:000095f0       ??_C@_0DG@JNOLKHOO@?4textShark?5?9?5PatchGuard?5declassi@ 000000000040a5f0     PatchGuardAMD64.obj
+ 0001:00009630       ??_C@_0DD@OFKGGODJ@?4textShark?5?9?5PatchGuard?5encrypte@ 000000000040a630     PatchGuardAMD64.obj
+ 0001:00009660       ??_C@_0CP@BIKPJGM@?4textff?50f?500?500?50f?585?5?$DP?$DP?5?$DP?$DP?5?$DP?$DP?5@ 000000000040a660     PatchGuardAMD64.obj
+ 0001:00009690       ??_C@_0BB@KNKPKDPK@?4text48?58b?5?$DP?$DP?5e8?$AA@ 000000000040a690     PatchGuardAMD64.obj
+ 0001:000096a0       ??_C@_0GC@BFLCFAGB@?4text48?5c1?5e9?509?548?5b8?5f8?5ff?5ff?5@ 000000000040a6a0     PatchGuardAMD64.obj
+ 0001:00009700       ??_C@_0BN@BMHONOCG@?4texteb?5?$DP?$DP?5b9?51e?500?500?500?5e8?$AA@ 000000000040a700     PatchGuardAMD64.obj
+ 0001:00009720       ??_C@_0DL@BLOPFGCK@?4textb9?501?500?500?500?544?50f?522?5c1?5@ 000000000040a720     PatchGuardAMD64.obj
+ 0001:00009760       ??_C@_0DL@FMGABGHE@?4text48?581?5ec?5c0?502?500?500?548?58d?5@ 000000000040a760     PatchGuardAMD64.obj
+ 0001:000097a0       ??_C@_0EE@FJAGBHFC@?4text?$DP?$DP?589?5?$DP?$DP?500?501?500?500?548?58D?5@ 000000000040a7a0     PatchGuardAMD64.obj
+ 0001:000097e0       ??_C@_0BB@EIDDKCKH@?4textfb?548?58d?505?$AA@ 000000000040a7e0     PatchGuardAMD64.obj
+ 0001:000097f0       ??_C@_0DF@GNJNIBHH@?4text2e?548?531?511?548?531?551?508?548?5@ 000000000040a7f0     PatchGuardAMD64.obj
+ 0001:00009820       ??_C@_0DN@DEIMHDI@?4textShark?5?9?5set?5new?5entry?5for?5P@ 000000000040a820     PatchGuardAMD64.obj
+ 0001:00009860       ??_C@_0CC@NIPOJBPD@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5first?5rorkey@ 000000000040a860     PatchGuardAMD64.obj
+ 0001:00009880       ??_C@_0DI@BMDPGN@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5found?5PatchG@ 000000000040a880     PatchGuardAMD64.obj
+ 0001:000098c0       ??_C@_0DL@MGMHIEPM@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5found?5PatchG@ 000000000040a8c0     PatchGuardAMD64.obj
+ 0001:00009900       ??_C@_0DC@JAOMONMC@?4textShark?5?9?5insert?5worker?5threa@ 000000000040a900     PatchGuardAMD64.obj
+ 0001:00009930       ??_C@_0ED@HLDBPPJF@?4textShark?5?9?5?$DM?5?$CFp?5?$DO?5found?5noimag@ 000000000040a930     PatchGuardAMD64.obj
+ 0001:00009970       ??_C@_0DC@KNDODOMC@?4textNULL?5?$CB?$DN?5PatchGuardBlock?9?$DOMm@ 000000000040a970     PatchGuardAMD64.obj
+ 0001:000099a0       ??_C@_0DE@IEDKNJIM@?4textPatchGuardBlock?9?$DOMmDetermin@ 000000000040a9a0     PatchGuardAMD64.obj
+ 0001:000099d0       ??_C@_0DB@DIABLGHB@?4textNULL?5?$CB?$DN?5PatchGuardBlock?9?$DOSy@ 000000000040a9d0     PatchGuardAMD64.obj
+ 0001:00009a00       ??_C@_0DA@JOJMLDHK@?4textNULL?5?$CB?$DN?5PatchGuardBlock?9?$DOSy@ 000000000040aa00     PatchGuardAMD64.obj
+ 0001:00009a30       ??_C@_0DA@LNEHHBOA@?4textPatchGuardBlock?9?$DOSystemPtes@ 000000000040aa30     PatchGuardAMD64.obj
+ 0001:00009a60       ??_C@_0DE@NADCACGP@?4textNULL?5?$CB?$DN?5PatchGuardBlock?9?$DOEx@ 000000000040aa60     PatchGuardAMD64.obj
+ 0001:00009a90       ??_C@_0DG@DGNCDOJL@?4textPatchGuardBlock?9?$DOExpLargePo@ 000000000040aa90     PatchGuardAMD64.obj
+ 0001:00009ad0       ??_C@_0DA@CLAFGOLJ@?4text0?5?$CB?$DN?5PatchGuardBlock?9?$DOPoolB@ 000000000040aad0     PatchGuardAMD64.obj
+ 0001:00009b00       ??_C@_0DF@IMAIHNOA@?4textPatchGuardBlock?9?$DOPoolBigPag@ 000000000040ab00     PatchGuardAMD64.obj
+ 0001:00009b30       ??_C@_0CP@LOOADPFK@?4textNULL?5?$CB?$DN?5PatchGuardBlock?9?$DOPo@ 000000000040ab30     PatchGuardAMD64.obj
+ 0001:00009b60       ??_C@_0DB@KMGPPPHC@?4textPatchGuardBlock?9?$DOPoolBigPag@ 000000000040ab60     PatchGuardAMD64.obj
+ 0001:00009b90       ??_C@_0CL@IGHHDOLI@?4text0?5?$CB?$DN?5PatchGuardBlock?9?$DOSizeO@ 000000000040ab90     PatchGuardAMD64.obj
+ 0001:00009bc0       ??_C@_0DA@LJMGOFGB@?4textPatchGuardBlock?9?$DOSizeOfNtSe@ 000000000040abc0     PatchGuardAMD64.obj
+ 0001:00009bf0       ??_C@_0DF@JGKOCKBF@?4text0?5?$CB?$DN?5PatchGuardBlock?9?$DOSizeO@ 000000000040abf0     PatchGuardAMD64.obj
+ 0001:00009c20       ??_C@_0DK@GFOEFFNH@?4textPatchGuardBlock?9?$DOSizeOfCmpA@ 000000000040ac20     PatchGuardAMD64.obj
+ 0001:00009c60       ??_C@_0CM@HNCKBGDL@?4text0?5?$CB?$DN?5PatchGuardBlock?9?$DORvaOf@ 000000000040ac60     PatchGuardAMD64.obj
+ 0001:00009c90       ??_C@_0DB@CPIGNDJK@?4textPatchGuardBlock?9?$DORvaOffsetO@ 000000000040ac90     PatchGuardAMD64.obj
+ 0001:00009cc0       ??_C@_0DG@OBHOMHDE@?4textNULL?5?$CB?$DN?5PatchGuardBlock?9?$DOEx@ 000000000040acc0     PatchGuardAMD64.obj
+ 0001:00009d00       ??_C@_0DG@DDOKBAGO@?4textPatchGuardBlock?9?$DOReleaseSpi@ 000000000040ad00     PatchGuardAMD64.obj
+ 0001:00009d40       ??_C@_0DG@FCOONGDO@?4textNULL?5?$CB?$DN?5PatchGuardBlock?9?$DOEx@ 000000000040ad40     PatchGuardAMD64.obj
+ 0001:00009d80       ??_C@_0DG@KBGODHFJ@?4textPatchGuardBlock?9?$DOAcquireSpi@ 000000000040ad80     PatchGuardAMD64.obj
+ 0001:00009dc0       ??_C@_0EF@DGOCKBNM@?4text?$CFs?$CI?$CFd?$CJ?3?5Soft?5assertion?5fail@ 000000000040adc0     PatchGuardAMD64.obj
+ 0001:00009e00       ??_C@_0DA@KBGFECPE@?4textNULL?5?$CB?$DN?5PatchGuardBlock?9?$DOIo@ 000000000040ae00     PatchGuardAMD64.obj
+ 0001:00009e30       ??_C@_0DC@PJLONBBP@?4textPatchGuardBlock?9?$DOIoGetIniti@ 000000000040ae30     PatchGuardAMD64.obj
+ 0001:00009e60       ??_C@_0BI@MIAGNGMH@?4textAMD64?2StackAMD64?4c?$AA@ 000000000040ae60     StackAMD64.obj
+ 0001:00009e80       ??_C@_0CE@NMLBNFAI@?4textNT_SUCCESS?$CIGetExceptionCode@ 000000000040ae80     StackAMD64.obj
+ 0001:00009ea0       ??_C@_0BD@LMDEBGPF@?4textShark?5?9?5load?6?$AA@ 000000000040aea0     Shark.obj
+ 0001:00009eb0       ??_C@_1CK@FFECKLHO@t?4xe?$AAt?$AA?2?$AAD?$AAo?$AAs?$AAD?$AAe?$AAv?$AAi?$AAc?$AAe?$AAs?$AA?2?$AAS?$AAh?$AAa?$AAr?$AAk?$AA?$AA@ 000000000040aeb0     Shark.obj
+ 0001:00009ee0       ??_C@_0N@EEGDJDAH@?4textShark?4c?$AA@ 000000000040aee0     Shark.obj
+ 0001:00009ef0       ??_C@_0BI@IIBFDAEC@?4textNT_SUCCESS?$CIStatus?$CJ?$AA@ 000000000040aef0     Shark.obj
+ 0001:00009f10       ??_C@_1CC@NNCCLFIJ@t?4xe?$AAt?$AA?2?$AAD?$AAe?$AAv?$AAi?$AAc?$AAe?$AA?2?$AAS?$AAh?$AAa?$AAr?$AAk?$AA?$AA@ 000000000040af10     Shark.obj
+ 0001:00009f30       ??_C@_0BF@MKMEOEJC@?4textShark?5?9?5unload?6?$AA@ 000000000040af30     Shark.obj
+ 0001:00009f40       ??_C@_0L@JJEAJAOG@?4textCtx?4c?$AA@ 000000000040af40     Ctx.obj
+ 0001:00009f50       ??_C@_0BE@JNPFBIIC@?4text?$PP?$CF?$AA?$AA?$AA?$AA?$PP?$PP?$PP?$PP?$PP?$PP?$PP?$PP?$AA@ 000000000040af50     Jump.obj
+ 0001:00009f60       ??_C@_0M@FLMBKNAH@?4textLock?4c?$AA@ 000000000040af60     Lock.obj
+ 0001:00009f70       ??_C@_0BH@LKAALDFE@?4textNULL?5?$CB?$DN?5MdlLocker?$AA@ 000000000040af70     Lock.obj
+ 0001:00009f90       ??_C@_1CA@NNPKNADH@t?4xe?$AAt?$AA?2?$AAD?$AAr?$AAi?$AAv?$AAe?$AAr?$AA?2?$AAd?$AAi?$AAs?$AAk?$AA?$AA@ 000000000040af90     KernelReload.obj
+ 0001:00009fb0       ??_C@_0CH@GDMIEPNM@?4textShark?5?9?5import?5dll?5?$CFhs?5not?5@ 000000000040afb0     KernelReload.obj
+ 0001:00009fe0       ??_C@_0CN@FPKINCK@?4textShark?5?9?5import?5procedure?5?$CFh@ 000000000040afe0     KernelReload.obj
+ 0001:0000a010       ??_C@_0DE@CGNBAOIH@?4textShark?5?9?5import?5procedure?5or@ 000000000040b010     KernelReload.obj
+ 0001:0000a040       ??_C@_1DA@LBGKEKNN@t?4xe?$AAt?$AA?2?$AAS?$AAy?$AAs?$AAt?$AAe?$AAm?$AAR?$AAo?$AAo?$AAt?$AA?2?$AAS?$AAy?$AAs?$AAt?$AAe?$AAm?$AA3?$AA2?$AA?$AA@ 000000000040b040     KernelReload.obj
+ 0001:0000a070       ??_C@_0BE@BIKGKBIC@?4textKernelReload?4c?$AA@ 000000000040b070     KernelReload.obj
+ 0001:0000a080       ??_C@_0BM@GMFMBAAC@?4textNULL?5?$CB?$DN?5DataTableEntry?$AA@ 000000000040b080     KernelReload.obj
+ 0001:0000a0a0       ??_C@_0M@PAILCCAJ@?4textScan?4c?$AA@ 000000000040b0a0     Scan.obj
+ 0002:00000000       GsDriverEntry              000000000040c000 f   bufferoverflowk:gs_support.obj
+ 0003:00000000       __imp_DbgPrint             000000000040d000     ntoskrnl:ntoskrnl.exe
+ 0003:00000008       __imp_RtlImageNtHeader     000000000040d008     ntoskrnl:ntoskrnl.exe
+ 0003:00000010       __imp_ZwClose              000000000040d010     ntoskrnl:ntoskrnl.exe
+ 0003:00000018       __imp_ZwUnmapViewOfSection 000000000040d018     ntoskrnl:ntoskrnl.exe
+ 0003:00000020       __imp_RtlLookupFunctionEntry 000000000040d020     ntoskrnl:ntoskrnl.exe
+ 0003:00000028       __imp_ZwMapViewOfSection   000000000040d028     ntoskrnl:ntoskrnl.exe
+ 0003:00000030       __imp_ZwCreateSection      000000000040d030     ntoskrnl:ntoskrnl.exe
+ 0003:00000038       __imp_ZwOpenFile           000000000040d038     ntoskrnl:ntoskrnl.exe
+ 0003:00000040       __imp_RtlInitUnicodeString 000000000040d040     ntoskrnl:ntoskrnl.exe
+ 0003:00000048       __imp_PsGetVersion         000000000040d048     ntoskrnl:ntoskrnl.exe
+ 0003:00000050       __imp_MmIsAddressValid     000000000040d050     ntoskrnl:ntoskrnl.exe
+ 0003:00000058       __imp_ExFreePoolWithTag    000000000040d058     ntoskrnl:ntoskrnl.exe
+ 0003:00000060       __imp_IoGetInitialStack    000000000040d060     ntoskrnl:ntoskrnl.exe
+ 0003:00000068       __imp_IoGetStackLimits     000000000040d068     ntoskrnl:ntoskrnl.exe
+ 0003:00000070       __imp_ExAllocatePool       000000000040d070     ntoskrnl:ntoskrnl.exe
+ 0003:00000078       __imp_PsGetCurrentThreadId 000000000040d078     ntoskrnl:ntoskrnl.exe
+ 0003:00000080       __imp_PsGetCurrentProcessId 000000000040d080     ntoskrnl:ntoskrnl.exe
+ 0003:00000088       __imp_ZwQuerySystemInformation 000000000040d088     ntoskrnl:ntoskrnl.exe
+ 0003:00000090       __imp_KeSetEvent           000000000040d090     ntoskrnl:ntoskrnl.exe
+ 0003:00000098       __imp_KeWaitForSingleObject 000000000040d098     ntoskrnl:ntoskrnl.exe
+ 0003:000000a0       __imp_ExQueueWorkItem      000000000040d0a0     ntoskrnl:ntoskrnl.exe
+ 0003:000000a8       __imp_KeInitializeEvent    000000000040d0a8     ntoskrnl:ntoskrnl.exe
+ 0003:000000b0       __imp___C_specific_handler 000000000040d0b0     ntoskrnl:ntoskrnl.exe
+ 0003:000000b8       __imp_RtlVirtualUnwind     000000000040d0b8     ntoskrnl:ntoskrnl.exe
+ 0003:000000c0       __imp_RtlCaptureContext    000000000040d0c0     ntoskrnl:ntoskrnl.exe
+ 0003:000000c8       __imp_IoDeleteDevice       000000000040d0c8     ntoskrnl:ntoskrnl.exe
+ 0003:000000d0       __imp_IoCreateSymbolicLink 000000000040d0d0     ntoskrnl:ntoskrnl.exe
+ 0003:000000d8       __imp_IoCreateDevice       000000000040d0d8     ntoskrnl:ntoskrnl.exe
+ 0003:000000e0       __imp_IoDeleteSymbolicLink 000000000040d0e0     ntoskrnl:ntoskrnl.exe
+ 0003:000000e8       __imp_IofCompleteRequest   000000000040d0e8     ntoskrnl:ntoskrnl.exe
+ 0003:000000f0       __imp_ObfDereferenceObject 000000000040d0f0     ntoskrnl:ntoskrnl.exe
+ 0003:000000f8       __imp_KeInsertQueueApc     000000000040d0f8     ntoskrnl:ntoskrnl.exe
+ 0003:00000100       __imp_KeInitializeApc      000000000040d100     ntoskrnl:ntoskrnl.exe
+ 0003:00000108       __imp_PsLookupThreadByThreadId 000000000040d108     ntoskrnl:ntoskrnl.exe
+ 0003:00000110       __imp_RtlImageDirectoryEntryToData 000000000040d110     ntoskrnl:ntoskrnl.exe
+ 0003:00000118       __imp_MmMapLockedPagesSpecifyCache 000000000040d118     ntoskrnl:ntoskrnl.exe
+ 0003:00000120       __imp_IoFreeMdl            000000000040d120     ntoskrnl:ntoskrnl.exe
+ 0003:00000128       __imp_MmProbeAndLockPages  000000000040d128     ntoskrnl:ntoskrnl.exe
+ 0003:00000130       __imp_IoAllocateMdl        000000000040d130     ntoskrnl:ntoskrnl.exe
+ 0003:00000138       __imp_MmUnlockPages        000000000040d138     ntoskrnl:ntoskrnl.exe
+ 0003:00000140       __imp_RtlAssert            000000000040d140     ntoskrnl:ntoskrnl.exe
+ 0003:00000148       __imp_RtlEqualUnicodeString 000000000040d148     ntoskrnl:ntoskrnl.exe
+ 0003:00000150       __imp_ObReferenceObjectByName 000000000040d150     ntoskrnl:ntoskrnl.exe
+ 0003:00000158       __imp_IoDriverObjectType   000000000040d158     ntoskrnl:ntoskrnl.exe
+ 0003:00000158       IoDriverObjectType         000000000040d158     ntoskrnl:ntoskrnl.exe
+ 0003:00000160       __imp_MmHighestUserAddress 000000000040d160     ntoskrnl:ntoskrnl.exe
+ 0003:00000160       MmHighestUserAddress       000000000040d160     ntoskrnl:ntoskrnl.exe
+ 0003:00000168       __imp_RtlCharToInteger     000000000040d168     ntoskrnl:ntoskrnl.exe
+ 0003:00000170       __imp_RtlFreeUnicodeString 000000000040d170     ntoskrnl:ntoskrnl.exe
+ 0003:00000178       __imp_RtlAnsiStringToUnicodeString 000000000040d178     ntoskrnl:ntoskrnl.exe
+ 0003:00000180       __imp_RtlInitAnsiString    000000000040d180     ntoskrnl:ntoskrnl.exe
+ 0003:00000188       __imp_strchr               000000000040d188     ntoskrnl:ntoskrnl.exe
+ 0003:00000190       __imp__stricmp             000000000040d190     ntoskrnl:ntoskrnl.exe
+ 0003:00000198       __imp_MmAllocateContiguousMemory 000000000040d198     ntoskrnl:ntoskrnl.exe
+ 0003:000001a0       __imp_wcslen               000000000040d1a0     ntoskrnl:ntoskrnl.exe
+ 0003:000001a8       __imp_wcscat               000000000040d1a8     ntoskrnl:ntoskrnl.exe
+ 0003:000001b0       __imp_wcscpy               000000000040d1b0     ntoskrnl:ntoskrnl.exe
+ 0003:000001b8       __imp_wcsrchr              000000000040d1b8     ntoskrnl:ntoskrnl.exe
+ 0003:000001c0       __imp_MmFreeContiguousMemory 000000000040d1c0     ntoskrnl:ntoskrnl.exe
+ 0003:000001c8       __imp_isxdigit             000000000040d1c8     ntoskrnl:ntoskrnl.exe
+ 0003:000001d0       __imp_strlen               000000000040d1d0     ntoskrnl:ntoskrnl.exe
+ 0003:000001d8       __imp_RtlCompareMemory     000000000040d1d8     ntoskrnl:ntoskrnl.exe
+ 0003:000001e0       __imp_KeBugCheckEx         000000000040d1e0     ntoskrnl:ntoskrnl.exe
+ 0003:000001e8       \177ntoskrnl_NULL_THUNK_DATA 000000000040d1e8     ntoskrnl:ntoskrnl.exe
+ 0003:00000240       KiFindFirstSetRight        000000000040d240     PatchGuardAMD64.obj
+ 0003:00000340       KiFindFirstSetLeft         000000000040d340     PatchGuardAMD64.obj
+ 0003:00000440       RtlAlternateDosPathSeparatorString 000000000040d440     PatchGuardAMD64.obj
+ 0003:00000450       ??_C@_13CGOKJPIL@?$AA?1?$AA?$AA@ 000000000040d450     PatchGuardAMD64.obj
+ 0003:00000458       RtlDosPathSeparatorsString 000000000040d458     PatchGuardAMD64.obj
+ 0003:00000468       ??_C@_15MNCACJLI@?$AA?2?$AA?1?$AA?$AA@ 000000000040d468     PatchGuardAMD64.obj
+ 0003:00000470       RtlNtPathSeparatorString   000000000040d470     PatchGuardAMD64.obj
+ 0003:00000480       ??_C@_13FPGAJAPJ@?$AA?2?$AA?$AA@ 000000000040d480     PatchGuardAMD64.obj
+ 0003:00000490       ?s_rceCopyTable@CDetourDis@@1QBUCOPYENTRY@1@B 000000000040d490     disasm.obj
+ 0003:000014a0       ?s_rceCopyTable0F@CDetourDis@@1QBUCOPYENTRY@1@B 000000000040e4a0     disasm.obj
+ 0003:000024b0       ?s_rbModRm@CDetourDis@@1QBEB 000000000040f4b0     disasm.obj
+ 0003:0000293c       __IMPORT_DESCRIPTOR_ntoskrnl 000000000040f93c     ntoskrnl:ntoskrnl.exe
+ 0003:00002950       __NULL_IMPORT_DESCRIPTOR   000000000040f950     ntoskrnl:ntoskrnl.exe
+ 0004:00000000       HotPatchBuffer             0000000000411000     HOTPATCH.obj
+ 0004:00000400       __security_cookie_complement 0000000000411400     bufferoverflowk:gs_support.obj
+ 0004:00000408       __security_cookie          0000000000411408     bufferoverflowk:gs_support.obj
+ 0004:00000438       MmPfnOwner                 0000000000411438     <common>
+ 0004:00000440       MmSessionFailureCauses     0000000000411440     <common>
 
  entry point at        0002:00000000
 
  Static symbols
 
- 0001:00003b20       WalkFrameChain$filt$0      0000000000404b20 f   StackAMD64.obj
- 0001:00004290       RemoteCall$filt$0          0000000000405290 f   Ctx.obj
- 0001:00004670       DetourGetInstructionLength$filt$0 0000000000405670 f   Jump.obj
- 0001:00004c60       ProbeAndLockPages$filt$0   0000000000405c60 f   Lock.obj
+ 0001:00004050       WalkFrameChain$filt$0      0000000000405050 f   StackAMD64.obj
+ 0001:000047c0       RemoteCall$filt$0          00000000004057c0 f   Ctx.obj
+ 0001:00004ba0       DetourGetInstructionLength$filt$0 0000000000405ba0 f   Jump.obj
+ 0001:00005190       ProbeAndLockPages$filt$0   0000000000406190 f   Lock.obj

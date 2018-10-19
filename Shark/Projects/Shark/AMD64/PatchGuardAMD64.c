@@ -844,27 +844,64 @@ InitializePatchGuardBlock(
                         0 == _CmpByte(ControlPc[2], 0x0d)) {
                         TargetPc = RvaToVa(ControlPc + 3);
 
-                        PatchGuardBlock->MiKernelStackPteInfo.BitMap = TargetPc;
+                        PatchGuardBlock->SystemPtes.BitMap = TargetPc;
 
 #ifndef VMP
                         DbgPrint(
-                            "Shark - < %p > PatchGuard clear context MiKernelStackPteInfo.BitMap\n",
-                            PatchGuardBlock->MiKernelStackPteInfo.BitMap);
+                            "Shark - < %p > PatchGuard clear context SystemPtes.BitMap\n",
+                            PatchGuardBlock->SystemPtes.BitMap);
 #endif // !VMP
 
                         if (PatchGuardBlock->BuildNumber < 9600) {
-                            PatchGuardBlock->MiKernelStackPteInfo.BasePte = *(PMMPTE *)
-                                ((PCHAR)(PatchGuardBlock->MiKernelStackPteInfo.BitMap + 1) + sizeof(ULONG) * 2);
+                            PatchGuardBlock->SystemPtes.BasePte = *(PMMPTE *)
+                                ((PCHAR)(PatchGuardBlock->SystemPtes.BitMap + 1) + sizeof(ULONG) * 2);
                         }
                         else {
-                            PatchGuardBlock->MiKernelStackPteInfo.BasePte = *(PMMPTE *)
-                                (PatchGuardBlock->MiKernelStackPteInfo.BitMap + 1);
+                            PatchGuardBlock->SystemPtes.BasePte = *(PMMPTE *)
+                                (PatchGuardBlock->SystemPtes.BitMap + 1);
                         }
 
 #ifndef VMP
                         DbgPrint(
-                            "Shark - < %p > PatchGuard clear context MiKernelStackPteInfo.BasePte\n",
-                            PatchGuardBlock->MiKernelStackPteInfo.BasePte);
+                            "Shark - < %p > PatchGuard clear context SystemPtes.BasePte\n",
+                            PatchGuardBlock->SystemPtes.BasePte);
+#endif // !VMP
+
+                        break;
+                    }
+                }
+
+                ControlPc += Length;
+            }
+        }
+
+        ControlPc = GetProcedureAddress(
+            PatchGuardBlock->KernelDataTableEntry->DllBase,
+            "KeCapturePersistentThreadState",
+            0);
+
+        if (NULL != ControlPc) {
+            while (TRUE) {
+                Length = DetourGetInstructionLength(ControlPc);
+
+                if (1 == Length) {
+                    if (0 == _CmpByte(ControlPc[0], 0xc3)) {
+                        break;
+                    }
+                }
+
+                if (7 == Length) {
+                    if (0 == _CmpByte(ControlPc[0], 0x48) &&
+                        0 == _CmpByte(ControlPc[1], 0x8b) &&
+                        0 == _CmpByte(ControlPc[2], 0x05)) {
+                        TargetPc = RvaToVa(ControlPc + 3);
+
+                        PatchGuardBlock->MmPfnDatabase = TargetPc;
+
+#ifndef VMP
+                        DbgPrint(
+                            "Shark - < %p > PatchGuard clear context MmPfnDatabase\n",
+                            PatchGuardBlock->MmPfnDatabase);
 #endif // !VMP
 
                         break;
@@ -1140,7 +1177,7 @@ CompareEncryptedContextFields(
     PCHAR TargetPc = NULL;
     SIZE_T Index = 0;
     ULONG64 RorKey = 0;
-    ULONG64 FirstRorKey = 0;
+    ULONG RorKeyIndex = 0;
     PULONG64 CompareFields = NULL;
     PVOID PatchGuardContext = NULL;
 
@@ -1179,39 +1216,48 @@ CompareEncryptedContextFields(
             }
         }
         else {
+            RorKeyIndex = 0;
+
             RorKey = __ROR64(RorKey, PG_FIELD_BITS);
 
             if (FALSE != PatchGuardBlock->IsBtcEncryptedEnable) {
                 RorKey = _btc64(RorKey, RorKey);
             }
 
+            RorKeyIndex++;
+
             if ((ULONG64)(CompareFields[2] ^ RorKey) == (ULONG64)PatchGuardBlock->CompareFields[2]) {
-                RorKey = __ROR64(RorKey, PG_FIELD_BITS - 1);
+                RorKey = __ROR64(RorKey, PG_FIELD_BITS - RorKeyIndex);
 
                 if (FALSE != PatchGuardBlock->IsBtcEncryptedEnable) {
                     RorKey = _btc64(RorKey, RorKey);
                 }
 
+                RorKeyIndex++;
+
                 if ((ULONG64)(CompareFields[1] ^ RorKey) == (ULONG64)PatchGuardBlock->CompareFields[1]) {
-                    RorKey = __ROR64(RorKey, PG_FIELD_BITS - 2);
+                    RorKey = __ROR64(RorKey, PG_FIELD_BITS - RorKeyIndex);
 
                     if (FALSE != PatchGuardBlock->IsBtcEncryptedEnable) {
                         RorKey = _btc64(RorKey, RorKey);
                     }
 
+                    RorKeyIndex++;
+
                     if ((ULONG64)(CompareFields[0] ^ RorKey) == (ULONG64)PatchGuardBlock->CompareFields[0]) {
                         PatchGuardContext = TargetPc - PG_FIRST_FIELD_OFFSET;
 
-                        RorKey = __ROR64(CompareFields[0] ^ PatchGuardBlock->CompareFields[0], PG_FIELD_BITS - 3);
+                        RorKey = CompareFields[0] ^ PatchGuardBlock->CompareFields[0];
 
-                        if (FALSE != PatchGuardBlock->IsBtcEncryptedEnable) {
-                            RorKey = _btc64(RorKey, RorKey);
+                        for (;
+                            RorKeyIndex < PG_FIELD_BITS;
+                            RorKeyIndex++) {
+                            RorKey = __ROR64(RorKey, PG_FIELD_BITS - RorKeyIndex);
+
+                            if (FALSE != PatchGuardBlock->IsBtcEncryptedEnable) {
+                                RorKey = _btc64(RorKey, RorKey);
+                            }
                         }
-
-                        FirstRorKey = GetKeyOffset(
-                            PatchGuardBlock->IsBtcEncryptedEnable,
-                            RorKey,
-                            PG_KEY_INTERVAL - (PG_FIELD_BITS - 2));
 
 #ifndef VMP
                         DbgPrint(
@@ -1220,13 +1266,13 @@ CompareEncryptedContextFields(
 
                         DbgPrint(
                             "Shark - < %p > first rorkey\n",
-                            FirstRorKey);
+                            RorKey);
 #endif // !VMP
 
                         SetNewEntryForEncryptedContext(
                             PatchGuardBlock,
                             PatchGuardContext,
-                            FirstRorKey);
+                            RorKey);
 
                         break;
                     }
@@ -1240,7 +1286,7 @@ CompareEncryptedContextFields(
 
 VOID
 NTAPI
-ClearPagesEncryptedContext(
+ClearSystemPtesEncryptedContext(
     __inout PPATCHGUARD_BLOCK PatchGuardBlock
 )
 {
@@ -1248,14 +1294,10 @@ ClearPagesEncryptedContext(
     PFN_NUMBER NumberOfPtes = 0;
     PMMPTE BasePte = NULL;
     PMMPTE PointerPte = NULL;
-    PVOID BaseAddress = NULL;
-    PVOID PointerAddress = NULL;
+    PVOID BaseVa = NULL;
+    PVOID PointerVa = NULL;
 
-    PMMPTE LastPte = NULL;
-    PVOID LastAddress = NULL;
-
-    PVOID CompareBegin = NULL;
-    PVOID CompareEnd = NULL;
+    PVOID LastVa = NULL;
 
     /*
     PatchGuard Context pages allocate by MmAllocateIndependentPages
@@ -1301,33 +1343,32 @@ ClearPagesEncryptedContext(
             ( MM_PTE_OWNER_MASK | MM_PTE_WRITE_THROUGH_MASK | MM_PTE_CACHE_DISABLE_MASK | \
                 MM_PTE_LARGE_PAGE_MASK | MM_PTE_COPY_ON_WRITE_MASK | MM_PTE_PROTOTYPE_MASK )
 
-    BaseAddress = MiGetVirtualAddressMappedByPte(
+    BaseVa = MiGetVirtualAddressMappedByPte(
         PatchGuardBlock->PteBase,
-        PatchGuardBlock->MiKernelStackPteInfo.BasePte);
+        PatchGuardBlock->SystemPtes.BasePte);
 
-    BasePte = PatchGuardBlock->MiKernelStackPteInfo.BasePte;
+    BasePte = PatchGuardBlock->SystemPtes.BasePte;
 
     NumberOfPtes =
-        PatchGuardBlock->MiKernelStackPteInfo.BitMap->SizeOfBitMap * 8;
+        PatchGuardBlock->SystemPtes.BitMap->SizeOfBitMap * 8;
 
     for (Index = 0;
         Index < NumberOfPtes;
         Index++) {
         PointerPte = BasePte + Index;
-        PointerAddress = (PCHAR)BaseAddress + PAGE_SIZE * Index;
+        PointerVa = (PCHAR)BaseVa + PAGE_SIZE * Index;
 
-        if (FALSE != MmIsAddressValid(PointerAddress)) {
+        if (FALSE != MmIsAddressValid(PointerVa)) {
             if (FALSE != MI_IS_PTE_EXECUTABLE(PointerPte)) {
                 if (VALID_PTE_SET_BITS == (PointerPte->u.Long & VALID_PTE_SET_BITS)) {
                     if (0 == (PointerPte->u.Long & VALID_PTE_UNSET_BITS)) {
-                        LastPte = PointerPte;
-                        LastAddress = PointerAddress;
+                        LastVa = PointerVa;
 
                         while (Index++) {
                             PointerPte = BasePte + Index;
-                            PointerAddress = (PCHAR)BaseAddress + PAGE_SIZE * Index;
+                            PointerVa = (PCHAR)BaseVa + PAGE_SIZE * Index;
 
-                            if (FALSE == MmIsAddressValid(PointerAddress)) {
+                            if (FALSE == MmIsAddressValid(PointerVa)) {
                                 break;
                             }
 
@@ -1344,13 +1385,10 @@ ClearPagesEncryptedContext(
                             }
                         }
 
-                        CompareBegin = LastAddress;
-                        CompareEnd = (PCHAR)PointerAddress - PatchGuardBlock->SizeOfCmpAppendDllSection;
-
                         CompareEncryptedContextFields(
                             PatchGuardBlock,
-                            CompareBegin,
-                            CompareEnd);
+                            LastVa,
+                            (PCHAR)PointerVa - PatchGuardBlock->SizeOfCmpAppendDllSection);
                     }
                 }
             }
@@ -1412,7 +1450,18 @@ GetVirtualAddressRegion(
 {
     BOOLEAN Result = FALSE;
     KIRQL Irql = 0;
-    SIZE_T Index = 0;
+    PFN_NUMBER Index = 0;
+    PFN_NUMBER NumberOfPtes = 0;
+    PMMPTE BasePte = NULL;
+    PMMPTE PointerPte = NULL;
+    PVOID BaseVa = NULL;
+    PVOID PointerVa = NULL;
+
+    PMMPTE LastPte = NULL;
+    PVOID LastVa = NULL;
+
+    *BaseAddress = NULL;
+    *RegionSize = 0;
 
     Irql = PatchGuardBlock->ExAcquireSpinLockShared(PatchGuardBlock->ExpLargePoolTableLock);
 
@@ -1438,6 +1487,64 @@ GetVirtualAddressRegion(
     }
 
     PatchGuardBlock->ExReleaseSpinLockShared(PatchGuardBlock->ExpLargePoolTableLock, Irql);
+
+    BaseAddress = MiGetVirtualAddressMappedByPte(
+        PatchGuardBlock->PteBase,
+        PatchGuardBlock->SystemPtes.BasePte);
+
+    BasePte = PatchGuardBlock->SystemPtes.BasePte;
+
+    NumberOfPtes =
+        PatchGuardBlock->SystemPtes.BitMap->SizeOfBitMap * 8;
+
+    for (Index = 0;
+        Index < NumberOfPtes;
+        Index++) {
+        PointerPte = BasePte + Index;
+        PointerVa = (PCHAR)BaseVa + PAGE_SIZE * Index;
+
+        if (FALSE != MmIsAddressValid(PointerVa)) {
+            if (FALSE != MI_IS_PTE_EXECUTABLE(PointerPte)) {
+                if (VALID_PTE_SET_BITS == (PointerPte->u.Long & VALID_PTE_SET_BITS)) {
+                    if (0 == (PointerPte->u.Long & VALID_PTE_UNSET_BITS)) {
+                        LastPte = PointerPte;
+                        LastVa = PointerVa;
+
+                        while (Index++) {
+                            PointerPte = BasePte + Index;
+                            PointerVa = (PCHAR)BaseAddress + PAGE_SIZE * Index;
+
+                            if (FALSE == MmIsAddressValid(PointerVa)) {
+                                break;
+                            }
+
+                            if (FALSE == MI_IS_PTE_EXECUTABLE(PointerPte)) {
+                                break;
+                            }
+
+                            if (VALID_PTE_SET_BITS != (PointerPte->u.Long & VALID_PTE_SET_BITS)) {
+                                break;
+                            }
+
+                            if (0 != (PointerPte->u.Long & VALID_PTE_UNSET_BITS)) {
+                                break;
+                            }
+                        }
+
+                        if ((ULONG64)VirtualAddress >= (ULONG64)LastVa &&
+                            (ULONG64)VirtualAddress < (ULONG64)PointerVa) {
+                            *BaseAddress = LastVa;
+                            *RegionSize = (SIZE_T)
+                                ((PCHAR)PointerVa - (PCHAR)LastVa - PatchGuardBlock->SizeOfCmpAppendDllSection);
+
+                            Result = TRUE;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     return Result;
 }
@@ -1692,7 +1799,7 @@ ClearPatchGuardWorker(
     __inout PPATCHGUARD_BLOCK PatchGuardBlock
 )
 {
-    ClearPagesEncryptedContext(PatchGuardBlock);
+    ClearSystemPtesEncryptedContext(PatchGuardBlock);
     ClearPoolEncryptedContext(PatchGuardBlock);
     CheckAllWorkerThread(PatchGuardBlock);
 
@@ -1748,11 +1855,11 @@ DisablePatchGuard(
 
     RTL_SOFT_ASSERTMSG(
         "PatchGuardBlock->SystemPtesState not found",
-        NULL != PatchGuardBlock->MiKernelStackPteInfo.BitMap);
+        NULL != PatchGuardBlock->SystemPtes.BitMap);
 
     RTL_SOFT_ASSERTMSG(
         "PatchGuardBlock->SystemPtesState not found",
-        NULL != PatchGuardBlock->MiKernelStackPteInfo.BasePte);
+        NULL != PatchGuardBlock->SystemPtes.BasePte);
 
     RTL_SOFT_ASSERTMSG(
         "PatchGuardBlock->MmDeterminePoolType not found",
