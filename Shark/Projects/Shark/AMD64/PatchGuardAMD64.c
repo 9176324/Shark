@@ -896,7 +896,7 @@ InitializePatchGuardBlock(
                         0 == _CmpByte(ControlPc[2], 0x05)) {
                         TargetPc = RvaToVa(ControlPc + 3);
 
-                        PatchGuardBlock->MmPfnDatabase = TargetPc;
+                        PatchGuardBlock->MmPfnDatabase = *(PMMPFN *)TargetPc;
 
 #ifndef VMP
                         DbgPrint(
@@ -1088,9 +1088,9 @@ SetNewEntryForEncryptedContext(
     ULONG Index = 0;
     PCHAR ControlPc = NULL;
 
-    // xor encode must be align 8 byte;
+    // xor code must be align 8 byte;
 
-    // get pg entry offset in encode code
+    // get PatchGuard entry offset in encrypted code
 
     FieldIndex = (PatchGuardBlock->RvaOffsetOfEntry -
         PatchGuardBlock->SizeOfCmpAppendDllSection) / sizeof(ULONG64);
@@ -1113,7 +1113,7 @@ SetNewEntryForEncryptedContext(
 
     RvaOfEntry = *(PULONG)((PCHAR)&FieldBuffer + (PatchGuardBlock->RvaOffsetOfEntry & 7));
 
-    // copy pg entry head code to temp bufer and decode
+    // copy PatchGuard entry head code to temp bufer and decode
 
     FieldIndex = (RvaOfEntry - PatchGuardBlock->SizeOfCmpAppendDllSection) / sizeof(ULONG64);
 
@@ -1133,7 +1133,7 @@ SetNewEntryForEncryptedContext(
         FieldBuffer[Index] = FieldBuffer[Index] ^ LastRorKey;
     }
 
-    // set temp buffer pg entry head jmp to _ClearEncryptedContext an encode
+    // set temp buffer PatchGuard entry head jmp to _ClearEncryptedContext and encrypt
 
     ControlPc = (PCHAR)&FieldBuffer + (RvaOfEntry & 7);
 
@@ -1152,8 +1152,8 @@ SetNewEntryForEncryptedContext(
         FieldBuffer[Index] = FieldBuffer[Index] ^ LastRorKey;
     }
 
-    // copy temp buffer pg entry head to old address, 
-    // when PatchGuard code decode self jmp _ClearEncryptedContext.
+    // copy temp buffer PatchGuard entry head to old address, 
+    // when PatchGuard code decrypt self jmp _ClearEncryptedContext.
 
     RtlCopyMemory(
         (PCHAR)PatchGuardContext + (RvaOfEntry & ~7),
@@ -1297,6 +1297,7 @@ ClearSystemPtesEncryptedContext(
     PVOID BaseVa = NULL;
     PVOID PointerVa = NULL;
 
+    PMMPTE LastPte = NULL;
     PVOID LastVa = NULL;
 
     /*
@@ -1362,6 +1363,7 @@ ClearSystemPtesEncryptedContext(
             if (FALSE != MI_IS_PTE_EXECUTABLE(PointerPte)) {
                 if (VALID_PTE_SET_BITS == (PointerPte->u.Long & VALID_PTE_SET_BITS)) {
                     if (0 == (PointerPte->u.Long & VALID_PTE_UNSET_BITS)) {
+                        LastPte = PointerPte;
                         LastVa = PointerVa;
 
                         while (Index++) {
@@ -1383,12 +1385,20 @@ ClearSystemPtesEncryptedContext(
                             if (0 != (PointerPte->u.Long & VALID_PTE_UNSET_BITS)) {
                                 break;
                             }
+
+                            if (PointerPte->u.Hard.PageFrameNumber !=
+                                (PointerPte - 1)->u.Hard.PageFrameNumber + 1) {
+                                LastPte = PointerPte;
+                                LastVa = PointerVa;
+                            }
                         }
 
-                        CompareEncryptedContextFields(
-                            PatchGuardBlock,
-                            LastVa,
-                            (PCHAR)PointerVa - PatchGuardBlock->SizeOfCmpAppendDllSection);
+                        if ((PointerPte - LastPte) * PAGE_SIZE > PatchGuardBlock->SizeOfNtSection) {
+                            CompareEncryptedContextFields(
+                                PatchGuardBlock,
+                                LastVa,
+                                (PCHAR)PointerVa - PatchGuardBlock->SizeOfCmpAppendDllSection);
+                        }
                     }
                 }
             }
@@ -1486,59 +1496,66 @@ GetVirtualAddressRegion(
         }
     }
 
-    PatchGuardBlock->ExReleaseSpinLockShared(PatchGuardBlock->ExpLargePoolTableLock, Irql);
+    if (FALSE == Result) {
+        PatchGuardBlock->ExReleaseSpinLockShared(PatchGuardBlock->ExpLargePoolTableLock, Irql);
 
-    BaseAddress = MiGetVirtualAddressMappedByPte(
-        PatchGuardBlock->PteBase,
-        PatchGuardBlock->SystemPtes.BasePte);
+        BaseAddress = MiGetVirtualAddressMappedByPte(
+            PatchGuardBlock->PteBase,
+            PatchGuardBlock->SystemPtes.BasePte);
 
-    BasePte = PatchGuardBlock->SystemPtes.BasePte;
+        BasePte = PatchGuardBlock->SystemPtes.BasePte;
 
-    NumberOfPtes =
-        PatchGuardBlock->SystemPtes.BitMap->SizeOfBitMap * 8;
+        NumberOfPtes =
+            PatchGuardBlock->SystemPtes.BitMap->SizeOfBitMap * 8;
 
-    for (Index = 0;
-        Index < NumberOfPtes;
-        Index++) {
-        PointerPte = BasePte + Index;
-        PointerVa = (PCHAR)BaseVa + PAGE_SIZE * Index;
+        for (Index = 0;
+            Index < NumberOfPtes;
+            Index++) {
+            PointerPte = BasePte + Index;
+            PointerVa = (PCHAR)BaseVa + PAGE_SIZE * Index;
 
-        if (FALSE != MmIsAddressValid(PointerVa)) {
-            if (FALSE != MI_IS_PTE_EXECUTABLE(PointerPte)) {
-                if (VALID_PTE_SET_BITS == (PointerPte->u.Long & VALID_PTE_SET_BITS)) {
-                    if (0 == (PointerPte->u.Long & VALID_PTE_UNSET_BITS)) {
-                        LastPte = PointerPte;
-                        LastVa = PointerVa;
+            if (FALSE != MmIsAddressValid(PointerVa)) {
+                if (FALSE != MI_IS_PTE_EXECUTABLE(PointerPte)) {
+                    if (VALID_PTE_SET_BITS == (PointerPte->u.Long & VALID_PTE_SET_BITS)) {
+                        if (0 == (PointerPte->u.Long & VALID_PTE_UNSET_BITS)) {
+                            LastPte = PointerPte;
+                            LastVa = PointerVa;
 
-                        while (Index++) {
-                            PointerPte = BasePte + Index;
-                            PointerVa = (PCHAR)BaseAddress + PAGE_SIZE * Index;
+                            while (Index++) {
+                                PointerPte = BasePte + Index;
+                                PointerVa = (PCHAR)BaseAddress + PAGE_SIZE * Index;
 
-                            if (FALSE == MmIsAddressValid(PointerVa)) {
-                                break;
+                                if (FALSE == MmIsAddressValid(PointerVa)) {
+                                    break;
+                                }
+
+                                if (FALSE == MI_IS_PTE_EXECUTABLE(PointerPte)) {
+                                    break;
+                                }
+
+                                if (VALID_PTE_SET_BITS != (PointerPte->u.Long & VALID_PTE_SET_BITS)) {
+                                    break;
+                                }
+
+                                if (0 != (PointerPte->u.Long & VALID_PTE_UNSET_BITS)) {
+                                    break;
+                                }
+
+                                if (PointerPte->u.Hard.PageFrameNumber !=
+                                    (PointerPte - 1)->u.Hard.PageFrameNumber + 1) {
+                                    LastPte = PointerPte;
+                                    LastVa = PointerVa;
+                                }
                             }
 
-                            if (FALSE == MI_IS_PTE_EXECUTABLE(PointerPte)) {
+                            if ((ULONG64)VirtualAddress >= (ULONG64)LastVa &&
+                                (ULONG64)VirtualAddress < (ULONG64)PointerVa) {
+                                *BaseAddress = LastVa;
+                                *RegionSize = (SIZE_T)((PCHAR)PointerVa - (PCHAR)LastVa);
+
+                                Result = TRUE;
                                 break;
                             }
-
-                            if (VALID_PTE_SET_BITS != (PointerPte->u.Long & VALID_PTE_SET_BITS)) {
-                                break;
-                            }
-
-                            if (0 != (PointerPte->u.Long & VALID_PTE_UNSET_BITS)) {
-                                break;
-                            }
-                        }
-
-                        if ((ULONG64)VirtualAddress >= (ULONG64)LastVa &&
-                            (ULONG64)VirtualAddress < (ULONG64)PointerVa) {
-                            *BaseAddress = LastVa;
-                            *RegionSize = (SIZE_T)
-                                ((PCHAR)PointerVa - (PCHAR)LastVa - PatchGuardBlock->SizeOfCmpAppendDllSection);
-
-                            Result = TRUE;
-                            break;
                         }
                     }
                 }

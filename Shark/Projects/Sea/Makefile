@@ -122,7 +122,12 @@ LINKLIBPATH = \
 
 LINKIGNORE = /IGNORE:4087,4001,4010,4037,4039,4065,4070,4078,4087,4089,4221,4198
 BUILDLIBS = ntdll.lib bufferoverflow.lib \
-            kernel32.lib msvcrt.lib shell32.lib
+!if "$(ARCTARG)" == "I386"
+    \
+!else if "$(ARCTARG)" == "AMD64"
+    gshandler.obj gshandlerseh.obj \
+!endif
+    kernel32.lib msvcrt.lib shell32.lib
 
 LINKFLAGS = $(LINKIGNORE) /WX /NODEFAULTLIB /machine:$(ARCH) /debug /debugtype:cv,fixup
 LINK = link.exe /nologo
