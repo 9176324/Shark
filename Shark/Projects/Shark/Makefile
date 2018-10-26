@@ -69,6 +69,9 @@ PROJOBJS = $(ASOBJS) $(CCARCHOBJS) $(CCOBJS) $(RCOBJS)
 
 PROJSRCS = \
     $(ARCTARG)\$(ARCTARG).asm \
+    $(ARCTARG)\PatchGuard$(ARCTARG).c \
+    $(ARCTARG)\PatchGuardInline$(ARCTARG).c \
+    $(ARCTARG)\Stack$(ARCTARG).c \
     $(PROJ).c \
     Ctx.c \
     Cmp$(ARCTARG).asm \
@@ -77,11 +80,8 @@ PROJSRCS = \
     Lock.c \
     KernelReload.c \
     PatchGuard.c \
-    PatchGuard$(ARCTARG).c \
-    PatchGuardInline$(ARCTARG).c \
     Scan.c \
-    Stack.c \
-    Stack$(ARCTARG).c
+    Stack.c
 
 !if "$(ARCTARG)" == "I386"
 TARGDEFS = /D_X86_=1 /Di386=1 /DSTD_CALL /DFPO=0
@@ -89,7 +89,6 @@ TARGAOPTS = /safeseh /coff /Zm
 TARGCOPTS = /Gz /Gm- /GX- /G7 /Ze /Gi- /QIfdiv- /Od /Oy-
 TARGLOPTS = 
 HOTPATCH = /stub:$(LABS)\WRK\base\ntos\BUILD\PREBUILT\$(ARCTARG)\STUB512.com
-DETOURSOBJS = disasm.obj
 ARCH = X86
 ARCHML = ml
 !else
@@ -98,7 +97,6 @@ TARGAOPTS =
 TARGCOPTS = /Wp64 /Od /EHs-c- /Gs12288
 TARGLOPTS = /IGNORE:4108,4088,4218,4218,4235
 HOTPATCH = $(LABS)\WRK\base\ntos\BUILD\PREBUILT\$(ARCTARG)\HOTPATCH.obj
-DETOURSOBJS = disasm.obj gshandler.obj
 ARCH = AMD64
 ARCHML = ml64
 !endif
@@ -143,7 +141,12 @@ LINKLIBPATH = \
 
 LINKIGNORE = /IGNORE:4087,4001,4010,4037,4039,4065,4070,4078,4087,4089,4221,4198
 BUILDLIBS = hal.lib ntoskrnl.lib bufferoverflowk.lib \
-            $(DETOURSOBJS)
+!if "$(ARCTARG)" == "I386"
+    \
+!else if "$(ARCTARG)" == "AMD64"
+    gshandler.obj gshandlerseh.obj \
+!endif
+    disasm.obj
 
 LINKFLAGS = $(LINKIGNORE) /WX /NODEFAULTLIB /machine:$(ARCH) /debug /debugtype:cv,fixup
 LINK = link.exe /nologo

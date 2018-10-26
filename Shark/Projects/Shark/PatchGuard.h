@@ -19,6 +19,8 @@
 #ifndef _PATCHGUARD_H_
 #define _PATCHGUARD_H_
 
+#include "..\..\WRK\base\ntos\mm\mi.h"
+
 #include "KernelReload.h"
 
 #ifdef __cplusplus
@@ -151,7 +153,7 @@ extern "C" {
         struct {
             PRTL_BITMAP BitMap;
             PMMPTE BasePte;
-        }MiKernelStackPteInfo;
+        }SystemPtes;
 
         BOOLEAN IsBtcEncryptedEnable;
         ULONG RvaOffsetOfEntry;

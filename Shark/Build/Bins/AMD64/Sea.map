@@ -1,25 +1,27 @@
  Sea
 
- Timestamp is 5bc49aa0 (Mon Oct 15 21:48:16 2018)
+ Timestamp is 5bcd4871 (Mon Oct 22 11:48:01 2018)
 
  Preferred load address is 0000000000400000
 
  Start         Length     Name                   Class
- 0001:00000000 000013a6H .text                   CODE
- 0001:000013b0 000002a3H .text$s                 CODE
+ 0001:00000000 000013a0H .text                   CODE
+ 0001:000013a0 0000002eH .text$00                CODE
+ 0001:000013d0 00000105H .text$mn                CODE
+ 0001:000014e0 000002a3H .text$s                 CODE
  0002:00000000 00000118H .idata$5                DATA
  0002:00000118 00000008H .CRT$XCC                DATA
  0002:00000120 000000a8H .rdata                  DATA
  0002:000001c8 00000040H .rdata$debug            DATA
- 0002:00000208 00000090H .xdata                  DATA
- 0002:00000298 00000028H .idata$2                DATA
- 0002:000002c0 00000014H .idata$3                DATA
- 0002:000002d8 00000118H .idata$4                DATA
- 0002:000003f0 0000027cH .idata$6                DATA
- 0002:00000670 00000030H .edata                  DATA
+ 0002:00000208 000000c4H .xdata                  DATA
+ 0002:000002cc 00000028H .idata$2                DATA
+ 0002:000002f4 00000014H .idata$3                DATA
+ 0002:00000308 00000118H .idata$4                DATA
+ 0002:00000420 0000027cH .idata$6                DATA
+ 0002:000006a0 00000030H .edata                  DATA
  0003:00000000 00000410H .data                   DATA
  0003:00000410 00000578H .bss                    DATA
- 0004:00000000 00000090H .pdata                  DATA
+ 0004:00000000 000000b4H .pdata                  DATA
  0005:00000000 00000290H .rsrc$01                DATA
  0005:00000290 000288d8H .rsrc$02                DATA
 
@@ -62,6 +64,7 @@
  0001:00001134       RtlAdjustPrivilege         0000000000402134 f   ntdll:ntdll.dll
  0001:0000113a       NtDeleteKey                000000000040213a f   ntdll:ntdll.dll
  0001:00001140       NtUnloadDriver             0000000000402140 f   ntdll:ntdll.dll
+ 0001:00001146       __C_specific_handler       0000000000402146 f   ntdll:ntdll.dll
  0001:00001150       _DllMainCRTStartupForGS    0000000000402150 f   bufferoverflow:gs_dllmain.obj
  0001:00001180       _DllMainCRTStartupForGS2   0000000000402180 f   bufferoverflow:gs_dllmain.obj
  0001:000011a0       NtGetTickCount             00000000004021a0 f i bufferoverflow:gs_support.obj
@@ -71,34 +74,37 @@
  0001:00001382       RtlVirtualUnwind           0000000000402382 f   kernel32:KERNEL32.dll
  0001:00001388       RtlLookupFunctionEntry     0000000000402388 f   kernel32:KERNEL32.dll
  0001:0000138e       RtlCaptureContext          000000000040238e f   kernel32:KERNEL32.dll
- 0001:00001394       __C_specific_handler       0000000000402394 f   kernel32:KERNEL32.dll
- 0001:0000139a       LdrDisableThreadCalloutsForDll 000000000040239a f   ntdll:ntdll.dll
- 0001:000013a0       RtlUnhandledExceptionFilter 00000000004023a0 f   ntdll:ntdll.dll
- 0001:000013b0       ??_C@_0CF@OIKGAIJG@?4textNT_SUCCESS?$CINtClose?$CIFileHand@ 00000000004023b0     Sea.obj
- 0001:000013d0       ??_C@_1CC@NNCCLFIJ@t?4xe?$AAt?$AA?2?$AAD?$AAe?$AAv?$AAi?$AAc?$AAe?$AA?2?$AAS?$AAh?$AAa?$AAr?$AAk?$AA?$AA@ 00000000004023d0     Sea.obj
- 0001:000013f0       ??_C@_0DG@EKEKEHKN@?4text?$CFs?$CI?$CFd?$CJ?3?5Soft?5assertion?5fail@ 00000000004023f0     Sea.obj
- 0001:00001430       ??_C@_0L@OKAHDEFK@?4textSea?4c?$AA@ 0000000000402430     Sea.obj
- 0001:00001440       ??_C@_0BI@IIBFDAEC@?4textNT_SUCCESS?$CIStatus?$CJ?$AA@ 0000000000402440     Sea.obj
- 0001:00001460       ??_C@_1BK@PFNLILMH@t?4xe?$AAt?$AAS?$AAh?$AAa?$AAr?$AAk?$AA?4?$AAs?$AAy?$AAs?$AA?$AA@ 0000000000402460     Sea.obj
- 0001:00001480       ??_C@_1BC@INGELJMG@t?4xe?$AAt?$AAS?$AAh?$AAa?$AAr?$AAk?$AA?$AA@ 0000000000402480     Sea.obj
- 0001:00001490       ??_C@_0BI@PBJENNDP@?4textOutputDebugStringW?$AA@ 0000000000402490     Print.obj
- 0001:000014b0       ??_C@_0N@EIHLOIED@?4textPrint?4c?$AA@ 00000000004024b0     Print.obj
- 0001:000014c0       ??_C@_1CA@EIJNOBNN@t?4xe?$AAt?$AAK?$AAe?$AAr?$AAn?$AAe?$AAl?$AA3?$AA2?$AA?4?$AAd?$AAl?$AAl?$AA?$AA@ 00000000004024c0     Print.obj
- 0001:000014e0       ??_C@_0CE@PPPANLEH@?4textNT_SUCCESS?$CINtClose?$CIKeyHandl@ 00000000004024e0     Sysload.obj
- 0001:00001500       ??_C@_1BK@EAEKCABJ@t?4xe?$AAt?$AAI?$AAm?$AAa?$AAg?$AAe?$AAP?$AAa?$AAt?$AAh?$AA?$AA@ 0000000000402500     Sysload.obj
- 0001:00001520       ??_C@_1BO@NDKGEFII@t?4xe?$AAt?$AAD?$AAi?$AAs?$AAp?$AAl?$AAa?$AAy?$AAN?$AAa?$AAm?$AAe?$AA?$AA@ 0000000000402520     Sysload.obj
- 0001:00001540       ??_C@_1BC@LIIMJPGJ@t?4xe?$AAt?$AAS?$AAt?$AAa?$AAr?$AAt?$AA?$AA@ 0000000000402540     Sysload.obj
- 0001:00001550       ??_C@_1CA@PJNPDJFJ@t?4xe?$AAt?$AAE?$AAr?$AAr?$AAo?$AAr?$AAC?$AAo?$AAn?$AAt?$AAr?$AAo?$AAl?$AA?$AA@ 0000000000402550     Sysload.obj
- 0001:00001570       ??_C@_0CL@MLPEJFGL@?4text?$CIRTL_SOFT_ASSERT?$CINT_SUCCESS@ 0000000000402570     Sysload.obj
- 0001:000015a0       ??_C@_1BA@GDCGNEOM@t?4xe?$AAt?$AAT?$AAy?$AAp?$AAe?$AA?$AA@ 00000000004025a0     Sysload.obj
- 0001:000015b0       ??_C@_1HA@EPBPLDHD@t?4xe?$AAt?$AA?2?$AAR?$AAe?$AAg?$AAi?$AAs?$AAt?$AAr?$AAy?$AA?2?$AAM?$AAa?$AAc?$AAh?$AAi?$AAn?$AAe?$AA?2?$AAS?$AAy?$AAs?$AAt?$AAe?$AAm?$AA?2?$AAC?$AAu?$AAr?$AAr@ 00000000004025b0     Sysload.obj
- 0001:00001620       ??_C@_0P@DEGFHBBE@?4textSysload?4c?$AA@ 0000000000402620     Sysload.obj
- 0001:00001630       ??_C@_0CI@IJDHMFDD@?4textNT_SUCCESS?$CINtDeleteKey?$CIKeyH@ 0000000000402630     Sysload.obj
- 0002:00000000       __imp_RtlCaptureContext    0000000000403000     kernel32:KERNEL32.dll
- 0002:00000008       __imp_RtlLookupFunctionEntry 0000000000403008     kernel32:KERNEL32.dll
- 0002:00000010       __imp_RtlVirtualUnwind     0000000000403010     kernel32:KERNEL32.dll
- 0002:00000018       __imp___C_specific_handler 0000000000403018     kernel32:KERNEL32.dll
- 0002:00000020       \177KERNEL32_NULL_THUNK_DATA 0000000000403020     kernel32:KERNEL32.dll
+ 0001:00001394       LdrDisableThreadCalloutsForDll 0000000000402394 f   ntdll:ntdll.dll
+ 0001:0000139a       RtlUnhandledExceptionFilter 000000000040239a f   ntdll:ntdll.dll
+ 0001:000013b0       __security_check_cookie    00000000004023b0 f   bufferoverflow:amdsecgs.obj
+ 0001:000013d0       __GSHandlerCheck           00000000004023d0 f   gshandler.obj
+ 0001:000013f0       __GSHandlerCheckCommon     00000000004023f0 f   gshandler.obj
+ 0001:00001450       __GSHandlerCheck_SEH       0000000000402450 f   gshandlerseh.obj
+ 0001:000014e0       ??_C@_0CF@OIKGAIJG@?4textNT_SUCCESS?$CINtClose?$CIFileHand@ 00000000004024e0     Sea.obj
+ 0001:00001500       ??_C@_1CC@NNCCLFIJ@t?4xe?$AAt?$AA?2?$AAD?$AAe?$AAv?$AAi?$AAc?$AAe?$AA?2?$AAS?$AAh?$AAa?$AAr?$AAk?$AA?$AA@ 0000000000402500     Sea.obj
+ 0001:00001520       ??_C@_0DG@EKEKEHKN@?4text?$CFs?$CI?$CFd?$CJ?3?5Soft?5assertion?5fail@ 0000000000402520     Sea.obj
+ 0001:00001560       ??_C@_0L@OKAHDEFK@?4textSea?4c?$AA@ 0000000000402560     Sea.obj
+ 0001:00001570       ??_C@_0BI@IIBFDAEC@?4textNT_SUCCESS?$CIStatus?$CJ?$AA@ 0000000000402570     Sea.obj
+ 0001:00001590       ??_C@_1BK@PFNLILMH@t?4xe?$AAt?$AAS?$AAh?$AAa?$AAr?$AAk?$AA?4?$AAs?$AAy?$AAs?$AA?$AA@ 0000000000402590     Sea.obj
+ 0001:000015b0       ??_C@_1BC@INGELJMG@t?4xe?$AAt?$AAS?$AAh?$AAa?$AAr?$AAk?$AA?$AA@ 00000000004025b0     Sea.obj
+ 0001:000015c0       ??_C@_0BI@PBJENNDP@?4textOutputDebugStringW?$AA@ 00000000004025c0     Print.obj
+ 0001:000015e0       ??_C@_0N@EIHLOIED@?4textPrint?4c?$AA@ 00000000004025e0     Print.obj
+ 0001:000015f0       ??_C@_1CA@EIJNOBNN@t?4xe?$AAt?$AAK?$AAe?$AAr?$AAn?$AAe?$AAl?$AA3?$AA2?$AA?4?$AAd?$AAl?$AAl?$AA?$AA@ 00000000004025f0     Print.obj
+ 0001:00001610       ??_C@_0CE@PPPANLEH@?4textNT_SUCCESS?$CINtClose?$CIKeyHandl@ 0000000000402610     Sysload.obj
+ 0001:00001630       ??_C@_1BK@EAEKCABJ@t?4xe?$AAt?$AAI?$AAm?$AAa?$AAg?$AAe?$AAP?$AAa?$AAt?$AAh?$AA?$AA@ 0000000000402630     Sysload.obj
+ 0001:00001650       ??_C@_1BO@NDKGEFII@t?4xe?$AAt?$AAD?$AAi?$AAs?$AAp?$AAl?$AAa?$AAy?$AAN?$AAa?$AAm?$AAe?$AA?$AA@ 0000000000402650     Sysload.obj
+ 0001:00001670       ??_C@_1BC@LIIMJPGJ@t?4xe?$AAt?$AAS?$AAt?$AAa?$AAr?$AAt?$AA?$AA@ 0000000000402670     Sysload.obj
+ 0001:00001680       ??_C@_1CA@PJNPDJFJ@t?4xe?$AAt?$AAE?$AAr?$AAr?$AAo?$AAr?$AAC?$AAo?$AAn?$AAt?$AAr?$AAo?$AAl?$AA?$AA@ 0000000000402680     Sysload.obj
+ 0001:000016a0       ??_C@_0CL@MLPEJFGL@?4text?$CIRTL_SOFT_ASSERT?$CINT_SUCCESS@ 00000000004026a0     Sysload.obj
+ 0001:000016d0       ??_C@_1BA@GDCGNEOM@t?4xe?$AAt?$AAT?$AAy?$AAp?$AAe?$AA?$AA@ 00000000004026d0     Sysload.obj
+ 0001:000016e0       ??_C@_1HA@EPBPLDHD@t?4xe?$AAt?$AA?2?$AAR?$AAe?$AAg?$AAi?$AAs?$AAt?$AAr?$AAy?$AA?2?$AAM?$AAa?$AAc?$AAh?$AAi?$AAn?$AAe?$AA?2?$AAS?$AAy?$AAs?$AAt?$AAe?$AAm?$AA?2?$AAC?$AAu?$AAr?$AAr@ 00000000004026e0     Sysload.obj
+ 0001:00001750       ??_C@_0P@DEGFHBBE@?4textSysload?4c?$AA@ 0000000000402750     Sysload.obj
+ 0001:00001760       ??_C@_0CI@IJDHMFDD@?4textNT_SUCCESS?$CINtDeleteKey?$CIKeyH@ 0000000000402760     Sysload.obj
+ 0002:00000000       __imp_RtlLookupFunctionEntry 0000000000403000     kernel32:KERNEL32.dll
+ 0002:00000008       __imp_RtlVirtualUnwind     0000000000403008     kernel32:KERNEL32.dll
+ 0002:00000010       __imp_RtlCaptureContext    0000000000403010     kernel32:KERNEL32.dll
+ 0002:00000018       \177KERNEL32_NULL_THUNK_DATA 0000000000403018     kernel32:KERNEL32.dll
+ 0002:00000020       __imp_RtlInitUnicodeString 0000000000403020     ntdll:ntdll.dll
  0002:00000028       __imp_DbgPrint             0000000000403028     ntdll:ntdll.dll
  0002:00000030       __imp_RtlFreeHeap          0000000000403030     ntdll:ntdll.dll
  0002:00000038       __imp__vsnwprintf          0000000000403038     ntdll:ntdll.dll
@@ -110,7 +116,7 @@
  0002:00000068       __imp_NtCreateKey          0000000000403068     ntdll:ntdll.dll
  0002:00000070       __imp_NtOpenKey            0000000000403070     ntdll:ntdll.dll
  0002:00000078       __imp_NtSetValueKey        0000000000403078     ntdll:ntdll.dll
- 0002:00000080       __imp_RtlInitUnicodeString 0000000000403080     ntdll:ntdll.dll
+ 0002:00000080       __imp_NtOpenFile           0000000000403080     ntdll:ntdll.dll
  0002:00000088       __imp_RtlFreeUnicodeString 0000000000403088     ntdll:ntdll.dll
  0002:00000090       __imp_memset               0000000000403090     ntdll:ntdll.dll
  0002:00000098       __imp_memcpy               0000000000403098     ntdll:ntdll.dll
@@ -121,7 +127,7 @@
  0002:000000c0       __imp_RtlAdjustPrivilege   00000000004030c0     ntdll:ntdll.dll
  0002:000000c8       __imp_NtDeleteKey          00000000004030c8     ntdll:ntdll.dll
  0002:000000d0       __imp_NtUnloadDriver       00000000004030d0     ntdll:ntdll.dll
- 0002:000000d8       __imp_NtOpenFile           00000000004030d8     ntdll:ntdll.dll
+ 0002:000000d8       __imp___C_specific_handler 00000000004030d8     ntdll:ntdll.dll
  0002:000000e0       __imp_NtDeviceIoControlFile 00000000004030e0     ntdll:ntdll.dll
  0002:000000e8       __imp_NtClose              00000000004030e8     ntdll:ntdll.dll
  0002:000000f0       __imp_NtLoadDriver         00000000004030f0     ntdll:ntdll.dll
@@ -138,9 +144,9 @@
  0002:00000188       RtlAlternateDosPathSeperatorString 0000000000403188     bufferoverflow:gs_dllmain.obj
  0002:00000198       RtlDosPathSeperatorsString 0000000000403198     bufferoverflow:gs_dllmain.obj
  0002:000001a8       RtlNtPathSeperatorString   00000000004031a8     bufferoverflow:gs_dllmain.obj
- 0002:00000298       __IMPORT_DESCRIPTOR_ntdll  0000000000403298     ntdll:ntdll.dll
- 0002:000002ac       __IMPORT_DESCRIPTOR_KERNEL32 00000000004032ac     kernel32:KERNEL32.dll
- 0002:000002c0       __NULL_IMPORT_DESCRIPTOR   00000000004032c0     ntdll:ntdll.dll
+ 0002:000002cc       __IMPORT_DESCRIPTOR_ntdll  00000000004032cc     ntdll:ntdll.dll
+ 0002:000002e0       __IMPORT_DESCRIPTOR_KERNEL32 00000000004032e0     kernel32:KERNEL32.dll
+ 0002:000002f4       __NULL_IMPORT_DESCRIPTOR   00000000004032f4     ntdll:ntdll.dll
  0003:00000000       HotPatchBuffer             0000000000404000     HOTPATCH.obj
  0003:00000400       __security_cookie_complement 0000000000404400     bufferoverflow:gs_support.obj
  0003:00000408       __security_cookie          0000000000404408     bufferoverflow:gs_support.obj

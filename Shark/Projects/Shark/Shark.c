@@ -96,13 +96,13 @@ DriverEntry(
         DriverObject->MajorFunction[IRP_MJ_READ] = (PDRIVER_DISPATCH)DeviceRead;
         DriverObject->MajorFunction[IRP_MJ_DEVICE_CONTROL] = (PDRIVER_DISPATCH)DeviceControl;
 
-        DriverObject->DriverUnload = (PDRIVER_UNLOAD)DriverUnload;
-
         RtlInitUnicodeString(&SymbolicLinkName, MANAGER_SYMBOLIC_LINK);
 
         Status = IoCreateSymbolicLink(&SymbolicLinkName, &DeviceName);
 
         if ((RTL_SOFT_ASSERT(NT_SUCCESS(Status)))) {
+            DriverObject->DriverUnload = (PDRIVER_UNLOAD)DriverUnload;
+
             InitializeLoadedModuleList(NULL);
 
 #ifndef VMP
