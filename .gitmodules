@@ -1,0 +1,7 @@
+[submodule "WinDDK"]
+	path = ../WinDDK
+	url = ../WinDDK
+	
+[submodule "WRK"]
+	path = ../WRK
+	url = ../WRK

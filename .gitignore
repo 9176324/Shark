@@ -1,19 +1,17 @@
 #
 # Compiled binaries.
 #
-Shark/Build/**
-Shark/Debug/**
+Build/**
+Debug/**
 
 #
 # Visual Studio files.
 #
 .vs/**
-Shark/.vs/**
-Shark/*.VC.db
-Shark/*.VC.opendb
+*.VC.db
+*.VC.opendb
 
 #
 # VS Code files.
 #
 .vscode/**
-Shark/.vscode/**
