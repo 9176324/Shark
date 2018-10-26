@@ -1,7 +1,0 @@
-LIBRARY VDD
-
-EXPORTS
-    VDDInit
-    VDDDispatch
-    VDDTerminateVDM
-

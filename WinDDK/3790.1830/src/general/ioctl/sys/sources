@@ -1,6 +1,0 @@
-TARGETNAME=sioctl
-TARGETPATH=obj
-TARGETTYPE=DRIVER
-
-
-SOURCES=sioctl.c sioctl.rc

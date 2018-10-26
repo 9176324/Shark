@@ -1,5 +1,0 @@
-; !!IHV!! Change the description string
-
-EXPORTS
-        DllGetClassObject                       PRIVATE
-        DllCanUnloadNow                         PRIVATE

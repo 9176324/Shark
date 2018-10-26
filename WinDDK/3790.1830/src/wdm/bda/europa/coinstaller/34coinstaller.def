@@ -1,6 +1,0 @@
-LIBRARY  34CoInstaller
-
-EXPORTS   
-   CoInstallerEntry
-
-   

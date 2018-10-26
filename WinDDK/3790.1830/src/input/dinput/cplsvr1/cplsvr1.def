@@ -1,6 +1,0 @@
-LIBRARY         CPLSVR1
-
-EXPORTS
-    DllCanUnloadNow     PRIVATE
-    DllGetClassObject   PRIVATE
-

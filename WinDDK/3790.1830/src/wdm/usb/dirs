@@ -1,5 +1,0 @@
-DIRS= \
-     bulkusb \
-     isousb \
-     selsusp \
-     usbview

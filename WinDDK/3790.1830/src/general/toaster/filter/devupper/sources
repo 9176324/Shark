@@ -1,7 +1,0 @@
-!include ..\sources.inc
-
-TARGETNAME=devupper
-
-#C_DEFINES= $(C_DEFINES)  -DDEVICE_UPPER=1 
-C_DEFINES= $(C_DEFINES)  -DDEVICE_UPPER=1 -DIOCTL_INTERFACE=1
-

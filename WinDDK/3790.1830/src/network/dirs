@@ -1,6 +1,0 @@
-DIRS= \
-     config \
-     irda \
-     modem \
-     ndis \
-     wshsmple

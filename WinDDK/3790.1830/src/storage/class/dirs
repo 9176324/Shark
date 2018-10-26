@@ -1,5 +1,0 @@
-DIRS= \
-     cdrom \
-     classpnp \
-     disk \
-     tape

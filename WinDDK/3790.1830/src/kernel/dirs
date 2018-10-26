@@ -1,6 +1,0 @@
-DIRS= \
-     agp \
-     mca \
-     parport \
-     serenum \
-     serial
