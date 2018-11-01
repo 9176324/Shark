@@ -1,5 +1,0 @@
-DIRS= \
-     dosapp \
-     dosdrvr \
-     ioctlvdd \
-     krnldrvr

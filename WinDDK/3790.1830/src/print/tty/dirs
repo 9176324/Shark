@@ -1,4 +1,0 @@
-DIRS= \
-     rc \
-     render \
-     ui

@@ -1,8 +1,0 @@
-LIBRARY         TTYUI
-EXPORTS
-                DllGetClassObject        PRIVATE
-                DllCanUnloadNow         PRIVATE
-
-;               OEMGetInfo
-;                OEMDevicePropertySheets
-

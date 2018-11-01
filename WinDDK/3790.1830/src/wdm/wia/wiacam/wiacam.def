@@ -1,8 +1,0 @@
-LIBRARY WIACAM
-
-EXPORTS
-        DllGetClassObject   PRIVATE
-        DllCanUnloadNow     PRIVATE
-
-
-

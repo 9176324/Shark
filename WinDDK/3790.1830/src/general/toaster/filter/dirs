@@ -1,7 +1,0 @@
-DIRS= \
-     buslower \
-     busupper \
-     claslower \
-     clasupper \
-     devlower \
-     devupper

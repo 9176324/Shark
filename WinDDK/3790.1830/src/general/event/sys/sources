@@ -1,7 +1,0 @@
-TARGETNAME=event
-#TARGETPATH=$(BASEDIR)\lib
-TARGETPATH=obj
-TARGETTYPE=DRIVER
-
-SOURCES=event.c \
-        event.rc

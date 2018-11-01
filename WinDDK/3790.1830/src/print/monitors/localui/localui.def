@@ -1,5 +1,0 @@
-LIBRARY LOCALUI
-
-EXPORTS
-    InitializePrintMonitorUI
-

@@ -1,9 +1,0 @@
-LIBRARY WIASCANR
-
-EXPORTS
-        DllGetClassObject   PRIVATE
-        DllCanUnloadNow     PRIVATE
-        DliHook
-
-
-

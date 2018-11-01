@@ -1,8 +1,0 @@
-LIBRARY mirror
-
-DESCRIPTION 'Mirror'
-
-EXPORTS
-    DriverEntry
-
-

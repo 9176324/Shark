@@ -1,6 +1,0 @@
-!include ..\sources.inc
-
-TARGETNAME=clsupper
-
-C_DEFINES= $(C_DEFINES)  -DCLASS_UPPER=1
-

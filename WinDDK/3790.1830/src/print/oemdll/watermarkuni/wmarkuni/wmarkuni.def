@@ -1,4 +1,0 @@
-LIBRARY		WMARKUNI
-EXPORTS        DllGetClassObject   PRIVATE
-               DllCanUnloadNow     PRIVATE
-

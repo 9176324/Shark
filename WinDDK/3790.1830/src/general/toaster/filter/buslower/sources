@@ -1,5 +1,0 @@
-!include ..\sources.inc
-
-TARGETNAME=bfdolwr
-
-C_DEFINES= $(C_DEFINES)  -DBUS_LOWER=1

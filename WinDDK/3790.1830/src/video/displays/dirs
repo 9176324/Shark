@@ -1,4 +1,0 @@
-DIRS= \
-     3dlabs \
-     framebuf \
-     mirror

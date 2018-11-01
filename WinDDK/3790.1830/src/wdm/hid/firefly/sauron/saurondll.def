@@ -1,9 +1,0 @@
-; Sauron.def : Declares the module parameters.
-
-LIBRARY      "SAURON.DLL"
-
-EXPORTS
-        DllCanUnloadNow     PRIVATE
-        DllGetClassObject   PRIVATE
-        DllRegisterServer   PRIVATE
-        DllUnregisterServer PRIVATE

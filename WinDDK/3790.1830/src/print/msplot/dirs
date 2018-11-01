@@ -1,6 +1,0 @@
-DIRS= \
-     lib \
-     mini \
-     plotter \
-     plotui \
-     tools

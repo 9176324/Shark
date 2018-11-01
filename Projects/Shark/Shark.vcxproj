@@ -1,0 +1,164 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Optimized|Win32">
+      <Configuration>Optimized</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Optimized|x64">
+      <Configuration>Optimized</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{389A3E87-9607-4515-9937-F2C5BAA1E268}</ProjectGuid>
+    <Keyword>MakeFileProj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">
+    <NMakeBuildCommandLine>NMAKE /NOLOGO BUILD PLATFORM=$(PlatformShortName) PROJ=$(ProjectName) SLND=$(SolutionDir)</NMakeBuildCommandLine>
+    <NMakeCleanCommandLine>NMAKE /NOLOGO CLEAN PLATFORM=$(PlatformShortName) PROJ=$(ProjectName) SLND=$(SolutionDir)</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>NMAKE /NOLOGO REBUILD PLATFORM=$(PlatformShortName) PROJ=$(ProjectName) SLND=$(SolutionDir)</NMakeReBuildCommandLine>
+    <NMakeOutput>$(SolutionDir)Build\Bins\I386\$(ProjectName).sys</NMakeOutput>
+    <NMakePreprocessorDefinitions>UNICODE;_UNICODE;DBG;_X86_;NTOS_KERNEL_RUNTIME;_NTDRIVER_;DETOURS_X86</NMakePreprocessorDefinitions>
+    <NMakeIncludeSearchPath>..\..\..\WRK\public\ddk\inc;..\..\..\WRK\public\halkit\inc;..\..\..\WRK\public\internal\base\inc;..\..\..\WRK\public\internal\ds\inc;..\..\..\WRK\public\internal\sdktools\inc;..\..\..\WRK\public\sdk\inc;..\..\..\WRK\public\sdk\inc\crt;..\..\..\WRK\base\inc;..\..\..\WRK\base\ntos\inc;$(SolutionDir)Include;$(ProjectDir)</NMakeIncludeSearchPath>
+    <OutDir>$(SolutionDir)Build\Bins\I386\</OutDir>
+    <IntDir>$(SolutionDir)Build\Objs\$(ProjectName)\I386\</IntDir>
+    <ExecutablePath>C:\Windows;C:\Windows\System32;..\..\..\WRK\tools\x86</ExecutablePath>
+    <IncludePath>..\..\..\WRK\public\ddk\inc;..\..\..\WRK\public\halkit\inc;..\..\..\WRK\public\internal\base\inc;..\..\..\WRK\public\internal\ds\inc;..\..\..\WRK\public\internal\sdktools\inc;..\..\..\WRK\public\sdk\inc;..\..\..\WRK\public\sdk\inc\crt;..\..\..\WRK\base\inc;..\..\..\WRK\base\ntos\inc;$(SolutionDir)Include;$(ProjectDir)</IncludePath>
+    <ReferencePath />
+    <LibraryPath>..\..\..\WinDDK\lib\win7\I386;..\..\..\WinDDK\lib\Crt\I386</LibraryPath>
+    <LibraryWPath />
+    <SourcePath />
+    <ExcludePath />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">
+    <NMakeBuildCommandLine>NMAKE /NOLOGO BUILD PLATFORM=$(PlatformShortName) PROJ=$(ProjectName) SLND=$(SolutionDir)</NMakeBuildCommandLine>
+    <NMakeCleanCommandLine>NMAKE /NOLOGO CLEAN PLATFORM=$(PlatformShortName) PROJ=$(ProjectName) SLND=$(SolutionDir)</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>NMAKE /NOLOGO REBUILD PLATFORM=$(PlatformShortName) PROJ=$(ProjectName) SLND=$(SolutionDir)</NMakeReBuildCommandLine>
+    <NMakeOutput>$(SolutionDir)Build\Bins\AMD64\$(ProjectName).sys</NMakeOutput>
+    <NMakePreprocessorDefinitions>UNICODE;_UNICODE;DBG;_AMD64_;NTOS_KERNEL_RUNTIME;_NTDRIVER_;DETOURS_X64</NMakePreprocessorDefinitions>
+    <NMakeIncludeSearchPath>..\..\..\WRK\public\ddk\inc;..\..\..\WRK\public\halkit\inc;..\..\..\WRK\public\internal\base\inc;..\..\..\WRK\public\internal\ds\inc;..\..\..\WRK\public\internal\sdktools\inc;..\..\..\WRK\public\sdk\inc;..\..\..\WRK\public\sdk\inc\crt;..\..\..\WRK\base\inc;..\..\..\WRK\base\ntos\inc;$(SolutionDir)Include;$(ProjectDir)</NMakeIncludeSearchPath>
+    <OutDir>$(SolutionDir)Build\Bins\AMD64\</OutDir>
+    <IntDir>$(SolutionDir)Build\Objs\$(ProjectName)\AMD64\</IntDir>
+    <ExecutablePath>C:\Windows;C:\Windows\System32;..\..\..\WRK\tools\amd64</ExecutablePath>
+    <IncludePath>..\..\..\WRK\public\ddk\inc;..\..\..\WRK\public\halkit\inc;..\..\..\WRK\public\internal\base\inc;..\..\..\WRK\public\internal\ds\inc;..\..\..\WRK\public\internal\sdktools\inc;..\..\..\WRK\public\sdk\inc;..\..\..\WRK\public\sdk\inc\crt;..\..\..\WRK\base\inc;..\..\..\WRK\base\ntos\inc;$(SolutionDir)Include;$(ProjectDir)</IncludePath>
+    <ReferencePath />
+    <LibraryPath>..\..\..\WinDDK\lib\win7\AMD64;..\..\..\WinDDK\lib\Crt\AMD64</LibraryPath>
+    <LibraryWPath />
+    <SourcePath />
+    <ExcludePath />
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
+  </ImportGroup>
+  <ItemGroup>
+    <MASM Include="AMD64\AMD64.asm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">true</ExcludedFromBuild>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">false</UseSafeExceptionHandlers>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">false</ExcludedFromBuild>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">true</UseSafeExceptionHandlers>
+    </MASM>
+    <MASM Include="I386\I386.asm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">false</ExcludedFromBuild>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">true</UseSafeExceptionHandlers>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">true</ExcludedFromBuild>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">false</UseSafeExceptionHandlers>
+    </MASM>
+    <MASM Include="AMD64\CmpAMD64.asm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">true</ExcludedFromBuild>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">false</UseSafeExceptionHandlers>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">false</ExcludedFromBuild>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">true</UseSafeExceptionHandlers>
+    </MASM>
+    <MASM Include="I386\CmpI386.asm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">false</ExcludedFromBuild>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">true</UseSafeExceptionHandlers>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">true</ExcludedFromBuild>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">false</UseSafeExceptionHandlers>
+    </MASM>
+    <MASM Include="AMD64\PatchGuardInlineAMD64.asm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">true</ExcludedFromBuild>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">false</UseSafeExceptionHandlers>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">false</ExcludedFromBuild>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">true</UseSafeExceptionHandlers>
+    </MASM>
+    <MASM Include="I386\PatchGuardInlineI386.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">false</ExcludedFromBuild>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">true</UseSafeExceptionHandlers>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">true</ExcludedFromBuild>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">false</UseSafeExceptionHandlers>
+    </MASM>
+    <ClCompile Include="AMD64\PatchGuardAMD64.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">true</ExcludedFromBuild>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">false</UseSafeExceptionHandlers>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">false</ExcludedFromBuild>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">true</UseSafeExceptionHandlers>
+    </ClCompile>
+    <ClCompile Include="Except.c" />
+    <ClCompile Include="I386\PatchGuardI386.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">false</ExcludedFromBuild>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">true</UseSafeExceptionHandlers>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">true</ExcludedFromBuild>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">false</UseSafeExceptionHandlers>
+    </ClCompile>
+    <ClCompile Include="AMD64\StackAMD64.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">true</ExcludedFromBuild>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">false</UseSafeExceptionHandlers>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">false</ExcludedFromBuild>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">true</UseSafeExceptionHandlers>
+    </ClCompile>
+    <ClCompile Include="I386\StackI386.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">false</ExcludedFromBuild>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">true</UseSafeExceptionHandlers>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">true</ExcludedFromBuild>
+      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">false</UseSafeExceptionHandlers>
+    </ClCompile>
+    <ClCompile Include="Ctx.c" />
+    <ClCompile Include="Jump.c" />
+    <ClCompile Include="KernelReload.c" />
+    <ClCompile Include="Lock.c" />
+    <ClCompile Include="Shark.c" />
+    <ClCompile Include="PatchGuard.c" />
+    <ClCompile Include="Scan.c" />
+    <ClCompile Include="Stack.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shark.def" />
+    <None Include="Makefile" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Shark.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Except.h" />
+    <ClInclude Include="Jump.h" />
+    <ClInclude Include="Lock.h" />
+    <ClInclude Include="Shark.h" />
+    <ClInclude Include="PatchGuard.h" />
+    <ClInclude Include="KernelReload.h" />
+    <ClInclude Include="Ctx.h" />
+    <ClInclude Include="Scan.h" />
+    <ClInclude Include="Stack.h" />
+  </ItemGroup>
+</Project>

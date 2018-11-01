@@ -1,9 +1,0 @@
-LIBRARY plotter
-
-
-EXPORTS
-    DllMain
-    DrvQueryDriverInfo
-    DrvEnableDriver
-    DrvDisableDriver
-
