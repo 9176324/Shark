@@ -26,19 +26,10 @@ extern "C" {
 
 #include <devioctl.h>
 
-#define MANAGER_IMAGE_LINK L"Shark.sys"
-#define MANAGER_SERVICE_LINK L"Shark"
-
-#define MANAGER_DEVICE_LINK L"\\Device\\Shark"
-#define MANAGER_SYMBOLIC_LINK L"\\DosDevices\\Shark"
-
-    typedef enum _COMMAND_NUMBER {
-        DISABLE_PATCHGUARD
-    } API_NUMBER;
-
-#define API_IO_TYPE ('  kS')
-
-#define API_METHOD_DISABLE_PATCHGUARD CTL_CODE(API_IO_TYPE, DISABLE_PATCHGUARD, FILE_ANY_ACCESS, METHOD_BUFFERED)
+#define LOADER_IMAGE_STRING L"Shark.sys"
+#define LOADER_SERVICE_STRING L"Shark"
+#define LOADER_DEVICE_STRING L"\\Device\\Shark"
+#define LOADER_SYMBOLIC_STRING L"\\DosDevices\\Shark"
 
 #ifdef __cplusplus
 }

@@ -21,7 +21,7 @@
 
 #include "..\..\WRK\base\ntos\mm\mi.h"
 
-#include "KernelReload.h"
+#include "Reload.h"
 
 #ifdef __cplusplus
 /* Assume byte packing throughout */
@@ -48,11 +48,12 @@ extern "C" {
     }KPRIQUEUE, *PKPRIQUEUE;
 
     typedef struct _PATCHGUARD_BLOCK {
-#define PG_MAXIMUM_CONTEXT_COUNT 0x00000002UI32
-#define PG_KEY_INTERVAL 0x00000080UI32
-#define PG_FIRST_FIELD_OFFSET 0x00000100UI32
-#define PG_CMP_APPEND_DLL_SECTION_END 0x000000c0UI32
-#define PG_COMPARE_FIELDS_COUNT  0x00000004UI32
+#define PG_MAXIMUM_CONTEXT_COUNT            0x00000008UI32 // Worker 中可能存在的 Context 最大数量
+#define PG_FIRST_FIELD_OFFSET               0x00000100UI32 // 搜索使用的第一个 Context 成员偏移
+#define PG_CMP_APPEND_DLL_SECTION_END       0x000000c0UI32 // CmpAppendDllSection 长度
+#define PG_COMPARE_FIELDS_COUNT             0x00000004UI32 // 搜索时比较的 Context 成员数量
+#define PG_MAXIMUM_EP_BUFFER_COUNT          PG_COMPARE_FIELDS_COUNT // EntryPoint 缓存大小 用来搜索头部的代码片段
+        // ( 最小长度 =  max(2 * 8 + 7, sizeof(JMP_CODE)) )
 
 #define PG_FIELD_BITS \
             ((ULONG)((((PG_FIRST_FIELD_OFFSET + PG_COMPARE_FIELDS_COUNT * sizeof(PVOID)) \
@@ -88,10 +89,10 @@ extern "C" {
             );
 
         // pointer to _Message[0]
-        PVOID ClearEncryptedContextMessage;
+        PSTR ClearEncryptedContextMessage;
 
         // pointer to _Message[1]
-        PVOID RevertWorkerToSelfMessage;
+        PSTR RevertWorkerToSelfMessage;
 
         SIZE_T
         (NTAPI * RtlCompareMemory)(
@@ -140,6 +141,8 @@ extern "C" {
             __in PVOID P
             );
 
+        LONG_PTR ReferenceCount;
+
         KEVENT Notify;
 
         PKLDR_DATA_TABLE_ENTRY KernelDataTableEntry;
@@ -160,6 +163,7 @@ extern "C" {
         ULONG SizeOfCmpAppendDllSection;
         ULONG SizeOfNtSection;
         ULONG_PTR CompareFields[PG_COMPARE_FIELDS_COUNT];
+        ULONG_PTR EntryPoint[PG_COMPARE_FIELDS_COUNT];
         WORK_QUEUE_ITEM ClearWorkerItem;
 
         PVOID MmHighestUserAddress;
@@ -194,44 +198,44 @@ extern "C" {
             );
 
         CHAR _SdbpCheckDll[0x40];
-        CHAR _Message[2][0x40];
+        CHAR _Message[2][0x60];
 
         struct {
             struct PATCHGUARD_BLOCK * PatchGuardBlock;
 
             // shellcode clone _ClearEncryptedContext
-            CHAR _ShellCode[0x38];
+            CHAR _ShellCode[0x40];
         }_ClearEncryptedContext;
 
         struct {
             struct PATCHGUARD_BLOCK * PatchGuardBlock;
 
             // shellcode clone _RevertWorkerToSelf
-            CHAR _ShellCode[0x58];
+            CHAR _ShellCode[0x70];
         }_RevertWorkerToSelf;
 
-        // shellcode clone _CheckPatchGuardCode
-        CHAR _CheckPatchGuardCode[0x50];
+        struct {
+            // shellcode clone _CheckPatchGuardCode
+            CHAR _ShellCode[0x50];
+        }_CheckPatchGuardCode;
 
         struct {
-            LONG_PTR ReferenceCount;
+            BOOLEAN Usable;
 
             struct PATCHGUARD_BLOCK * PatchGuardBlock;
 
             PVOID Parameters[4];
 
             // shellcode clone _GuardCall
-            CHAR _ShellCode[0x1a0];
+            CHAR _ShellCode[0x1c0];
         }_GuardCall[PG_MAXIMUM_CONTEXT_COUNT];
     }PATCHGUARD_BLOCK, *PPATCHGUARD_BLOCK;
 
-#ifdef _WIN64
     VOID
         NTAPI
         DisablePatchGuard(
             __inout PPATCHGUARD_BLOCK PatchGuardBlock
         );
-#endif // _WIN64
 
 #ifdef __cplusplus
 }

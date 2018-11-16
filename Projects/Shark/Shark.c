@@ -16,13 +16,13 @@
 *
 */
 
-#include <Defs.h>
-#include <DeviceDefs.h>
+#include <defs.h>
+#include <devicedefs.h>
 
 #include "Shark.h"
 
 #include "Jump.h"
-#include "KernelReload.h"
+#include "Reload.h"
 #include "PatchGuard.h"
 
 VOID
@@ -78,7 +78,7 @@ DriverEntry(
     UNICODE_STRING DeviceName = { 0 };
     UNICODE_STRING SymbolicLinkName = { 0 };
 
-    RtlInitUnicodeString(&DeviceName, MANAGER_DEVICE_LINK);
+    RtlInitUnicodeString(&DeviceName, LOADER_DEVICE_STRING);
 
     Status = IoCreateDevice(
         DriverObject,
@@ -96,7 +96,7 @@ DriverEntry(
         DriverObject->MajorFunction[IRP_MJ_READ] = (PDRIVER_DISPATCH)DeviceRead;
         DriverObject->MajorFunction[IRP_MJ_DEVICE_CONTROL] = (PDRIVER_DISPATCH)DeviceControl;
 
-        RtlInitUnicodeString(&SymbolicLinkName, MANAGER_SYMBOLIC_LINK);
+        RtlInitUnicodeString(&SymbolicLinkName, LOADER_SYMBOLIC_STRING);
 
         Status = IoCreateSymbolicLink(&SymbolicLinkName, &DeviceName);
 
@@ -125,7 +125,7 @@ DriverUnload(
 {
     UNICODE_STRING SymbolicLinkName = { 0 };
 
-    RtlInitUnicodeString(&SymbolicLinkName, MANAGER_SYMBOLIC_LINK);
+    RtlInitUnicodeString(&SymbolicLinkName, LOADER_SYMBOLIC_STRING);
     IoDeleteSymbolicLink(&SymbolicLinkName);
     IoDeleteDevice(DriverObject->DeviceObject);
 
@@ -223,7 +223,7 @@ DeviceControl(
     IrpSp = IoGetCurrentIrpStackLocation(Irp);
 
     switch (IrpSp->Parameters.DeviceIoControl.IoControlCode) {
-    case API_METHOD_DISABLE_PATCHGUARD: {
+    case 0: {
         PPATCHGUARD_BLOCK PatchGuardBlock = NULL;
 
         PatchGuardBlock = ExAllocatePool(

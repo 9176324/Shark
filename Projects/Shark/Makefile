@@ -16,7 +16,7 @@
 #
 #
 
-LABS=..\..\..
+LABS=..\..\..\
 
 !if "$(PLATFORM)" == "x86"
 ARCTARG = I386
@@ -58,8 +58,8 @@ CCOBJS = \
     $(OBJD)\Except.obj \
     $(OBJD)\Jump.obj \
     $(OBJD)\Lock.obj \
-    $(OBJD)\KernelReload.obj \
     $(OBJD)\PatchGuard.obj \
+    $(OBJD)\Reload.obj \
     $(OBJD)\Scan.obj \
     $(OBJD)\Stack.obj
     
@@ -78,8 +78,8 @@ PROJSRCS = \
     Except.c \
     Jump.c \
     Lock.c \
-    KernelReload.c \
     PatchGuard.c \
+    Reload.c \
     Scan.c \
     Stack.c
 
@@ -135,8 +135,8 @@ RC = rc.exe
 RFLAGS = $(INCS) /fo$(RCOBJS)
 
 LINKLIBPATH = \
-    /LIBPATH:$(LABS)\WinDDK\3790.1830\lib\wnet\$(ARCTARG) \
-    /LIBPATH:$(LABS)\WinDDK\3790.1830\lib\crt\$(ARCTARG) \
+    /LIBPATH:$(LABS)\WinDDK\7600.16385.1\lib\win7\$(ARCTARG) \
+    /LIBPATH:$(LABS)\WinDDK\7600.16385.1\lib\Crt\$(ARCTARG) \
     /LIBPATH:$(SLND)\Lib\$(ARCTARG)
 
 LINKIGNORE = /IGNORE:4087,4001,4010,4037,4039,4065,4070,4078,4087,4089,4221,4198

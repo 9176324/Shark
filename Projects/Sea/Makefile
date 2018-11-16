@@ -16,7 +16,7 @@
 #
 #
 
-LABS=..\..\..
+LABS=..\..\..\
 
 !if "$(PLATFORM)" == "x86"
 ARCTARG = I386
@@ -38,9 +38,9 @@ BUILD: $(PROJTARG).exe
 OBJD = $(SLND)Build\Objs\$(PROJ)\$(ARCTARG)
 
 !if "$(ARCTARG)" == "I386"
-PROJENTRY = Startup
-!else
-PROJENTRY = Startup
+PROJENTRY = NtProcessStartupForGS@4
+!else if "$(ARCTARG)" == "AMD64"
+PROJENTRY = NtProcessStartupForGS
 !endif
 
 ASOBJS = \
@@ -116,18 +116,20 @@ RFLAGS = $(INCS) /fo$(RCOBJS)
 
 
 LINKLIBPATH = \
-    /LIBPATH:$(LABS)\WinDDK\3790.1830\lib\wnet\$(ARCTARG) \
-    /LIBPATH:$(LABS)\WinDDK\3790.1830\lib\crt\$(ARCTARG) \
+    /LIBPATH:$(LABS)\WinDDK\7600.16385.1\lib\win7\$(ARCTARG) \
+    /LIBPATH:$(LABS)\WinDDK\7600.16385.1\lib\Crt\$(ARCTARG) \
     /LIBPATH:$(SLND)\Lib\$(ARCTARG)
 
 LINKIGNORE = /IGNORE:4087,4001,4010,4037,4039,4065,4070,4078,4087,4089,4221,4198
-BUILDLIBS = ntdll.lib bufferoverflow.lib \
+BUILDLIBS = ntdllp.lib bufferoverflow.lib \
 !if "$(ARCTARG)" == "I386"
     \
 !else if "$(ARCTARG)" == "AMD64"
     gshandler.obj gshandlerseh.obj \
 !endif
-    kernel32.lib msvcrt.lib shell32.lib
+    disasm.obj \
+    kernl32p.lib msvcrt.lib shell32.lib user32.lib gdi32.lib \
+    nt_process_startup.obj
 
 LINKFLAGS = $(LINKIGNORE) /WX /NODEFAULTLIB /machine:$(ARCH) /debug /debugtype:cv,fixup
 LINK = link.exe /nologo
