@@ -19,7 +19,7 @@
 #ifndef _EXCEPT_H_
 #define _EXCEPT_H_
 
-#include "KernelReload.h"
+#include "Reload.h"
 
 #ifdef __cplusplus
 /* Assume byte packing throughout */

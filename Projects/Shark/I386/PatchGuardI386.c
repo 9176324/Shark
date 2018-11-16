@@ -16,6 +16,15 @@
 *
 */
 
-#include <Defs.h>
+#include <defs.h>
 
 #include "PatchGuard.h"
+
+VOID
+NTAPI
+DisablePatchGuard(
+    __inout PPATCHGUARD_BLOCK PatchGuardBlock
+)
+{
+    NOTHING;
+}

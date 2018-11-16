@@ -36,6 +36,7 @@ PgbRevertWorkerToSelf                   equ 00000068h
 PgbRtlRestoreContext                    equ 00000070h
 PgbExQueueWorkItem                      equ 00000078h
 PgbExFreePool                           equ 00000080h
+PgbReferenceCount                       equ 00000088h
 
 ; ULONG64
 ; NTAPI
@@ -44,13 +45,13 @@ PgbExFreePool                           equ 00000080h
 ;     __in ULONG64 b
 ; );
 
-        LEAF_ENTRY _btc64, _TEXT$00
+    LEAF_ENTRY _btc64, _TEXT$00
 
         btc rcx, rdx
         mov rax, rcx
         ret
     
-        LEAF_END _btc64, _TEXT$00
+    LEAF_END _btc64, _TEXT$00
         
 ; VOID
 ;     NTAPI
@@ -58,7 +59,7 @@ PgbExFreePool                           equ 00000080h
 ;         VOID
 ; );
 
-        LEAF_ENTRY _MakePgFire, _TEXT$00
+    LEAF_ENTRY _MakePgFire, _TEXT$00
         
         sub rsp, 10h
 
@@ -76,7 +77,7 @@ PgbExFreePool                           equ 00000080h
 
         ret
 
-        LEAF_END _MakePgFire, _TEXT$00
+    LEAF_END _MakePgFire, _TEXT$00
         
 ; PVOID
 ; NTAPI
@@ -85,7 +86,7 @@ PgbExFreePool                           equ 00000080h
 ;     __in PVOID PatchGuardContext
 ; );
 
-        LEAF_ENTRY _ClearEncryptedContext, _TEXT$00
+    LEAF_ENTRY _ClearEncryptedContext, _TEXT$00
     
 @@:
         dq 1 dup (0)                                ; PgbPatchGuardBlock
@@ -95,11 +96,15 @@ PgbExFreePool                           equ 00000080h
         
         lea rbx, @b
         mov rbx, [rbx]
+        
+        lea rcx, PgbReferenceCount [rbx]
+        lock dec qword ptr [rcx]
 
+        mov rdx, [rcx]
         mov rcx, PgbClearEncryptedContextMessage [rbx]
         mov rax, PgbDbgPrint [rbx]
         call rax
-
+        
         add rsp, KSTART_FRAME_LENGTH - 10h
         pop rbx
 
@@ -107,7 +112,7 @@ PgbExFreePool                           equ 00000080h
 
         ret
 
-        LEAF_END _ClearEncryptedContext, _TEXT$00
+    LEAF_END _ClearEncryptedContext, _TEXT$00
         
 ; VOID
 ; NTAPI
@@ -115,45 +120,42 @@ PgbExFreePool                           equ 00000080h
 ;     VOID
 ; );
 
-        LEAF_ENTRY _RevertWorkerToSelf, _TEXT$00
+    LEAF_ENTRY _RevertWorkerToSelf, _TEXT$00
     
 @@:
         dq 1 dup (0)                                ; PgbPatchGuardBlock
 
-        sub rsp, KSTART_FRAME_LENGTH - 10h
+        and rsp, not 0fh
         
         lea rbx, @b
         mov rbx, [rbx]
+        
+        mov r15, PgbWorkerContext [rbx]
+        mov r14, PgbExpWorkerThread [rbx]
+        mov r13, PgbPspSystemThreadStartup [rbx]
+        mov r12, PgbKiStartSystemThread [rbx]
+        
+        lea rcx, PgbReferenceCount [rbx]
+        lock dec qword ptr [rcx]
 
+        mov rdx, [rcx]
         mov rcx, PgbRevertWorkerToSelfMessage [rbx]
         mov rax, PgbDbgPrint [rbx]
         call rax
-
-        add rsp, KSTART_FRAME_LENGTH - 10h
-
+        
         mov rax, PgbIoGetInitialStack [rbx]
         call rax
-
+        
         mov rsp, rax
         sub rsp, KSTART_FRAME_LENGTH
         
-        mov rax, PgbWorkerContext [rbx]
-        mov SfP1Home [rsp], rax
-        
-        mov rax, PgbExpWorkerThread [rbx]
-        mov SfP2Home [rsp], rax
-        
-        mov rax, PgbPspSystemThreadStartup [rbx]
-        mov SfP3Home [rsp], rax
-        
-        xor rax, rax
-        mov SfReturn [rsp], rax
-        
-        mov rax, PgbKiStartSystemThread [rbx]
-        
-        jmp rax
-            
-        LEAF_END _RevertWorkerToSelf, _TEXT$00
+        mov SfP1Home [rsp], r15
+        mov SfP2Home [rsp], r14
+        mov SfP3Home [rsp], r13
+        mov qword ptr SfReturn [rsp], 0
+        jmp r12
+
+    LEAF_END _RevertWorkerToSelf, _TEXT$00
     
 ; VOID
 ; NTAPI
@@ -162,7 +164,7 @@ PgbExFreePool                           equ 00000080h
 ;     __in SIZE_T RegionSize
 ; );
 
-        NESTED_ENTRY _CheckPatchGuardCode, _TEXT$00
+    NESTED_ENTRY _CheckPatchGuardCode, _TEXT$00
 
         alloc_stack ( KSTART_FRAME_LENGTH - 8 )
         
@@ -201,7 +203,7 @@ PgbExFreePool                           equ 00000080h
         
         ret
 
-        NESTED_END _CheckPatchGuardCode, _TEXT$00
+    NESTED_END _CheckPatchGuardCode, _TEXT$00
 
 ; VOID
 ; NTAPI
@@ -209,10 +211,10 @@ PgbExFreePool                           equ 00000080h
 ;     VOID
 ; );
 
-        NESTED_ENTRY _GuardCall, _TEXT$00
+    NESTED_ENTRY _GuardCall, _TEXT$00
         
 @@:
-        dq 1 dup (0)                                ; PgbReferenceCount
+        dq 1 dup (0)                                ; _GuardCall->Usable
         dq 1 dup (0)                                ; PgbPatchGuardBlock
         dq 4 dup (0)                                ; _GuardCall->Parameters
 
@@ -306,6 +308,6 @@ PgbExFreePool                           equ 00000080h
 
         int 3
 
-        NESTED_END _GuardCall, _TEXT$00
+    NESTED_END _GuardCall, _TEXT$00
 
         end

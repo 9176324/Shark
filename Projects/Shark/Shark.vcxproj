@@ -136,8 +136,8 @@
     </ClCompile>
     <ClCompile Include="Ctx.c" />
     <ClCompile Include="Jump.c" />
-    <ClCompile Include="KernelReload.c" />
     <ClCompile Include="Lock.c" />
+    <ClCompile Include="Reload.c" />
     <ClCompile Include="Shark.c" />
     <ClCompile Include="PatchGuard.c" />
     <ClCompile Include="Scan.c" />
@@ -154,9 +154,9 @@
     <ClInclude Include="Except.h" />
     <ClInclude Include="Jump.h" />
     <ClInclude Include="Lock.h" />
+    <ClInclude Include="Reload.h" />
     <ClInclude Include="Shark.h" />
     <ClInclude Include="PatchGuard.h" />
-    <ClInclude Include="KernelReload.h" />
     <ClInclude Include="Ctx.h" />
     <ClInclude Include="Scan.h" />
     <ClInclude Include="Stack.h" />

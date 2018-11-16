@@ -16,26 +16,18 @@
 *
 */
 
-#include <Defs.h>
-#include <DeviceDefs.h>
+#include <defs.h>
+#include <devicedefs.h>
 
 #include "Sea.h"
 
 #include "Print.h"
 #include "Sysload.h"
 
-BOOLEAN
+NTSTATUS
 NTAPI
-_DllMainCRTStartupForGS(
-    __in PVOID DllHandle,
-    __in ULONG Reason,
-    __in_opt PCONTEXT Context
-);
-
-VOID
-NTAPI
-Startup(
-    VOID
+NtProcessStartup(
+    __in PPEB PebBase
 )
 {
     NTSTATUS Status = STATUS_SUCCESS;
@@ -45,51 +37,44 @@ Startup(
     OBJECT_ATTRIBUTES ObjectAttributes = { 0 };
     IO_STATUS_BLOCK IoStatusBlock = { 0 };
 
-    Result = _DllMainCRTStartupForGS(
-        NtCurrentPeb()->ImageBaseAddress,
-        DLL_PROCESS_ATTACH,
-        NULL);
+    Status = LoadSystemImage(LOADER_IMAGE_STRING, LOADER_SERVICE_STRING);
 
-    if (FALSE != Result) {
-        Status = LoadSystemImage(MANAGER_IMAGE_LINK, MANAGER_SERVICE_LINK);
+    if (RTL_SOFT_ASSERT(NT_SUCCESS(Status))) {
+        RtlInitUnicodeString(&FilePath, LOADER_DEVICE_STRING);
 
-        if (RTL_SOFT_ASSERT(NT_SUCCESS(Status))) {
-            RtlInitUnicodeString(&FilePath, MANAGER_DEVICE_LINK);
+        InitializeObjectAttributes(
+            &ObjectAttributes,
+            &FilePath,
+            OBJ_CASE_INSENSITIVE,
+            NULL,
+            NULL);
 
-            InitializeObjectAttributes(
-                &ObjectAttributes,
-                &FilePath,
-                OBJ_CASE_INSENSITIVE,
+        Status = NtOpenFile(
+            &FileHandle,
+            FILE_ALL_ACCESS,
+            &ObjectAttributes,
+            &IoStatusBlock,
+            FILE_SHARE_VALID_FLAGS,
+            FILE_NON_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT);
+
+        if (NT_SUCCESS(Status)) {
+            Status = NtDeviceIoControlFile(
+                FileHandle,
                 NULL,
-                NULL);
-
-            Status = NtOpenFile(
-                &FileHandle,
-                FILE_ALL_ACCESS,
-                &ObjectAttributes,
+                NULL,
+                NULL,
                 &IoStatusBlock,
-                FILE_SHARE_VALID_FLAGS,
-                FILE_NON_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT);
+                0,
+                NULL,
+                0,
+                NULL,
+                0);
 
-            if (NT_SUCCESS(Status)) {
-                Status = NtDeviceIoControlFile(
-                    FileHandle,
-                    NULL,
-                    NULL,
-                    NULL,
-                    &IoStatusBlock,
-                    API_METHOD_DISABLE_PATCHGUARD,
-                    NULL,
-                    0,
-                    NULL,
-                    0);
-
-                RTL_SOFT_ASSERT(NT_SUCCESS(NtClose(FileHandle)));
-            }
-
-            UnloadSystemImage(MANAGER_SERVICE_LINK);
+            RTL_SOFT_ASSERT(NT_SUCCESS(NtClose(FileHandle)));
         }
+
+        UnloadSystemImage(LOADER_SERVICE_STRING);
     }
 
-    NtTerminateProcess(NtCurrentProcess(), STATUS_SUCCESS);
+    return  NtTerminateProcess(NtCurrentProcess(), STATUS_SUCCESS);
 }
