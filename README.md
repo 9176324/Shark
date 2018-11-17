@@ -9,5 +9,6 @@
     git clone https://github.com/9176324/WRK
     
 # Build sys
-    open "D:\Labs\Shark\Shark.sln" with VisualStudio
-    
+    Method 1: open "D:\Labs\Shark\Shark.sln" with VisualStudio
+    Method 2: run Build.cmd
+	
