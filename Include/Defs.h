@@ -24,9 +24,9 @@
 extern "C" {
 #endif	/* __cplusplus */
 
-#ifndef VMP
-// #define VMP
-#endif // !VMP
+#ifndef PUBLIC
+// #define PUBLIC
+#endif // !PUBLIC
 
 #ifndef NTOS_KERNEL_RUNTIME
 #include <nt.h>
