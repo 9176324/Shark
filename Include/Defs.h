@@ -25,7 +25,7 @@ extern "C" {
 #endif	/* __cplusplus */
 
 #ifndef PUBLIC
-// #define PUBLIC
+    // #define PUBLIC
 #endif // !PUBLIC
 
 #ifndef NTOS_KERNEL_RUNTIME
@@ -42,11 +42,14 @@ extern "C" {
 
 #ifdef _WIN64
 #include <wow64t.h>
+#include <wow64.h>
 #endif // _WIN64
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <tchar.h>
+
+#include <arccodes.h>
 
 #ifdef __cplusplus
 }

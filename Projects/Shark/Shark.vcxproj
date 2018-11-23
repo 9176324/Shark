@@ -115,6 +115,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">false</ExcludedFromBuild>
       <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">true</UseSafeExceptionHandlers>
     </ClCompile>
+    <ClCompile Include="AMD64\SpaceAMD64.c" />
     <ClCompile Include="Except.c" />
     <ClCompile Include="I386\PatchGuardI386.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">false</ExcludedFromBuild>
@@ -128,6 +129,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">false</ExcludedFromBuild>
       <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">true</UseSafeExceptionHandlers>
     </ClCompile>
+    <ClCompile Include="I386\SpaceI386.c" />
     <ClCompile Include="I386\StackI386.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">false</ExcludedFromBuild>
       <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">true</UseSafeExceptionHandlers>
@@ -138,9 +140,11 @@
     <ClCompile Include="Jump.c" />
     <ClCompile Include="Lock.c" />
     <ClCompile Include="Reload.c" />
+    <ClCompile Include="Rtx.c" />
     <ClCompile Include="Shark.c" />
     <ClCompile Include="PatchGuard.c" />
     <ClCompile Include="Scan.c" />
+    <ClCompile Include="Space.c" />
     <ClCompile Include="Stack.c" />
   </ItemGroup>
   <ItemGroup>
@@ -155,10 +159,12 @@
     <ClInclude Include="Jump.h" />
     <ClInclude Include="Lock.h" />
     <ClInclude Include="Reload.h" />
+    <ClInclude Include="Rtx.h" />
     <ClInclude Include="Shark.h" />
     <ClInclude Include="PatchGuard.h" />
     <ClInclude Include="Ctx.h" />
     <ClInclude Include="Scan.h" />
+    <ClInclude Include="Space.h" />
     <ClInclude Include="Stack.h" />
   </ItemGroup>
 </Project>

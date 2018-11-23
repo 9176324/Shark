@@ -21,6 +21,7 @@
 #include "Reload.h"
 
 #include "Except.h"
+#include "Space.h"
 
 extern POBJECT_TYPE * IoDriverObjectType;
 
@@ -293,6 +294,83 @@ RelocateImage(
                     GetRelocCount(RelocDirectory->SizeOfBlock),
                     (PUSHORT)(RelocDirectory + 1),
                     Diff);
+            }
+        }
+    }
+}
+
+ULONG
+NTAPI
+MakeImageProtection(
+    __in PIMAGE_SECTION_HEADER NtSection
+)
+{
+    ULONG ProtectionMask = 0;
+
+    if (IMAGE_SCN_MEM_WRITE ==
+        (NtSection->Characteristics & IMAGE_SCN_MEM_WRITE)) {
+        ProtectionMask = MM_READWRITE;
+    }
+    else {
+        if (IMAGE_SCN_MEM_EXECUTE ==
+            (NtSection->Characteristics & IMAGE_SCN_MEM_EXECUTE)) {
+            ProtectionMask = MM_EXECUTE_READ;
+        }
+        else {
+            ProtectionMask = MM_READONLY;
+        }
+
+        if (IMAGE_SCN_MEM_NOT_CACHED ==
+            (NtSection->Characteristics & IMAGE_SCN_MEM_NOT_CACHED)) {
+            ProtectionMask |= MM_NOCACHE;
+        }
+    }
+
+    return ProtectionMask;
+}
+
+VOID
+NTAPI
+SetImageProtection(
+    __in PVOID ImageBase,
+    __in BOOLEAN Reset
+)
+{
+    PIMAGE_NT_HEADERS NtHeaders = NULL;
+    PIMAGE_SECTION_HEADER NtSection = NULL;
+    ULONG SizeToLock = 0;
+    ULONG SizeOfImage = 0;
+    ULONG Index = 0;
+    ULONG ProtectionMask = 0;
+
+    NtHeaders = RtlImageNtHeader(ImageBase);
+    SizeOfImage = GetSizeOfImage(ImageBase);
+
+    if (NULL != NtHeaders) {
+        NtSection = IMAGE_FIRST_SECTION(NtHeaders);
+
+        ProtectionMask = FALSE != Reset ?
+            MM_EXECUTE_READWRITE : MM_READONLY;
+
+        SetPageProtection(ImageBase, NtSection->VirtualAddress, ProtectionMask);
+
+        for (Index = 0;
+            Index < NtHeaders->FileHeader.NumberOfSections;
+            Index++) {
+            if (0 != NtSection[Index].PointerToRawData) {
+                if (0 != NtSection[Index].VirtualAddress) {
+                    SizeToLock = max(
+                        NtSection[Index].SizeOfRawData,
+                        NtSection[Index].Misc.VirtualSize);
+
+                    ProtectionMask = FALSE != Reset ?
+                        MM_EXECUTE_READWRITE : MakeImageProtection(&NtSection[Index]);
+
+                    SetPageProtection(
+                        (PCHAR)ImageBase + NtSection[Index].VirtualAddress,
+                        SizeToLock,
+                        ProtectionMask);
+                }
             }
         }
     }
@@ -851,7 +929,7 @@ SnapKernelThunk(
                         }
                         else {
                             DbgPrint(
-                                "[Sefirot] [Tiferet] import procedure ordinal@%d not found\n",
+                                "[Shark] import procedure ordinal@%d not found\n",
                                 Ordinal);
                         }
                     }
@@ -868,7 +946,7 @@ SnapKernelThunk(
                         }
                         else {
                             DbgPrint(
-                                "[Sefirot] [Tiferet] import procedure %hs not found\n",
+                                "[Shark] import procedure %hs not found\n",
                                 ImportByName->Name);
                         }
                     }
@@ -879,7 +957,7 @@ SnapKernelThunk(
             }
             else {
                 DbgPrint(
-                    "[Sefirot] [Tiferet] import dll %hs not found\n",
+                    "[Shark] import dll %hs not found\n",
                     ImportImageName);
             }
 
@@ -894,25 +972,15 @@ AllocateKernelPrivateImage(
     __in PVOID ViewBase
 )
 {
-    NTSTATUS Status = STATUS_SUCCESS;
     PVOID ImageBase = NULL;
-    PHYSICAL_ADDRESS HighestAcceptableAddress = { 0 };
-    ULONG SizeOfImage = 0;
+    ULONG SizeOfEntry = 0;
 
-    SizeOfImage = GetSizeOfImage(ViewBase);
+    SizeOfEntry = GetSizeOfImage(ViewBase) + PAGE_SIZE;
 
-    if (0 != SizeOfImage) {
-        SizeOfImage += PAGE_SIZE;
+    ImageBase = AllocateIndependentPages(NULL, SizeOfEntry);
 
-        HighestAcceptableAddress.QuadPart = -1;
-
-        ImageBase = MmAllocateContiguousMemory(
-            SizeOfImage,
-            HighestAcceptableAddress);
-
-        if (NULL != ImageBase) {
-            ImageBase = (PCHAR)ImageBase + PAGE_SIZE;
-        }
+    if (NULL != ImageBase) {
+        ImageBase = (PCHAR)ImageBase + PAGE_SIZE;
     }
 
     return ImageBase;
@@ -1008,6 +1076,8 @@ LoadKernelPrivateImage(
         ImageBase = MapKernelPrivateImage(ViewBase);
 
         if (NULL != ImageBase) {
+            SetImageProtection(ImageBase, FALSE);
+
             DataTableEntry = (PKLDR_DATA_TABLE_ENTRY)
                 ((PCHAR)ImageBase - PAGE_SIZE);
 
@@ -1075,6 +1145,9 @@ UnloadKernelPrivateImage(
     if (0 == DataTableEntry->LoadCount) {
         DereferenceKernelImageImports(DataTableEntry->DllBase);
         RemoveEntryList(&DataTableEntry->InLoadOrderLinks);
-        MmFreeContiguousMemory(DataTableEntry);
+
+        FreeIndependentPages(
+            DataTableEntry,
+            DataTableEntry->SizeOfImage + PAGE_SIZE);
     }
 }
