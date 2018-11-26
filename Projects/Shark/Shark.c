@@ -24,6 +24,7 @@
 #include "Jump.h"
 #include "Reload.h"
 #include "PatchGuard.h"
+#include "Space.h"
 
 VOID
 NTAPI
@@ -104,6 +105,7 @@ DriverEntry(
             DriverObject->DriverUnload = (PDRIVER_UNLOAD)DriverUnload;
 
             InitializeLoadedModuleList(NULL);
+            InitializeSpace(NULL);
 
 #ifndef VMP
             DbgPrint("Shark - load\n");

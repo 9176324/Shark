@@ -50,6 +50,7 @@ ASOBJS = \
 CCARCHOBJS = \
     $(OBJD)\PatchGuard$(ARCTARG).obj \
     $(OBJD)\PatchGuardInline$(ARCTARG).obj \
+    $(OBJD)\Space$(ARCTARG).obj \
     $(OBJD)\Stack$(ARCTARG).obj
 
 CCOBJS = \
@@ -60,7 +61,9 @@ CCOBJS = \
     $(OBJD)\Lock.obj \
     $(OBJD)\PatchGuard.obj \
     $(OBJD)\Reload.obj \
+    $(OBJD)\Rtx.obj \
     $(OBJD)\Scan.obj \
+    $(OBJD)\Space.obj \
     $(OBJD)\Stack.obj
     
 RCOBJS = $(OBJD)\$(PROJ).res
@@ -71,6 +74,7 @@ PROJSRCS = \
     $(ARCTARG)\$(ARCTARG).asm \
     $(ARCTARG)\PatchGuard$(ARCTARG).c \
     $(ARCTARG)\PatchGuardInline$(ARCTARG).c \
+    $(ARCTARG)\Space$(ARCTARG).c \
     $(ARCTARG)\Stack$(ARCTARG).c \
     $(PROJ).c \
     Ctx.c \
@@ -80,7 +84,9 @@ PROJSRCS = \
     Lock.c \
     PatchGuard.c \
     Reload.c \
+    Rtx.c \
     Scan.c \
+    Space.c \
     Stack.c
 
 !if "$(ARCTARG)" == "I386"

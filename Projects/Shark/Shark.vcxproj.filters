@@ -60,6 +60,18 @@
     <ClCompile Include="Reload.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Space.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AMD64\SpaceAMD64.c">
+      <Filter>Source Files\AMD64</Filter>
+    </ClCompile>
+    <ClCompile Include="I386\SpaceI386.c">
+      <Filter>Source Files\I386</Filter>
+    </ClCompile>
+    <ClCompile Include="Rtx.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shark.def">
@@ -118,6 +130,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Reload.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Space.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Rtx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

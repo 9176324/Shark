@@ -19,4 +19,69 @@
 include ksamd64.inc
 include macamd64.inc
 
+    LEAF_ENTRY _FlushSingleTb, _TEXT$00
+        
+        mov rax, rcx
+        invlpg [rax]
+        ret
+
+    LEAF_END _FlushSingleTb, _TEXT$00
+        
+    NESTED_ENTRY _IpiDispatcher, _TEXT$00
+
+        alloc_stack ( KSTART_FRAME_LENGTH - 8 )
+        
+        END_PROLOGUE
+        
+        mov rax, rcx
+
+        test rax, rax
+        jz @f
+
+        mov rcx, rdx
+        mov rdx, r8
+        mov r8, r9
+
+        call rax
+
+        add rsp,  ( KSTART_FRAME_LENGTH - 8 )
+
+        ret
+
+@@ :    
+        mov rax, rdx
+
+        test rax, rax
+        jz @f
+        
+        mov rcx, r8
+        mov rdx, r9
+
+        call rax
+
+        add rsp,  ( KSTART_FRAME_LENGTH - 8 )
+
+        ret
+
+@@ :    
+        mov rax, r8
+
+        test rax, rax
+        jz error
+        
+        mov rcx, r9
+
+        call rax
+
+        add rsp,  ( KSTART_FRAME_LENGTH - 8 )
+
+        ret
+
+error : 
+        add rsp,  ( KSTART_FRAME_LENGTH - 8 )
+
+        ret
+
+    NESTED_END _IpiDispatcher, _TEXT$00
+        
         end

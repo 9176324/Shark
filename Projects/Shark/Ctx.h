@@ -24,28 +24,88 @@
 extern "C" {
 #endif	/* __cplusplus */
 
-    typedef struct _CTX {
-        USHORT Platform;
-        PUSER_THREAD_START_ROUTINE StartRoutine;
-        PVOID StartContext;
-        NTSTATUS ReturnedStatus;
-        KPROCESSOR_MODE Mode;
-    } CTX, *PCTX;
+#ifndef _WIN64
+#define GetTrapFrame(Thread) GetTrapFrameThread(Thread)
+#define GetBaseTrapFrame(Thread) GetBaseTrapFrameThread(Thread)
+#else
+    typedef struct _KSTACK_SEGMENT_LEGACY {
+        ULONG_PTR StackBase;
+        ULONG_PTR StackLimit;
+        ULONG_PTR KernelStack;
+        ULONG_PTR InitialStack;
+        ULONG_PTR ActualLimit;
+    } KSTACK_SEGMENT_LEGACY, *PKSTACK_SEGMENT_LEGACY;
 
-    typedef struct _ATX {
-        KAPC Apc;
-        KEVENT Notify;
-        CTX Ctx; 
-    } ATX, *PATX;
+    typedef struct _KSTACK_CONTROL_LEGACY {
+        KSTACK_SEGMENT_LEGACY Current;
+        KSTACK_SEGMENT_LEGACY Previous;
+    } KSTACK_CONTROL_LEGACY, *PKSTACK_CONTROL_LEGACY;
+
+    typedef struct _KSTACK_SEGMENT {
+        ULONG_PTR StackBase;
+        ULONG_PTR StackLimit;
+        ULONG_PTR KernelStack;
+        ULONG_PTR InitialStack;
+    } KSTACK_SEGMENT, *PKSTACK_SEGMENT;
+
+    typedef struct _KSTACK_CONTROL {
+        ULONG_PTR StackBase;
+
+        union {
+            ULONG_PTR ActualLimit;
+            BOOLEAN StackExpansion : 1;
+        };
+
+        KSTACK_SEGMENT Previous;
+    }KSTACK_CONTROL, *PKSTACK_CONTROL;
+
+#define GetTrapFrame(Thread) GetTrapFrameThread(Thread)
+#define GetBaseTrapFrame(Thread) GetBaseTrapFrameThread(Thread)
+#endif // !_WIN64
+
+    PKTRAP_FRAME
+        NTAPI
+        GetTrapFrameThread(
+            __in PKTHREAD Thread
+        );
+
+    PKTRAP_FRAME
+        NTAPI
+        GetBaseTrapFrameThread(
+            __in PETHREAD Thread
+        );
+
+    PKAPC_STATE
+        NTAPI
+        GetApcStateThread(
+            __in PKTHREAD Thread
+        );
+
+#ifdef _WIN64
+    NTSTATUS
+        NTAPI
+        PsWow64GetContextThread(
+            __in PETHREAD Thread,
+            __inout PWOW64_CONTEXT ThreadContext,
+            __in KPROCESSOR_MODE Mode
+        );
 
     NTSTATUS
         NTAPI
-        RemoteCall(
-            __in HANDLE UniqueThread,
-            __in USHORT Platform,
-            __in_opt PUSER_THREAD_START_ROUTINE StartRoutine,
-            __in_opt PVOID StartContext,
+        PsWow64SetContextThread(
+            __in PETHREAD Thread,
+            __in PWOW64_CONTEXT ThreadContext,
             __in KPROCESSOR_MODE Mode
+        );
+#endif // _WIN64
+
+    NTSTATUS
+        NTAPI
+        UserModeCallback(
+            __in PVOID InputBuffer,
+            __in ULONG InputLength,
+            __out PVOID * OutputBuffer,
+            __in PULONG OutputLength
         );
 
 #ifdef __cplusplus
