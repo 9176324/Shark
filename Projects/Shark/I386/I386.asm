@@ -16,11 +16,10 @@
 ;
 ;
 
-.386p
-
-.model flat, stdcall
+.686p
 
         .xlist
+include ks386.inc
 include callconv.inc
         .list
         
@@ -35,7 +34,7 @@ _TEXT$00    SEGMENT PAGE 'CODE'
         
     stdENDP __FlushSingleTb
         
-    cPublicProc __IpiDispatcher, 4
+    cPublicProc __MultipleDispatcher, 4
 
         mov edi, edi
 
@@ -56,7 +55,7 @@ _TEXT$00    SEGMENT PAGE 'CODE'
         mov esp, ebp
         pop ebp
         
-        stdRET __IpiDispatcher
+        stdRET __MultipleDispatcher
         
 @@ :    
         mov eax, [ebp + 0ch]
@@ -72,7 +71,7 @@ _TEXT$00    SEGMENT PAGE 'CODE'
         mov esp, ebp
         pop ebp
         
-        stdRET __IpiDispatcher
+        stdRET __MultipleDispatcher
         
 @@ :    
         mov eax, [ebp + 10h]
@@ -87,7 +86,7 @@ _TEXT$00    SEGMENT PAGE 'CODE'
         mov esp, ebp
         pop ebp
         
-        stdRET __IpiDispatcher
+        stdRET __MultipleDispatcher
         
 error : 
         xor eax, eax
@@ -95,9 +94,9 @@ error :
         mov esp, ebp
         pop ebp
         
-        stdRET __IpiDispatcher
+        stdRET __MultipleDispatcher
         
-    stdENDP __IpiDispatcher
+    stdENDP __MultipleDispatcher
     
     cPublicProc _IsPAEEnable, 0
     

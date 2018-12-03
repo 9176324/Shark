@@ -27,7 +27,7 @@ include macamd64.inc
 
     LEAF_END _FlushSingleTb, _TEXT$00
         
-    NESTED_ENTRY _IpiDispatcher, _TEXT$00
+    NESTED_ENTRY _MultipleDispatcher, _TEXT$00
 
         alloc_stack ( KSTART_FRAME_LENGTH - 8 )
         
@@ -82,6 +82,6 @@ error :
 
         ret
 
-    NESTED_END _IpiDispatcher, _TEXT$00
+    NESTED_END _MultipleDispatcher, _TEXT$00
         
         end

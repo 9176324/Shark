@@ -105,7 +105,7 @@ DriverEntry(
             DriverObject->DriverUnload = (PDRIVER_UNLOAD)DriverUnload;
 
             InitializeLoadedModuleList(NULL);
-            InitializeSpace(NULL);
+            InitializeSystemSpace(NULL);
 
 #ifndef VMP
             DbgPrint("Shark - load\n");

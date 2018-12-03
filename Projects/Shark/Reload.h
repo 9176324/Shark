@@ -73,6 +73,12 @@ extern "C" {
 
     VOID
         NTAPI
+        FreeImageDiscardableSection(
+            __in PVOID ImageBase
+        );
+
+    VOID
+        NTAPI
         InitializeLoadedModuleList(
             __in PKLDR_DATA_TABLE_ENTRY DataTableEntry
         );
@@ -126,6 +132,24 @@ extern "C" {
         UnloadKernelPrivateImage(
             __in PKLDR_DATA_TABLE_ENTRY DataTableEntry
         );
+
+    NTSTATUS
+        NTAPI
+        FindEntryForUserImage(
+            __in PUNICODE_STRING ImageFileName,
+            __out PLDR_DATA_TABLE_ENTRY * DataTableEntry
+        );
+
+    PVOID
+        NTAPI
+        GetUserProcedureAddress(
+            __in PVOID ImageBase,
+            __in_opt PSTR ProcedureName,
+            __in_opt ULONG ProcedureNumber
+        );
+
+        extern PLIST_ENTRY LoadedModuleList;
+        extern LIST_ENTRY LoadedPrivateImageList;
 
 #ifdef __cplusplus
 }

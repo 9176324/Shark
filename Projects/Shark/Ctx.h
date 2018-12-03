@@ -99,15 +99,6 @@ extern "C" {
         );
 #endif // _WIN64
 
-    NTSTATUS
-        NTAPI
-        UserModeCallback(
-            __in PVOID InputBuffer,
-            __in ULONG InputLength,
-            __out PVOID * OutputBuffer,
-            __in PULONG OutputLength
-        );
-
 #ifdef __cplusplus
 }
 #endif	/* __cplusplus */

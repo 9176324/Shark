@@ -58,7 +58,6 @@ CCOBJS = \
     $(OBJD)\Ctx.obj \
     $(OBJD)\Except.obj \
     $(OBJD)\Jump.obj \
-    $(OBJD)\Lock.obj \
     $(OBJD)\PatchGuard.obj \
     $(OBJD)\Reload.obj \
     $(OBJD)\Rtx.obj \
@@ -81,7 +80,6 @@ PROJSRCS = \
     Cmp$(ARCTARG).asm \
     Except.c \
     Jump.c \
-    Lock.c \
     PatchGuard.c \
     Reload.c \
     Rtx.c \

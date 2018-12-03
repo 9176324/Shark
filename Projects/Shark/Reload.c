@@ -21,12 +21,17 @@
 #include "Reload.h"
 
 #include "Except.h"
-#include "Space.h"
+#include "Jump.h"
+#include "Scan.h"
+#include "Space.h" 
 
 extern POBJECT_TYPE * IoDriverObjectType;
 
-static PLIST_ENTRY LoadedModuleList;
-static LIST_ENTRY LoadedPrivateImageList;
+PLIST_ENTRY LoadedModuleList;
+LIST_ENTRY LoadedPrivateImageList;
+
+KSERVICE_TABLE_DESCRIPTOR * ServiceDescriptorTable;
+KSERVICE_TABLE_DESCRIPTOR * ServiceDescriptorTableShadow;
 
 ULONG
 NTAPI
@@ -378,6 +383,52 @@ SetImageProtection(
 
 VOID
 NTAPI
+ResstDriverSection(
+    __in PVOID ImageBase
+)
+{
+    PIMAGE_NT_HEADERS NtHeaders = NULL;
+    PIMAGE_SECTION_HEADER NtSection = NULL;
+    ULONG SizeToLock = 0;
+    ULONG SizeOfImage = 0;
+    ULONG Index = 0;
+
+    NtHeaders = RtlImageNtHeader(ImageBase);
+    SizeOfImage = GetSizeOfImage(ImageBase);
+
+    if (NULL != NtHeaders) {
+        NtSection = IMAGE_FIRST_SECTION(NtHeaders);
+
+        for (Index = 0;
+            Index < NtHeaders->FileHeader.NumberOfSections;
+            Index++) {
+            if (IMAGE_SCN_MEM_DISCARDABLE ==
+                (NtSection[Index].Characteristics & IMAGE_SCN_MEM_DISCARDABLE)) {
+                if (0 != NtSection[Index].VirtualAddress) {
+                    SizeToLock = max(
+                        NtSection[Index].SizeOfRawData,
+                        NtSection[Index].Misc.VirtualSize);
+
+                    //
+                }
+            }
+
+            if (IMAGE_SCN_MEM_NOT_PAGED !=
+                (NtSection[Index].Characteristics & IMAGE_SCN_MEM_NOT_PAGED)) {
+                if (0 != NtSection[Index].VirtualAddress) {
+                    SizeToLock = max(
+                        NtSection[Index].SizeOfRawData,
+                        NtSection[Index].Misc.VirtualSize);
+
+                    //
+                }
+            }
+        }
+    }
+}
+
+VOID
+NTAPI
 InitializeLoadedModuleList(
     __in PKLDR_DATA_TABLE_ENTRY DataTableEntry
 )
@@ -389,6 +440,25 @@ InitializeLoadedModuleList(
     UNICODE_STRING DriverPath = { 0 };
     PKLDR_DATA_TABLE_ENTRY KernelDataTableEntry = NULL;
     UNICODE_STRING KernelString = { 0 };
+    PIMAGE_NT_HEADERS NtHeaders = NULL;
+    PIMAGE_SECTION_HEADER NtSection = NULL;
+    PCHAR SectionBase = NULL;
+    ULONG SizeToLock = 0;
+    PCHAR ControlPc = NULL;
+    UNICODE_STRING RoutineString = { 0 };
+
+#ifdef _WIN64
+    // 48 89 A3 D8 01 00 00             mov [rbx + 1D8h], rsp
+    // 8B F8                            mov edi, eax
+    // C1 EF 07                         shr edi, 7
+    // 83 E7 20                         and edi, 20h
+    // 25 FF 0F 00 00                   and eax, 0FFFh
+    // 4C 8D 15 C7 20 23 00             lea r10, KeServiceDescriptorTable
+    // 4C 8D 1D 00 21 23 00             lea r11, KeServiceDescriptorTableShadow
+
+    CHAR KiSystemCall64[] =
+        "48 89 a3 ?? ?? ?? ?? 8b f8 c1 ef 07 83 e7 20 25 ff 0f 00 00 4c 8d 15 ?? ?? ?? ?? 4c 8d 1d ?? ?? ?? ??";
+#endif // _WIN64
 
     RtlInitUnicodeString(&KernelString, L"ntoskrnl.exe");
 
@@ -411,26 +481,28 @@ InitializeLoadedModuleList(
             TempDataTableEntry = DriverObject->DriverSection;
 
             if (NULL != TempDataTableEntry) {
-                FoundDataTableEntry = CONTAINING_RECORD(
-                    TempDataTableEntry->InLoadOrderLinks.Flink,
-                    KLDR_DATA_TABLE_ENTRY,
-                    InLoadOrderLinks);
-
-                while (FoundDataTableEntry != TempDataTableEntry) {
-                    if (NULL != FoundDataTableEntry->DllBase) {
-                        if (FALSE != RtlEqualUnicodeString(
-                            &KernelString,
-                            &FoundDataTableEntry->BaseDllName,
-                            TRUE)) {
-                            LoadedModuleList = FoundDataTableEntry->InLoadOrderLinks.Blink;
-                            break;
-                        }
-                    }
-
+                if (FALSE == IsListEmpty(&TempDataTableEntry->InLoadOrderLinks)) {
                     FoundDataTableEntry = CONTAINING_RECORD(
-                        FoundDataTableEntry->InLoadOrderLinks.Flink,
+                        TempDataTableEntry->InLoadOrderLinks.Flink,
                         KLDR_DATA_TABLE_ENTRY,
                         InLoadOrderLinks);
+
+                    while (FoundDataTableEntry != TempDataTableEntry) {
+                        if (NULL != FoundDataTableEntry->DllBase) {
+                            if (FALSE != RtlEqualUnicodeString(
+                                &KernelString,
+                                &FoundDataTableEntry->BaseDllName,
+                                TRUE)) {
+                                LoadedModuleList = FoundDataTableEntry->InLoadOrderLinks.Blink;
+                                break;
+                            }
+                        }
+
+                        FoundDataTableEntry = CONTAINING_RECORD(
+                            FoundDataTableEntry->InLoadOrderLinks.Flink,
+                            KLDR_DATA_TABLE_ENTRY,
+                            InLoadOrderLinks);
+                    }
                 }
             }
 
@@ -452,6 +524,33 @@ InitializeLoadedModuleList(
             &DataTableEntry->ExceptionTable,
             &DataTableEntry->ExceptionTableSize);
     }
+
+#ifndef _WIN64
+    RtlInitUnicodeString(&RoutineString, L"KeServiceDescriptorTable");
+
+    ServiceDescriptorTable = MmGetSystemRoutineAddress(&RoutineString);
+#else
+    NtHeaders = RtlImageNtHeader(FoundDataTableEntry->DllBase);
+
+    if (NULL != NtHeaders) {
+        NtSection = IMAGE_FIRST_SECTION(NtHeaders);
+
+        SectionBase = (PCHAR)FoundDataTableEntry->DllBase + NtSection[0].VirtualAddress;
+
+        SizeToLock = max(
+            NtSection[0].SizeOfRawData,
+            NtSection[0].Misc.VirtualSize);
+
+        ControlPc = ScanBytes(
+            SectionBase,
+            (PCHAR)SectionBase + SizeToLock,
+            KiSystemCall64);
+
+        if (NULL != ControlPc) {
+            ServiceDescriptorTable = RvaToVa(ControlPc + 23);
+        }
+    }
+#endif // !_WIN64
 }
 
 NTSTATUS
@@ -501,25 +600,27 @@ FindEntryForKernelImage(
     PKLDR_DATA_TABLE_ENTRY FoundDataTableEntry = NULL;
 
     if (NULL != LoadedModuleList) {
-        FoundDataTableEntry = CONTAINING_RECORD(
-            LoadedModuleList->Flink,
-            KLDR_DATA_TABLE_ENTRY,
-            InLoadOrderLinks);
-
-        while (FoundDataTableEntry != LoadedModuleList) {
-            if (FALSE != RtlEqualUnicodeString(
-                ImageFileName,
-                &FoundDataTableEntry->BaseDllName,
-                TRUE)) {
-                *DataTableEntry = FoundDataTableEntry;
-                Status = STATUS_SUCCESS;
-                break;
-            }
-
+        if (FALSE == IsListEmpty(LoadedModuleList)) {
             FoundDataTableEntry = CONTAINING_RECORD(
-                FoundDataTableEntry->InLoadOrderLinks.Flink,
+                LoadedModuleList->Flink,
                 KLDR_DATA_TABLE_ENTRY,
                 InLoadOrderLinks);
+
+            while (FoundDataTableEntry != LoadedModuleList) {
+                if (FALSE != RtlEqualUnicodeString(
+                    ImageFileName,
+                    &FoundDataTableEntry->BaseDllName,
+                    TRUE)) {
+                    *DataTableEntry = FoundDataTableEntry;
+                    Status = STATUS_SUCCESS;
+                    break;
+                }
+
+                FoundDataTableEntry = CONTAINING_RECORD(
+                    FoundDataTableEntry->InLoadOrderLinks.Flink,
+                    KLDR_DATA_TABLE_ENTRY,
+                    InLoadOrderLinks);
+            }
         }
     }
 
@@ -573,24 +674,26 @@ FindEntryForKernelImageAddress(
     PKLDR_DATA_TABLE_ENTRY FoundDataTableEntry = NULL;
 
     if (NULL != LoadedModuleList) {
-        FoundDataTableEntry = CONTAINING_RECORD(
-            LoadedModuleList->Flink,
-            KLDR_DATA_TABLE_ENTRY,
-            InLoadOrderLinks);
-
-        while (FoundDataTableEntry != LoadedModuleList) {
-            if ((ULONG_PTR)Address >= (ULONG_PTR)FoundDataTableEntry->DllBase &&
-                (ULONG_PTR)Address < (ULONG_PTR)FoundDataTableEntry->DllBase +
-                FoundDataTableEntry->SizeOfImage) {
-                *DataTableEntry = FoundDataTableEntry;
-                Status = STATUS_SUCCESS;
-                break;
-            }
-
+        if (FALSE == IsListEmpty(LoadedModuleList)) {
             FoundDataTableEntry = CONTAINING_RECORD(
-                FoundDataTableEntry->InLoadOrderLinks.Flink,
+                LoadedModuleList->Flink,
                 KLDR_DATA_TABLE_ENTRY,
                 InLoadOrderLinks);
+
+            while (FoundDataTableEntry != LoadedModuleList) {
+                if ((ULONG_PTR)Address >= (ULONG_PTR)FoundDataTableEntry->DllBase &&
+                    (ULONG_PTR)Address < (ULONG_PTR)FoundDataTableEntry->DllBase +
+                    FoundDataTableEntry->SizeOfImage) {
+                    *DataTableEntry = FoundDataTableEntry;
+                    Status = STATUS_SUCCESS;
+                    break;
+                }
+
+                FoundDataTableEntry = CONTAINING_RECORD(
+                    FoundDataTableEntry->InLoadOrderLinks.Flink,
+                    KLDR_DATA_TABLE_ENTRY,
+                    InLoadOrderLinks);
+            }
         }
     }
 
@@ -883,6 +986,116 @@ ReferenceKernelImage(
     return ImageBase;
 }
 
+LONG
+NTAPI
+NameToNumber(
+    __in PSTR String
+)
+{
+    NTSTATUS Status = STATUS_SUCCESS;
+    PLDR_DATA_TABLE_ENTRY DataTableEntry = NULL;
+    UNICODE_STRING NativeString = { 0 };
+    PCHAR TargetPc = NULL;
+    LONG Number = -1;
+
+    RtlInitUnicodeString(&NativeString, L"ntdll.dll");
+
+    Status = FindEntryForUserImage(
+        &NativeString,
+        &DataTableEntry);
+
+    if (NT_SUCCESS(Status)) {
+        TargetPc = GetUserProcedureAddress(
+            DataTableEntry->DllBase,
+            String,
+            0);
+
+        if (NULL != TargetPc) {
+#ifndef _WIN64
+            Number = *(PLONG)(TargetPc + 1);
+#else
+            Number = *(PLONG)(TargetPc + 4);
+#endif // !_WIN64
+        }
+    }
+
+    return Number;
+}
+
+PVOID
+NTAPI
+NameToAddress(
+    __in PSTR String
+)
+{
+    PVOID RoutineAddress = NULL;
+    UNICODE_STRING RoutineString = { 0 };
+    LONG Number = -1;
+    PCHAR ControlPc = NULL;
+    PCHAR TargetPc = NULL;
+    ULONG FirstLength = 0;
+    ULONG Length = 0;
+
+    static ULONG Interval;
+
+    if (0 == _CmpByte(String[0], 'Z') &&
+        0 == _CmpByte(String[1], 'w')) {
+        RtlInitUnicodeString(&RoutineString, L"ZwClose");
+
+        ControlPc = MmGetSystemRoutineAddress(&RoutineString);
+
+        if (NULL != ControlPc) {
+            Number = NameToNumber("NtClose");
+
+            if (0 == Interval) {
+                FirstLength = DetourGetInstructionLength(ControlPc);
+
+                TargetPc = ControlPc + FirstLength;
+
+                while (TRUE) {
+                    Length = DetourGetInstructionLength(TargetPc);
+
+                    if (FirstLength == Length) {
+#ifndef _WIN64
+                        if (0 == _CmpByte(TargetPc[0], ControlPc[0]) &&
+                            1 == *(PLONG)&TargetPc[1] - *(PLONG)&ControlPc[1]) {
+                            Interval = TargetPc - ControlPc;
+                            break;
+                        }
+#else
+                        if (FirstLength == RtlCompareMemory(
+                            TargetPc,
+                            ControlPc,
+                            FirstLength)) {
+                            Interval = TargetPc - ControlPc;
+                            break;
+                        }
+#endif // !_WIN64
+                    }
+
+                    TargetPc += Length;
+                }
+            }
+
+            RoutineAddress = ControlPc +
+                Interval * (LONG_PTR)(NameToNumber(String) - Number);
+        }
+    }
+    else if (0 == _CmpByte(String[0], 'N') &&
+        0 == _CmpByte(String[1], 't')) {
+        Number = NameToNumber(String);
+
+#ifndef _WIN64
+        RoutineAddress = UlongToPtr(ServiceDescriptorTable[0].Base[Number]);
+#else
+        RoutineAddress = (PCHAR)ServiceDescriptorTable[0].Base +
+            (*(PLONG)((PCHAR)ServiceDescriptorTable[0].Base + 4 * Number) >> 4);
+#endif // !_WIN64
+    }
+
+    return RoutineAddress;
+}
+
 VOID
 NTAPI
 SnapKernelThunk(
@@ -936,10 +1149,18 @@ SnapKernelThunk(
                     else {
                         ImportByName = (PCHAR)ImageBase + OriginalThunk->u1.AddressOfData;
 
-                        FunctionAddress = GetKernelProcedureAddress(
-                            ImportImageBase,
-                            ImportByName->Name,
-                            0);
+                        if ((0 == _CmpByte(ImportByName->Name[0], 'Z') &&
+                            0 == _CmpByte(ImportByName->Name[1], 'w')) ||
+                            (0 == _CmpByte(ImportByName->Name[0], 'N') &&
+                                0 == _CmpByte(ImportByName->Name[1], 't'))) {
+                            FunctionAddress = NameToAddress(ImportByName->Name);
+                        }
+                        else {
+                            FunctionAddress = GetKernelProcedureAddress(
+                                ImportImageBase,
+                                ImportByName->Name,
+                                0);
+                        }
 
                         if (NULL != FunctionAddress) {
                             Thunk->u1.Function = (ULONG_PTR)FunctionAddress;
@@ -977,7 +1198,7 @@ AllocateKernelPrivateImage(
 
     SizeOfEntry = GetSizeOfImage(ViewBase) + PAGE_SIZE;
 
-    ImageBase = AllocateIndependentPages(NULL, SizeOfEntry);
+    ImageBase = AllocateIndependentPages(SizeOfEntry);
 
     if (NULL != ImageBase) {
         ImageBase = (PCHAR)ImageBase + PAGE_SIZE;
@@ -992,7 +1213,6 @@ MapKernelPrivateImage(
     __in PVOID ViewBase
 )
 {
-    NTSTATUS Status = STATUS_SUCCESS;
     PVOID ImageBase = NULL;
     PIMAGE_NT_HEADERS NtHeaders = NULL;
     PIMAGE_SECTION_HEADER NtSection = NULL;
@@ -1140,8 +1360,6 @@ UnloadKernelPrivateImage(
 {
     RTL_SOFT_ASSERT(NULL != DataTableEntry);
 
-    DataTableEntry->LoadCount--;
-
     if (0 == DataTableEntry->LoadCount) {
         DereferenceKernelImageImports(DataTableEntry->DllBase);
         RemoveEntryList(&DataTableEntry->InLoadOrderLinks);
@@ -1150,4 +1368,209 @@ UnloadKernelPrivateImage(
             DataTableEntry,
             DataTableEntry->SizeOfImage + PAGE_SIZE);
     }
+    else {
+        DataTableEntry->LoadCount--;
+
+        if (0 == DataTableEntry->LoadCount) {
+            DereferenceKernelImageImports(DataTableEntry->DllBase);
+            RemoveEntryList(&DataTableEntry->InLoadOrderLinks);
+
+            FreeIndependentPages(
+                DataTableEntry,
+                DataTableEntry->SizeOfImage + PAGE_SIZE);
+        }
+    }
+}
+
+NTSTATUS
+NTAPI
+FindEntryForUserImage(
+    __in PUNICODE_STRING ImageFileName,
+    __out PLDR_DATA_TABLE_ENTRY * DataTableEntry
+)
+{
+    NTSTATUS Status = STATUS_NO_MORE_ENTRIES;
+    PPEB Peb = NULL;
+    PPEB_LDR_DATA Ldr = NULL;
+    PLDR_DATA_TABLE_ENTRY LdrDataTableEntry = NULL;
+    PLDR_DATA_TABLE_ENTRY FoundDataTableEntry = NULL;
+
+    Peb = PsGetProcessPeb(IoGetCurrentProcess());
+
+    if (NULL != Peb) {
+        Ldr = Peb->Ldr;
+
+        if (NULL != Ldr) {
+            if (FALSE == IsListEmpty(&Ldr->InLoadOrderModuleList)) {
+                LdrDataTableEntry = CONTAINING_RECORD(
+                    &Ldr->InLoadOrderModuleList,
+                    LDR_DATA_TABLE_ENTRY,
+                    InLoadOrderLinks);
+
+                FoundDataTableEntry = CONTAINING_RECORD(
+                    LdrDataTableEntry->InLoadOrderLinks.Flink,
+                    LDR_DATA_TABLE_ENTRY,
+                    InLoadOrderLinks);
+
+                while (FoundDataTableEntry != LdrDataTableEntry) {
+                    if (FALSE != RtlEqualUnicodeString(
+                        ImageFileName,
+                        &FoundDataTableEntry->BaseDllName,
+                        TRUE)) {
+                        *DataTableEntry = FoundDataTableEntry;
+                        Status = STATUS_SUCCESS;
+                        break;
+                    }
+
+                    FoundDataTableEntry = CONTAINING_RECORD(
+                        FoundDataTableEntry->InLoadOrderLinks.Flink,
+                        LDR_DATA_TABLE_ENTRY,
+                        InLoadOrderLinks);
+                }
+            }
+        }
+    }
+
+    return Status;
+}
+
+PVOID
+NTAPI
+GetUserForwarder(
+    __in PSTR ForwarderData
+)
+{
+    NTSTATUS Status = STATUS_SUCCESS;
+    PSTR Separator = NULL;
+    PSTR ImageName = NULL;
+    PSTR ProcedureName = NULL;
+    ULONG ProcedureNumber = 0;
+    PVOID ProcedureAddress = NULL;
+    PLDR_DATA_TABLE_ENTRY DataTableEntry = NULL;
+    ANSI_STRING TempImageFileName = { 0 };
+    UNICODE_STRING ImageFileName = { 0 };
+
+    Separator = strchr(
+        ForwarderData,
+        '.');
+
+    if (Separator) {
+        ImageName = ExAllocatePool(
+            NonPagedPool,
+            Separator - ForwarderData);
+
+        if (ImageName) {
+            RtlCopyMemory(
+                ImageName,
+                ForwarderData,
+                Separator - ForwarderData);
+
+            RtlInitAnsiString(
+                &TempImageFileName,
+                ImageName);
+
+            Status = RtlAnsiStringToUnicodeString(
+                &ImageFileName,
+                &TempImageFileName,
+                TRUE);
+
+            if (NT_SUCCESS(Status)) {
+                Status = FindEntryForUserImage(
+                    &ImageFileName,
+                    &DataTableEntry);
+
+                if (NT_SUCCESS(Status)) {
+                    Separator += 1;
+                    ProcedureName = Separator;
+
+                    if (Separator[0] != '#') {
+                        ProcedureAddress = GetUserProcedureAddress(
+                            DataTableEntry->DllBase,
+                            ProcedureName,
+                            0);
+                    }
+                    else {
+                        Separator += 1;
+
+                        if (RtlCharToInteger(
+                            Separator,
+                            0,
+                            &ProcedureNumber) >= 0) {
+                            ProcedureAddress = GetUserProcedureAddress(
+                                DataTableEntry->DllBase,
+                                NULL,
+                                ProcedureNumber);
+                        }
+                    }
+                }
+
+                RtlFreeUnicodeString(&ImageFileName);
+            }
+
+            ExFreePool(ImageName);
+        }
+    }
+
+    return ProcedureAddress;
+}
+
+PVOID
+NTAPI
+GetUserProcedureAddress(
+    __in PVOID ImageBase,
+    __in_opt PSTR ProcedureName,
+    __in_opt ULONG ProcedureNumber
+)
+{
+    PIMAGE_EXPORT_DIRECTORY ExportDirectory = NULL;
+    ULONG Size = 0;
+    PULONG NameTable = NULL;
+    PUSHORT OrdinalTable = NULL;
+    PULONG AddressTable = NULL;
+    PSTR NameTableName = NULL;
+    USHORT HintIndex = 0;
+    PVOID ProcedureAddress = NULL;
+
+    ExportDirectory = RtlImageDirectoryEntryToData(
+        ImageBase,
+        TRUE,
+        IMAGE_DIRECTORY_ENTRY_EXPORT,
+        &Size);
+
+    if (NULL != ExportDirectory) {
+        NameTable = (PCHAR)ImageBase + ExportDirectory->AddressOfNames;
+        OrdinalTable = (PCHAR)ImageBase + ExportDirectory->AddressOfNameOrdinals;
+        AddressTable = (PCHAR)ImageBase + ExportDirectory->AddressOfFunctions;
+
+        if (NULL != NameTable &&
+            NULL != OrdinalTable &&
+            NULL != AddressTable) {
+            if (ProcedureNumber >= ExportDirectory->Base &&
+                ProcedureNumber < MAXSHORT) {
+                ProcedureAddress = (PCHAR)ImageBase +
+                    AddressTable[ProcedureNumber - ExportDirectory->Base];
+            }
+            else {
+                for (HintIndex = 0;
+                    HintIndex < ExportDirectory->NumberOfNames;
+                    HintIndex++) {
+                    NameTableName = (PCHAR)ImageBase + NameTable[HintIndex];
+
+                    if (0 == _stricmp(
+                        ProcedureName,
+                        NameTableName)) {
+                        ProcedureAddress = (PCHAR)ImageBase +
+                            AddressTable[OrdinalTable[HintIndex]];
+                    }
+                }
+            }
+        }
+
+        if ((ULONG_PTR)ProcedureAddress >= (ULONG_PTR)ExportDirectory &&
+            (ULONG_PTR)ProcedureAddress < (ULONG_PTR)ExportDirectory + Size) {
+            ProcedureAddress = GetUserForwarder(ProcedureAddress);
+        }
+    }
+
+    return ProcedureAddress;
 }
