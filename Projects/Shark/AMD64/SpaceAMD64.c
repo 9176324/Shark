@@ -25,20 +25,10 @@
 #include "Rtx.h"
 #include "Scan.h"
 
-static PMMPTE PxeBase;
-static PMMPTE PpeBase;
-static PMMPTE PdeBase;
-static PMMPTE PteBase;
-
-static PMMPTE PxeTop;
-static PMMPTE PpeTop;
-static PMMPTE PdeTop;
-static PMMPTE PteTop;
-
 VOID
 NTAPI
 InitializeSystemSpace(
-    __in PVOID Parameter
+    __inout PRELOADER_PARAMETER_BLOCK ReloaderBlock
 )
 {
     PVOID ImageBase = NULL;
@@ -46,9 +36,6 @@ InitializeSystemSpace(
     PIMAGE_SECTION_HEADER NtSection = NULL;
     PCHAR SectionBase = NULL;
     ULONG SizeToLock = 0;
-    UNICODE_STRING ImageFileName = { 0 };
-    PLDR_DATA_TABLE_ENTRY DataTableEntry = NULL;
-    ULONG BuildNumber = 0;
     PCHAR ControlPc = NULL;
     PCHAR TargetPc = NULL;
     UNICODE_STRING RoutineString = { 0 };
@@ -86,73 +73,66 @@ InitializeSystemSpace(
     CHAR MmDuplicateMemory[] =
         "8b ?? 48 8d 0c 80 49 8b 84 ?? ?? ?? ?? ?? 48 8d ?? c8";
 
-    PsGetVersion(NULL, NULL, &BuildNumber, NULL);
+    if (ReloaderBlock->BuildNumber >= 10586) {
+        NtHeaders = RtlImageNtHeader(ReloaderBlock->KernelDataTableEntry->DllBase);
 
-    if (BuildNumber >= 10586) {
-        RtlInitUnicodeString(&ImageFileName, L"ntoskrnl.exe");
+        if (NULL != NtHeaders) {
+            NtSection = IMAGE_FIRST_SECTION(NtHeaders);
 
-        if (RTL_SOFT_ASSERT(NT_SUCCESS(FindEntryForKernelImage(
-            &ImageFileName,
-            &DataTableEntry)))) {
-            NtHeaders = RtlImageNtHeader(DataTableEntry->DllBase);
+            SectionBase =
+                (PCHAR)ReloaderBlock->KernelDataTableEntry->DllBase + NtSection[0].VirtualAddress;
 
-            if (NULL != NtHeaders) {
-                NtSection = IMAGE_FIRST_SECTION(NtHeaders);
+            SizeToLock = max(
+                NtSection[0].SizeOfRawData,
+                NtSection[0].Misc.VirtualSize);
 
-                SectionBase = (PCHAR)DataTableEntry->DllBase + NtSection[0].VirtualAddress;
+            ControlPc = ScanBytes(
+                SectionBase,
+                (PCHAR)SectionBase + SizeToLock,
+                MiGetPteAddress);
 
-                SizeToLock = max(
-                    NtSection[0].SizeOfRawData,
-                    NtSection[0].Misc.VirtualSize);
+            if (NULL != ControlPc) {
+                ReloaderBlock->PteBase = *(PMMPTE *)(ControlPc + 19);
 
-                ControlPc = ScanBytes(
-                    SectionBase,
-                    (PCHAR)SectionBase + SizeToLock,
-                    MiGetPteAddress);
+                ReloaderBlock->PteTop = (PMMPTE)
+                    ((LONGLONG)ReloaderBlock->PteBase |
+                    (((((LONGLONG)1 << (VIRTUAL_ADDRESS_BITS + 1)) >> PTI_SHIFT) << PTE_SHIFT) - 1));
 
-                if (NULL != ControlPc) {
-                    PteBase = *(PMMPTE *)(ControlPc + 19);
+                ReloaderBlock->PdeBase = (PMMPTE)
+                    (((LONGLONG)ReloaderBlock->PteBase & ~(((LONGLONG)1 << (PHYSICAL_ADDRESS_BITS - 1)) - 1)) |
+                    (((LONGLONG)ReloaderBlock->PteBase >> 9) & (((LONGLONG)1 << (PHYSICAL_ADDRESS_BITS - 1)) - 1)));
 
-                    PteTop = (PMMPTE)
-                        ((LONGLONG)PteBase |
-                        (((((LONGLONG)1 << (VIRTUAL_ADDRESS_BITS + 1)) >> PTI_SHIFT) << PTE_SHIFT) - 1));
+                ReloaderBlock->PdeTop = (PMMPTE)
+                    ((LONGLONG)ReloaderBlock->PdeBase |
+                    (((((LONGLONG)1 << (VIRTUAL_ADDRESS_BITS + 1)) >> PDI_SHIFT) << PTE_SHIFT) - 1));
 
-                    PdeBase = (PMMPTE)
-                        (((LONGLONG)PteBase & ~(((LONGLONG)1 << (PHYSICAL_ADDRESS_BITS - 1)) - 1)) |
-                        (((LONGLONG)PteBase >> 9) & (((LONGLONG)1 << (PHYSICAL_ADDRESS_BITS - 1)) - 1)));
+                ReloaderBlock->PpeBase = (PMMPTE)
+                    (((LONGLONG)ReloaderBlock->PdeBase & ~(((LONGLONG)1 << (PHYSICAL_ADDRESS_BITS - 1)) - 1)) |
+                    (((LONGLONG)ReloaderBlock->PdeBase >> 9) & (((LONGLONG)1 << (PHYSICAL_ADDRESS_BITS - 1)) - 1)));
 
-                    PdeTop = (PMMPTE)
-                        ((LONGLONG)PdeBase |
-                        (((((LONGLONG)1 << (VIRTUAL_ADDRESS_BITS + 1)) >> PDI_SHIFT) << PTE_SHIFT) - 1));
+                ReloaderBlock->PpeTop = (PMMPTE)
+                    ((LONGLONG)ReloaderBlock->PpeBase |
+                    (((((LONGLONG)1 << (VIRTUAL_ADDRESS_BITS + 1)) >> PPI_SHIFT) << PTE_SHIFT) - 1));
 
-                    PpeBase = (PMMPTE)
-                        (((LONGLONG)PdeBase & ~(((LONGLONG)1 << (PHYSICAL_ADDRESS_BITS - 1)) - 1)) |
-                        (((LONGLONG)PdeBase >> 9) & (((LONGLONG)1 << (PHYSICAL_ADDRESS_BITS - 1)) - 1)));
+                ReloaderBlock->PxeBase = (PMMPTE)
+                    (((LONGLONG)ReloaderBlock->PpeBase & ~(((LONGLONG)1 << (PHYSICAL_ADDRESS_BITS - 1)) - 1)) |
+                    (((LONGLONG)ReloaderBlock->PpeBase >> 9) & (((LONGLONG)1 << (PHYSICAL_ADDRESS_BITS - 1)) - 1)));
 
-                    PpeTop = (PMMPTE)
-                        ((LONGLONG)PpeBase |
-                        (((((LONGLONG)1 << (VIRTUAL_ADDRESS_BITS + 1)) >> PPI_SHIFT) << PTE_SHIFT) - 1));
-
-                    PxeBase = (PMMPTE)
-                        (((LONGLONG)PpeBase & ~(((LONGLONG)1 << (PHYSICAL_ADDRESS_BITS - 1)) - 1)) |
-                        (((LONGLONG)PpeBase >> 9) & (((LONGLONG)1 << (PHYSICAL_ADDRESS_BITS - 1)) - 1)));
-
-                    PxeTop = (PMMPTE)
-                        ((LONGLONG)PxeBase |
-                        (((((LONGLONG)1 << (VIRTUAL_ADDRESS_BITS + 1)) >> PXI_SHIFT) << PTE_SHIFT) - 1));
-                }
+                ReloaderBlock->PxeTop = (PMMPTE)
+                    ((LONGLONG)ReloaderBlock->PxeBase |
+                    (((((LONGLONG)1 << (VIRTUAL_ADDRESS_BITS + 1)) >> PXI_SHIFT) << PTE_SHIFT) - 1));
             }
         }
     }
     else {
-        PteBase = (PMMPTE)PTE_BASE;
-        PteTop = (PMMPTE)PTE_TOP;
-        PdeBase = (PMMPTE)PDE_BASE;
-        PdeTop = (PMMPTE)PDE_TOP;
-        PpeBase = (PMMPTE)PPE_BASE;
-        PpeTop = (PMMPTE)PPE_TOP;
-        PxeBase = (PMMPTE)PXE_BASE;
-        PxeTop = (PMMPTE)PXE_TOP;
+        ReloaderBlock->PteBase = (PMMPTE)PTE_BASE;
+        ReloaderBlock->PteTop = (PMMPTE)PTE_TOP;
+        ReloaderBlock->PdeBase = (PMMPTE)PDE_BASE;
+        ReloaderBlock->PdeTop = (PMMPTE)PDE_TOP;
+        ReloaderBlock->PpeBase = (PMMPTE)PPE_BASE;
+        ReloaderBlock->PpeTop = (PMMPTE)PPE_TOP;
+        ReloaderBlock->PxeBase = (PMMPTE)PXE_BASE;
+        ReloaderBlock->PxeTop = (PMMPTE)PXE_TOP;
     }
 
     RtlInitUnicodeString(&RoutineString, L"KeCapturePersistentThreadState");
@@ -168,7 +148,7 @@ InitializeSystemSpace(
                 if (0 == _CmpByte(ControlPc[0], 0x48) &&
                     0 == _CmpByte(ControlPc[1], 0x8b) &&
                     0 == _CmpByte(ControlPc[2], 0x05)) {
-                    PfnDatabase = *(PVOID *)RvaToVa(ControlPc + Length - sizeof(LONG));
+                    ReloaderBlock->PfnDatabase = *(PVOID *)RvaToVa(ControlPc + Length - sizeof(LONG));
 
                     break;
                 }
@@ -178,142 +158,140 @@ InitializeSystemSpace(
         }
     }
 
-    RtlInitUnicodeString(&ImageFileName, L"ntoskrnl.exe");
+    if (ReloaderBlock->BuildNumber > 9600) {
+        RtlInitUnicodeString(&RoutineString, L"MmAddPhysicalMemory");
 
-    if (RTL_SOFT_ASSERT(NT_SUCCESS(FindEntryForKernelImage(
-        &ImageFileName,
-        &DataTableEntry)))) {
-        if (BuildNumber > 9600) {
-            RtlInitUnicodeString(&RoutineString, L"MmAddPhysicalMemory");
+        ControlPc = MmGetSystemRoutineAddress(&RoutineString);
 
-            ControlPc = MmGetSystemRoutineAddress(&RoutineString);
+        if (NULL != ControlPc) {
+            while (0 != _CmpByte(ControlPc[0], 0xc2) &&
+                0 != _CmpByte(ControlPc[0], 0xc3)) {
+                Length = DetourGetInstructionLength(ControlPc);
+
+                if (7 == Length) {
+                    if (0 == _CmpByte(ControlPc[0], 0x48) &&
+                        0 == _CmpByte(ControlPc[1], 0x8d) &&
+                        0 == _CmpByte(ControlPc[2], 0x0d)) {
+                        TargetPc = RvaToVa(ControlPc + Length - sizeof(LONG));
+
+                        for (ControlPc = TargetPc;
+                            ;
+                            ControlPc += 0x10) {
+                            if (FreePageList == ((PPARTITION_PAGE_LISTS)ControlPc)->FreePageListHead.ListName &&
+                                ZeroedPageList == ((PPARTITION_PAGE_LISTS)ControlPc)->ZeroedPageListHead.ListName &&
+                                StandbyPageList == ((PPARTITION_PAGE_LISTS)ControlPc)->StandbyPageListHead.ListName) {
+                                TargetPc = ControlPc;
+
+                                RtlCopyMemory(
+                                    &ReloaderBlock->FreePagesByColor,
+                                    &TargetPc,
+                                    sizeof(PVOID));
+
+                                ReloaderBlock->FreePageSlist[0] = ((PPARTITION_PAGE_LISTS)TargetPc)->FreePageSlist[0];
+                                ReloaderBlock->FreePageSlist[1] = ((PPARTITION_PAGE_LISTS)TargetPc)->FreePageSlist[1];
+
+                                ReloaderBlock->NodeColor =
+                                    max(ReloaderBlock->FreePageSlist[0], ReloaderBlock->FreePageSlist[1]) -
+                                    min(ReloaderBlock->FreePageSlist[0], ReloaderBlock->FreePageSlist[1]);
+
+                                break;
+                            }
+                        }
+
+                        break;
+                    }
+                }
+
+                ControlPc += Length;
+            }
+        }
+    }
+    else {
+        NtHeaders = RtlImageNtHeader(ReloaderBlock->KernelDataTableEntry->DllBase);
+
+        if (NULL != NtHeaders) {
+            NtSection = IMAGE_FIRST_SECTION(NtHeaders);
+
+            SectionBase =
+                (PCHAR)ReloaderBlock->KernelDataTableEntry->DllBase + NtSection[0].VirtualAddress;
+
+            SizeToLock = max(
+                NtSection[0].SizeOfRawData,
+                NtSection[0].Misc.VirtualSize);
+
+            ControlPc = ScanBytes(
+                SectionBase,
+                (PCHAR)SectionBase + SizeToLock,
+                MiDrainZeroLookasides);
 
             if (NULL != ControlPc) {
-                while (0 != _CmpByte(ControlPc[0], 0xc2) &&
-                    0 != _CmpByte(ControlPc[0], 0xc3)) {
-                    Length = DetourGetInstructionLength(ControlPc);
+                FunctionEntry = RtlLookupFunctionEntry(
+                    (ULONG64)ControlPc,
+                    (PULONG64)&ImageBase,
+                    NULL);
 
-                    if (7 == Length) {
+                if (NULL != FunctionEntry) {
+                    ControlPc = (PCHAR)ImageBase + FunctionEntry->BeginAddress;
+
+                    while ((ULONG_PTR)ControlPc <
+                        ((ULONG_PTR)ImageBase + FunctionEntry->EndAddress)) {
                         if (0 == _CmpByte(ControlPc[0], 0x48) &&
-                            0 == _CmpByte(ControlPc[1], 0x8d) &&
-                            0 == _CmpByte(ControlPc[2], 0x0d)) {
-                            TargetPc = RvaToVa(ControlPc + Length - sizeof(LONG));
+                            0 == _CmpByte(ControlPc[1], 0x8b)) {
+                            Length = DetourGetInstructionLength(ControlPc);
 
-                            for (ControlPc = TargetPc;
-                                ;
-                                ControlPc += 0x10) {
-                                if (FreePageList == ((PPARTITION_PAGE_LISTS)ControlPc)->FreePageListHead.ListName &&
-                                    ZeroedPageList == ((PPARTITION_PAGE_LISTS)ControlPc)->ZeroedPageListHead.ListName &&
-                                    StandbyPageList == ((PPARTITION_PAGE_LISTS)ControlPc)->StandbyPageListHead.ListName) {
-                                    TargetPc = ControlPc;
+                            if (7 == Length) {
+                                if (NULL == ReloaderBlock->FreePageSlist[0]) {
+                                    ReloaderBlock->FreePageSlist[0] =
+                                        *(PVOID *)RvaToVa(ControlPc + Length - sizeof(LONG));
+                                }
+                                else if (NULL == ReloaderBlock->FreePageSlist[1]) {
+                                    ReloaderBlock->FreePageSlist[1] =
+                                        *(PVOID *)RvaToVa(ControlPc + Length - sizeof(LONG));
 
-                                    RtlCopyMemory(
-                                        &FreePagesByColor,
-                                        &TargetPc,
-                                        sizeof(PVOID));
-
-                                    FreePageSlist[0] = ((PPARTITION_PAGE_LISTS)TargetPc)->FreePageSlist[0];
-                                    FreePageSlist[1] = ((PPARTITION_PAGE_LISTS)TargetPc)->FreePageSlist[1];
-
-                                    MaximumColor =
-                                        max(FreePageSlist[0], FreePageSlist[1]) -
-                                        min(FreePageSlist[0], FreePageSlist[1]);
+                                    ReloaderBlock->NodeColor =
+                                        max(ReloaderBlock->FreePageSlist[0], ReloaderBlock->FreePageSlist[1]) -
+                                        min(ReloaderBlock->FreePageSlist[0], ReloaderBlock->FreePageSlist[1]);
 
                                     break;
                                 }
                             }
-
-                            break;
                         }
-                    }
 
-                    ControlPc += Length;
+                        ControlPc++;
+                    }
                 }
             }
-        }
-        else {
-            NtHeaders = RtlImageNtHeader(DataTableEntry->DllBase);
 
-            if (NULL != NtHeaders) {
-                NtSection = IMAGE_FIRST_SECTION(NtHeaders);
+            for (Index = 0;
+                Index < NtHeaders->FileHeader.NumberOfSections;
+                Index++) {
+                if ((0 == _CmpByte(NtSection[Index].Name[0], 'p') || 0 == _CmpByte(NtSection[Index].Name[0], 'P')) &&
+                    (0 == _CmpByte(NtSection[Index].Name[1], 'a') || 0 == _CmpByte(NtSection[Index].Name[1], 'A')) &&
+                    (0 == _CmpByte(NtSection[Index].Name[2], 'g') || 0 == _CmpByte(NtSection[Index].Name[2], 'G')) &&
+                    (0 == _CmpByte(NtSection[Index].Name[3], 'e') || 0 == _CmpByte(NtSection[Index].Name[3], 'E')) &&
+                    (0 == _CmpByte(NtSection[Index].Name[4], 'l') || 0 == _CmpByte(NtSection[Index].Name[4], 'L')) &&
+                    (0 == _CmpByte(NtSection[Index].Name[5], 'k') || 0 == _CmpByte(NtSection[Index].Name[5], 'K'))) {
+                    if (0 != NtSection[Index].VirtualAddress) {
+                        SectionBase =
+                            (PCHAR)ReloaderBlock->KernelDataTableEntry->DllBase + NtSection[Index].VirtualAddress;
 
-                SectionBase = (PCHAR)DataTableEntry->DllBase + NtSection[0].VirtualAddress;
+                        SizeToLock = max(
+                            NtSection[Index].SizeOfRawData,
+                            NtSection[Index].Misc.VirtualSize);
 
-                SizeToLock = max(
-                    NtSection[0].SizeOfRawData,
-                    NtSection[0].Misc.VirtualSize);
+                        ControlPc = ScanBytes(
+                            SectionBase,
+                            (PCHAR)SectionBase + SizeToLock,
+                            MmDuplicateMemory);
 
-                ControlPc = ScanBytes(
-                    SectionBase,
-                    (PCHAR)SectionBase + SizeToLock,
-                    MiDrainZeroLookasides);
+                        if (NULL != ControlPc) {
+                            TargetPc =
+                                (PCHAR)ReloaderBlock->KernelDataTableEntry->DllBase + *(PLONG)(ControlPc + 10);
 
-                if (NULL != ControlPc) {
-                    FunctionEntry = RtlLookupFunctionEntry(
-                        (ULONG64)ControlPc,
-                        (PULONG64)&ImageBase,
-                        NULL);
-
-                    if (NULL != FunctionEntry) {
-                        ControlPc = (PCHAR)ImageBase + FunctionEntry->BeginAddress;
-
-                        while ((ULONG_PTR)ControlPc <
-                            ((ULONG_PTR)ImageBase + FunctionEntry->EndAddress)) {
-                            if (0 == _CmpByte(ControlPc[0], 0x48) &&
-                                0 == _CmpByte(ControlPc[1], 0x8b)) {
-                                Length = DetourGetInstructionLength(ControlPc);
-
-                                if (7 == Length) {
-                                    if (NULL == FreePageSlist[0]) {
-                                        FreePageSlist[0] = *(PVOID *)RvaToVa(ControlPc + Length - sizeof(LONG));
-                                    }
-                                    else if (NULL == FreePageSlist[1]) {
-                                        FreePageSlist[1] = *(PVOID *)RvaToVa(ControlPc + Length - sizeof(LONG));
-
-                                        MaximumColor =
-                                            max(FreePageSlist[0], FreePageSlist[1]) -
-                                            min(FreePageSlist[0], FreePageSlist[1]);
-
-                                        break;
-                                    }
-                                }
-                            }
-
-                            ControlPc++;
-                        }
-                    }
-                }
-
-                for (Index = 0;
-                    Index < NtHeaders->FileHeader.NumberOfSections;
-                    Index++) {
-                    if ((0 == _CmpByte(NtSection[Index].Name[0], 'p') || 0 == _CmpByte(NtSection[Index].Name[0], 'P')) &&
-                        (0 == _CmpByte(NtSection[Index].Name[1], 'a') || 0 == _CmpByte(NtSection[Index].Name[1], 'A')) &&
-                        (0 == _CmpByte(NtSection[Index].Name[2], 'g') || 0 == _CmpByte(NtSection[Index].Name[2], 'G')) &&
-                        (0 == _CmpByte(NtSection[Index].Name[3], 'e') || 0 == _CmpByte(NtSection[Index].Name[3], 'E')) &&
-                        (0 == _CmpByte(NtSection[Index].Name[4], 'l') || 0 == _CmpByte(NtSection[Index].Name[4], 'L')) &&
-                        (0 == _CmpByte(NtSection[Index].Name[5], 'k') || 0 == _CmpByte(NtSection[Index].Name[5], 'K'))) {
-                        if (0 != NtSection[Index].VirtualAddress) {
-                            SectionBase = (PCHAR)DataTableEntry->DllBase + NtSection[Index].VirtualAddress;
-
-                            SizeToLock = max(
-                                NtSection[Index].SizeOfRawData,
-                                NtSection[Index].Misc.VirtualSize);
-
-                            ControlPc = ScanBytes(
-                                SectionBase,
-                                (PCHAR)SectionBase + SizeToLock,
-                                MmDuplicateMemory);
-
-                            if (NULL != ControlPc) {
-                                TargetPc =
-                                    (PCHAR)DataTableEntry->DllBase + *(PLONG)(ControlPc + 10);
-
-                                RtlCopyMemory(
-                                    &FreePagesByColor,
-                                    &TargetPc,
-                                    sizeof(PVOID));
-                            }
+                            RtlCopyMemory(
+                                &ReloaderBlock->FreePagesByColor,
+                                &TargetPc,
+                                sizeof(PVOID));
                         }
                     }
                 }
@@ -328,7 +306,7 @@ GetPxeAddress(
     __in PVOID VirtualAddress
 )
 {
-    return PxeBase + MiGetPxeOffset(VirtualAddress);
+    return ReloaderBlock->PxeBase + MiGetPxeOffset(VirtualAddress);
 }
 
 PMMPTE
@@ -339,7 +317,7 @@ GetPpeAddress(
 {
     return (PMMPTE)
         (((((LONGLONG)VirtualAddress &
-            VIRTUAL_ADDRESS_MASK) >> PPI_SHIFT) << PTE_SHIFT) + (LONGLONG)PpeBase);
+            VIRTUAL_ADDRESS_MASK) >> PPI_SHIFT) << PTE_SHIFT) + (LONGLONG)ReloaderBlock->PpeBase);
 }
 
 PMMPTE
@@ -350,7 +328,7 @@ GetPdeAddress(
 {
     return (PMMPTE)
         (((((LONGLONG)VirtualAddress &
-            VIRTUAL_ADDRESS_MASK) >> PDI_SHIFT) << PTE_SHIFT) + (LONGLONG)PdeBase);
+            VIRTUAL_ADDRESS_MASK) >> PDI_SHIFT) << PTE_SHIFT) + (LONGLONG)ReloaderBlock->PdeBase);
 }
 
 PMMPTE
@@ -361,7 +339,7 @@ GetPteAddress(
 {
     return (PMMPTE)
         (((((LONGLONG)VirtualAddress &
-            VIRTUAL_ADDRESS_MASK) >> PTI_SHIFT) << PTE_SHIFT) + (LONGLONG)PteBase);
+            VIRTUAL_ADDRESS_MASK) >> PTI_SHIFT) << PTE_SHIFT) + (LONGLONG)ReloaderBlock->PteBase);
 }
 
 PVOID
@@ -370,7 +348,7 @@ GetVirtualAddressMappedByPte(
     __in PMMPTE Pte
 )
 {
-    return (PVOID)((((LONGLONG)Pte - (LONGLONG)PteBase) <<
+    return (PVOID)((((LONGLONG)Pte - (LONGLONG)ReloaderBlock->PteBase) <<
         (PAGE_SHIFT + VA_SHIFT - PTE_SHIFT)) >> VA_SHIFT);
 }
 
@@ -444,21 +422,18 @@ PfnElement(
 )
 {
     PPFN Pfn = NULL;
-    ULONG BuildNumber = 0;
 
-    PsGetVersion(NULL, NULL, &BuildNumber, NULL);
-
-    if (BuildNumber < 9200) {
-        Pfn = &PfnDatabase->Pfn7600 + PageFrameIndex;
+    if (ReloaderBlock->BuildNumber < 9200) {
+        Pfn = &ReloaderBlock->PfnDatabase->Pfn7600 + PageFrameIndex;
     }
-    else if (BuildNumber >= 9200 && BuildNumber < 9600) {
-        Pfn = &PfnDatabase->Pfn9200 + PageFrameIndex;
+    else if (ReloaderBlock->BuildNumber >= 9200 && ReloaderBlock->BuildNumber < 9600) {
+        Pfn = &ReloaderBlock->PfnDatabase->Pfn9200 + PageFrameIndex;
     }
-    else if (BuildNumber >= 9600 && BuildNumber < 10240) {
-        Pfn = &PfnDatabase->Pfn9600 + PageFrameIndex;
+    else if (ReloaderBlock->BuildNumber >= 9600 && ReloaderBlock->BuildNumber < 10240) {
+        Pfn = &ReloaderBlock->PfnDatabase->Pfn9600 + PageFrameIndex;
     }
     else {
-        Pfn = &PfnDatabase->Pfn10240 + PageFrameIndex;
+        Pfn = &ReloaderBlock->PfnDatabase->Pfn10240 + PageFrameIndex;
     }
 
     return Pfn;
@@ -471,21 +446,18 @@ PfnElementToIndex(
 )
 {
     PFN_NUMBER PageFrameIndex = 0;
-    ULONG BuildNumber = 0;
 
-    PsGetVersion(NULL, NULL, &BuildNumber, NULL);
-
-    if (BuildNumber < 9200) {
-        PageFrameIndex = &Pfn->Pfn7600 - &PfnDatabase->Pfn7600;
+    if (ReloaderBlock->BuildNumber < 9200) {
+        PageFrameIndex = &Pfn->Pfn7600 - &ReloaderBlock->PfnDatabase->Pfn7600;
     }
-    else if (BuildNumber >= 9200 && BuildNumber < 9600) {
-        PageFrameIndex = &Pfn->Pfn9200 - &PfnDatabase->Pfn9200;
+    else if (ReloaderBlock->BuildNumber >= 9200 && ReloaderBlock->BuildNumber < 9600) {
+        PageFrameIndex = &Pfn->Pfn9200 - &ReloaderBlock->PfnDatabase->Pfn9200;
     }
-    else if (BuildNumber >= 9600 && BuildNumber < 10240) {
-        PageFrameIndex = &Pfn->Pfn9600 - &PfnDatabase->Pfn9600;
+    else if (ReloaderBlock->BuildNumber >= 9600 && ReloaderBlock->BuildNumber < 10240) {
+        PageFrameIndex = &Pfn->Pfn9600 - &ReloaderBlock->PfnDatabase->Pfn9600;
     }
     else {
-        PageFrameIndex = &Pfn->Pfn10240 - &PfnDatabase->Pfn10240;
+        PageFrameIndex = &Pfn->Pfn10240 - &ReloaderBlock->PfnDatabase->Pfn10240;
     }
 
     return PageFrameIndex;
@@ -499,14 +471,11 @@ InitializePfn(
 )
 {
     PPFN Pfn = NULL;
-    ULONG BuildNumber = 0;
-
-    PsGetVersion(NULL, NULL, &BuildNumber, NULL);
 
     Pfn = PfnElement(PageFrameIndex);
 
     if (FALSE != MmIsAddressValid(Pfn)) {
-        if (BuildNumber < 9200) {
+        if (ReloaderBlock->BuildNumber < 9200) {
             Pfn->Pfn7600.PteAddress = PrototypePfn->PointerPte;
             Pfn->Pfn7600.OriginalPte.u.Soft.Protection = PrototypePfn->Protection;
             Pfn->Pfn7600.u3.e1.CacheAttribute = PrototypePfn->CacheAttribute;
@@ -516,7 +485,7 @@ InitializePfn(
             Pfn->Pfn7600.u3.e1.Modified = PrototypePfn->Modified;
             Pfn->Pfn7600.u4.PteFrame = PrototypePfn->PteFrame;
         }
-        else if (BuildNumber >= 9200 && BuildNumber < 9600) {
+        else if (ReloaderBlock->BuildNumber >= 9200 && ReloaderBlock->BuildNumber < 9600) {
             Pfn->Pfn9200.PteAddress = PrototypePfn->PointerPte;
             Pfn->Pfn9200.OriginalPte.u.Soft.Protection = PrototypePfn->Protection;
             Pfn->Pfn9200.u3.e1.CacheAttribute = PrototypePfn->CacheAttribute;
@@ -526,7 +495,7 @@ InitializePfn(
             Pfn->Pfn9200.u3.e1.Modified = PrototypePfn->Modified;
             Pfn->Pfn9200.u4.PteFrame = PrototypePfn->PteFrame;
         }
-        else if (BuildNumber >= 9600 && BuildNumber < 10240) {
+        else if (ReloaderBlock->BuildNumber >= 9600 && ReloaderBlock->BuildNumber < 10240) {
             Pfn->Pfn9600.PteAddress = PrototypePfn->PointerPte;
             Pfn->Pfn9600.OriginalPte.u.Soft.Protection = PrototypePfn->Protection;
             Pfn->Pfn9600.u3.e1.CacheAttribute = PrototypePfn->CacheAttribute;
@@ -557,14 +526,11 @@ LocalPfn(
 )
 {
     PPFN Pfn = NULL;
-    ULONG BuildNumber = 0;
-
-    PsGetVersion(NULL, NULL, &BuildNumber, NULL);
 
     Pfn = PfnElement(PageFrameIndex);
 
     if (FALSE != MmIsAddressValid(Pfn)) {
-        if (BuildNumber < 9200) {
+        if (ReloaderBlock->BuildNumber < 9200) {
             PrototypePfn->PointerPte = Pfn->Pfn7600.PteAddress;
             PrototypePfn->Protection = Pfn->Pfn7600.OriginalPte.u.Soft.Protection;
             PrototypePfn->CacheAttribute = Pfn->Pfn7600.u3.e1.CacheAttribute;
@@ -574,7 +540,7 @@ LocalPfn(
             PrototypePfn->Modified = Pfn->Pfn7600.u3.e1.Modified;
             PrototypePfn->PteFrame = Pfn->Pfn7600.u4.PteFrame;
         }
-        else if (BuildNumber >= 9200 && BuildNumber < 9600) {
+        else if (ReloaderBlock->BuildNumber >= 9200 && ReloaderBlock->BuildNumber < 9600) {
             PrototypePfn->PointerPte = Pfn->Pfn9200.PteAddress;
             PrototypePfn->Protection = Pfn->Pfn9200.OriginalPte.u.Soft.Protection;
             PrototypePfn->CacheAttribute = Pfn->Pfn9200.u3.e1.CacheAttribute;
@@ -584,7 +550,7 @@ LocalPfn(
             PrototypePfn->Modified = Pfn->Pfn9200.u3.e1.Modified;
             PrototypePfn->PteFrame = Pfn->Pfn9200.u4.PteFrame;
         }
-        else if (BuildNumber >= 9600 && BuildNumber < 10240) {
+        else if (ReloaderBlock->BuildNumber >= 9600 && ReloaderBlock->BuildNumber < 10240) {
             PrototypePfn->PointerPte = Pfn->Pfn9600.PteAddress;
             PrototypePfn->Protection = Pfn->Pfn9600.OriginalPte.u.Soft.Protection;
             PrototypePfn->CacheAttribute = Pfn->Pfn9600.u3.e1.CacheAttribute;
@@ -619,8 +585,8 @@ _RemoveAnyPage(
     USHORT SlistIndex = 0;
     USHORT Color = 0;
 
-    if (0 != FreeSlist.Depth) {
-        TempPfn = ExpInterlockedPopEntrySList(&FreeSlist);
+    if (0 != ReloaderBlock->FreeSlist.Depth) {
+        TempPfn = ExpInterlockedPopEntrySList(&ReloaderBlock->FreeSlist);
 
         PageFrameIndex = PfnElementToIndex(TempPfn);
 
@@ -634,10 +600,12 @@ _RemoveAnyPage(
             SlistIndex < MAXIMUM_PFNSLIST_COUNT;
             SlistIndex++) {
             for (Color = 0;
-                Color < MaximumColor;
+                Color < ReloaderBlock->NodeColor;
                 Color++) {
-                if ((MAXIMUM_PFNSLIST_DEPTH - DepthIndex) == FreePageSlist[SlistIndex][Color].Depth) {
-                    TempPfn = ExpInterlockedPopEntrySList(&FreePageSlist[SlistIndex][Color]);
+                if ((MAXIMUM_PFNSLIST_DEPTH - DepthIndex) ==
+                    ReloaderBlock->FreePageSlist[SlistIndex][Color].Depth) {
+                    TempPfn = ExpInterlockedPopEntrySList(
+                        &ReloaderBlock->FreePageSlist[SlistIndex][Color]);
 
                     PageFrameIndex = PfnElementToIndex(TempPfn);
 
@@ -662,12 +630,21 @@ RemoveAnyPage(
     PROTOTYPE_PFN NextPfn = { 0 };
     PSINGLE_LIST_ENTRY TempEntry = NULL;
     PVOID VirtualAddress = NULL;
+    LARGE_INTEGER Interval = { 0 };
 
-    PageFrameIndex = IpiSingleCall(
-        (PPS_APC_ROUTINE)NULL,
-        (PKSYSTEM_ROUTINE)NULL,
-        (PUSER_THREAD_START_ROUTINE)_RemoveAnyPage,
-        (PVOID)PointerPte);
+    do {
+        PageFrameIndex = IpiSingleCall(
+            (PPS_APC_ROUTINE)NULL,
+            (PKSYSTEM_ROUTINE)NULL,
+            (PUSER_THREAD_START_ROUTINE)_RemoveAnyPage,
+            (PVOID)PointerPte);
+
+        Interval.QuadPart = Int32x32To64(10, -10 * 1000);
+
+        // wait for system replenish page slist
+
+        KeDelayExecutionThread(KernelMode, FALSE, &Interval);
+    } while (0 == PageFrameIndex);
 
     ASSERT(0 != PageFrameIndex);
 
@@ -807,7 +784,7 @@ _FreePfn(
 
     Next = PfnElement(PageFrameIndex);
 
-    ExpInterlockedPushEntrySList(&FreeSlist, Next);
+    ExpInterlockedPushEntrySList(&ReloaderBlock->FreeSlist, Next);
 }
 
 VOID
@@ -850,11 +827,7 @@ LocalVpn(
     __out PVAD_LOCAL_NODE VadLocalNode
 )
 {
-    ULONG BuildNumber = 0;
-
-    PsGetVersion(NULL, NULL, &BuildNumber, NULL);
-
-    if (BuildNumber < 9600) {
+    if (ReloaderBlock->BuildNumber < 9600) {
         VadLocalNode->BalancedRoot.LeftChild = VadNode->AvlRoot.LeftChild;
         VadLocalNode->BalancedRoot.RightChild = VadNode->AvlRoot.RightChild;
         VadLocalNode->BalancedRoot.Parent = VadNode->AvlRoot.Parent;
@@ -865,11 +838,11 @@ LocalVpn(
         VadLocalNode->BalancedRoot.Parent = VadNode->BalancedRoot.Parent;
     }
 
-    if (BuildNumber < 9200) {
+    if (ReloaderBlock->BuildNumber < 9200) {
         VadLocalNode->BeginAddress = VadNode->Legacy.StartingVpn << PAGE_SHIFT;
         VadLocalNode->BeginAddress = VadNode->Legacy.EndingVpn << PAGE_SHIFT;
     }
-    else if (BuildNumber >= 9200 && BuildNumber < 9600) {
+    else if (ReloaderBlock->BuildNumber >= 9200 && ReloaderBlock->BuildNumber < 9600) {
         VadLocalNode->BeginAddress = VadNode->StartingVpn << PAGE_SHIFT;
         VadLocalNode->BeginAddress = VadNode->EndingVpn << PAGE_SHIFT;
     }

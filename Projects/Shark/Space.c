@@ -25,14 +25,6 @@
 #include "Rtx.h"
 #include "Scan.h"
 
-PPFN PfnDatabase;
-
-PPFNLIST * FreePagesByColor;
-PPFNSLIST_HEADER FreePageSlist[2];
-ULONG MaximumColor;
-
-PFNSLIST_HEADER FreeSlist;
-
 #define MM_PTE_NO_EXECUTE ((ULONG64)1 << 63)
 
 ULONG64 ProtectToPteMask[32] = {
@@ -117,13 +109,8 @@ GetVadRootProcess(
     PCHAR ControlPc = NULL;
     ULONG Length = 0;
     UNICODE_STRING RoutineString = { 0 };
-    ULONG BuildNumber = 0;
 
-    static LONG Offset;
-
-    PsGetVersion(NULL, NULL, &BuildNumber, NULL);
-
-    if (0 == Offset) {
+    if (0 == ReloaderBlock->VadOffset) {
         RtlInitUnicodeString(&RoutineString, L"PsGetProcessExitStatus");
 
         ControlPc = MmGetSystemRoutineAddress(&RoutineString);
@@ -135,13 +122,13 @@ GetVadRootProcess(
 
                 if (6 == Length) {
                     if (0 == _CmpByte(ControlPc[0], 0x8b)) {
-                        Offset = *(PLONG)(ControlPc + 2) + 4;
+                        ReloaderBlock->VadOffset = *(PLONG)(ControlPc + 2) + 4;
 
-                        if (BuildNumber < 9600) {
-                            VadRoot = ((PMM_AVL_NODE)((ULONG_PTR)Process + Offset))->RightChild;
+                        if (ReloaderBlock->BuildNumber < 9600) {
+                            VadRoot = ((PMM_AVL_NODE)((ULONG_PTR)Process + ReloaderBlock->VadOffset))->RightChild;
                         }
                         else {
-                            VadRoot = *(PVAD_NODE *)((ULONG_PTR)Process + Offset);
+                            VadRoot = *(PVAD_NODE *)((ULONG_PTR)Process + ReloaderBlock->VadOffset);
                         }
 
                         break;
@@ -153,11 +140,11 @@ GetVadRootProcess(
         }
     }
     else {
-        if (BuildNumber < 9600) {
-            VadRoot = ((PMM_AVL_NODE)((ULONG_PTR)Process + Offset))->RightChild;
+        if (ReloaderBlock->BuildNumber < 9600) {
+            VadRoot = ((PMM_AVL_NODE)((ULONG_PTR)Process + ReloaderBlock->VadOffset))->RightChild;
         }
         else {
-            VadRoot = *(PVAD_NODE *)((ULONG_PTR)Process + Offset);
+            VadRoot = *(PVAD_NODE *)((ULONG_PTR)Process + ReloaderBlock->VadOffset);
         }
     }
 
@@ -173,13 +160,10 @@ GetNextNode(
     PVAD_NODE Next = NULL;
     PVAD_NODE Parent = NULL;
     PVAD_NODE Left = NULL;
-    ULONG BuildNumber = 0;
-
-    PsGetVersion(NULL, NULL, &BuildNumber, NULL);
 
     Next = Node;
 
-    if (BuildNumber < 9600) {
+    if (ReloaderBlock->BuildNumber < 9600) {
         if (NULL == Next->AvlRoot.RightChild) {
             do {
                 Parent = (PVAD_NODE)((ULONG_PTR)Next->AvlRoot.Parent & ~3);
@@ -250,16 +234,13 @@ FindVadNode(
     PVAD_NODE VadRoot = NULL;
     PVAD_NODE Node = NULL;
     PVAD_NODE ResultVad = NULL;
-    ULONG BuildNumber = 0;
     VAD_LOCAL_NODE VadLocalNode = { 0 };
-
-    PsGetVersion(NULL, NULL, &BuildNumber, NULL);
 
     VadRoot = GetVadRootProcess(IoGetCurrentProcess());
 
     Node = VadRoot;
 
-    if (BuildNumber < 9600) {
+    if (ReloaderBlock->BuildNumber < 9600) {
         while (Node->AvlRoot.LeftChild != NULL) {
             Node = Node->AvlRoot.LeftChild;
         }

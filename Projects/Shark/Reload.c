@@ -25,13 +25,9 @@
 #include "Scan.h"
 #include "Space.h" 
 
+PRELOADER_PARAMETER_BLOCK ReloaderBlock;
+
 extern POBJECT_TYPE * IoDriverObjectType;
-
-PLIST_ENTRY LoadedModuleList;
-LIST_ENTRY LoadedPrivateImageList;
-
-KSERVICE_TABLE_DESCRIPTOR * ServiceDescriptorTable;
-KSERVICE_TABLE_DESCRIPTOR * ServiceDescriptorTableShadow;
 
 ULONG
 NTAPI
@@ -430,7 +426,7 @@ ResstDriverSection(
 VOID
 NTAPI
 InitializeLoadedModuleList(
-    __in PKLDR_DATA_TABLE_ENTRY DataTableEntry
+    __inout PRELOADER_PARAMETER_BLOCK ReloaderBlock
 )
 {
     NTSTATUS Status = STATUS_NO_MORE_ENTRIES;
@@ -438,7 +434,6 @@ InitializeLoadedModuleList(
     PKLDR_DATA_TABLE_ENTRY FoundDataTableEntry = NULL;
     PDRIVER_OBJECT DriverObject = NULL;
     UNICODE_STRING DriverPath = { 0 };
-    PKLDR_DATA_TABLE_ENTRY KernelDataTableEntry = NULL;
     UNICODE_STRING KernelString = { 0 };
     PIMAGE_NT_HEADERS NtHeaders = NULL;
     PIMAGE_SECTION_HEADER NtSection = NULL;
@@ -462,7 +457,7 @@ InitializeLoadedModuleList(
 
     RtlInitUnicodeString(&KernelString, L"ntoskrnl.exe");
 
-    if (NULL == LoadedModuleList) {
+    if (NULL == ReloaderBlock->LoadedModuleList) {
         RtlInitUnicodeString(&DriverPath, L"\\Driver\\disk");
 
         Status = ObReferenceObjectByName(
@@ -493,7 +488,8 @@ InitializeLoadedModuleList(
                                 &KernelString,
                                 &FoundDataTableEntry->BaseDllName,
                                 TRUE)) {
-                                LoadedModuleList = FoundDataTableEntry->InLoadOrderLinks.Blink;
+                                ReloaderBlock->KernelDataTableEntry = FoundDataTableEntry;
+                                ReloaderBlock->LoadedModuleList = FoundDataTableEntry->InLoadOrderLinks.Blink;
                                 break;
                             }
                         }
@@ -510,32 +506,33 @@ InitializeLoadedModuleList(
         }
     }
 
-    InitializeListHead(&LoadedPrivateImageList);
+    InitializeListHead(&ReloaderBlock->LoadedPrivateImageList);
 
-    if (NULL != DataTableEntry) {
-        DataTableEntry->LoadCount++;
+    if (NULL != ReloaderBlock->DataTableEntry) {
+        ReloaderBlock->DataTableEntry->LoadCount++;
 
         InsertTailList(
-            &LoadedPrivateImageList,
-            &DataTableEntry->InLoadOrderLinks);
+            &ReloaderBlock->LoadedPrivateImageList,
+            &ReloaderBlock->DataTableEntry->InLoadOrderLinks);
 
         CaptureImageExceptionValues(
-            DataTableEntry->DllBase,
-            &DataTableEntry->ExceptionTable,
-            &DataTableEntry->ExceptionTableSize);
+            ReloaderBlock->DataTableEntry->DllBase,
+            &ReloaderBlock->DataTableEntry->ExceptionTable,
+            &ReloaderBlock->DataTableEntry->ExceptionTableSize);
     }
 
 #ifndef _WIN64
     RtlInitUnicodeString(&RoutineString, L"KeServiceDescriptorTable");
 
-    ServiceDescriptorTable = MmGetSystemRoutineAddress(&RoutineString);
+    ReloaderBlock->ServiceDescriptorTable = MmGetSystemRoutineAddress(&RoutineString);
 #else
-    NtHeaders = RtlImageNtHeader(FoundDataTableEntry->DllBase);
+    NtHeaders = RtlImageNtHeader(ReloaderBlock->KernelDataTableEntry->DllBase);
 
     if (NULL != NtHeaders) {
         NtSection = IMAGE_FIRST_SECTION(NtHeaders);
 
-        SectionBase = (PCHAR)FoundDataTableEntry->DllBase + NtSection[0].VirtualAddress;
+        SectionBase = 
+            (PCHAR)ReloaderBlock->KernelDataTableEntry->DllBase + NtSection[0].VirtualAddress;
 
         SizeToLock = max(
             NtSection[0].SizeOfRawData,
@@ -547,7 +544,7 @@ InitializeLoadedModuleList(
             KiSystemCall64);
 
         if (NULL != ControlPc) {
-            ServiceDescriptorTable = RvaToVa(ControlPc + 23);
+            ReloaderBlock->ServiceDescriptorTable = RvaToVa(ControlPc + 23);
         }
     }
 #endif // !_WIN64
@@ -563,13 +560,13 @@ FindEntryForKernelPrivateImage(
     NTSTATUS Status = STATUS_NO_MORE_ENTRIES;
     PKLDR_DATA_TABLE_ENTRY FoundDataTableEntry = NULL;
 
-    if (FALSE == IsListEmpty(&LoadedPrivateImageList)) {
+    if (FALSE == IsListEmpty(&ReloaderBlock->LoadedPrivateImageList)) {
         FoundDataTableEntry = CONTAINING_RECORD(
-            LoadedPrivateImageList.Flink,
+            ReloaderBlock->LoadedPrivateImageList.Flink,
             KLDR_DATA_TABLE_ENTRY,
             InLoadOrderLinks);
 
-        while ((ULONG_PTR)FoundDataTableEntry != (ULONG_PTR)&LoadedPrivateImageList) {
+        while ((ULONG_PTR)FoundDataTableEntry != (ULONG_PTR)&ReloaderBlock->LoadedPrivateImageList) {
             if (FALSE != RtlEqualUnicodeString(
                 ImageFileName,
                 &FoundDataTableEntry->BaseDllName,
@@ -599,14 +596,14 @@ FindEntryForKernelImage(
     NTSTATUS Status = STATUS_NO_MORE_ENTRIES;
     PKLDR_DATA_TABLE_ENTRY FoundDataTableEntry = NULL;
 
-    if (NULL != LoadedModuleList) {
-        if (FALSE == IsListEmpty(LoadedModuleList)) {
+    if (NULL != ReloaderBlock->LoadedModuleList) {
+        if (FALSE == IsListEmpty(ReloaderBlock->LoadedModuleList)) {
             FoundDataTableEntry = CONTAINING_RECORD(
-                LoadedModuleList->Flink,
+                ReloaderBlock->LoadedModuleList->Flink,
                 KLDR_DATA_TABLE_ENTRY,
                 InLoadOrderLinks);
 
-            while (FoundDataTableEntry != LoadedModuleList) {
+            while (FoundDataTableEntry != ReloaderBlock->LoadedModuleList) {
                 if (FALSE != RtlEqualUnicodeString(
                     ImageFileName,
                     &FoundDataTableEntry->BaseDllName,
@@ -637,14 +634,14 @@ FindEntryForKernelPrivateImageAddress(
     NTSTATUS Status = STATUS_NO_MORE_ENTRIES;
     PKLDR_DATA_TABLE_ENTRY FoundDataTableEntry = NULL;
 
-    if (FALSE == IsListEmpty(&LoadedPrivateImageList)) {
+    if (FALSE == IsListEmpty(&ReloaderBlock->LoadedPrivateImageList)) {
         FoundDataTableEntry = CONTAINING_RECORD(
-            LoadedPrivateImageList.Flink,
+            ReloaderBlock->LoadedPrivateImageList.Flink,
             KLDR_DATA_TABLE_ENTRY,
             InLoadOrderLinks);
 
         while ((ULONG_PTR)FoundDataTableEntry !=
-            (ULONG_PTR)&LoadedPrivateImageList) {
+            (ULONG_PTR)&ReloaderBlock->LoadedPrivateImageList) {
             if ((ULONG_PTR)Address >= (ULONG_PTR)FoundDataTableEntry->DllBase &&
                 (ULONG_PTR)Address < (ULONG_PTR)FoundDataTableEntry->DllBase +
                 FoundDataTableEntry->SizeOfImage) {
@@ -673,14 +670,14 @@ FindEntryForKernelImageAddress(
     NTSTATUS Status = STATUS_NO_MORE_ENTRIES;
     PKLDR_DATA_TABLE_ENTRY FoundDataTableEntry = NULL;
 
-    if (NULL != LoadedModuleList) {
-        if (FALSE == IsListEmpty(LoadedModuleList)) {
+    if (NULL != ReloaderBlock->LoadedModuleList) {
+        if (FALSE == IsListEmpty(ReloaderBlock->LoadedModuleList)) {
             FoundDataTableEntry = CONTAINING_RECORD(
-                LoadedModuleList->Flink,
+                ReloaderBlock->LoadedModuleList->Flink,
                 KLDR_DATA_TABLE_ENTRY,
                 InLoadOrderLinks);
 
-            while (FoundDataTableEntry != LoadedModuleList) {
+            while (FoundDataTableEntry != ReloaderBlock->LoadedModuleList) {
                 if ((ULONG_PTR)Address >= (ULONG_PTR)FoundDataTableEntry->DllBase &&
                     (ULONG_PTR)Address < (ULONG_PTR)FoundDataTableEntry->DllBase +
                     FoundDataTableEntry->SizeOfImage) {
@@ -1086,10 +1083,10 @@ NameToAddress(
         Number = NameToNumber(String);
 
 #ifndef _WIN64
-        RoutineAddress = UlongToPtr(ServiceDescriptorTable[0].Base[Number]);
+        RoutineAddress = UlongToPtr(ReloaderBlock->ServiceDescriptorTable[0].Base[Number]);
 #else
-        RoutineAddress = (PCHAR)ServiceDescriptorTable[0].Base +
-            (*(PLONG)((PCHAR)ServiceDescriptorTable[0].Base + 4 * Number) >> 4);
+        RoutineAddress = (PCHAR)ReloaderBlock->ServiceDescriptorTable[0].Base +
+            (((PLONG)ReloaderBlock->ServiceDescriptorTable[0].Base)[Number] >> 4);
 #endif // !_WIN64
     }
 
@@ -1338,7 +1335,7 @@ LoadKernelPrivateImage(
                 DataTableEntry->LoadCount++;
 
                 InsertTailList(
-                    &LoadedPrivateImageList,
+                    &ReloaderBlock->LoadedPrivateImageList,
                     &DataTableEntry->InLoadOrderLinks);
 
                 CaptureImageExceptionValues(

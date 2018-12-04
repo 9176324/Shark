@@ -1146,11 +1146,6 @@ extern "C" {
             __in PVAD_NODE Node
         );
 
-    extern PPFN PfnDatabase;
-    extern PPFNLIST * FreePagesByColor;
-    extern PPFNSLIST_HEADER FreePageSlist[2];
-    extern ULONG MaximumColor;
-    extern PFNSLIST_HEADER FreeSlist;
     extern ULONG64 ProtectToPteMask[32];
 
 #ifdef __cplusplus
