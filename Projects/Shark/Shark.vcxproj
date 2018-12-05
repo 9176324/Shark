@@ -138,7 +138,6 @@
     </ClCompile>
     <ClCompile Include="Ctx.c" />
     <ClCompile Include="Jump.c" />
-    <ClCompile Include="Lock.c" />
     <ClCompile Include="Reload.c" />
     <ClCompile Include="Rtx.c" />
     <ClCompile Include="Shark.c" />
@@ -157,7 +156,6 @@
   <ItemGroup>
     <ClInclude Include="Except.h" />
     <ClInclude Include="Jump.h" />
-    <ClInclude Include="Lock.h" />
     <ClInclude Include="Reload.h" />
     <ClInclude Include="Rtx.h" />
     <ClInclude Include="Shark.h" />

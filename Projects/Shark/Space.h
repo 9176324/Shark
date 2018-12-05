@@ -26,30 +26,89 @@
 extern "C" {
 #endif	/* __cplusplus */
 
-#ifndef _WIN64
+    typedef struct _MM_AVL_NODE {
+        union {
+            LONG_PTR Balance : 2;
+            struct _MM_AVL_NODE * Parent;
+        };
 
+        struct _MM_AVL_NODE * LeftChild;
+        struct _MM_AVL_NODE * RightChild;
+    }MM_AVL_NODE, *PMM_AVL_NODE;
+
+    typedef struct _RTL_BALANCED_NODE {
+        union {
+            struct _RTL_BALANCED_NODE * Children[2];
+
+            struct {
+                struct _RTL_BALANCED_NODE * LeftChild;
+                struct _RTL_BALANCED_NODE * RightChild;
+            };
+        };
+        union {
+            struct {
+                UINT8 Red : 1;
+                UINT8 Balance : 2;
+            };
+
+            struct _RTL_BALANCED_NODE * Parent;
+        };
+    }RTL_BALANCED_NODE, *PRTL_BALANCED_NODE;
+
+    typedef struct _VAD_NODE {
+        union {
+            struct _MM_AVL_NODE AvlRoot;
+            struct _RTL_BALANCED_NODE BalancedRoot;
+        };
+
+        union {
+            struct {
+                ULONG_PTR StartingVpn;
+                ULONG_PTR EndingVpn;
+            }Legacy;
+
+            struct {
+                ULONG StartingVpn;
+                ULONG EndingVpn;
+                CHAR StartingVpnHigh;
+                CHAR EndingVpnHigh;
+            };
+        };
+    }VAD_NODE, *PVAD_NODE;
+
+    typedef struct _VAD_LOCAL_NODE {
+        RTL_BALANCED_NODE BalancedRoot;
+        ULONG_PTR BeginAddress;
+        ULONG_PTR EndAddress;
+    } VAD_LOCAL_NODE, *PVAD_LOCAL_NODE;
+
+#ifndef _WIN64
     typedef struct _MMPTE_EX_HIGHLOW {
         ULONG32 LowPart;
         ULONG32 HighPart;
     }MMPTE_EX_HIGHLOW, *PMMPTE_EX_HIGHLOW;
 
+#define _HARDWARE_PTE_WORKING_SET_BITS  11
+
     typedef struct _HARDWARE_PTE_EX {
         union {
             struct {
-                UINT64 Valid : 1;
-                UINT64 Write : 1;
-                UINT64 Owner : 1;
-                UINT64 WriteThrough : 1;
-                UINT64 CacheDisable : 1;
-                UINT64 Accessed : 1;
-                UINT64 Dirty : 1;
-                UINT64 LargePage : 1;
-                UINT64 Global : 1;
-                UINT64 CopyOnWrite : 1;
-                UINT64 Prototype : 1;
-                UINT64 Reserved0 : 1;
-                UINT64 PageFrameNumber : 26;
-                UINT64 Reserved1 : 26;
+                ULONG64 Valid : 1;
+                ULONG64 Write : 1;
+                ULONG64 Owner : 1;
+                ULONG64 WriteThrough : 1;
+                ULONG64 CacheDisable : 1;
+                ULONG64 Accessed : 1;
+                ULONG64 Dirty : 1;
+                ULONG64 LargePage : 1;
+                ULONG64 Global : 1;
+                ULONG64 CopyOnWrite : 1;
+                ULONG64 Prototype : 1;
+                ULONG64 Reserved0 : 1;
+                ULONG64 PageFrameNumber : 26;
+                ULONG64 reserved1 : 25 - (_HARDWARE_PTE_WORKING_SET_BITS + 1);
+                ULONGLONG SoftwareWsIndex : _HARDWARE_PTE_WORKING_SET_BITS;
+                ULONG64 NoExecute : 1;
             };
 
             struct {
@@ -60,89 +119,91 @@ extern "C" {
     }HARDWARE_PTE_EX, *PHARDWARE_PTE_EX;
 
     typedef struct _MMPTE_EX_HARDWARE {
-        UINT64 Valid : 1;
-        UINT64 Dirty1 : 1;
-        UINT64 Owner : 1;
-        UINT64 WriteThrough : 1;
-        UINT64 CacheDisable : 1;
-        UINT64 Accessed : 1;
-        UINT64 Dirty : 1;
-        UINT64 LargePage : 1;
-        UINT64 Global : 1;
-        UINT64 CopyOnWrite : 1;
-        UINT64 Unused : 1;
-        UINT64 Write : 1;
-        UINT64 PageFrameNumber : 26;
-        UINT64 Reserved1 : 26;
+        ULONG64 Valid : 1;
+        ULONG64 Dirty1 : 1;
+        ULONG64 Owner : 1;
+        ULONG64 WriteThrough : 1;
+        ULONG64 CacheDisable : 1;
+        ULONG64 Accessed : 1;
+        ULONG64 Dirty : 1;
+        ULONG64 LargePage : 1;
+        ULONG64 Global : 1;
+        ULONG64 CopyOnWrite : 1;
+        ULONG64 Unused : 1;
+        ULONG64 Write : 1;
+        ULONG64 PageFrameNumber : 26;
+        ULONG64 reserved1 : 25 - (_HARDWARE_PTE_WORKING_SET_BITS + 1);
+        ULONGLONG SoftwareWsIndex : _HARDWARE_PTE_WORKING_SET_BITS;
+        ULONG64 NoExecute : 1;
     }MMPTE_EX_HARDWARE, *PMMPTE_EX_HARDWARE;
 
     typedef struct _MMPTE_EX_PROTOTYPE {
-        UINT64 Valid : 1;
-        UINT64 Unused0 : 7;
-        UINT64 ReadOnly : 1;
-        UINT64 Unused1 : 1;
-        UINT64 Prototype : 1;
-        UINT64 Protection : 5;
-        UINT64 Unused : 16;
-        UINT64 ProtoAddress : 32;
+        ULONG64 Valid : 1;
+        ULONG64 Unused0 : 7;
+        ULONG64 ReadOnly : 1;
+        ULONG64 Unused1 : 1;
+        ULONG64 Prototype : 1;
+        ULONG64 Protection : 5;
+        ULONG64 Unused : 16;
+        ULONG64 ProtoAddress : 32;
     }MMPTE_EX_PROTOTYPE, *PMMPTE_EX_PROTOTYPE;
 
     typedef struct _MMPTE_EX_SOFTWARE {
-        UINT64 Valid : 1;
-        UINT64 PageFileLow : 4;
-        UINT64 Protection : 5;
-        UINT64 Prototype : 1;
-        UINT64 Transition : 1;
-        UINT64 InStore : 1;
-        UINT64 Unused1 : 19;
-        UINT64 PageFileHigh : 32;
+        ULONG64 Valid : 1;
+        ULONG64 PageFileLow : 4;
+        ULONG64 Protection : 5;
+        ULONG64 Prototype : 1;
+        ULONG64 Transition : 1;
+        ULONG64 InStore : 1;
+        ULONG64 Unused1 : 19;
+        ULONG64 PageFileHigh : 32;
     }MMPTE_EX_SOFTWARE, *PMMPTE_EX_SOFTWARE;
 
     typedef struct _MMPTE_EX_TIMESTAMP {
-        UINT64 MustBeZero : 1;
-        UINT64 PageFileLow : 4;
-        UINT64 Protection : 5;
-        UINT64 Prototype : 1;
-        UINT64 Transition : 1;
-        UINT64 Unused : 20;
-        UINT64 GlobalTimeStamp : 32;
+        ULONG64 MustBeZero : 1;
+        ULONG64 PageFileLow : 4;
+        ULONG64 Protection : 5;
+        ULONG64 Prototype : 1;
+        ULONG64 Transition : 1;
+        ULONG64 Unused : 20;
+        ULONG64 GlobalTimeStamp : 32;
     }MMPTE_EX_TIMESTAMP, *PMMPTE_EX_TIMESTAMP;
 
     typedef struct _MMPTE_EX_TRANSITION {
-        UINT64 Valid : 1;
-        UINT64 Write : 1;
-        UINT64 Owner : 1;
-        UINT64 WriteThrough : 1;
-        UINT64 CacheDisable : 1;
-        UINT64 Protection : 5;
-        UINT64 Prototype : 1;
-        UINT64 Transition : 1;
-        UINT64 PageFrameNumber : 26;
-        UINT64 Unused : 26;
+        ULONG64 Valid : 1;
+        ULONG64 Write : 1;
+        ULONG64 Owner : 1;
+        ULONG64 WriteThrough : 1;
+        ULONG64 CacheDisable : 1;
+        ULONG64 Protection : 5;
+        ULONG64 Prototype : 1;
+        ULONG64 Transition : 1;
+        ULONG64 PageFrameNumber : 26;
+        ULONG64 Unused : 26;
     }MMPTE_EX_TRANSITION, *PMMPTE_EX_TRANSITION;
 
     typedef struct _MMPTE_EX_SUBSECTION {
-        UINT64 Valid : 1;
-        UINT64 Unused0 : 4;
-        UINT64 Protection : 5;
-        UINT64 Prototype : 1;
-        UINT64 Unused1 : 21;
-        UINT64 SubsectionAddress : 32;
+        ULONG64 Valid : 1;
+        ULONG64 Unused0 : 4;
+        ULONG64 Protection : 5;
+        ULONG64 Prototype : 1;
+        ULONG64 Unused1 : 21;
+        ULONG64 SubsectionAddress : 32;
     }MMPTE_EX_SUBSECTION, *PMMPTE_EX_SUBSECTION;
 
     typedef struct _MMPTE_EX_LIST {
-        UINT64 Valid : 1;
-        UINT64 OneEntry : 1;
-        UINT64 filler0 : 8;
-        UINT64 Prototype : 1;
-        UINT64 filler1 : 21;
-        UINT64 NextEntry : 32;
+        ULONG64 Valid : 1;
+        ULONG64 OneEntry : 1;
+        ULONG64 filler0 : 8;
+        ULONG64 Prototype : 1;
+        ULONG64 filler1 : 21;
+        ULONG64 NextEntry : 32;
     }MMPTE_EX_LIST, *PMMPTE_EX_LIST;
 
     typedef struct _MMPTE_EX {
         union {
-            UINT64 Long;
-            UINT64 VolatileLong;
+            ULONG64 Long;
+            ULONG64 VolatileLong;
 
             struct _MMPTE_EX_HIGHLOW HighLow;
             struct _HARDWARE_PTE_EX Flush;
@@ -659,32 +720,10 @@ extern "C" {
 
     C_ASSERT(sizeof(MIPFNBLINK_10240) == sizeof(ULONG_PTR));
 
-    typedef struct _RTL_BALANCED_NODE_10240 {
-        union {
-            struct _RTL_BALANCED_NODE * Children[2];
-
-            struct {
-                struct _RTL_BALANCED_NODE * Left;
-                struct _RTL_BALANCED_NODE * Right;
-            };
-        };
-
-        union {
-            struct {
-                UCHAR Red : 1;
-                UCHAR Balance : 2;
-            };
-
-            ULONG_PTR ParentValue;
-        };
-    }RTL_BALANCED_NODE_10240, *PRTL_BALANCED_NODE_10240;
-
-    C_ASSERT(sizeof(RTL_BALANCED_NODE_10240) == 3 * sizeof(ULONG_PTR));
-
     typedef struct _PFN_10240 {
         union {
             LIST_ENTRY ListEntry;
-            RTL_BALANCED_NODE_10240 TreeNode;
+            RTL_BALANCED_NODE TreeNode;
 
             struct {
                 union {
@@ -794,6 +833,9 @@ extern "C" {
 #endif // !_WIN64
 
     typedef union _PFN {
+        SINGLE_LIST_ENTRY SingleListEntry;
+        LIST_ENTRY ListEntry;
+
         PFN_7600 Pfn7600;
 #ifndef _WIN64
         PFN_7600_EX Pfn7600Ex;
@@ -805,37 +847,24 @@ extern "C" {
 
 #pragma pack(pop)
 
-#define IDLE_PFN_NULL 0x0
-#define IDLE_PFN_FREE 0x1
-#define MAXIMUM_SLIST_COUNT 0x2
-#define MINIMUM_STORAGE_COUNT 0x3
-#define MINIMUM_IDLE_PFN_COUNT 0x80
-#define MAXIMUM_IDLE_PFN_COUNT 0x200
-
 #ifndef _WIN64
-    typedef struct _IDLE_PFN {
-        PSINGLE_LIST_ENTRY Next;
-        USHORT Count;
-        USHORT Color;
-    }IDLE_PFN, *PIDLE_PFN;
-
-    C_ASSERT(FIELD_OFFSET(IDLE_PFN, Next) == 0);
-    C_ASSERT(FIELD_OFFSET(IDLE_PFN, Count) == sizeof(ULONG_PTR));
-    C_ASSERT(FIELD_OFFSET(IDLE_PFN, Color) == sizeof(ULONG_PTR) + sizeof(USHORT));
-    C_ASSERT(sizeof(IDLE_PFN) == 2 * sizeof(ULONG_PTR));
+#define EMPTY_PFN_LIST 0xFFFFFFUI32
 #else
-    typedef struct _IDLE_PFN {
-        USHORT Count;
-        USHORT Color;
-        ULONG Reserved;
-        PSINGLE_LIST_ENTRY Next;
-    }IDLE_PFN, *PIDLE_PFN;
-
-    C_ASSERT(FIELD_OFFSET(IDLE_PFN, Count) == 0);
-    C_ASSERT(FIELD_OFFSET(IDLE_PFN, Color) == sizeof(USHORT));
-    C_ASSERT(FIELD_OFFSET(IDLE_PFN, Next) == sizeof(ULONG_PTR));
-    C_ASSERT(sizeof(IDLE_PFN) == 2 * sizeof(ULONG_PTR));
+#define EMPTY_PFN_LIST 0xFFFFFFFFFUI64
 #endif // !_WIN64
+
+    typedef struct _PROTOTYPE_PFN {
+        ULONG_PTR Flink;
+        ULONG_PTR Blink;
+        PMMPTE PointerPte;
+        ULONG Protection;
+        UCHAR PageLocation;
+        UCHAR Modified;
+        UCHAR CacheAttribute;
+        ULONG_PTR ShareCount;
+        USHORT ReferenceCount;
+        LONG_PTR PteFrame;
+    }PROTOTYPE_PFN, *PPROTOTYPE_PFN;
 
 #define PDE_MAPS_LARGE_PAGE(PPDE) ((PPDE)->u.Hard.LargePage == 1)
 #define MAKE_PDE_MAP_LARGE_PAGE(PPDE) ((PPDE)->u.Hard.LargePage = 1)
@@ -846,6 +875,70 @@ extern "C" {
 
 #define SET_PTE_DIRTY(PPTE) (PPTE)->u.Long |= HARDWARE_PTE_DIRTY_MASK
 #define SET_ACCESSED_IN_PTE(PPTE, ACCESSED) (PPTE)->u.Hard.Accessed = ACCESSED
+
+    typedef struct DECLSPEC_ALIGN(0x40) _PFNLIST {
+        PFN_NUMBER Total;
+        MMLISTS ListName;
+        PFN_NUMBER Flink;
+        PFN_NUMBER Blink;
+        ULONG_PTR Lock;
+    } PFNLIST, *PPFNLIST;
+
+    C_ASSERT(sizeof(PFNLIST) == 0x40);
+
+#define MAXIMUM_PFNSLIST_COUNT 0x2
+#define MAXIMUM_PFNSLIST_DEPTH 0x3
+
+#ifndef _WIN64
+    typedef struct _PFNSLIST_HEADER {
+        PSINGLE_LIST_ENTRY Next;
+        USHORT Depth;
+        USHORT Sequence;
+    } PFNSLIST_HEADER, *PPFNSLIST_HEADER;
+
+    C_ASSERT(sizeof(PFNSLIST_HEADER) == 8);
+#else
+    typedef struct _PFNSLIST_HEADER {
+        struct {
+            ULONG64 Depth : 16;
+            ULONG64 Sequence : 48;
+        };
+
+        PSINGLE_LIST_ENTRY Next;
+    }PFNSLIST_HEADER, *PPFNSLIST_HEADER;
+
+    C_ASSERT(sizeof(PFNSLIST_HEADER) == 0x10);
+#endif // !_WIN64
+
+#ifndef _WIN64     
+    typedef struct _PARTITION_PAGE_LISTS {
+        PPFNLIST FreePagesByColor[2];
+        PPFNSLIST_HEADER FreePageSlist[2];
+        PFNLIST ZeroedPageListHead;
+        PFNLIST FreePageListHead;
+        PFNLIST StandbyPageListHead;
+    }PARTITION_PAGE_LISTS, *PPARTITION_PAGE_LISTS;
+
+    C_ASSERT(FIELD_OFFSET(PARTITION_PAGE_LISTS, FreePagesByColor) == 0);
+    C_ASSERT(FIELD_OFFSET(PARTITION_PAGE_LISTS, FreePageSlist) == 8);
+    C_ASSERT(FIELD_OFFSET(PARTITION_PAGE_LISTS, ZeroedPageListHead) == 0x40);
+    C_ASSERT(FIELD_OFFSET(PARTITION_PAGE_LISTS, FreePageListHead) == 0x80);
+    C_ASSERT(FIELD_OFFSET(PARTITION_PAGE_LISTS, StandbyPageListHead) == 0xc0);
+#else     
+    typedef struct _PARTITION_PAGE_LISTS {
+        PPFNLIST FreePagesByColor[2];
+        PPFNSLIST_HEADER FreePageSlist[2];
+        PFNLIST ZeroedPageListHead;
+        PFNLIST FreePageListHead;
+        PFNLIST StandbyPageListHead;
+    }PARTITION_PAGE_LISTS, *PPARTITION_PAGE_LISTS;
+
+    C_ASSERT(FIELD_OFFSET(PARTITION_PAGE_LISTS, FreePagesByColor) == 0);
+    C_ASSERT(FIELD_OFFSET(PARTITION_PAGE_LISTS, FreePageSlist) == 0x10);
+    C_ASSERT(FIELD_OFFSET(PARTITION_PAGE_LISTS, ZeroedPageListHead) == 0x40);
+    C_ASSERT(FIELD_OFFSET(PARTITION_PAGE_LISTS, FreePageListHead) == 0x80);
+    C_ASSERT(FIELD_OFFSET(PARTITION_PAGE_LISTS, StandbyPageListHead) == 0xc0);
+#endif // !_WIN64
 
 #ifndef _WIN64
     C_ASSERT(sizeof(PFN_7600) == 0x18);
@@ -897,9 +990,55 @@ extern "C" {
         );
 #endif // !_WIN64
 
+#ifndef _WIN64
+    NTKERNELAPI
+        PSLIST_ENTRY
+        FASTCALL
+        InterlockedPopEntrySList(
+            __inout PSLIST_HEADER ListHead
+        );
+
+    NTKERNELAPI
+        PSLIST_ENTRY
+        FASTCALL
+        InterlockedPushEntrySList(
+            __inout PSLIST_HEADER ListHead,
+            __inout PSLIST_ENTRY ListEntry
+        );
+
+    NTKERNELAPI
+        PSLIST_ENTRY
+        FASTCALL
+        ExInterlockedFlushSList(
+            __inout PSLIST_HEADER ListHead
+        );
+#else
+    NTKERNELAPI
+        PSLIST_ENTRY
+        NTAPI
+        ExpInterlockedPopEntrySList(
+            __inout PSLIST_HEADER ListHead
+        );
+
+    NTKERNELAPI
+        PSLIST_ENTRY
+        NTAPI
+        ExpInterlockedPushEntrySList(
+            __inout PSLIST_HEADER ListHead,
+            __inout PSLIST_ENTRY ListEntry
+        );
+
+    NTKERNELAPI
+        PSLIST_ENTRY
+        NTAPI
+        ExpInterlockedFlushSList(
+            __inout PSLIST_HEADER ListHead
+        );
+#endif // !_WIN64
+
     VOID
         NTAPI
-        InitializeSpace(
+        InitializeSystemSpace(
             __in PVOID Parameter
         );
 
@@ -927,19 +1066,18 @@ extern "C" {
             __in PMMPTE Pte
         );
 
-    PVOID
-        NTAPI
-        AllocateIndependentPages(
-            __in PVOID VirtualAddress,
-            __in SIZE_T NumberOfBytes
-        );
-
     VOID
         NTAPI
         SetPageProtection(
             __in_bcount(NumberOfBytes) PVOID VirtualAddress,
             __in SIZE_T NumberOfBytes,
             __in ULONG ProtectionMask
+        );
+
+    PVOID
+        NTAPI
+        AllocateIndependentPages(
+            __in SIZE_T NumberOfBytes
         );
 
     VOID
@@ -989,9 +1127,26 @@ extern "C" {
             __in BOOLEAN AllProcesors
         );
 
-    extern PPFN PfnDatabase; 
-    extern PFN_NUMBER PfnAllocation;
-    extern ULONG_PTR ProtectToPteMask[32];
+    VOID
+        NTAPI
+        LocalVpn(
+            __in PVAD_NODE VadNode,
+            __out PVAD_LOCAL_NODE VadLocalNode
+        );
+
+    PVAD_NODE
+        NTAPI
+        GetVadRootProcess(
+            __in PEPROCESS Process
+        );
+
+    PVAD_NODE
+        FASTCALL
+        GetNextNode(
+            __in PVAD_NODE Node
+        );
+
+    extern ULONG64 ProtectToPteMask[32];
 
 #ifdef __cplusplus
 }

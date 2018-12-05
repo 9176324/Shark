@@ -20,7 +20,7 @@
 
 #include "Jump.h"
 
-#include "Lock.h"
+#include "Scan.h"
 
 ULONG
 NTAPI
@@ -32,20 +32,15 @@ DetourGetInstructionLength(
     LONG Extra = 0;
     ULONG Length = 0;
 
-    __try {
-        TargetPc = DetourCopyInstruction(
-            NULL,
-            NULL,
-            ControlPc,
-            NULL,
-            &Extra);
+    TargetPc = DetourCopyInstruction(
+        NULL,
+        NULL,
+        ControlPc,
+        NULL,
+        &Extra);
 
-        if (NULL != TargetPc) {
-            Length += (ULONG)(TargetPc - ControlPc);
-        }
-    }
-    __except (EXCEPTION_EXECUTE_HANDLER) {
-        Length = 0;
+    if (NULL != TargetPc) {
+        Length += (ULONG)(TargetPc - ControlPc);
     }
 
     return Length;
@@ -60,7 +55,8 @@ BuildJumpCode32(
 {
     NTSTATUS Status = STATUS_SUCCESS;
     PJMPCODE JmpCode32 = NULL;
-    PMDL_LOCKER MdlLocker = NULL;
+    PHYSICAL_ADDRESS PhysicalAddress = { 0 };
+    PVOID VirtualAddress = NULL;
 
     JmpCode32 = ExAllocatePool(
         NonPagedPool,
@@ -82,26 +78,29 @@ BuildJumpCode32(
             &Function,
             sizeof(ULONG_PTR));
 
-        MdlLocker = ProbeAndLockPages(
-            *NewAddress,
-            FIELD_OFFSET(JMPCODE32, Filler),
-            KernelMode,
-            IoWriteAccess);
+        PhysicalAddress = MmGetPhysicalAddress(*NewAddress);
 
-        if (NULL != MdlLocker) {
-            InterlockedExchange(MdlLocker->MappedAddress, JUMP_SELF);
+        VirtualAddress = MmMapIoSpace(
+            PhysicalAddress,
+            FIELD_OFFSET(JMPCODE32, Filler),
+            MmNonCached);
+
+        if (NULL != VirtualAddress) {
+            InterlockedExchange(VirtualAddress, JUMP_SELF);
 
             RtlCopyMemory(
-                (PCHAR)MdlLocker->MappedAddress + 2,
+                (PCHAR)VirtualAddress + 2,
                 (PCHAR)JmpCode32 + 2,
                 FIELD_OFFSET(JMPCODE32, Filler) - 2);
 
-            InterlockedExchange(MdlLocker->MappedAddress, *(PULONG)JmpCode32);
+            InterlockedExchange(VirtualAddress, *(PULONG)JmpCode32);
 
-            UnlockPages(MdlLocker);
+            MmUnmapIoSpace(
+                VirtualAddress,
+                FIELD_OFFSET(JMPCODE32, Filler));
         }
         else {
-            Status = STATUS_INSUFFICIENT_RESOURCES;
+            Status = STATUS_INVALID_ADDRESS;
         }
 
         ExFreePool(JmpCode32);
@@ -122,7 +121,8 @@ BuildJumpCode64(
 {
     NTSTATUS Status = STATUS_SUCCESS;
     PJMPCODE JmpCode64 = NULL;
-    PMDL_LOCKER MdlLocker = NULL;
+    PHYSICAL_ADDRESS PhysicalAddress = { 0 };
+    PVOID VirtualAddress = NULL;
 
     JmpCode64 = ExAllocatePool(
         NonPagedPool,
@@ -144,26 +144,29 @@ BuildJumpCode64(
             &Function,
             sizeof(ULONG_PTR));
 
-        MdlLocker = ProbeAndLockPages(
-            *NewAddress,
-            FIELD_OFFSET(JMPCODE64, Filler),
-            KernelMode,
-            IoWriteAccess);
+        PhysicalAddress = MmGetPhysicalAddress(*NewAddress);
 
-        if (NULL != MdlLocker) {
-            InterlockedExchange(MdlLocker->MappedAddress, JUMP_SELF);
+        VirtualAddress = MmMapIoSpace(
+            PhysicalAddress,
+            FIELD_OFFSET(JMPCODE64, Filler),
+            MmNonCached);
+
+        if (NULL != VirtualAddress) {
+            InterlockedExchange(VirtualAddress, JUMP_SELF);
 
             RtlCopyMemory(
-                (PCHAR)MdlLocker->MappedAddress + 2,
+                (PCHAR)VirtualAddress + 2,
                 (PCHAR)JmpCode64 + 2,
                 FIELD_OFFSET(JMPCODE64, Filler) - 2);
 
-            InterlockedExchange(MdlLocker->MappedAddress, *(PULONG)JmpCode64);
+            InterlockedExchange(VirtualAddress, *(PULONG)JmpCode64);
 
-            UnlockPages(MdlLocker);
+            MmUnmapIoSpace(
+                VirtualAddress,
+                FIELD_OFFSET(JMPCODE64, Filler));
         }
         else {
-            Status = STATUS_INSUFFICIENT_RESOURCES;
+            Status = STATUS_INVALID_ADDRESS;
         }
 
         ExFreePool(JmpCode64);
@@ -184,7 +187,8 @@ BuildJumpCode(
 {
     NTSTATUS Status = STATUS_SUCCESS;
     PJMPCODE JmpCode = NULL;
-    PMDL_LOCKER MdlLocker = NULL;
+    PHYSICAL_ADDRESS PhysicalAddress = { 0 };
+    PVOID VirtualAddress = NULL;
 
     JmpCode = ExAllocatePool(
         NonPagedPool,
@@ -206,26 +210,29 @@ BuildJumpCode(
             &Function,
             sizeof(ULONG_PTR));
 
-        MdlLocker = ProbeAndLockPages(
-            *NewAddress,
-            FIELD_OFFSET(JMPCODE, Filler),
-            KernelMode,
-            IoWriteAccess);
+        PhysicalAddress = MmGetPhysicalAddress(*NewAddress);
 
-        if (NULL != MdlLocker) {
-            InterlockedExchange(MdlLocker->MappedAddress, JUMP_SELF);
+        VirtualAddress = MmMapIoSpace(
+            PhysicalAddress,
+            FIELD_OFFSET(JMPCODE, Filler),
+            MmNonCached);
+
+        if (NULL != VirtualAddress) {
+            InterlockedExchange(VirtualAddress, JUMP_SELF);
 
             RtlCopyMemory(
-                (PCHAR)MdlLocker->MappedAddress + 2,
+                (PCHAR)VirtualAddress + 2,
                 (PCHAR)JmpCode + 2,
                 FIELD_OFFSET(JMPCODE, Filler) - 2);
 
-            InterlockedExchange(MdlLocker->MappedAddress, *(PULONG)JmpCode);
+            InterlockedExchange(VirtualAddress, *(PULONG)JmpCode);
 
-            UnlockPages(MdlLocker);
+            MmUnmapIoSpace(
+                VirtualAddress,
+                FIELD_OFFSET(JMPCODE, Filler));
         }
         else {
-            Status = STATUS_INSUFFICIENT_RESOURCES;
+            Status = STATUS_INVALID_ADDRESS;
         }
 
         ExFreePool(JmpCode);

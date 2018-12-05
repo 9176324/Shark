@@ -24,25 +24,6 @@
 
 VOID
 NTAPI
-CtxSpecialApc(
-    __in PKAPC Apc,
-    __in PKNORMAL_ROUTINE * NormalRoutine,
-    __in PVOID * NormalContext,
-    __in PVOID * SystemArgument1,
-    __in PVOID * SystemArgument2
-)
-{
-    PKEVENT Notify = NULL;
-
-    Notify = (PKEVENT)Apc->RundownRoutine;
-
-    KeSetEvent(Notify, LOW_PRIORITY, FALSE);
-
-    ExFreePool(Apc);
-}
-
-VOID
-NTAPI
 RemoteDispatcher(
     __in PKAPC Apc,
     __in PKNORMAL_ROUTINE * NormalRoutine,
@@ -56,7 +37,11 @@ RemoteDispatcher(
     Atx = CONTAINING_RECORD(Apc, ATX, Apc);
 
     if (KernelMode == Atx->Rtx.Mode) {
-        Atx->Rtx.ReturnedStatus = Atx->Rtx.StartRoutine(Atx->Rtx.StartContext);
+        Atx->Rtx.Result = _MultipleDispatcher(
+            Atx->Rtx.ApcRoutine,
+            Atx->Rtx.SystemRoutine,
+            Atx->Rtx.StartRoutine,
+            Atx->Rtx.StartContext);
     }
     else {
     }
@@ -69,8 +54,10 @@ NTAPI
 RemoteCall(
     __in HANDLE UniqueThread,
     __in USHORT Platform,
-    __in_opt PUSER_THREAD_START_ROUTINE StartRoutine,
-    __in_opt PVOID StartContext,
+    __in PPS_APC_ROUTINE ApcRoutine,
+    __in PKSYSTEM_ROUTINE SystemRoutine,
+    __in PUSER_THREAD_START_ROUTINE StartRoutine,
+    __in PVOID StartContext,
     __in KPROCESSOR_MODE Mode
 )
 {
@@ -100,6 +87,8 @@ RemoteCall(
                 NULL);
 
             Atx.Rtx.Platform = Platform;
+            Atx.Rtx.ApcRoutine = ApcRoutine;
+            Atx.Rtx.SystemRoutine = SystemRoutine;
             Atx.Rtx.StartRoutine = StartRoutine;
             Atx.Rtx.StartContext = StartContext;
             Atx.Rtx.Mode = Mode;
@@ -117,7 +106,7 @@ RemoteCall(
                     NULL);
 
                 if (STATUS_SUCCESS == Status) {
-                    Status = Atx.Rtx.ReturnedStatus;
+                    Status = Atx.Rtx.Result;
                 }
             }
             else {
@@ -130,14 +119,16 @@ RemoteCall(
                 SynchronizationEvent,
                 FALSE);
 
+            Atx.Rtx.Platform = Platform;
+            Atx.Rtx.ApcRoutine = ApcRoutine;
+            Atx.Rtx.SystemRoutine = SystemRoutine;
             Atx.Rtx.StartRoutine = StartRoutine;
             Atx.Rtx.StartContext = StartContext;
-
-            Atx.Rtx.Platform = Platform;
+            Atx.Rtx.Mode = Mode;
 
             RemoteDispatcher(&Atx.Apc, NULL, NULL, NULL, NULL);
 
-            Status = Atx.Rtx.ReturnedStatus;
+            Status = Atx.Rtx.Result;
         }
 
         ObDereferenceObject(Thread);
@@ -153,7 +144,7 @@ IpiDispatcher(
 )
 {
     if (-1 == Rtx->Processor) {
-        _IpiDispatcher(
+        _MultipleDispatcher(
             Rtx->ApcRoutine,
             Rtx->SystemRoutine,
             Rtx->StartRoutine,
@@ -161,7 +152,7 @@ IpiDispatcher(
     }
     else {
         if (KeGetCurrentProcessorNumber() == Rtx->Processor) {
-            Rtx->Result = _IpiDispatcher(
+            Rtx->Result = _MultipleDispatcher(
                 Rtx->ApcRoutine,
                 Rtx->SystemRoutine,
                 Rtx->StartRoutine,

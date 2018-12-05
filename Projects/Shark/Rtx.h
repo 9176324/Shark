@@ -24,14 +24,6 @@
 extern "C" {
 #endif	/* __cplusplus */
 
-    typedef
-        ULONG_PTR
-        (NTAPI * PKIPI_ROUTINE)(
-            __in ULONG_PTR Argument1,
-            __in ULONG_PTR Argument2,
-            __in ULONG_PTR Argument3
-            );
-
     typedef struct _RTX {
         USHORT Platform;
         ULONG Processor;
@@ -39,7 +31,6 @@ extern "C" {
         PKSYSTEM_ROUTINE SystemRoutine;
         PUSER_THREAD_START_ROUTINE StartRoutine;
         PVOID StartContext;
-        NTSTATUS ReturnedStatus;
         ULONG_PTR Result;
         KPROCESSOR_MODE Mode;
     } RTX, *PRTX;
@@ -50,14 +41,13 @@ extern "C" {
         RTX Rtx;
     } ATX, *PATX;
 
-    VOID
+    ULONG_PTR
         NTAPI
-        CtxSpecialApc(
-            __in PKAPC Apc,
-            __in PKNORMAL_ROUTINE * NormalRoutine,
-            __in PVOID * NormalContext,
-            __in PVOID * SystemArgument1,
-            __in PVOID * SystemArgument2
+        _MultipleDispatcher(
+            __in PPS_APC_ROUTINE ApcRoutine,
+            __in PKSYSTEM_ROUTINE SystemRoutine,
+            __in PUSER_THREAD_START_ROUTINE StartRoutine,
+            __in PVOID StartContext
         );
 
     NTSTATUS
@@ -65,18 +55,11 @@ extern "C" {
         RemoteCall(
             __in HANDLE UniqueThread,
             __in USHORT Platform,
-            __in_opt PUSER_THREAD_START_ROUTINE StartRoutine,
-            __in_opt PVOID StartContext,
-            __in KPROCESSOR_MODE Mode
-        );
-
-    ULONG_PTR
-        NTAPI
-        _IpiDispatcher(
             __in PPS_APC_ROUTINE ApcRoutine,
             __in PKSYSTEM_ROUTINE SystemRoutine,
             __in PUSER_THREAD_START_ROUTINE StartRoutine,
-            __in PVOID StartContext
+            __in PVOID StartContext,
+            __in KPROCESSOR_MODE Mode
         );
 
     ULONG_PTR

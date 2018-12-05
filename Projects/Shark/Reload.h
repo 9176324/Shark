@@ -19,6 +19,8 @@
 #ifndef _RELOAD_H_
 #define _RELOAD_H_
 
+#include "Space.h"
+
 #ifdef __cplusplus
 /* Assume byte packing throughout */
 extern "C" {
@@ -26,6 +28,63 @@ extern "C" {
 
 #define SystemDirectory L"\\SystemRoot\\System32\\"
 #define Wx86SystemDirectory L"\\SystemRoot\\SysWOW64\\"
+
+    typedef struct _RELOADER_PARAMETER_BLOCK {
+        PKLDR_DATA_TABLE_ENTRY KernelDataTableEntry;
+        PKLDR_DATA_TABLE_ENTRY DataTableEntry;
+        PVOID PrivateHeader;
+
+        ULONG BuildNumber;
+
+        PPFN PfnDatabase;
+        PPFNLIST * FreePagesByColor;
+        PPFNSLIST_HEADER FreePageSlist[2];
+        USHORT NodeColor;
+        PFNSLIST_HEADER FreeSlist;
+
+#ifndef _WIN64
+        BOOLEAN PAEEnable;
+#else
+        PMMPTE PxeBase;
+        PMMPTE PpeBase;
+
+        PMMPTE PxeTop;
+        PMMPTE PpeTop;
+#endif // !_WIN64
+
+        PMMPTE PdeBase;
+        PMMPTE PteBase;
+
+        PMMPTE PdeTop;
+        PMMPTE PteTop;
+
+        PLIST_ENTRY LoadedModuleList;
+        LIST_ENTRY LoadedPrivateImageList;
+
+        KSERVICE_TABLE_DESCRIPTOR * ServiceDescriptorTable;
+        KSERVICE_TABLE_DESCRIPTOR * ServiceDescriptorTableShadow;
+
+        ULONG VadOffset;
+        ULONG ApcOffset;
+        ULONG TrapOffset;
+
+        NTSTATUS
+        (NTAPI * PsCreateThread)(
+            __out PHANDLE ThreadHandle,
+            __in ACCESS_MASK DesiredAccess,
+            __in_opt POBJECT_ATTRIBUTES ObjectAttributes,
+            __in HANDLE ProcessHandle,
+            __in PEPROCESS ProcessPointer,
+            __out_opt PCLIENT_ID ClientId,
+            __in_opt PCONTEXT ThreadContext,
+            __in_opt PINITIAL_TEB InitialTeb,
+            __in BOOLEAN CreateSuspended,
+            __in_opt PKSTART_ROUTINE StartRoutine,
+            __in PVOID StartContext
+            );
+
+        // PATCHGUARD_BLOCK PatchGuardBlock;
+    } RELOADER_PARAMETER_BLOCK, *PRELOADER_PARAMETER_BLOCK;
 
     ULONG
         NTAPI
@@ -74,7 +133,7 @@ extern "C" {
     VOID
         NTAPI
         InitializeLoadedModuleList(
-            __in PKLDR_DATA_TABLE_ENTRY DataTableEntry
+            __in PRELOADER_PARAMETER_BLOCK ReloaderBlock
         );
 
     NTSTATUS
@@ -113,6 +172,12 @@ extern "C" {
             __in_opt ULONG ProcedureNumber
         );
 
+    PVOID
+        NTAPI
+        NameToAddress(
+            __in PSTR String
+        );
+
     PKLDR_DATA_TABLE_ENTRY
         NTAPI
         LoadKernelPrivateImage(
@@ -126,6 +191,23 @@ extern "C" {
         UnloadKernelPrivateImage(
             __in PKLDR_DATA_TABLE_ENTRY DataTableEntry
         );
+
+    NTSTATUS
+        NTAPI
+        FindEntryForUserImage(
+            __in PUNICODE_STRING ImageFileName,
+            __out PLDR_DATA_TABLE_ENTRY * DataTableEntry
+        );
+
+    PVOID
+        NTAPI
+        GetUserProcedureAddress(
+            __in PVOID ImageBase,
+            __in_opt PSTR ProcedureName,
+            __in_opt ULONG ProcedureNumber
+        );
+
+    extern PRELOADER_PARAMETER_BLOCK ReloaderBlock;
 
 #ifdef __cplusplus
 }

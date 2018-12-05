@@ -20,6 +20,9 @@
 
 #include "Ctx.h"
 
+#include "Jump.h"
+#include "Scan.h"
+
 PKAPC_STATE
 NTAPI
 GetApcStateThread(

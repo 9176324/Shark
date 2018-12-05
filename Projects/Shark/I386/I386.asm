@@ -16,16 +16,25 @@
 ;
 ;
 
-.386p
-
-.model flat, stdcall
+.686p
 
         .xlist
+include ks386.inc
 include callconv.inc
         .list
         
 _TEXT$00    SEGMENT PAGE 'CODE'
 
+    cPublicProc _IsPAEEnable, 0
+    
+        mov eax, cr4
+        and eax, CR4_PAE
+        shr eax, 5
+
+        stdRET _IsPAEEnable
+        
+    stdENDP _IsPAEEnable
+    
     cPublicProc __FlushSingleTb, 1
         
         mov eax, [esp + 4]
@@ -35,7 +44,7 @@ _TEXT$00    SEGMENT PAGE 'CODE'
         
     stdENDP __FlushSingleTb
         
-    cPublicProc __IpiDispatcher, 4
+    cPublicProc __MultipleDispatcher, 4
 
         mov edi, edi
 
@@ -56,7 +65,7 @@ _TEXT$00    SEGMENT PAGE 'CODE'
         mov esp, ebp
         pop ebp
         
-        stdRET __IpiDispatcher
+        stdRET __MultipleDispatcher
         
 @@ :    
         mov eax, [ebp + 0ch]
@@ -72,13 +81,13 @@ _TEXT$00    SEGMENT PAGE 'CODE'
         mov esp, ebp
         pop ebp
         
-        stdRET __IpiDispatcher
+        stdRET __MultipleDispatcher
         
 @@ :    
         mov eax, [ebp + 10h]
 
         test eax, eax
-        jz @f
+        jz nothing
 
         push [ebp + 14h]
 
@@ -87,96 +96,17 @@ _TEXT$00    SEGMENT PAGE 'CODE'
         mov esp, ebp
         pop ebp
         
-        stdRET __IpiDispatcher
+        stdRET __MultipleDispatcher
         
-error : 
+nothing : 
         xor eax, eax
 
         mov esp, ebp
         pop ebp
         
-        stdRET __IpiDispatcher
+        stdRET __MultipleDispatcher
         
-    stdENDP __IpiDispatcher
-    
-    cPublicProc _IsPAEEnable, 0
-    
-        mov eax, cr4
-        and eax, CR4_PAE
-        shr eax, 5
-
-        stdRET _IsPAEEnable
-        
-    stdENDP _IsPAEEnable
-    
-    cPublicProc _GetPteAddress, 1
-    
-        mov edx, cr4
-        and edx, CR4_PAE
-        shr edx, 5
-        mov eax, [esp + 4]
-        shr eax, 0ch
-        mov cl, 2
-        add cl, dl
-        shl eax, cl
-        lea eax, [eax + 0C0000000h]
-
-        stdRET _GetPteAddress
-        
-    stdENDP _GetPteAddress
-    
-    cPublicProc _GetPdeAddress, 1
-    
-        mov edx, cr4
-        and edx, CR4_PAE
-        shr edx, 5
-        mov cl, 16h
-        sub cl, dl
-        mov eax, [esp + 4]
-        shr eax, cl
-        mov cl, 2
-        add cl, dl
-        shl eax, cl
-
-        test dl, dl
-        jz @f
-
-        mov ecx, 300000h
-
-@@ :    lea eax, [eax + ecx + 0C0300000h]
-
-        stdRET _GetPdeAddress
-        
-    stdENDP _GetPdeAddress
-
-    cPublicProc _GetVirtualAddressMappedByPde, 1
-    
-        mov edx, cr4
-        and edx, CR4_PAE
-        shr edx, 5
-        mov eax, [esp + 4]
-        mov cl, 14h
-        shl dl, 1
-        sub cl, dl
-        shl eax, cl
-    
-        stdRET _GetVirtualAddressMappedByPde
-        
-    stdENDP _GetVirtualAddressMappedByPde
-    
-    cPublicProc _GetVirtualAddressMappedByPte, 1
-    
-        mov edx, cr4
-        and edx, CR4_PAE
-        shr edx, 5
-        mov eax, [esp + 4]
-        mov cl, 0ah
-        sub cl, dl
-        shl eax, cl
-    
-        stdRET _GetVirtualAddressMappedByPte
-        
-    stdENDP _GetVirtualAddressMappedByPte
+    stdENDP __MultipleDispatcher
     
 _TEXT$00    ends
 

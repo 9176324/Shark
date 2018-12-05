@@ -104,8 +104,20 @@ DriverEntry(
         if ((RTL_SOFT_ASSERT(NT_SUCCESS(Status)))) {
             DriverObject->DriverUnload = (PDRIVER_UNLOAD)DriverUnload;
 
-            InitializeLoadedModuleList(NULL);
-            InitializeSpace(NULL);
+            ReloaderBlock = ExAllocatePool(
+                NonPagedPool,
+                sizeof(RELOADER_PARAMETER_BLOCK) + sizeof(PATCHGUARD_BLOCK));
+
+            if (NULL != ReloaderBlock) {
+                RtlZeroMemory(
+                    ReloaderBlock,
+                    sizeof(RELOADER_PARAMETER_BLOCK) + sizeof(PATCHGUARD_BLOCK));
+
+                PsGetVersion(NULL, NULL, &ReloaderBlock->BuildNumber, NULL);
+
+                InitializeLoadedModuleList(ReloaderBlock);
+                InitializeSystemSpace(ReloaderBlock);
+            }
 
 #ifndef VMP
             DbgPrint("Shark - load\n");
@@ -228,20 +240,16 @@ DeviceControl(
     case 0: {
         PPATCHGUARD_BLOCK PatchGuardBlock = NULL;
 
-        PatchGuardBlock = ExAllocatePool(
-            NonPagedPool,
-            sizeof(PATCHGUARD_BLOCK));
+        PatchGuardBlock =
+            (PCHAR)ReloaderBlock + sizeof(RELOADER_PARAMETER_BLOCK);
 
-        if (NULL != PatchGuardBlock) {
-            RtlZeroMemory(PatchGuardBlock, sizeof(PATCHGUARD_BLOCK));
+        PatchGuardBlock->BuildNumber = ReloaderBlock->BuildNumber;
+        PatchGuardBlock->KernelDataTableEntry = ReloaderBlock->KernelDataTableEntry;
 
-#ifdef _WIN64
-            DisablePatchGuard(PatchGuardBlock);
-#endif // _WIN64
+        DisablePatchGuard(PatchGuardBlock);
 
-            // free must after PatchGuard context cleared
-            // ExFreePool(PatchGuardBlock);
-        }
+        // free must after PatchGuard context cleared
+        // ExFreePool(PatchGuardBlock);
 
         Irp->IoStatus.Information = 0;
 

@@ -42,9 +42,6 @@
     <ClCompile Include="Scan.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Lock.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Stack.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -118,9 +115,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Scan.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Lock.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Stack.h">
