@@ -50,8 +50,7 @@ ASOBJS = \
 CCARCHOBJS = \
     $(OBJD)\PatchGuard$(ARCTARG).obj \
     $(OBJD)\PatchGuardInline$(ARCTARG).obj \
-    $(OBJD)\Space$(ARCTARG).obj \
-    $(OBJD)\Stack$(ARCTARG).obj
+    $(OBJD)\Space$(ARCTARG).obj
 
 CCOBJS = \
     $(OBJD)\$(PROJ).obj \
@@ -74,7 +73,6 @@ PROJSRCS = \
     $(ARCTARG)\PatchGuard$(ARCTARG).c \
     $(ARCTARG)\PatchGuardInline$(ARCTARG).c \
     $(ARCTARG)\Space$(ARCTARG).c \
-    $(ARCTARG)\Stack$(ARCTARG).c \
     $(PROJ).c \
     Ctx.c \
     Cmp$(ARCTARG).asm \

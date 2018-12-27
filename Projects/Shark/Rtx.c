@@ -21,6 +21,8 @@
 #include "Rtx.h"
 
 #include "Ctx.h"
+#include "Jump.h"
+#include "Scan.h"
 
 VOID
 NTAPI
@@ -36,29 +38,23 @@ RemoteDispatcher(
 
     Atx = CONTAINING_RECORD(Apc, ATX, Apc);
 
-    if (KernelMode == Atx->Rtx.Mode) {
-        Atx->Rtx.Result = _MultipleDispatcher(
-            Atx->Rtx.ApcRoutine,
-            Atx->Rtx.SystemRoutine,
-            Atx->Rtx.StartRoutine,
-            Atx->Rtx.StartContext);
-    }
-    else {
-    }
+    Atx->Rtx.Routines.Result = _MultipleDispatcher(
+        Atx->Rtx.Routines.ApcRoutine,
+        Atx->Rtx.Routines.SystemRoutine,
+        Atx->Rtx.Routines.StartRoutine,
+        Atx->Rtx.Routines.StartContext);
 
-    KeSetEvent(&Atx->Notify, LOW_PRIORITY, FALSE);
+    KeSetEvent(&Atx->Rtx.Notify, LOW_PRIORITY, FALSE);
 }
 
 NTSTATUS
 NTAPI
 RemoteCall(
     __in HANDLE UniqueThread,
-    __in USHORT Platform,
     __in PPS_APC_ROUTINE ApcRoutine,
     __in PKSYSTEM_ROUTINE SystemRoutine,
     __in PUSER_THREAD_START_ROUTINE StartRoutine,
-    __in PVOID StartContext,
-    __in KPROCESSOR_MODE Mode
+    __in PVOID StartContext
 )
 {
     NTSTATUS Status = STATUS_SUCCESS;
@@ -69,10 +65,15 @@ RemoteCall(
         UniqueThread,
         &Thread);
 
-    if (NT_SUCCESS(Status)) {
+    if (TRACE(Status)) {
+        Atx.Rtx.Routines.ApcRoutine = ApcRoutine;
+        Atx.Rtx.Routines.SystemRoutine = SystemRoutine;
+        Atx.Rtx.Routines.StartRoutine = StartRoutine;
+        Atx.Rtx.Routines.StartContext = StartContext;
+
         if ((ULONG_PTR)KeGetCurrentThread() != (ULONG_PTR)Thread) {
             KeInitializeEvent(
-                &Atx.Notify,
+                &Atx.Rtx.Notify,
                 SynchronizationEvent,
                 FALSE);
 
@@ -86,27 +87,20 @@ RemoteCall(
                 KernelMode,
                 NULL);
 
-            Atx.Rtx.Platform = Platform;
-            Atx.Rtx.ApcRoutine = ApcRoutine;
-            Atx.Rtx.SystemRoutine = SystemRoutine;
-            Atx.Rtx.StartRoutine = StartRoutine;
-            Atx.Rtx.StartContext = StartContext;
-            Atx.Rtx.Mode = Mode;
-
-            if (FALSE != KeInsertQueueApc(
+            if (KeInsertQueueApc(
                 &Atx.Apc,
                 NULL,
                 NULL,
                 LOW_PRIORITY)) {
                 Status = KeWaitForSingleObject(
-                    &Atx.Notify,
+                    &Atx.Rtx.Notify,
                     Executive,
                     KernelMode,
                     FALSE,
                     NULL);
 
                 if (STATUS_SUCCESS == Status) {
-                    Status = Atx.Rtx.Result;
+                    Status = Atx.Rtx.Routines.Result;
                 }
             }
             else {
@@ -114,21 +108,9 @@ RemoteCall(
             }
         }
         else {
-            KeInitializeEvent(
-                &Atx.Notify,
-                SynchronizationEvent,
-                FALSE);
-
-            Atx.Rtx.Platform = Platform;
-            Atx.Rtx.ApcRoutine = ApcRoutine;
-            Atx.Rtx.SystemRoutine = SystemRoutine;
-            Atx.Rtx.StartRoutine = StartRoutine;
-            Atx.Rtx.StartContext = StartContext;
-            Atx.Rtx.Mode = Mode;
-
             RemoteDispatcher(&Atx.Apc, NULL, NULL, NULL, NULL);
 
-            Status = Atx.Rtx.Result;
+            Status = Atx.Rtx.Routines.Result;
         }
 
         ObDereferenceObject(Thread);
@@ -145,18 +127,18 @@ IpiDispatcher(
 {
     if (-1 == Rtx->Processor) {
         _MultipleDispatcher(
-            Rtx->ApcRoutine,
-            Rtx->SystemRoutine,
-            Rtx->StartRoutine,
-            Rtx->StartContext);
+            Rtx->Routines.ApcRoutine,
+            Rtx->Routines.SystemRoutine,
+            Rtx->Routines.StartRoutine,
+            Rtx->Routines.StartContext);
     }
     else {
         if (KeGetCurrentProcessorNumber() == Rtx->Processor) {
-            Rtx->Result = _MultipleDispatcher(
-                Rtx->ApcRoutine,
-                Rtx->SystemRoutine,
-                Rtx->StartRoutine,
-                Rtx->StartContext);
+            Rtx->Routines.Result = _MultipleDispatcher(
+                Rtx->Routines.ApcRoutine,
+                Rtx->Routines.SystemRoutine,
+                Rtx->Routines.StartRoutine,
+                Rtx->Routines.StartContext);
         }
     }
 }
@@ -174,16 +156,17 @@ IpiSingleCall(
     RTX Rtx = { 0 };
 
     Rtx.Processor = KeGetCurrentProcessorNumber();
-    Rtx.ApcRoutine = ApcRoutine;
-    Rtx.SystemRoutine = SystemRoutine;
-    Rtx.StartRoutine = StartRoutine;
-    Rtx.StartContext = StartContext;
+
+    Rtx.Routines.ApcRoutine = ApcRoutine;
+    Rtx.Routines.SystemRoutine = SystemRoutine;
+    Rtx.Routines.StartRoutine = StartRoutine;
+    Rtx.Routines.StartContext = StartContext;
 
     KeIpiGenericCall(
         (PKIPI_BROADCAST_WORKER)IpiDispatcher,
         (ULONG_PTR)&Rtx);
 
-    Result = Rtx.Result;
+    Result = Rtx.Routines.Result;
 
     return Result;
 }
@@ -200,10 +183,11 @@ IpiGenericCall(
     RTX Rtx = { 0 };
 
     Rtx.Processor = -1;
-    Rtx.ApcRoutine = ApcRoutine;
-    Rtx.SystemRoutine = SystemRoutine;
-    Rtx.StartRoutine = StartRoutine;
-    Rtx.StartContext = StartContext;
+
+    Rtx.Routines.ApcRoutine = ApcRoutine;
+    Rtx.Routines.SystemRoutine = SystemRoutine;
+    Rtx.Routines.StartRoutine = StartRoutine;
+    Rtx.Routines.StartContext = StartContext;
 
     KeIpiGenericCall(
         (PKIPI_BROADCAST_WORKER)IpiDispatcher,

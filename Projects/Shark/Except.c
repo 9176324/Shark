@@ -20,29 +20,29 @@
 
 #include "Except.h"
 
-#define __ROL32(x, n) (((x) << ((n % 32))) | ((x) >> (32 - (n % 32))))
-#define __ROR32(x, n) (((x) >> ((n % 32))) | ((x) << (32 - (n % 32))))
+#include "Reload.h"
 
 ULONG
 NTAPI
-EncodeSystemPointer32(
+EncodeSystemPointer(
     __in ULONG Pointer
 )
 {
-    return SharedUserData->Cookie ^ __ROR32(
-        Pointer, 
-        (SharedUserData->Cookie & 0x1f));
+    return ((SharedUserData->Cookie ^
+        Pointer) >> (SharedUserData->Cookie & 0x1f)) |
+        ((SharedUserData->Cookie ^ Pointer) <<
+        (32 - (SharedUserData->Cookie & 0x1f)));
 }
 
 ULONG
 NTAPI
-DecodeSystemPointer32(
+RtlDecodeSystemPointer(
     __in ULONG Pointer
 )
 {
-    return SharedUserData->Cookie ^ __ROL32(
-        Pointer, 
-        (SharedUserData->Cookie & 0x1f));
+    return SharedUserData->Cookie ^
+        ((Pointer >> (32 - (SharedUserData->Cookie & 0x1f))) |
+        (Pointer << (SharedUserData->Cookie & 0x1f)));
 }
 
 VOID
@@ -113,4 +113,22 @@ CaptureImageExceptionValues(
                 TableSize);
         }
     }
+}
+
+PVOID
+NTAPI
+LookupFunctionTableEx(
+    __in PVOID ControlPc,
+    __inout PVOID * ImageBase,
+    __out PULONG SizeOfTable
+)
+{
+    PVOID FunctionTable = NULL;
+
+    CaptureImageExceptionValues(
+        *ImageBase,
+        &FunctionTable,
+        SizeOfTable);
+
+    return FunctionTable;
 }

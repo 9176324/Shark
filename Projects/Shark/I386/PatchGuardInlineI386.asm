@@ -16,11 +16,10 @@
 ;
 ;
 
-.386p
-
-.model flat, stdcall
+.686p
 
         .xlist
+include ks386.inc
 include callconv.inc
         .list
         

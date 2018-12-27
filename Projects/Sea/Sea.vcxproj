@@ -74,7 +74,6 @@
   </ImportGroup>
   <ItemGroup>
     <ClCompile Include="Sea.c" />
-    <ClCompile Include="Print.c" />
     <ClCompile Include="Sysload.c" />
   </ItemGroup>
   <ItemGroup>
@@ -99,7 +98,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sea.h" />
-    <ClInclude Include="Print.h" />
     <ClInclude Include="Sysload.h" />
   </ItemGroup>
 </Project>

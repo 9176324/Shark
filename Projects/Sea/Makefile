@@ -51,7 +51,6 @@ CCARCHOBJS = \
 
 CCOBJS = \
     $(OBJD)\$(PROJ).obj \
-    $(OBJD)\Print.obj \
     $(OBJD)\Sysload.obj
     
 RCOBJS = $(OBJD)\$(PROJ).res
@@ -61,7 +60,6 @@ PROJOBJS = $(ASOBJS) $(CCARCHOBJS) $(CCOBJS) $(RCOBJS)
 PROJSRCS = \
     $(ARCTARG)\$(ARCTARG).asm \
     $(PROJ).c \
-    Print.c \
     Sysload.c
 
 !if "$(ARCTARG)" == "I386"
@@ -127,7 +125,7 @@ BUILDLIBS = ntdllp.lib bufferoverflow.lib \
 !else if "$(ARCTARG)" == "AMD64"
     gshandler.obj gshandlerseh.obj \
 !endif
-    disasm.obj \
+    disasm.obj log.obj\
     kernl32p.lib msvcrt.lib shell32.lib user32.lib gdi32.lib \
     nt_process_startup.obj
 

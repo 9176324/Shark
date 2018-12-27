@@ -26,14 +26,14 @@ extern "C" {
 
     NTSTATUS
         NTAPI
-        LoadSystemImage(
+        LoadKernelImage(
             __in PWSTR ImageFileName,
             __in PWSTR ServiceName
         );
 
     NTSTATUS
         NTAPI
-        UnloadSystemImage(
+        UnloadKernelImage(
             __in PWSTR ServiceName
         );
 

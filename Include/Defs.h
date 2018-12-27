@@ -51,6 +51,8 @@ extern "C" {
 
 #include <arccodes.h>
 
+#include <log.h>
+
 #ifdef __cplusplus
 }
 #endif	/* __cplusplus */
