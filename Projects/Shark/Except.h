@@ -19,8 +19,6 @@
 #ifndef _EXCEPT_H_
 #define _EXCEPT_H_
 
-#include "Reload.h"
-
 #ifdef __cplusplus
 /* Assume byte packing throughout */
 extern "C" {
@@ -36,12 +34,16 @@ extern "C" {
         ULONG SizeOfTable;
     } FUNCTION_TABLE_ENTRY32, *PFUNCTION_TABLE_ENTRY32;
 
+    C_ASSERT(sizeof(FUNCTION_TABLE_ENTRY32) == 0x10);
+
     typedef struct _FUNCTION_TABLE_ENTRY64 {
         ULONG64 FunctionTable;
         ULONG64 ImageBase;
         ULONG SizeOfImage;
         ULONG SizeOfTable;
     } FUNCTION_TABLE_ENTRY64, *PFUNCTION_TABLE_ENTRY64;
+
+    C_ASSERT(sizeof(FUNCTION_TABLE_ENTRY64) == 0x18);
 
     typedef struct _FUNCTION_TABLE {
         ULONG CurrentSize;
@@ -51,6 +53,8 @@ extern "C" {
         ULONG TableEntry[1];
     } FUNCTION_TABLE, *PFUNCTION_TABLE;
 
+    C_ASSERT(FIELD_OFFSET(FUNCTION_TABLE, TableEntry) == 0x10);
+
     typedef struct _FUNCTION_TABLE_LEGACY {
         ULONG CurrentSize;
         ULONG MaximumSize;
@@ -58,15 +62,17 @@ extern "C" {
         ULONG TableEntry[1];
     } FUNCTION_TABLE_LEGACY, *PFUNCTION_TABLE_LEGACY;
 
+    C_ASSERT(FIELD_OFFSET(FUNCTION_TABLE_LEGACY, TableEntry) == 0xc);
+
     ULONG
         NTAPI
-        EncodeSystemPointer32(
+        EncodeSystemPointer(
             __in ULONG Pointer
         );
 
     ULONG
         NTAPI
-        DecodeSystemPointer32(
+        RtlDecodeSystemPointer(
             __in ULONG Pointer
         );
 
@@ -77,6 +83,73 @@ extern "C" {
             __out PVOID * FunctionTable,
             __out PULONG TableSize
         );
+
+    VOID
+        NTAPI
+        InsertInvertedFunctionTable(
+            __in PVOID ImageBase,
+            __in ULONG SizeOfImage
+        );
+
+    VOID
+        NTAPI
+        RemoveInvertedFunctionTable(
+            __in PVOID ImageBase
+        );
+
+#ifdef _WIN64
+    VOID
+        NTAPI
+        Wx86InsertInvertedFunctionTable(
+            __in PVOID ImageBase,
+            __in ULONG SizeOfImage
+        );
+
+    VOID
+        NTAPI
+        Wx86RemoveInvertedFunctionTable(
+            __in PVOID ImageBase
+        );
+#endif // _WIN64
+
+    PVOID
+        NTAPI
+        LookupFunctionTableEx(
+            __in PVOID ControlPc,
+            __inout PVOID * ImageBase,
+            __out PULONG SizeOfTable
+        );
+
+    PVOID
+        NTAPI
+        LookupFunctionTable(
+            __in PVOID ControlPc,
+            __out PVOID * ImageBase,
+            __out PULONG SizeOfTable
+        );
+
+#ifdef _WIN64
+    PRUNTIME_FUNCTION
+        NTAPI
+        LookupFunctionEntry(
+            __in ULONG64 ControlPc,
+            __out PULONG64 ImageBase,
+            __inout_opt PUNWIND_HISTORY_TABLE HistoryTable
+        );
+
+    PEXCEPTION_ROUTINE
+        NTAPI
+        VirtualUnwind(
+            __in ULONG HandlerType,
+            __in ULONG64 ImageBase,
+            __in ULONG64 ControlPc,
+            __in PRUNTIME_FUNCTION FunctionEntry,
+            __inout PCONTEXT ContextRecord,
+            __out PVOID * HandlerData,
+            __out PULONG64 EstablisherFrame,
+            __inout_opt PKNONVOLATILE_CONTEXT_POINTERS ContextPointers
+        );
+#endif // _WIN64
 
 #ifdef __cplusplus
 }

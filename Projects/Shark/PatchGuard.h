@@ -48,7 +48,7 @@ extern "C" {
     }KPRIQUEUE, *PKPRIQUEUE;
 
     typedef struct _PATCHGUARD_BLOCK {
-#define PG_MAXIMUM_CONTEXT_COUNT            0x00000008UI32 // Worker 中可能存在的 Context 最大数量
+#define PG_MAXIMUM_CONTEXT_COUNT            0x00000002UI32 // Worker 中可能存在的 Context 最大数量
 #define PG_FIRST_FIELD_OFFSET               0x00000100UI32 // 搜索使用的第一个 Context 成员偏移
 #define PG_CMP_APPEND_DLL_SECTION_END       0x000000c0UI32 // CmpAppendDllSection 长度
 #define PG_COMPARE_FIELDS_COUNT             0x00000004UI32 // 搜索时比较的 Context 成员数量
@@ -145,7 +145,7 @@ extern "C" {
 
         KEVENT Notify;
 
-        PKLDR_DATA_TABLE_ENTRY KernelDataTableEntry;
+        PVOID KernelBase;
 
         ULONG BuildNumber;
 
@@ -165,21 +165,6 @@ extern "C" {
         ULONG_PTR CompareFields[PG_COMPARE_FIELDS_COUNT];
         ULONG_PTR EntryPoint[PG_COMPARE_FIELDS_COUNT];
         WORK_QUEUE_ITEM ClearWorkerItem;
-
-        PVOID MmHighestUserAddress;
-        PVOID MmSystemRangeStart;
-
-        PMMPTE PxeBase;
-        PMMPTE PpeBase;
-        PMMPTE PdeBase;
-        PMMPTE PteBase;
-
-        PMMPTE PxeTop;
-        PMMPTE PpeTop;
-        PMMPTE PdeTop;
-        PMMPTE PteTop;
-
-        PMMPFN MmPfnDatabase;
 
         KIRQL
         (NTAPI * ExAcquireSpinLockShared)(
@@ -230,6 +215,48 @@ extern "C" {
             CHAR _ShellCode[0x1c0];
         }_GuardCall[PG_MAXIMUM_CONTEXT_COUNT];
     }PATCHGUARD_BLOCK, *PPATCHGUARD_BLOCK;
+
+#ifndef _WIN64
+#else
+    ULONG64
+        NTAPI
+        _btc64(
+            __in ULONG64 a,
+            __in ULONG64 b
+        );
+
+    VOID
+        NTAPI
+        _MakePgFire(
+            VOID
+        );
+
+    PVOID
+        NTAPI
+        _ClearEncryptedContext(
+            __in PVOID Reserved,
+            __in PVOID PatchGuardContext
+        );
+
+    VOID
+        NTAPI
+        _RevertWorkerToSelf(
+            VOID
+        );
+
+    VOID
+        NTAPI
+        _PgGuardCall(
+            VOID
+        );
+
+    VOID
+        NTAPI
+        _CheckPatchGuardCode(
+            __in PVOID BaseAddress,
+            __in SIZE_T RegionSize
+        );
+#endif // !_WIN64
 
     VOID
         NTAPI

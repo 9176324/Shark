@@ -21,6 +21,7 @@
 #include "Ctx.h"
 
 #include "Jump.h"
+#include "Reload.h"
 #include "Scan.h"
 
 PKAPC_STATE
@@ -29,33 +30,8 @@ GetApcStateThread(
     __in PKTHREAD Thread
 )
 {
-    PKAPC_STATE ApcState = NULL;
-    PULONG_PTR Buffer = NULL;
-    ULONG Index = 0;
-
-    static SIZE_T Offset;
-
-    if (0 == Offset) {
-        for (Index = 0;
-            Index < PAGE_SIZE;
-            Index += sizeof(PVOID)) {
-            Buffer = (PULONG_PTR)((ULONG_PTR)Thread + Index);
-
-            if ((ULONG_PTR)*Buffer == (ULONG_PTR)PsGetThreadProcess(Thread)) {
-                ApcState = CONTAINING_RECORD(
-                    (ULONG_PTR)Thread + Index,
-                    KAPC_STATE,
-                    Process);
-
-                Offset = (ULONG_PTR)ApcState - (ULONG_PTR)Thread;
-
-                break;
-            }
-        }
-    }
-    else {
-        ApcState = (PKAPC_STATE)((ULONG_PTR)Thread + Offset);
-    }
-
-    return ApcState;
+    return CONTAINING_RECORD(
+        (ULONG_PTR)Thread + ReloaderBlock->DebuggerDataBlock.OffsetKThreadApcProcess,
+        KAPC_STATE,
+        Process);
 }

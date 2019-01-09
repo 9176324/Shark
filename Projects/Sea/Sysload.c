@@ -111,7 +111,7 @@ SetValueKey(
 
 NTSTATUS
 NTAPI
-LoadSystemImage(
+LoadKernelImage(
     __in PWSTR ImageFileName,
     __in PWSTR ServiceName
 )
@@ -134,7 +134,7 @@ LoadSystemImage(
         FALSE,
         &WasEnabled);
 
-    if (RTL_SOFT_ASSERT(NT_SUCCESS(Status))) {
+    if (TRACE(Status)) {
         KeyPathBuffer = RtlAllocateHeap(
             RtlProcessHeap(),
             0,
@@ -165,42 +165,34 @@ LoadSystemImage(
                 REG_OPTION_VOLATILE,
                 NULL);
 
-            if (RTL_SOFT_ASSERT(NT_SUCCESS(Status))) {
-                Status = SetValueKey(
+            if (TRACE(Status)) {
+                TRACE(SetValueKey(
                     KeyHandle,
                     L"Type",
                     REG_DWORD,
                     &Type,
-                    sizeof(Type));
+                    sizeof(Type)));
 
-                RTL_SOFT_ASSERT((RTL_SOFT_ASSERT(NT_SUCCESS(Status))));
-
-                Status = SetValueKey(
+                TRACE(SetValueKey(
                     KeyHandle,
                     L"ErrorControl",
                     REG_DWORD,
                     &ErrorControl,
-                    sizeof(ErrorControl));
+                    sizeof(ErrorControl)));
 
-                RTL_SOFT_ASSERT((RTL_SOFT_ASSERT(NT_SUCCESS(Status))));
-
-                Status = SetValueKey(
+                TRACE(SetValueKey(
                     KeyHandle,
                     L"Start",
                     REG_DWORD,
                     &Start,
-                    sizeof(Start));
+                    sizeof(Start)));
 
-                RTL_SOFT_ASSERT((RTL_SOFT_ASSERT(NT_SUCCESS(Status))));
-
-                Status = SetValueKey(
+                TRACE(SetValueKey(
                     KeyHandle,
                     L"DisplayName",
                     REG_SZ,
                     ServiceName,
-                    wcslen(ServiceName) * sizeof(WCHAR) + sizeof(UNICODE_NULL));
-
-                RTL_SOFT_ASSERT((RTL_SOFT_ASSERT(NT_SUCCESS(Status))));
+                    wcslen(ServiceName) * sizeof(WCHAR) + sizeof(UNICODE_NULL)));
 
                 Status = RtlDosPathNameToNtPathName_U_WithStatus(
                     ImageFileName,
@@ -208,7 +200,7 @@ LoadSystemImage(
                     NULL,
                     NULL);
 
-                if (RTL_SOFT_ASSERT(NT_SUCCESS(Status))) {
+                if (TRACE(Status)) {
                     ImagePathBuffer = RtlAllocateHeap(
                         RtlProcessHeap(),
                         0,
@@ -245,7 +237,7 @@ LoadSystemImage(
 
                 Status = NtLoadDriver(&KeyPath);
 
-                RTL_SOFT_ASSERT(NT_SUCCESS(NtClose(KeyHandle)));
+                TRACE(NtClose(KeyHandle));
             }
 
             if (FALSE == WasEnabled) {
@@ -268,7 +260,7 @@ LoadSystemImage(
 
 NTSTATUS
 NTAPI
-UnloadSystemImage(
+UnloadKernelImage(
     __in PWSTR ServiceName
 )
 {
@@ -285,7 +277,7 @@ UnloadSystemImage(
         FALSE,
         &WasEnabled);
 
-    if (RTL_SOFT_ASSERT(NT_SUCCESS(Status))) {
+    if (TRACE(Status)) {
         KeyPathBuffer = RtlAllocateHeap(
             RtlProcessHeap(),
             0,
@@ -312,14 +304,14 @@ UnloadSystemImage(
                 KEY_ALL_ACCESS,
                 &ObjectAttributes);
 
-            if (RTL_SOFT_ASSERT(NT_SUCCESS(Status))) {
+            if (TRACE(Status)) {
                 Status = NtUnloadDriver(&KeyPath);
 
-                if (RTL_SOFT_ASSERT(NT_SUCCESS(Status))) {
-                    RTL_SOFT_ASSERT(NT_SUCCESS(NtDeleteKey(KeyHandle)));
+                if (TRACE(Status)) {
+                    TRACE(NtDeleteKey(KeyHandle));
                 }
 
-                RTL_SOFT_ASSERT(NT_SUCCESS(NtClose(KeyHandle)));
+                TRACE(NtClose(KeyHandle));
             }
 
             RtlFreeHeap(

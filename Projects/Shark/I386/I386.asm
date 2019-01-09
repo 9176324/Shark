@@ -25,15 +25,85 @@ include callconv.inc
         
 _TEXT$00    SEGMENT PAGE 'CODE'
 
-    cPublicProc _IsPAEEnable, 0
+    cPublicProc __GetPdeAddress, 2
     
-        mov eax, cr4
-        and eax, CR4_PAE
-        shr eax, 5
+        mov eax, [esp + 4]
+        shr eax, 15h
+        shl eax, 3
+        add eax, [esp + 8]
 
-        stdRET _IsPAEEnable
+        stdRET __GetPdeAddress
         
-    stdENDP _IsPAEEnable
+    stdENDP __GetPdeAddress
+    
+    cPublicProc __GetPdeAddressPae, 2
+    
+        mov eax, [esp + 4]
+        shr eax, 16h
+        shl eax, 2
+        add eax, [esp + 8]
+
+        stdRET __GetPdeAddressPae
+        
+    stdENDP __GetPdeAddressPae
+    
+    cPublicProc __GetPteAddress, 2
+    
+        mov eax, [esp + 4]
+        shr eax, 0ch
+        shl eax, 2
+        add eax, [esp + 8]
+
+        stdRET __GetPteAddress
+        
+    stdENDP __GetPteAddress
+    
+    cPublicProc __GetPteAddressPae, 2
+    
+        mov eax, [esp + 4]
+        shr eax, 0ch
+        shl eax, 3
+        add eax, [esp + 8]
+
+        stdRET __GetPteAddressPae
+        
+    stdENDP __GetPteAddressPae
+    
+    cPublicProc __GetVirtualAddressMappedByPte, 1
+    
+        mov eax, [esp + 4]
+        shl eax, 0ah
+
+        stdRET __GetVirtualAddressMappedByPte
+        
+    stdENDP __GetVirtualAddressMappedByPte
+    
+    cPublicProc __GetVirtualAddressMappedByPtePae, 1
+    
+        mov eax, [esp + 4]
+        shl eax, 9
+
+        stdRET __GetVirtualAddressMappedByPtePae
+        
+    stdENDP __GetVirtualAddressMappedByPtePae
+    
+    cPublicProc __GetVirtualAddressMappedByPde, 1
+    
+        mov eax, [esp + 4]
+        shl eax, 14h
+
+        stdRET __GetVirtualAddressMappedByPde
+        
+    stdENDP __GetVirtualAddressMappedByPde
+    
+    cPublicProc __GetVirtualAddressMappedByPdePae, 1
+    
+        mov eax, [esp + 4]
+        shl eax, 12h
+
+        stdRET __GetVirtualAddressMappedByPdePae
+        
+    stdENDP __GetVirtualAddressMappedByPdePae
     
     cPublicProc __FlushSingleTb, 1
         
@@ -87,7 +157,7 @@ _TEXT$00    SEGMENT PAGE 'CODE'
         mov eax, [ebp + 10h]
 
         test eax, eax
-        jz nothing
+        jz @f
 
         push [ebp + 14h]
 
@@ -98,7 +168,20 @@ _TEXT$00    SEGMENT PAGE 'CODE'
         
         stdRET __MultipleDispatcher
         
-nothing : 
+@@ :    
+        mov eax, [ebp + 14h]
+
+        test eax, eax
+        jz error
+
+        call eax
+        
+        mov esp, ebp
+        pop ebp
+        
+        stdRET __MultipleDispatcher
+        
+error : 
         xor eax, eax
 
         mov esp, ebp

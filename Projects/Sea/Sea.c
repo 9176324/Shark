@@ -21,7 +21,6 @@
 
 #include "Sea.h"
 
-#include "Print.h"
 #include "Sysload.h"
 
 NTSTATUS
@@ -37,9 +36,9 @@ NtProcessStartup(
     OBJECT_ATTRIBUTES ObjectAttributes = { 0 };
     IO_STATUS_BLOCK IoStatusBlock = { 0 };
 
-    Status = LoadSystemImage(LOADER_IMAGE_STRING, LOADER_SERVICE_STRING);
+    Status = LoadKernelImage(LOADER_IMAGE_STRING, LOADER_SERVICE_STRING);
 
-    if (RTL_SOFT_ASSERT(NT_SUCCESS(Status))) {
+    if (NT_SUCCESS(Status)) {
         RtlInitUnicodeString(&FilePath, LOADER_DEVICE_STRING);
 
         InitializeObjectAttributes(
@@ -70,10 +69,10 @@ NtProcessStartup(
                 NULL,
                 0);
 
-            RTL_SOFT_ASSERT(NT_SUCCESS(NtClose(FileHandle)));
+            TRACE(NtClose(FileHandle));
         }
 
-        UnloadSystemImage(LOADER_SERVICE_STRING);
+        UnloadKernelImage(LOADER_SERVICE_STRING);
     }
 
     return  NtTerminateProcess(NtCurrentProcess(), STATUS_SUCCESS);

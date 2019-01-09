@@ -26,201 +26,6 @@
 extern "C" {
 #endif	/* __cplusplus */
 
-    typedef struct _MM_AVL_NODE {
-        union {
-            LONG_PTR Balance : 2;
-            struct _MM_AVL_NODE * Parent;
-        };
-
-        struct _MM_AVL_NODE * LeftChild;
-        struct _MM_AVL_NODE * RightChild;
-    }MM_AVL_NODE, *PMM_AVL_NODE;
-
-    typedef struct _RTL_BALANCED_NODE {
-        union {
-            struct _RTL_BALANCED_NODE * Children[2];
-
-            struct {
-                struct _RTL_BALANCED_NODE * LeftChild;
-                struct _RTL_BALANCED_NODE * RightChild;
-            };
-        };
-        union {
-            struct {
-                UINT8 Red : 1;
-                UINT8 Balance : 2;
-            };
-
-            struct _RTL_BALANCED_NODE * Parent;
-        };
-    }RTL_BALANCED_NODE, *PRTL_BALANCED_NODE;
-
-    typedef struct _VAD_NODE {
-        union {
-            struct _MM_AVL_NODE AvlRoot;
-            struct _RTL_BALANCED_NODE BalancedRoot;
-        };
-
-        union {
-            struct {
-                ULONG_PTR StartingVpn;
-                ULONG_PTR EndingVpn;
-            }Legacy;
-
-            struct {
-                ULONG StartingVpn;
-                ULONG EndingVpn;
-                CHAR StartingVpnHigh;
-                CHAR EndingVpnHigh;
-            };
-        };
-    }VAD_NODE, *PVAD_NODE;
-
-    typedef struct _VAD_LOCAL_NODE {
-        RTL_BALANCED_NODE BalancedRoot;
-        ULONG_PTR BeginAddress;
-        ULONG_PTR EndAddress;
-    } VAD_LOCAL_NODE, *PVAD_LOCAL_NODE;
-
-#ifndef _WIN64
-    typedef struct _MMPTE_EX_HIGHLOW {
-        ULONG32 LowPart;
-        ULONG32 HighPart;
-    }MMPTE_EX_HIGHLOW, *PMMPTE_EX_HIGHLOW;
-
-#define _HARDWARE_PTE_WORKING_SET_BITS  11
-
-    typedef struct _HARDWARE_PTE_EX {
-        union {
-            struct {
-                ULONG64 Valid : 1;
-                ULONG64 Write : 1;
-                ULONG64 Owner : 1;
-                ULONG64 WriteThrough : 1;
-                ULONG64 CacheDisable : 1;
-                ULONG64 Accessed : 1;
-                ULONG64 Dirty : 1;
-                ULONG64 LargePage : 1;
-                ULONG64 Global : 1;
-                ULONG64 CopyOnWrite : 1;
-                ULONG64 Prototype : 1;
-                ULONG64 Reserved0 : 1;
-                ULONG64 PageFrameNumber : 26;
-                ULONG64 reserved1 : 25 - (_HARDWARE_PTE_WORKING_SET_BITS + 1);
-                ULONGLONG SoftwareWsIndex : _HARDWARE_PTE_WORKING_SET_BITS;
-                ULONG64 NoExecute : 1;
-            };
-
-            struct {
-                ULONG32 LowPart;
-                ULONG32 HighPart;
-            };
-        };
-    }HARDWARE_PTE_EX, *PHARDWARE_PTE_EX;
-
-    typedef struct _MMPTE_EX_HARDWARE {
-        ULONG64 Valid : 1;
-        ULONG64 Dirty1 : 1;
-        ULONG64 Owner : 1;
-        ULONG64 WriteThrough : 1;
-        ULONG64 CacheDisable : 1;
-        ULONG64 Accessed : 1;
-        ULONG64 Dirty : 1;
-        ULONG64 LargePage : 1;
-        ULONG64 Global : 1;
-        ULONG64 CopyOnWrite : 1;
-        ULONG64 Unused : 1;
-        ULONG64 Write : 1;
-        ULONG64 PageFrameNumber : 26;
-        ULONG64 reserved1 : 25 - (_HARDWARE_PTE_WORKING_SET_BITS + 1);
-        ULONGLONG SoftwareWsIndex : _HARDWARE_PTE_WORKING_SET_BITS;
-        ULONG64 NoExecute : 1;
-    }MMPTE_EX_HARDWARE, *PMMPTE_EX_HARDWARE;
-
-    typedef struct _MMPTE_EX_PROTOTYPE {
-        ULONG64 Valid : 1;
-        ULONG64 Unused0 : 7;
-        ULONG64 ReadOnly : 1;
-        ULONG64 Unused1 : 1;
-        ULONG64 Prototype : 1;
-        ULONG64 Protection : 5;
-        ULONG64 Unused : 16;
-        ULONG64 ProtoAddress : 32;
-    }MMPTE_EX_PROTOTYPE, *PMMPTE_EX_PROTOTYPE;
-
-    typedef struct _MMPTE_EX_SOFTWARE {
-        ULONG64 Valid : 1;
-        ULONG64 PageFileLow : 4;
-        ULONG64 Protection : 5;
-        ULONG64 Prototype : 1;
-        ULONG64 Transition : 1;
-        ULONG64 InStore : 1;
-        ULONG64 Unused1 : 19;
-        ULONG64 PageFileHigh : 32;
-    }MMPTE_EX_SOFTWARE, *PMMPTE_EX_SOFTWARE;
-
-    typedef struct _MMPTE_EX_TIMESTAMP {
-        ULONG64 MustBeZero : 1;
-        ULONG64 PageFileLow : 4;
-        ULONG64 Protection : 5;
-        ULONG64 Prototype : 1;
-        ULONG64 Transition : 1;
-        ULONG64 Unused : 20;
-        ULONG64 GlobalTimeStamp : 32;
-    }MMPTE_EX_TIMESTAMP, *PMMPTE_EX_TIMESTAMP;
-
-    typedef struct _MMPTE_EX_TRANSITION {
-        ULONG64 Valid : 1;
-        ULONG64 Write : 1;
-        ULONG64 Owner : 1;
-        ULONG64 WriteThrough : 1;
-        ULONG64 CacheDisable : 1;
-        ULONG64 Protection : 5;
-        ULONG64 Prototype : 1;
-        ULONG64 Transition : 1;
-        ULONG64 PageFrameNumber : 26;
-        ULONG64 Unused : 26;
-    }MMPTE_EX_TRANSITION, *PMMPTE_EX_TRANSITION;
-
-    typedef struct _MMPTE_EX_SUBSECTION {
-        ULONG64 Valid : 1;
-        ULONG64 Unused0 : 4;
-        ULONG64 Protection : 5;
-        ULONG64 Prototype : 1;
-        ULONG64 Unused1 : 21;
-        ULONG64 SubsectionAddress : 32;
-    }MMPTE_EX_SUBSECTION, *PMMPTE_EX_SUBSECTION;
-
-    typedef struct _MMPTE_EX_LIST {
-        ULONG64 Valid : 1;
-        ULONG64 OneEntry : 1;
-        ULONG64 filler0 : 8;
-        ULONG64 Prototype : 1;
-        ULONG64 filler1 : 21;
-        ULONG64 NextEntry : 32;
-    }MMPTE_EX_LIST, *PMMPTE_EX_LIST;
-
-    typedef struct _MMPTE_EX {
-        union {
-            ULONG64 Long;
-            ULONG64 VolatileLong;
-
-            struct _MMPTE_EX_HIGHLOW HighLow;
-            struct _HARDWARE_PTE_EX Flush;
-            struct _MMPTE_EX_HARDWARE Hard;
-            struct _MMPTE_EX_PROTOTYPE Proto;
-            struct _MMPTE_EX_SOFTWARE Soft;
-            struct _MMPTE_EX_TIMESTAMP TimeStamp;
-            struct _MMPTE_EX_TRANSITION Trans;
-            struct _MMPTE_EX_SUBSECTION Subsect;
-            struct _MMPTE_EX_LIST List;
-        }u;
-    }MMPTE_EX, *PMMPTE_EX;
-
-    C_ASSERT(sizeof(MMPTE_EX) == 2 * sizeof(ULONG_PTR));
-#endif // !_WIN64
-
-#pragma pack(push, 1)
     typedef struct _MMPFNENTRY_7600 {
         struct {
             UCHAR PageLocation : 3;
@@ -321,7 +126,7 @@ extern "C" {
     C_ASSERT(RTL_FIELD_SIZE(PFN_7600, u4) == sizeof(ULONG_PTR));
 
 #ifndef _WIN64
-    typedef struct _PFN_7600_EX {
+    typedef struct _PFN_7600PAE {
         union {
             ULONG_PTR Flink;
             ULONG WsIndex;
@@ -362,7 +167,11 @@ extern "C" {
         }u3;
 
         union {
-            MMPTE_EX OriginalPte;
+            struct {
+                MMPTE OriginalPte;
+                LONG Reserved;
+            };
+
             LONG AweReferenceCount;
         };
 
@@ -375,14 +184,14 @@ extern "C" {
                 ULONG_PTR PageColor : 4;
             };
         }u4;
-    }PFN_7600_EX, *PPFN_7600_EX;
+    }PFN_7600PAE, *PPFN_7600PAE;
 
-    C_ASSERT(FIELD_OFFSET(PFN_7600_EX, u2) == sizeof(ULONG_PTR));
-    C_ASSERT(FIELD_OFFSET(PFN_7600_EX, PteAddress) == 2 * sizeof(ULONG_PTR));
-    C_ASSERT(FIELD_OFFSET(PFN_7600_EX, u3) == 3 * sizeof(ULONG_PTR));
-    C_ASSERT(FIELD_OFFSET(PFN_7600_EX, OriginalPte) == 4 * sizeof(ULONG_PTR));
-    C_ASSERT(FIELD_OFFSET(PFN_7600_EX, u4) == 6 * sizeof(ULONG_PTR));
-    C_ASSERT(RTL_FIELD_SIZE(PFN_7600_EX, u4) == sizeof(ULONG_PTR));
+    C_ASSERT(FIELD_OFFSET(PFN_7600PAE, u2) == sizeof(ULONG_PTR));
+    C_ASSERT(FIELD_OFFSET(PFN_7600PAE, PteAddress) == 2 * sizeof(ULONG_PTR));
+    C_ASSERT(FIELD_OFFSET(PFN_7600PAE, u3) == 3 * sizeof(ULONG_PTR));
+    C_ASSERT(FIELD_OFFSET(PFN_7600PAE, OriginalPte) == 4 * sizeof(ULONG_PTR));
+    C_ASSERT(FIELD_OFFSET(PFN_7600PAE, u4) == 6 * sizeof(ULONG_PTR));
+    C_ASSERT(RTL_FIELD_SIZE(PFN_7600PAE, u4) == sizeof(ULONG_PTR));
 #endif // !_WIN64
 
     typedef struct _MMPFNENTRY_9200 {
@@ -470,7 +279,10 @@ extern "C" {
         }u3;
 
 #ifndef _WIN64
-        MMPTE_EX OriginalPte;
+        struct {
+            MMPTE OriginalPte;
+            LONG Reserved;
+        };
 #else
         USHORT NodeBlinkLow;
 
@@ -592,7 +404,10 @@ extern "C" {
         }u3;
 
 #ifndef _WIN64
-        MMPTE_EX OriginalPte;
+        struct {
+            MMPTE OriginalPte;
+            LONG Reserved;
+        };
 #else
         USHORT NodeBlinkLow;
 
@@ -720,6 +535,25 @@ extern "C" {
 
     C_ASSERT(sizeof(MIPFNBLINK_10240) == sizeof(ULONG_PTR));
 
+    typedef struct _RTL_BALANCED_NODE {
+        union {
+            struct _RTL_BALANCED_NODE * Children[2];
+
+            struct {
+                struct _RTL_BALANCED_NODE * LeftChild;
+                struct _RTL_BALANCED_NODE * RightChild;
+            };
+        };
+        union {
+            struct {
+                UINT8 Red : 1;
+                UINT8 Balance : 2;
+            };
+
+            struct _RTL_BALANCED_NODE * Parent;
+        };
+    }RTL_BALANCED_NODE, *PRTL_BALANCED_NODE;
+
     typedef struct _PFN_10240 {
         union {
             LIST_ENTRY ListEntry;
@@ -751,7 +585,10 @@ extern "C" {
                 };
 
 #ifndef _WIN64
-                MMPTE_EX OriginalPte;
+                struct {
+                    MMPTE OriginalPte;
+                    LONG Reserved;
+                };
 #else
                 MMPTE OriginalPte;
 #endif // !_WIN64
@@ -838,20 +675,12 @@ extern "C" {
 
         PFN_7600 Pfn7600;
 #ifndef _WIN64
-        PFN_7600_EX Pfn7600Ex;
+        PFN_7600PAE Pfn7600Pae;
 #endif // !_WIN64
         PFN_9200 Pfn9200;
         PFN_9600 Pfn9600;
         PFN_10240 Pfn10240;
     }PFN, *PPFN;
-
-#pragma pack(pop)
-
-#ifndef _WIN64
-#define EMPTY_PFN_LIST 0xFFFFFFUI32
-#else
-#define EMPTY_PFN_LIST 0xFFFFFFFFFUI64
-#endif // !_WIN64
 
     typedef struct _PROTOTYPE_PFN {
         ULONG_PTR Flink;
@@ -866,7 +695,7 @@ extern "C" {
         LONG_PTR PteFrame;
     }PROTOTYPE_PFN, *PPROTOTYPE_PFN;
 
-#define PDE_MAPS_LARGE_PAGE(PPDE) ((PPDE)->u.Hard.LargePage == 1)
+#define PDE_MAPS_LARGE_PAGE(PPDE) (0 != (PPDE)->u.Hard.LargePage)
 #define MAKE_PDE_MAP_LARGE_PAGE(PPDE) ((PPDE)->u.Hard.LargePage = 1)
 #define GET_PAGE_FRAME_FROM_PTE(PPTE) ((PPTE)->u.Hard.PageFrameNumber)
 #define GET_PAGE_FRAME_FROM_TRANSITION_PTE(PPTE) ((PPTE)->u.Trans.PageFrameNumber)
@@ -876,73 +705,9 @@ extern "C" {
 #define SET_PTE_DIRTY(PPTE) (PPTE)->u.Long |= HARDWARE_PTE_DIRTY_MASK
 #define SET_ACCESSED_IN_PTE(PPTE, ACCESSED) (PPTE)->u.Hard.Accessed = ACCESSED
 
-    typedef struct DECLSPEC_ALIGN(0x40) _PFNLIST {
-        PFN_NUMBER Total;
-        MMLISTS ListName;
-        PFN_NUMBER Flink;
-        PFN_NUMBER Blink;
-        ULONG_PTR Lock;
-    } PFNLIST, *PPFNLIST;
-
-    C_ASSERT(sizeof(PFNLIST) == 0x40);
-
-#define MAXIMUM_PFNSLIST_COUNT 0x2
-#define MAXIMUM_PFNSLIST_DEPTH 0x3
-
-#ifndef _WIN64
-    typedef struct _PFNSLIST_HEADER {
-        PSINGLE_LIST_ENTRY Next;
-        USHORT Depth;
-        USHORT Sequence;
-    } PFNSLIST_HEADER, *PPFNSLIST_HEADER;
-
-    C_ASSERT(sizeof(PFNSLIST_HEADER) == 8);
-#else
-    typedef struct _PFNSLIST_HEADER {
-        struct {
-            ULONG64 Depth : 16;
-            ULONG64 Sequence : 48;
-        };
-
-        PSINGLE_LIST_ENTRY Next;
-    }PFNSLIST_HEADER, *PPFNSLIST_HEADER;
-
-    C_ASSERT(sizeof(PFNSLIST_HEADER) == 0x10);
-#endif // !_WIN64
-
-#ifndef _WIN64     
-    typedef struct _PARTITION_PAGE_LISTS {
-        PPFNLIST FreePagesByColor[2];
-        PPFNSLIST_HEADER FreePageSlist[2];
-        PFNLIST ZeroedPageListHead;
-        PFNLIST FreePageListHead;
-        PFNLIST StandbyPageListHead;
-    }PARTITION_PAGE_LISTS, *PPARTITION_PAGE_LISTS;
-
-    C_ASSERT(FIELD_OFFSET(PARTITION_PAGE_LISTS, FreePagesByColor) == 0);
-    C_ASSERT(FIELD_OFFSET(PARTITION_PAGE_LISTS, FreePageSlist) == 8);
-    C_ASSERT(FIELD_OFFSET(PARTITION_PAGE_LISTS, ZeroedPageListHead) == 0x40);
-    C_ASSERT(FIELD_OFFSET(PARTITION_PAGE_LISTS, FreePageListHead) == 0x80);
-    C_ASSERT(FIELD_OFFSET(PARTITION_PAGE_LISTS, StandbyPageListHead) == 0xc0);
-#else     
-    typedef struct _PARTITION_PAGE_LISTS {
-        PPFNLIST FreePagesByColor[2];
-        PPFNSLIST_HEADER FreePageSlist[2];
-        PFNLIST ZeroedPageListHead;
-        PFNLIST FreePageListHead;
-        PFNLIST StandbyPageListHead;
-    }PARTITION_PAGE_LISTS, *PPARTITION_PAGE_LISTS;
-
-    C_ASSERT(FIELD_OFFSET(PARTITION_PAGE_LISTS, FreePagesByColor) == 0);
-    C_ASSERT(FIELD_OFFSET(PARTITION_PAGE_LISTS, FreePageSlist) == 0x10);
-    C_ASSERT(FIELD_OFFSET(PARTITION_PAGE_LISTS, ZeroedPageListHead) == 0x40);
-    C_ASSERT(FIELD_OFFSET(PARTITION_PAGE_LISTS, FreePageListHead) == 0x80);
-    C_ASSERT(FIELD_OFFSET(PARTITION_PAGE_LISTS, StandbyPageListHead) == 0xc0);
-#endif // !_WIN64
-
 #ifndef _WIN64
     C_ASSERT(sizeof(PFN_7600) == 0x18);
-    C_ASSERT(sizeof(PFN_7600_EX) == 0x1c);
+    C_ASSERT(sizeof(PFN_7600PAE) == 0x1c);
     C_ASSERT(sizeof(PFN_9200) == 0x1c);
     C_ASSERT(sizeof(PFN_9600) == 0x1c);
     C_ASSERT(sizeof(PFN_10240) == 0x1c);
@@ -953,10 +718,56 @@ extern "C" {
 #define GetVirtualAddressMappedByPxe(Pxe) (NULL);
 #define GetVirtualAddressMappedByPpe(Ppe) (NULL);
 
-    BOOLEAN
+    PMMPTE
         NTAPI
-        IsPAEEnable(
-            VOID
+        _GetPdeAddress(
+            __in PVOID VirtualAddress,
+            __in PMMPTE PdeBase
+        );
+
+    PMMPTE
+        NTAPI
+        _GetPdeAddressPae(
+            __in PVOID VirtualAddress,
+            __in PMMPTE PdeBase
+        );
+
+    PMMPTE
+        NTAPI
+        _GetPteAddress(
+            __in PVOID VirtualAddress,
+            __in PMMPTE PteBase
+        );
+
+    PMMPTE
+        NTAPI
+        _GetPteAddressPae(
+            __in PVOID VirtualAddress,
+            __in PMMPTE PteBase
+        );
+
+    PVOID
+        NTAPI
+        _GetVirtualAddressMappedByPte(
+            __in PMMPTE Pte
+        );
+
+    PVOID
+        NTAPI
+        _GetVirtualAddressMappedByPtePae(
+            __in PMMPTE Pte
+        );
+
+    PVOID
+        NTAPI
+        _GetVirtualAddressMappedByPde(
+            __in PMMPTE Pde
+        );
+
+    PVOID
+        NTAPI
+        _GetVirtualAddressMappedByPdePae(
+            __in PMMPTE Pde
         );
 #else
     C_ASSERT(sizeof(PFN_7600) == 0x30);
@@ -990,56 +801,10 @@ extern "C" {
         );
 #endif // !_WIN64
 
-#ifndef _WIN64
-    NTKERNELAPI
-        PSLIST_ENTRY
-        FASTCALL
-        InterlockedPopEntrySList(
-            __inout PSLIST_HEADER ListHead
-        );
-
-    NTKERNELAPI
-        PSLIST_ENTRY
-        FASTCALL
-        InterlockedPushEntrySList(
-            __inout PSLIST_HEADER ListHead,
-            __inout PSLIST_ENTRY ListEntry
-        );
-
-    NTKERNELAPI
-        PSLIST_ENTRY
-        FASTCALL
-        ExInterlockedFlushSList(
-            __inout PSLIST_HEADER ListHead
-        );
-#else
-    NTKERNELAPI
-        PSLIST_ENTRY
-        NTAPI
-        ExpInterlockedPopEntrySList(
-            __inout PSLIST_HEADER ListHead
-        );
-
-    NTKERNELAPI
-        PSLIST_ENTRY
-        NTAPI
-        ExpInterlockedPushEntrySList(
-            __inout PSLIST_HEADER ListHead,
-            __inout PSLIST_ENTRY ListEntry
-        );
-
-    NTKERNELAPI
-        PSLIST_ENTRY
-        NTAPI
-        ExpInterlockedFlushSList(
-            __inout PSLIST_HEADER ListHead
-        );
-#endif // !_WIN64
-
     VOID
         NTAPI
         InitializeSystemSpace(
-            __in PVOID Parameter
+            __inout PVOID Block
         );
 
     PMMPTE
@@ -1076,15 +841,14 @@ extern "C" {
 
     PVOID
         NTAPI
-        AllocateIndependentPages(
+        AllocateDriverPages(
             __in SIZE_T NumberOfBytes
         );
 
     VOID
         NTAPI
-        FreeIndependentPages(
-            __in PVOID VirtualAddress,
-            __in SIZE_T NumberOfBytes
+        FreeDriverPages(
+            __in PVOID VirtualAddress
         );
 
     VOID
@@ -1125,25 +889,6 @@ extern "C" {
             __in PVOID VirtualAddress,
             __in SIZE_T RegionSize,
             __in BOOLEAN AllProcesors
-        );
-
-    VOID
-        NTAPI
-        LocalVpn(
-            __in PVAD_NODE VadNode,
-            __out PVAD_LOCAL_NODE VadLocalNode
-        );
-
-    PVAD_NODE
-        NTAPI
-        GetVadRootProcess(
-            __in PEPROCESS Process
-        );
-
-    PVAD_NODE
-        FASTCALL
-        GetNextNode(
-            __in PVAD_NODE Node
         );
 
     extern ULONG64 ProtectToPteMask[32];

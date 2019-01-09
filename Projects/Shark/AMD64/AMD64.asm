@@ -67,10 +67,22 @@ include macamd64.inc
         mov rax, r8
 
         test rax, rax
-        jz error
+        jz @f
         
         mov rcx, r9
 
+        call rax
+
+        add rsp,  ( KSTART_FRAME_LENGTH - 8 )
+
+        ret
+        
+@@ :    
+        mov rax, r9
+
+        test rax, rax
+        jz error
+        
         call rax
 
         add rsp,  ( KSTART_FRAME_LENGTH - 8 )

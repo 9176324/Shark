@@ -24,22 +24,54 @@
 extern "C" {
 #endif	/* __cplusplus */
 
-    typedef struct _RTX {
-        USHORT Platform;
-        ULONG Processor;
+    typedef struct _ROUTINES32 {
+        ULONG ApcRoutine;
+        ULONG SystemRoutine;
+        ULONG StartRoutine;
+        ULONG StartContext;
+        ULONG Result;
+    }ROUTINES32, *PROUTINES32;
+
+    typedef struct _ROUTINES64 {
+        ULONG64 ApcRoutine;
+        ULONG64 SystemRoutine;
+        ULONG64 StartRoutine;
+        ULONG64 StartContext;
+        ULONG64 Result;
+    }ROUTINES64, *PROUTINES64;
+
+    typedef struct _ROUTINES {
         PPS_APC_ROUTINE ApcRoutine;
         PKSYSTEM_ROUTINE SystemRoutine;
         PUSER_THREAD_START_ROUTINE StartRoutine;
         PVOID StartContext;
         ULONG_PTR Result;
+    }ROUTINES, *PROUTINES;
+
+    typedef struct _RTX {
+        PVOID Object;
+        PVOID Target;
+        PVOID ApiMessage;
+        KEVENT Notify;
+
+        USHORT Platform;
+        ULONG Processor;
+
+        union {
+            ROUTINES Routines;
+            ROUTINES32 Routines32;
+            ROUTINES64 Routines64;
+        };
+
         KPROCESSOR_MODE Mode;
     } RTX, *PRTX;
 
     typedef struct _ATX {
         KAPC Apc;
-        KEVENT Notify;
         RTX Rtx;
     } ATX, *PATX;
+
+#define MAXIMUM_COMPARE_INSTRUCTION_COUNT 8
 
     ULONG_PTR
         NTAPI
@@ -54,12 +86,10 @@ extern "C" {
         NTAPI
         RemoteCall(
             __in HANDLE UniqueThread,
-            __in USHORT Platform,
             __in PPS_APC_ROUTINE ApcRoutine,
             __in PKSYSTEM_ROUTINE SystemRoutine,
             __in PUSER_THREAD_START_ROUTINE StartRoutine,
-            __in PVOID StartContext,
-            __in KPROCESSOR_MODE Mode
+            __in PVOID StartContext
         );
 
     ULONG_PTR

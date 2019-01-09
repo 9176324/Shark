@@ -123,19 +123,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">true</ExcludedFromBuild>
       <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">false</UseSafeExceptionHandlers>
     </ClCompile>
-    <ClCompile Include="AMD64\StackAMD64.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">true</ExcludedFromBuild>
-      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">false</UseSafeExceptionHandlers>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">false</ExcludedFromBuild>
-      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">true</UseSafeExceptionHandlers>
-    </ClCompile>
     <ClCompile Include="I386\SpaceI386.c" />
-    <ClCompile Include="I386\StackI386.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">false</ExcludedFromBuild>
-      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">true</UseSafeExceptionHandlers>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">true</ExcludedFromBuild>
-      <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">false</UseSafeExceptionHandlers>
-    </ClCompile>
     <ClCompile Include="Ctx.c" />
     <ClCompile Include="Jump.c" />
     <ClCompile Include="Reload.c" />

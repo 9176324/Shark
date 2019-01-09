@@ -24,9 +24,9 @@
 extern "C" {
 #endif	/* __cplusplus */
 
-#ifndef RvaToVa
-#define RvaToVa(p) ((PVOID)((PCHAR)(p) + *(PLONG)(p) + sizeof(LONG)))
-#endif // !RvaToVa
+#ifndef __RVA_TO_VA
+#define __RVA_TO_VA(p) ((PVOID)((PCHAR)(p) + *(PLONG)(p) + sizeof(LONG)))
+#endif // !__RVA_TO_VA
 
 #define JUMP_SELF 0x0000feebUI32
 

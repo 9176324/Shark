@@ -65,14 +65,21 @@ extern "C" {
 
     PKTRAP_FRAME
         NTAPI
-        GetTrapFrameThread(
-            __in PKTHREAD Thread
+        GetBaseTrapFrameThread(
+            __in PETHREAD Thread
         );
 
     PKTRAP_FRAME
         NTAPI
-        GetBaseTrapFrameThread(
-            __in PETHREAD Thread
+        GetTrapFrameThread(
+            __in PKTHREAD Thread
+        );
+
+    VOID
+        NTAPI
+        SetTrapFrameThread(
+            __in PKTHREAD Thread,
+            __in PKTRAP_FRAME TrapFrame
         );
 
     PKAPC_STATE

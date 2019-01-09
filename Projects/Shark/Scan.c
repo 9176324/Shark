@@ -112,11 +112,11 @@ TrimBytes(
                                     16,
                                     &Digit);
 
-                                if (RTL_SOFT_ASSERT(NT_SUCCESS(Status))) {
+                                if (TRACE(Status)) {
                                     *(Coll + Index / 2) = (CHAR)Digit;
 
                                     *Selector =
-                                        FALSE != *Selector ? TRUE : FALSE;
+                                        *Selector ? TRUE : FALSE;
                                 }
                                 else {
                                     Result = -1;
@@ -149,7 +149,7 @@ TrimBytes(
     }
 
     return Result;
-        }
+}
 
 SIZE_T
 NTAPI
@@ -250,4 +250,4 @@ ScanBytes(
     }
 
     return Result;
-        }
+}

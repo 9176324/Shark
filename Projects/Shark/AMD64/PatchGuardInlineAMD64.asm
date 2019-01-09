@@ -207,11 +207,11 @@ PgbReferenceCount                       equ 00000088h
 
 ; VOID
 ; NTAPI
-; _GuardCall(
+; _PgGuardCall(
 ;     VOID
 ; );
 
-    NESTED_ENTRY _GuardCall, _TEXT$00
+    NESTED_ENTRY _PgGuardCall, _TEXT$00
         
 @@:
         dq 1 dup (0)                                ; _GuardCall->Usable
@@ -308,6 +308,6 @@ PgbReferenceCount                       equ 00000088h
 
         int 3
 
-    NESTED_END _GuardCall, _TEXT$00
+    NESTED_END _PgGuardCall, _TEXT$00
 
         end
