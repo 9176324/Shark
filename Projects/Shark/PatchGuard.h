@@ -148,6 +148,7 @@ extern "C" {
         PVOID KernelBase;
 
         ULONG BuildNumber;
+        CCHAR NumberProcessors;
 
         PPOOL_BIG_PAGES PoolBigPageTable;
         SIZE_T PoolBigPageTableSize;

@@ -35,28 +35,33 @@ extern "C" {
 #define Wow64SystemDirectory L"\\SystemRoot\\SysWOW64\\"
 
     typedef struct _RELOADER_PARAMETER_BLOCK {
-        PKLDR_DATA_TABLE_ENTRY DataTableEntry;
-
-        PVOID PrivateHeader;
-
         KDDEBUGGER_DATA64 DebuggerDataBlock;
         KDDEBUGGER_DATA_ADDITION64 DebuggerDataAdditionBlock;
 
+        PKLDR_DATA_TABLE_ENTRY CoreDataTableEntry;
+
+        PVOID PrivateHeader;
+
+        PVOID CpuControlBlock;
+        PKLDR_DATA_TABLE_ENTRY RootDataTableEntry;
+        BOOLEAN DeployRoot;
+
         ULONG BuildNumber;
-
-        PMMPTE PdeBase;
-        PMMPTE PteBase;
-
-        PMMPTE PdeTop;
-        PMMPTE PteTop;
+        CCHAR NumberProcessors;
 
 #ifdef _WIN64
         PMMPTE PxeBase;
-        PMMPTE PpeBase;
-
         PMMPTE PxeTop;
+
+        PMMPTE PpeBase;
         PMMPTE PpeTop;
 #endif // _WIN64
+
+        PMMPTE PdeBase;
+        PMMPTE PdeTop;
+
+        PMMPTE PteBase;
+        PMMPTE PteTop;
 
         LIST_ENTRY LoadedPrivateImageList;
 
@@ -81,7 +86,7 @@ extern "C" {
             __in_opt PKSTART_ROUTINE StartRoutine,
             __in PVOID StartContext
             );
-        
+
         BOOLEAN DeployPatchGuard;
 
         // PATCHGUARD_BLOCK PatchGuardBlock;
@@ -129,13 +134,6 @@ extern "C" {
         RelocateImage(
             __in PVOID ImageBase,
             __in LONG_PTR Diff
-        );
-
-    VOID
-        NTAPI
-        SetImageProtection(
-            __in PVOID ImageBase,
-            __in BOOLEAN Reset
         );
 
     VOID

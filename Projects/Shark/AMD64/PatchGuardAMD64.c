@@ -278,6 +278,8 @@ InitializePatchGuardBlock(
                             DbgPrint(
                                 "[Shark] < %p > PatchGuard clear context CompareFields[0]\n",
                                 PatchGuardBlock->CompareFields[0]);
+
+                            PrintSymbol((PVOID)PatchGuardBlock->CompareFields[0]);
 #endif // !PUBLIC
 
                             PatchGuardBlock->CompareFields[1] =
@@ -287,6 +289,8 @@ InitializePatchGuardBlock(
                             DbgPrint(
                                 "[Shark] < %p > PatchGuard clear context CompareFields[1]\n",
                                 PatchGuardBlock->CompareFields[1]);
+
+                            PrintSymbol((PVOID)PatchGuardBlock->CompareFields[1]);
 #endif // !PUBLIC
 
                             PatchGuardBlock->CompareFields[2] =
@@ -296,6 +300,8 @@ InitializePatchGuardBlock(
                             DbgPrint(
                                 "[Shark] < %p > PatchGuard clear context CompareFields[2]\n",
                                 PatchGuardBlock->CompareFields[2]);
+
+                            PrintSymbol((PVOID)PatchGuardBlock->CompareFields[2]);
 #endif // !PUBLIC
 
                             PatchGuardBlock->CompareFields[3] =
@@ -305,6 +311,8 @@ InitializePatchGuardBlock(
                             DbgPrint(
                                 "[Shark] < %p > PatchGuard clear context CompareFields[3]\n",
                                 PatchGuardBlock->CompareFields[3]);
+
+                            PrintSymbol((PVOID)PatchGuardBlock->CompareFields[3]);
 #endif // !PUBLIC
 
                             break;
@@ -1024,9 +1032,6 @@ ClearSystemPtesEncryptedContext(
     __in PFN_NUMBER IntervalOfPtes
 )
 {
-    PMMPTE PointerPxe = NULL;
-    PMMPTE PointerPpe = NULL;
-    PMMPTE PointerPde = NULL;
     PMMPTE PointerPte = NULL;
     PFN_NUMBER Index = 0;
     PVOID BaseVa = NULL;
@@ -1040,43 +1045,35 @@ ClearSystemPtesEncryptedContext(
     PTE field like this
 
     nt!_MMPTE
-        [+0x000] Long             : 0x2da963 [Type: unsigned __int64]
-        [+0x000] VolatileLong     : 0x2da963 [Type: unsigned __int64]
-        [+0x000] Hard             [Type: _MMPTE_HARDWARE]
+    [+0x000] Long             : 0x2da963 [Type: unsigned __int64]
+    [+0x000] VolatileLong     : 0x2da963 [Type: unsigned __int64]
+    [+0x000] Hard             [Type: _MMPTE_HARDWARE]
 
-            [+0x000 ( 0: 0)] Valid            : 0x1     [Type: unsigned __int64] <- MM_PTE_VALID_MASK
-            [+0x000 ( 1: 1)] Dirty1           : 0x1     [Type: unsigned __int64] <- MM_PTE_DIRTY_MASK
-            [+0x000 ( 2: 2)] Owner            : 0x0     [Type: unsigned __int64]
-            [+0x000 ( 3: 3)] WriteThrough     : 0x0     [Type: unsigned __int64]
-            [+0x000 ( 4: 4)] CacheDisable     : 0x0     [Type: unsigned __int64]
-            [+0x000 ( 5: 5)] Accessed         : 0x1     [Type: unsigned __int64] <- MM_PTE_ACCESS_MASK
-            [+0x000 ( 6: 6)] Dirty            : 0x1     [Type: unsigned __int64] <- MM_PTE_DIRTY_MASK
-            [+0x000 ( 7: 7)] LargePage        : 0x0     [Type: unsigned __int64]
-            [+0x000 ( 8: 8)] Global           : 0x1     [Type: unsigned __int64] <- MM_PTE_GLOBAL_MASK
-            [+0x000 ( 9: 9)] CopyOnWrite      : 0x0     [Type: unsigned __int64]
-            [+0x000 (10:10)] Unused           : 0x0     [Type: unsigned __int64]
-            [+0x000 (11:11)] Write            : 0x1     [Type: unsigned __int64] <- MM_PTE_WRITE_MASK
-            [+0x000 (47:12)] PageFrameNumber  : 0x2da   [Type: unsigned __int64] <- pfndata index
-            [+0x000 (51:48)] reserved1        : 0x0     [Type: unsigned __int64]
-            [+0x000 (62:52)] SoftwareWsIndex  : 0x0     [Type: unsigned __int64]
-            [+0x000 (63:63)] NoExecute        : 0x0     [Type: unsigned __int64] <- page can executable
+    [+0x000 ( 0: 0)] Valid            : 0x1     [Type: unsigned __int64] <- MM_PTE_VALID_MASK
+    [+0x000 ( 1: 1)] Dirty1           : 0x1     [Type: unsigned __int64] <- MM_PTE_DIRTY_MASK
+    [+0x000 ( 2: 2)] Owner            : 0x0     [Type: unsigned __int64]
+    [+0x000 ( 3: 3)] WriteThrough     : 0x0     [Type: unsigned __int64]
+    [+0x000 ( 4: 4)] CacheDisable     : 0x0     [Type: unsigned __int64]
+    [+0x000 ( 5: 5)] Accessed         : 0x1     [Type: unsigned __int64] <- MM_PTE_ACCESS_MASK
+    [+0x000 ( 6: 6)] Dirty            : 0x1     [Type: unsigned __int64] <- MM_PTE_DIRTY_MASK
+    [+0x000 ( 7: 7)] LargePage        : 0x0     [Type: unsigned __int64]
+    [+0x000 ( 8: 8)] Global           : 0x1     [Type: unsigned __int64] <- MM_PTE_GLOBAL_MASK
+    [+0x000 ( 9: 9)] CopyOnWrite      : 0x0     [Type: unsigned __int64]
+    [+0x000 (10:10)] Unused           : 0x0     [Type: unsigned __int64]
+    [+0x000 (11:11)] Write            : 0x1     [Type: unsigned __int64] <- MM_PTE_WRITE_MASK
+    [+0x000 (47:12)] PageFrameNumber  : 0x2da   [Type: unsigned __int64] <- pfndata index
+    [+0x000 (51:48)] reserved1        : 0x0     [Type: unsigned __int64]
+    [+0x000 (62:52)] SoftwareWsIndex  : 0x0     [Type: unsigned __int64]
+    [+0x000 (63:63)] NoExecute        : 0x0     [Type: unsigned __int64] <- page can executable
 
-        [+0x000] Flush            [Type: _HARDWARE_PTE]
-        [+0x000] Proto            [Type: _MMPTE_PROTOTYPE]
-        [+0x000] Soft             [Type: _MMPTE_SOFTWARE]
-        [+0x000] TimeStamp        [Type: _MMPTE_TIMESTAMP]
-        [+0x000] Trans            [Type: _MMPTE_TRANSITION]
-        [+0x000] Subsect          [Type: _MMPTE_SUBSECTION]
-        [+0x000] List             [Type: _MMPTE_LIST]
+    [+0x000] Flush            [Type: _HARDWARE_PTE]
+    [+0x000] Proto            [Type: _MMPTE_PROTOTYPE]
+    [+0x000] Soft             [Type: _MMPTE_SOFTWARE]
+    [+0x000] TimeStamp        [Type: _MMPTE_TIMESTAMP]
+    [+0x000] Trans            [Type: _MMPTE_TRANSITION]
+    [+0x000] Subsect          [Type: _MMPTE_SUBSECTION]
+    [+0x000] List             [Type: _MMPTE_LIST]
     */
-
-#define VALID_PTE_SET_BITS \
-            ( MM_PTE_VALID_MASK | MM_PTE_WRITE_MASK | MM_PTE_ACCESS_MASK | \
-                MM_PTE_DIRTY_MASK | MM_PTE_GLOBAL_MASK)
-
-#define VALID_PTE_UNSET_BITS \
-            ( MM_PTE_OWNER_MASK | MM_PTE_WRITE_THROUGH_MASK | MM_PTE_CACHE_DISABLE_MASK | \
-                MM_PTE_LARGE_PAGE_MASK | MM_PTE_COPY_ON_WRITE_MASK | MM_PTE_PROTOTYPE_MASK )
 
     BasePte = BasePte + IntervalOfPtes * KeGetCurrentProcessorNumber();
 
@@ -1094,75 +1091,29 @@ ClearSystemPtesEncryptedContext(
         Index++) {
         PointerVa = (PCHAR)BaseVa + PAGE_SIZE * Index;
 
-        PointerPxe = GetPxeAddress(PointerVa);
-        PointerPpe = GetPpeAddress(PointerVa);
-        PointerPde = GetPdeAddress(PointerVa);
-        PointerPte = GetPteAddress(PointerVa);
+        if (FALSE != MmIsAddressValid(PointerVa)) {
+            LastVa = PointerVa;
+            LastPte = GetPteAddress(LastVa);
 
-        if (PointerPxe->u.Hard.Valid) {
-            if (PointerPpe->u.Hard.Valid) {
-                if (PointerPde->u.Hard.Valid) {
-                    if (PointerPde->u.Hard.LargePage) {
-                        // pass LargePage
+            while (Index++) {
+                PointerPte = BasePte + Index;
+                PointerVa = (PCHAR)BaseVa + PAGE_SIZE * Index;
 
-                        Index += PAGE_SIZE / sizeof(MMPTE);
-                    }
-                    else {
-                        if (PointerPte->u.Hard.Valid) {
-                            if (MI_IS_PTE_EXECUTABLE(PointerPte)) {
-                                if (VALID_PTE_SET_BITS == (PointerPte->u.Long & VALID_PTE_SET_BITS)) {
-                                    if (0 == (PointerPte->u.Long & VALID_PTE_UNSET_BITS)) {
-                                        LastPte = PointerPte;
-                                        LastVa = PointerVa;
-
-                                        while (Index++) {
-                                            PointerPte = BasePte + Index;
-                                            PointerVa = (PCHAR)BaseVa + PAGE_SIZE * Index;
-
-                                            if (FALSE == MmIsAddressValid(PointerVa)) {
-                                                break;
-                                            }
-
-                                            if (FALSE == MI_IS_PTE_EXECUTABLE(PointerPte)) {
-                                                break;
-                                            }
-
-                                            if (VALID_PTE_SET_BITS != (PointerPte->u.Long & VALID_PTE_SET_BITS)) {
-                                                break;
-                                            }
-
-                                            if (0 != (PointerPte->u.Long & VALID_PTE_UNSET_BITS)) {
-                                                break;
-                                            }
-                                        }
-
-                                        if ((PointerPte - LastPte) * PAGE_SIZE > PatchGuardBlock->SizeOfNtSection) {
-                                            CompareEncryptedContextFields(
-                                                PatchGuardBlock,
-                                                LastVa,
-                                                (PCHAR)PointerVa - PatchGuardBlock->SizeOfCmpAppendDllSection);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                if (FALSE == MmIsAddressValid(PointerVa)) {
+                    break;
                 }
-                else {
-                    Index += PAGE_SIZE / sizeof(MMPTE);
+
+                if (FALSE == MI_IS_PTE_EXECUTABLE(PointerPte)) {
+                    break;
                 }
             }
-            else {
-                Index +=
-                    (PAGE_SIZE / sizeof(MMPTE)) *
-                    (PAGE_SIZE / sizeof(MMPTE));
+
+            if ((PointerPte - LastPte) * PAGE_SIZE > PatchGuardBlock->SizeOfNtSection) {
+                CompareEncryptedContextFields(
+                    PatchGuardBlock,
+                    LastVa,
+                    (PCHAR)PointerVa - PatchGuardBlock->SizeOfCmpAppendDllSection);
             }
-        }
-        else {
-            Index +=
-                (PAGE_SIZE / sizeof(MMPTE)) *
-                (PAGE_SIZE / sizeof(MMPTE)) *
-                (PAGE_SIZE / sizeof(MMPTE));
         }
     }
 }
@@ -1196,27 +1147,24 @@ ClearPoolEncryptedContext(
     for (Index = 0;
         Index < IntervalOfTable;
         Index++) {
-        if (POOL_BIG_TABLE_ENTRY_FREE != (
-            (ULONG64)PoolBigPageTable[Index].Va & POOL_BIG_TABLE_ENTRY_FREE)) {
-            if (NonPagedPool == PatchGuardBlock->MmDeterminePoolType(
-                PoolBigPageTable[Index].Va)) {
+        if (POOL_BIG_TABLE_ENTRY_FREE !=
+            ((ULONG64)PoolBigPageTable[Index].Va & POOL_BIG_TABLE_ENTRY_FREE)) {
+            if (NonPagedPool == PatchGuardBlock->MmDeterminePoolType(PoolBigPageTable[Index].Va)) {
                 if (PoolBigPageTable[Index].NumberOfPages > PatchGuardBlock->SizeOfNtSection) {
                     CompareBegin = PoolBigPageTable[Index].Va;
+
                     CompareEnd = (PCHAR)PoolBigPageTable[Index].Va +
                         PoolBigPageTable[Index].NumberOfPages -
                         PatchGuardBlock->SizeOfCmpAppendDllSection;
 
-                    CompareEncryptedContextFields(
-                        PatchGuardBlock,
-                        CompareBegin,
-                        CompareEnd);
+                    CompareEncryptedContextFields(PatchGuardBlock, CompareBegin, CompareEnd);
                 }
             }
         }
     }
 }
 
-SIZE_T
+BOOLEAN
 NTAPI
 GetContextRegion(
     __inout PPATCHGUARD_BLOCK PatchGuardBlock,
@@ -1226,10 +1174,6 @@ GetContextRegion(
 )
 {
     BOOLEAN Result = FALSE;
-    KIRQL Irql = 0;
-    PMMPTE PointerPxe = NULL;
-    PMMPTE PointerPpe = NULL;
-    PMMPTE PointerPde = NULL;
     PMMPTE PointerPte = NULL;
     PFN_NUMBER Index = 0;
     PFN_NUMBER NumberOfPtes = 0;
@@ -1265,88 +1209,40 @@ GetContextRegion(
 
     if (FALSE == Result) {
         BasePte = PatchGuardBlock->SystemPtes.BasePte;
+        NumberOfPtes = PatchGuardBlock->SystemPtes.BitMap->SizeOfBitMap;
 
-        BaseAddress = GetVirtualAddressMappedByPte(BasePte);
-
-        NumberOfPtes =
-            PatchGuardBlock->SystemPtes.BitMap->SizeOfBitMap * 8;
+        BaseVa = GetVirtualAddressMappedByPte(BasePte);
 
         for (Index = 0;
             Index < NumberOfPtes;
             Index++) {
             PointerVa = (PCHAR)BaseVa + PAGE_SIZE * Index;
 
-            PointerPxe = GetPxeAddress(PointerVa);
-            PointerPpe = GetPpeAddress(PointerVa);
-            PointerPde = GetPdeAddress(PointerVa);
-            PointerPte = GetPteAddress(PointerVa);
+            if (FALSE != MmIsAddressValid(PointerVa)) {
+                LastVa = PointerVa;
+                LastPte = GetPteAddress(LastVa);
 
-            if (PointerPxe->u.Hard.Valid) {
-                if (PointerPpe->u.Hard.Valid) {
-                    if (PointerPde->u.Hard.Valid) {
-                        if (PointerPde->u.Hard.LargePage) {
-                            // pass LargePage
+                while (Index++) {
+                    PointerPte = BasePte + Index;
+                    PointerVa = (PCHAR)BaseVa + PAGE_SIZE * Index;
 
-                            Index += PAGE_SIZE / sizeof(MMPTE);
-                        }
-                        else {
-                            if (PointerPte->u.Hard.Valid) {
-                                if (MI_IS_PTE_EXECUTABLE(PointerPte)) {
-                                    if (VALID_PTE_SET_BITS == (PointerPte->u.Long & VALID_PTE_SET_BITS)) {
-                                        if (0 == (PointerPte->u.Long & VALID_PTE_UNSET_BITS)) {
-                                            LastPte = PointerPte;
-                                            LastVa = PointerVa;
-
-                                            while (Index++) {
-                                                PointerPte = BasePte + Index;
-                                                PointerVa = (PCHAR)BaseAddress + PAGE_SIZE * Index;
-
-                                                if (FALSE == MmIsAddressValid(PointerVa)) {
-                                                    break;
-                                                }
-
-                                                if (FALSE == MI_IS_PTE_EXECUTABLE(PointerPte)) {
-                                                    break;
-                                                }
-
-                                                if (VALID_PTE_SET_BITS != (PointerPte->u.Long & VALID_PTE_SET_BITS)) {
-                                                    break;
-                                                }
-
-                                                if (0 != (PointerPte->u.Long & VALID_PTE_UNSET_BITS)) {
-                                                    break;
-                                                }
-                                            }
-
-                                            if ((ULONG64)VirtualAddress >= (ULONG64)LastVa &&
-                                                (ULONG64)VirtualAddress < (ULONG64)PointerVa) {
-                                                *BaseAddress = LastVa;
-                                                *RegionSize = (SIZE_T)((PCHAR)PointerVa - (PCHAR)LastVa);
-
-                                                Result = TRUE;
-                                                break;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                    if (FALSE == MmIsAddressValid(PointerVa)) {
+                        break;
                     }
-                    else {
-                        Index += PAGE_SIZE / sizeof(MMPTE);
+
+                    if (FALSE == MI_IS_PTE_EXECUTABLE(PointerPte)) {
+                        break;
                     }
                 }
-                else {
-                    Index +=
-                        (PAGE_SIZE / sizeof(MMPTE)) *
-                        (PAGE_SIZE / sizeof(MMPTE));
+
+                if ((ULONG64)VirtualAddress >= (ULONG64)LastVa &&
+                    (ULONG64)VirtualAddress < (ULONG64)PointerVa) {
+                    *BaseAddress = LastVa;
+                    *RegionSize = (SIZE_T)((PCHAR)PointerVa - (PCHAR)LastVa);
+
+                    Result = TRUE;
+                    break;
                 }
-            }
-            else {
-                Index +=
-                    (PAGE_SIZE / sizeof(MMPTE)) *
-                    (PAGE_SIZE / sizeof(MMPTE)) *
-                    (PAGE_SIZE / sizeof(MMPTE));
             }
         }
     }
@@ -1382,6 +1278,8 @@ CheckWorkerThread(
             MAX_STACK_DEPTH);
 
         if (0 != Count) {
+            // PrintFrameChain(Callers, 0, Count);
+
             IoGetStackLimits(&LowLimit, &HighLimit);
 
             InitialStack = IoGetInitialStack();
@@ -1608,23 +1506,16 @@ ClearPatchGuardWorker(
     PFN_NUMBER IntervalOfPtes = 0;
     PPOOL_BIG_PAGES PoolBigPageTable = NULL;
     SIZE_T IntervalOfTable = 0;
-    UNICODE_STRING RoutineString = { 0 };
-    PCCHAR NumberProcessors = NULL;
-
-    RtlInitUnicodeString(&RoutineString, L"KeNumberProcessors");
-
-    NumberProcessors = MmGetSystemRoutineAddress(&RoutineString);
 
 #ifndef PUBLIC
     DbgPrint(
         "[Shark] < %p > number of processors\n",
-        *NumberProcessors);
+        PatchGuardBlock->NumberProcessors);
 #endif // !PUBLIC
 
     BasePte = PatchGuardBlock->SystemPtes.BasePte;
 
-    IntervalOfPtes =
-        (PatchGuardBlock->SystemPtes.BitMap->SizeOfBitMap * 8) / (*NumberProcessors);
+    IntervalOfPtes = PatchGuardBlock->SystemPtes.BitMap->SizeOfBitMap / PatchGuardBlock->NumberProcessors;
 
     IpiGenericCall(
         (PPS_APC_ROUTINE)ClearSystemPtesEncryptedContext,
@@ -1633,7 +1524,7 @@ ClearPatchGuardWorker(
         (PVOID)IntervalOfPtes);
 
     PoolBigPageTable = PatchGuardBlock->PoolBigPageTable;
-    IntervalOfTable = PatchGuardBlock->PoolBigPageTableSize / (*NumberProcessors);
+    IntervalOfTable = PatchGuardBlock->PoolBigPageTableSize / PatchGuardBlock->NumberProcessors;
 
     IpiGenericCall(
         (PPS_APC_ROUTINE)ClearPoolEncryptedContext,

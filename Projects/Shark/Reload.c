@@ -23,7 +23,6 @@
 #include "Except.h"
 #include "Jump.h"
 #include "Scan.h"
-#include "Space.h"
 
 PRELOADER_PARAMETER_BLOCK ReloaderBlock;
 
@@ -298,127 +297,6 @@ RelocateImage(
     }
 }
 
-ULONG
-NTAPI
-MakeImageProtection(
-    __in PIMAGE_SECTION_HEADER NtSection
-)
-{
-    ULONG ProtectionMask = 0;
-
-    if (IMAGE_SCN_MEM_WRITE ==
-        (NtSection->Characteristics & IMAGE_SCN_MEM_WRITE)) {
-        ProtectionMask = MM_READWRITE;
-    }
-    else {
-        if (IMAGE_SCN_MEM_EXECUTE ==
-            (NtSection->Characteristics & IMAGE_SCN_MEM_EXECUTE)) {
-            ProtectionMask = MM_EXECUTE_READ;
-        }
-        else {
-            ProtectionMask = MM_READONLY;
-        }
-
-        if (IMAGE_SCN_MEM_NOT_CACHED ==
-            (NtSection->Characteristics & IMAGE_SCN_MEM_NOT_CACHED)) {
-            ProtectionMask |= MM_NOCACHE;
-        }
-    }
-
-    return ProtectionMask;
-}
-
-VOID
-NTAPI
-SetImageProtection(
-    __in PVOID ImageBase,
-    __in BOOLEAN Reset
-)
-{
-    PIMAGE_NT_HEADERS NtHeaders = NULL;
-    PIMAGE_SECTION_HEADER NtSection = NULL;
-    ULONG SizeToLock = 0;
-    ULONG SizeOfImage = 0;
-    ULONG Index = 0;
-    ULONG ProtectionMask = 0;
-
-    NtHeaders = RtlImageNtHeader(ImageBase);
-    SizeOfImage = GetSizeOfImage(ImageBase);
-
-    if (NULL != NtHeaders) {
-        NtSection = IMAGE_FIRST_SECTION(NtHeaders);
-
-        ProtectionMask = Reset ?
-            MM_EXECUTE_READWRITE : MM_READONLY;
-
-        SetPageProtection(ImageBase, NtSection->VirtualAddress, ProtectionMask);
-
-        for (Index = 0;
-            Index < NtHeaders->FileHeader.NumberOfSections;
-            Index++) {
-            if (0 != NtSection[Index].VirtualAddress) {
-                SizeToLock = max(
-                    NtSection[Index].SizeOfRawData,
-                    NtSection[Index].Misc.VirtualSize);
-
-                ProtectionMask = Reset ?
-                    MM_EXECUTE_READWRITE : MakeImageProtection(&NtSection[Index]);
-
-                SetPageProtection(
-                    (PCHAR)ImageBase + NtSection[Index].VirtualAddress,
-                    SizeToLock,
-                    ProtectionMask);
-            }
-        }
-    }
-}
-
-VOID
-NTAPI
-ResstDriverSection(
-    __in PVOID ImageBase
-)
-{
-    PIMAGE_NT_HEADERS NtHeaders = NULL;
-    PIMAGE_SECTION_HEADER NtSection = NULL;
-    ULONG SizeToLock = 0;
-    ULONG SizeOfImage = 0;
-    ULONG Index = 0;
-
-    NtHeaders = RtlImageNtHeader(ImageBase);
-    SizeOfImage = GetSizeOfImage(ImageBase);
-
-    if (NULL != NtHeaders) {
-        NtSection = IMAGE_FIRST_SECTION(NtHeaders);
-
-        for (Index = 0;
-            Index < NtHeaders->FileHeader.NumberOfSections;
-            Index++) {
-            if (IMAGE_SCN_MEM_DISCARDABLE ==
-                (NtSection[Index].Characteristics & IMAGE_SCN_MEM_DISCARDABLE)) {
-                if (0 != NtSection[Index].VirtualAddress) {
-                    SizeToLock = max(
-                        NtSection[Index].SizeOfRawData,
-                        NtSection[Index].Misc.VirtualSize);
-
-                    //
-                }
-            }
-
-            if (IMAGE_SCN_MEM_NOT_PAGED !=
-                (NtSection[Index].Characteristics & IMAGE_SCN_MEM_NOT_PAGED)) {
-                if (0 != NtSection[Index].VirtualAddress) {
-                    SizeToLock = max(
-                        NtSection[Index].SizeOfRawData,
-                        NtSection[Index].Misc.VirtualSize);
-
-                    //
-                }
-            }
-        }
-    }
-}
-
 VOID
 NTAPI
 InitializeLoadedModuleList(
@@ -483,139 +361,139 @@ InitializeLoadedModuleList(
             sizeof(KDDEBUGGER_DATA_ADDITION64));
 
 #ifndef PUBLIC
-        DbgPrint("[Shark] <%p> Header\n", KdDebuggerDataBlock->Header);
-        DbgPrint("[Shark] <%p> KernBase\n", KdDebuggerDataBlock->KernBase);
-        DbgPrint("[Shark] <%p> BreakpointWithStatus\n", KdDebuggerDataBlock->BreakpointWithStatus);
-        DbgPrint("[Shark] <%p> SavedContext\n", KdDebuggerDataBlock->SavedContext);
-        DbgPrint("[Shark] <%p> ThCallbackStack\n", KdDebuggerDataBlock->ThCallbackStack);
-        DbgPrint("[Shark] <%p> NextCallback\n", KdDebuggerDataBlock->NextCallback);
-        DbgPrint("[Shark] <%p> FramePointer\n", KdDebuggerDataBlock->FramePointer);
-        DbgPrint("[Shark] <%p> PaeEnabled\n", KdDebuggerDataBlock->PaeEnabled);
-        DbgPrint("[Shark] <%p> KiCallUserMode\n", KdDebuggerDataBlock->KiCallUserMode);
-        DbgPrint("[Shark] <%p> KeUserCallbackDispatcher\n", KdDebuggerDataBlock->KeUserCallbackDispatcher);
-        DbgPrint("[Shark] <%p> PsLoadedModuleList\n", KdDebuggerDataBlock->PsLoadedModuleList);
-        DbgPrint("[Shark] <%p> PsActiveProcessHead\n", KdDebuggerDataBlock->PsActiveProcessHead);
-        DbgPrint("[Shark] <%p> PspCidTable\n", KdDebuggerDataBlock->PspCidTable);
-        DbgPrint("[Shark] <%p> ExpSystemResourcesList\n", KdDebuggerDataBlock->ExpSystemResourcesList);
-        DbgPrint("[Shark] <%p> ExpPagedPoolDescriptor\n", KdDebuggerDataBlock->ExpPagedPoolDescriptor);
-        DbgPrint("[Shark] <%p> ExpNumberOfPagedPools\n", KdDebuggerDataBlock->ExpNumberOfPagedPools);
-        DbgPrint("[Shark] <%p> KeTimeIncrement\n", KdDebuggerDataBlock->KeTimeIncrement);
-        DbgPrint("[Shark] <%p> KeBugCheckCallbackListHead\n", KdDebuggerDataBlock->KeBugCheckCallbackListHead);
-        DbgPrint("[Shark] <%p> KiBugcheckData\n", KdDebuggerDataBlock->KiBugcheckData);
-        DbgPrint("[Shark] <%p> IopErrorLogListHead\n", KdDebuggerDataBlock->IopErrorLogListHead);
-        DbgPrint("[Shark] <%p> ObpRootDirectoryObject\n", KdDebuggerDataBlock->ObpRootDirectoryObject);
-        DbgPrint("[Shark] <%p> ObpTypeObjectType\n", KdDebuggerDataBlock->ObpTypeObjectType);
-        DbgPrint("[Shark] <%p> MmSystemCacheStart\n", KdDebuggerDataBlock->MmSystemCacheStart);
-        DbgPrint("[Shark] <%p> MmSystemCacheEnd\n", KdDebuggerDataBlock->MmSystemCacheEnd);
-        DbgPrint("[Shark] <%p> MmSystemCacheWs\n", KdDebuggerDataBlock->MmSystemCacheWs);
-        DbgPrint("[Shark] <%p> MmPfnDatabase\n", KdDebuggerDataBlock->MmPfnDatabase);
-        DbgPrint("[Shark] <%p> MmSystemPtesStart\n", KdDebuggerDataBlock->MmSystemPtesStart);
-        DbgPrint("[Shark] <%p> MmSystemPtesEnd\n", KdDebuggerDataBlock->MmSystemPtesEnd);
-        DbgPrint("[Shark] <%p> MmSubsectionBase\n", KdDebuggerDataBlock->MmSubsectionBase);
-        DbgPrint("[Shark] <%p> MmNumberOfPagingFiles\n", KdDebuggerDataBlock->MmNumberOfPagingFiles);
-        DbgPrint("[Shark] <%p> MmLowestPhysicalPage\n", KdDebuggerDataBlock->MmLowestPhysicalPage);
-        DbgPrint("[Shark] <%p> MmHighestPhysicalPage\n", KdDebuggerDataBlock->MmHighestPhysicalPage);
-        DbgPrint("[Shark] <%p> MmNumberOfPhysicalPages\n", KdDebuggerDataBlock->MmNumberOfPhysicalPages);
-        DbgPrint("[Shark] <%p> MmMaximumNonPagedPoolInBytes\n", KdDebuggerDataBlock->MmMaximumNonPagedPoolInBytes);
-        DbgPrint("[Shark] <%p> MmNonPagedSystemStart\n", KdDebuggerDataBlock->MmNonPagedSystemStart);
-        DbgPrint("[Shark] <%p> MmNonPagedPoolStart\n", KdDebuggerDataBlock->MmNonPagedPoolStart);
-        DbgPrint("[Shark] <%p> MmNonPagedPoolEnd\n", KdDebuggerDataBlock->MmNonPagedPoolEnd);
-        DbgPrint("[Shark] <%p> MmPagedPoolStart\n", KdDebuggerDataBlock->MmPagedPoolStart);
-        DbgPrint("[Shark] <%p> MmPagedPoolEnd\n", KdDebuggerDataBlock->MmPagedPoolEnd);
-        DbgPrint("[Shark] <%p> MmPagedPoolInformation\n", KdDebuggerDataBlock->MmPagedPoolInformation);
-        DbgPrint("[Shark] <%p> MmPageSize\n", KdDebuggerDataBlock->MmPageSize);
-        DbgPrint("[Shark] <%p> MmSizeOfPagedPoolInBytes\n", KdDebuggerDataBlock->MmSizeOfPagedPoolInBytes);
-        DbgPrint("[Shark] <%p> MmTotalCommitLimit\n", KdDebuggerDataBlock->MmTotalCommitLimit);
-        DbgPrint("[Shark] <%p> MmTotalCommittedPages\n", KdDebuggerDataBlock->MmTotalCommittedPages);
-        DbgPrint("[Shark] <%p> MmSharedCommit\n", KdDebuggerDataBlock->MmSharedCommit);
-        DbgPrint("[Shark] <%p> MmDriverCommit\n", KdDebuggerDataBlock->MmDriverCommit);
-        DbgPrint("[Shark] <%p> MmProcessCommit\n", KdDebuggerDataBlock->MmProcessCommit);
-        DbgPrint("[Shark] <%p> MmPagedPoolCommit\n", KdDebuggerDataBlock->MmPagedPoolCommit);
-        DbgPrint("[Shark] <%p> MmExtendedCommit\n", KdDebuggerDataBlock->MmExtendedCommit);
-        DbgPrint("[Shark] <%p> MmZeroedPageListHead\n", KdDebuggerDataBlock->MmZeroedPageListHead);
-        DbgPrint("[Shark] <%p> MmFreePageListHead\n", KdDebuggerDataBlock->MmFreePageListHead);
-        DbgPrint("[Shark] <%p> MmStandbyPageListHead\n", KdDebuggerDataBlock->MmStandbyPageListHead);
-        DbgPrint("[Shark] <%p> MmModifiedPageListHead\n", KdDebuggerDataBlock->MmModifiedPageListHead);
-        DbgPrint("[Shark] <%p> MmModifiedNoWritePageListHead\n", KdDebuggerDataBlock->MmModifiedNoWritePageListHead);
-        DbgPrint("[Shark] <%p> MmAvailablePages\n", KdDebuggerDataBlock->MmAvailablePages);
-        DbgPrint("[Shark] <%p> MmResidentAvailablePages\n", KdDebuggerDataBlock->MmResidentAvailablePages);
-        DbgPrint("[Shark] <%p> PoolTrackTable\n", KdDebuggerDataBlock->PoolTrackTable);
-        DbgPrint("[Shark] <%p> NonPagedPoolDescriptor\n", KdDebuggerDataBlock->NonPagedPoolDescriptor);
-        DbgPrint("[Shark] <%p> MmHighestUserAddress\n", KdDebuggerDataBlock->MmHighestUserAddress);
-        DbgPrint("[Shark] <%p> MmSystemRangeStart\n", KdDebuggerDataBlock->MmSystemRangeStart);
-        DbgPrint("[Shark] <%p> MmUserProbeAddress\n", KdDebuggerDataBlock->MmUserProbeAddress);
-        DbgPrint("[Shark] <%p> KdPrintCircularBuffer\n", KdDebuggerDataBlock->KdPrintCircularBuffer);
-        DbgPrint("[Shark] <%p> KdPrintCircularBufferEnd\n", KdDebuggerDataBlock->KdPrintCircularBufferEnd);
-        DbgPrint("[Shark] <%p> KdPrintWritePointer\n", KdDebuggerDataBlock->KdPrintWritePointer);
-        DbgPrint("[Shark] <%p> KdPrintRolloverCount\n", KdDebuggerDataBlock->KdPrintRolloverCount);
-        DbgPrint("[Shark] <%p> MmLoadedUserImageList\n", KdDebuggerDataBlock->MmLoadedUserImageList);
-        DbgPrint("[Shark] <%p> NtBuildLab\n", KdDebuggerDataBlock->NtBuildLab);
-        DbgPrint("[Shark] <%p> KiNormalSystemCall\n", KdDebuggerDataBlock->KiNormalSystemCall);
-        DbgPrint("[Shark] <%p> KiProcessorBlock\n", KdDebuggerDataBlock->KiProcessorBlock);
-        DbgPrint("[Shark] <%p> MmUnloadedDrivers\n", KdDebuggerDataBlock->MmUnloadedDrivers);
-        DbgPrint("[Shark] <%p> MmLastUnloadedDriver\n", KdDebuggerDataBlock->MmLastUnloadedDriver);
-        DbgPrint("[Shark] <%p> MmTriageActionTaken\n", KdDebuggerDataBlock->MmTriageActionTaken);
-        DbgPrint("[Shark] <%p> MmSpecialPoolTag\n", KdDebuggerDataBlock->MmSpecialPoolTag);
-        DbgPrint("[Shark] <%p> KernelVerifier\n", KdDebuggerDataBlock->KernelVerifier);
-        DbgPrint("[Shark] <%p> MmVerifierData\n", KdDebuggerDataBlock->MmVerifierData);
-        DbgPrint("[Shark] <%p> MmAllocatedNonPagedPool\n", KdDebuggerDataBlock->MmAllocatedNonPagedPool);
-        DbgPrint("[Shark] <%p> MmPeakCommitment\n", KdDebuggerDataBlock->MmPeakCommitment);
-        DbgPrint("[Shark] <%p> MmTotalCommitLimitMaximum\n", KdDebuggerDataBlock->MmTotalCommitLimitMaximum);
-        DbgPrint("[Shark] <%p> CmNtCSDVersion\n", KdDebuggerDataBlock->CmNtCSDVersion);
-        DbgPrint("[Shark] <%p> MmPhysicalMemoryBlock\n", KdDebuggerDataBlock->MmPhysicalMemoryBlock);
-        DbgPrint("[Shark] <%p> MmSessionBase\n", KdDebuggerDataBlock->MmSessionBase);
-        DbgPrint("[Shark] <%p> MmSessionSize\n", KdDebuggerDataBlock->MmSessionSize);
-        DbgPrint("[Shark] <%p> MmSystemParentTablePage\n", KdDebuggerDataBlock->MmSystemParentTablePage);
-        DbgPrint("[Shark] <%p> MmVirtualTranslationBase\n", KdDebuggerDataBlock->MmVirtualTranslationBase);
-        DbgPrint("[Shark] <%p> OffsetKThreadNextProcessor\n", KdDebuggerDataBlock->OffsetKThreadNextProcessor);
-        DbgPrint("[Shark] <%p> OffsetKThreadTeb\n", KdDebuggerDataBlock->OffsetKThreadTeb);
-        DbgPrint("[Shark] <%p> OffsetKThreadKernelStack\n", KdDebuggerDataBlock->OffsetKThreadKernelStack);
-        DbgPrint("[Shark] <%p> OffsetKThreadInitialStack\n", KdDebuggerDataBlock->OffsetKThreadInitialStack);
-        DbgPrint("[Shark] <%p> OffsetKThreadApcProcess\n", KdDebuggerDataBlock->OffsetKThreadApcProcess);
-        DbgPrint("[Shark] <%p> OffsetKThreadState\n", KdDebuggerDataBlock->OffsetKThreadState);
-        DbgPrint("[Shark] <%p> OffsetKThreadBStore\n", KdDebuggerDataBlock->OffsetKThreadBStore);
-        DbgPrint("[Shark] <%p> OffsetKThreadBStoreLimit\n", KdDebuggerDataBlock->OffsetKThreadBStoreLimit);
-        DbgPrint("[Shark] <%p> SizeEProcess\n", KdDebuggerDataBlock->SizeEProcess);
-        DbgPrint("[Shark] <%p> OffsetEprocessPeb\n", KdDebuggerDataBlock->OffsetEprocessPeb);
-        DbgPrint("[Shark] <%p> OffsetEprocessParentCID\n", KdDebuggerDataBlock->OffsetEprocessParentCID);
-        DbgPrint("[Shark] <%p> OffsetEprocessDirectoryTableBase\n", KdDebuggerDataBlock->OffsetEprocessDirectoryTableBase);
-        DbgPrint("[Shark] <%p> SizePrcb\n", KdDebuggerDataBlock->SizePrcb);
-        DbgPrint("[Shark] <%p> OffsetPrcbDpcRoutine\n", KdDebuggerDataBlock->OffsetPrcbDpcRoutine);
-        DbgPrint("[Shark] <%p> OffsetPrcbCurrentThread\n", KdDebuggerDataBlock->OffsetPrcbCurrentThread);
-        DbgPrint("[Shark] <%p> OffsetPrcbMhz\n", KdDebuggerDataBlock->OffsetPrcbMhz);
-        DbgPrint("[Shark] <%p> OffsetPrcbCpuType\n", KdDebuggerDataBlock->OffsetPrcbCpuType);
-        DbgPrint("[Shark] <%p> OffsetPrcbVendorString\n", KdDebuggerDataBlock->OffsetPrcbVendorString);
-        DbgPrint("[Shark] <%p> OffsetPrcbProcStateContext\n", KdDebuggerDataBlock->OffsetPrcbProcStateContext);
-        DbgPrint("[Shark] <%p> OffsetPrcbNumber\n", KdDebuggerDataBlock->OffsetPrcbNumber);
-        DbgPrint("[Shark] <%p> SizeEThread\n", KdDebuggerDataBlock->SizeEThread);
-        DbgPrint("[Shark] <%p> KdPrintCircularBufferPtr\n", KdDebuggerDataBlock->KdPrintCircularBufferPtr);
-        DbgPrint("[Shark] <%p> KdPrintBufferSize\n", KdDebuggerDataBlock->KdPrintBufferSize);
-        DbgPrint("[Shark] <%p> KeLoaderBlock\n", KdDebuggerDataBlock->KeLoaderBlock);
-        DbgPrint("[Shark] <%p> SizePcr\n", KdDebuggerDataBlock->SizePcr);
-        DbgPrint("[Shark] <%p> OffsetPcrSelfPcr\n", KdDebuggerDataBlock->OffsetPcrSelfPcr);
-        DbgPrint("[Shark] <%p> OffsetPcrCurrentPrcb\n", KdDebuggerDataBlock->OffsetPcrCurrentPrcb);
-        DbgPrint("[Shark] <%p> OffsetPcrContainedPrcb\n", KdDebuggerDataBlock->OffsetPcrContainedPrcb);
-        DbgPrint("[Shark] <%p> OffsetPcrInitialBStore\n", KdDebuggerDataBlock->OffsetPcrInitialBStore);
-        DbgPrint("[Shark] <%p> OffsetPcrBStoreLimit\n", KdDebuggerDataBlock->OffsetPcrBStoreLimit);
-        DbgPrint("[Shark] <%p> OffsetPcrInitialStack\n", KdDebuggerDataBlock->OffsetPcrInitialStack);
-        DbgPrint("[Shark] <%p> OffsetPcrStackLimit\n", KdDebuggerDataBlock->OffsetPcrStackLimit);
-        DbgPrint("[Shark] <%p> OffsetPrcbPcrPage\n", KdDebuggerDataBlock->OffsetPrcbPcrPage);
-        DbgPrint("[Shark] <%p> OffsetPrcbProcStateSpecialReg\n", KdDebuggerDataBlock->OffsetPrcbProcStateSpecialReg);
-        DbgPrint("[Shark] <%p> GdtR0Code\n", KdDebuggerDataBlock->GdtR0Code);
-        DbgPrint("[Shark] <%p> GdtR0Data\n", KdDebuggerDataBlock->GdtR0Data);
-        DbgPrint("[Shark] <%p> GdtR0Pcr\n", KdDebuggerDataBlock->GdtR0Pcr);
-        DbgPrint("[Shark] <%p> GdtR3Code\n", KdDebuggerDataBlock->GdtR3Code);
-        DbgPrint("[Shark] <%p> GdtR3Data\n", KdDebuggerDataBlock->GdtR3Data);
-        DbgPrint("[Shark] <%p> GdtR3Teb\n", KdDebuggerDataBlock->GdtR3Teb);
-        DbgPrint("[Shark] <%p> GdtLdt\n", KdDebuggerDataBlock->GdtLdt);
-        DbgPrint("[Shark] <%p> GdtTss\n", KdDebuggerDataBlock->GdtTss);
-        DbgPrint("[Shark] <%p> Gdt64R3CmCode\n", KdDebuggerDataBlock->Gdt64R3CmCode);
-        DbgPrint("[Shark] <%p> Gdt64R3CmTeb\n", KdDebuggerDataBlock->Gdt64R3CmTeb);
-        DbgPrint("[Shark] <%p> IopNumTriageDumpDataBlocks\n", KdDebuggerDataBlock->IopNumTriageDumpDataBlocks);
-        DbgPrint("[Shark] <%p> IopTriageDumpDataBlocks\n", KdDebuggerDataBlock->IopTriageDumpDataBlocks);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > Header\n", KdDebuggerDataBlock->Header);
+        DbgPrint("[Sefirot] [Tiferet] < %p > KernBase\n", KdDebuggerDataBlock->KernBase);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > BreakpointWithStatus\n", KdDebuggerDataBlock->BreakpointWithStatus);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > SavedContext\n", KdDebuggerDataBlock->SavedContext);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > ThCallbackStack\n", KdDebuggerDataBlock->ThCallbackStack);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > NextCallback\n", KdDebuggerDataBlock->NextCallback);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > FramePointer\n", KdDebuggerDataBlock->FramePointer);
+        DbgPrint("[Sefirot] [Tiferet] < %p > PaeEnabled\n", KdDebuggerDataBlock->PaeEnabled);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > KiCallUserMode\n", KdDebuggerDataBlock->KiCallUserMode);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > KeUserCallbackDispatcher\n", KdDebuggerDataBlock->KeUserCallbackDispatcher);
+        DbgPrint("[Sefirot] [Tiferet] < %p > PsLoadedModuleList\n", KdDebuggerDataBlock->PsLoadedModuleList);
+        DbgPrint("[Sefirot] [Tiferet] < %p > PsActiveProcessHead\n", KdDebuggerDataBlock->PsActiveProcessHead);
+        DbgPrint("[Sefirot] [Tiferet] < %p > PspCidTable\n", KdDebuggerDataBlock->PspCidTable);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > ExpSystemResourcesList\n", KdDebuggerDataBlock->ExpSystemResourcesList);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > ExpPagedPoolDescriptor\n", KdDebuggerDataBlock->ExpPagedPoolDescriptor);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > ExpNumberOfPagedPools\n", KdDebuggerDataBlock->ExpNumberOfPagedPools);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > KeTimeIncrement\n", KdDebuggerDataBlock->KeTimeIncrement);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > KeBugCheckCallbackListHead\n", KdDebuggerDataBlock->KeBugCheckCallbackListHead);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > KiBugcheckData\n", KdDebuggerDataBlock->KiBugcheckData);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > IopErrorLogListHead\n", KdDebuggerDataBlock->IopErrorLogListHead);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > ObpRootDirectoryObject\n", KdDebuggerDataBlock->ObpRootDirectoryObject);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > ObpTypeObjectType\n", KdDebuggerDataBlock->ObpTypeObjectType);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmSystemCacheStart\n", KdDebuggerDataBlock->MmSystemCacheStart);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmSystemCacheEnd\n", KdDebuggerDataBlock->MmSystemCacheEnd);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmSystemCacheWs\n", KdDebuggerDataBlock->MmSystemCacheWs);
+        DbgPrint("[Sefirot] [Tiferet] < %p > MmPfnDatabase\n", KdDebuggerDataBlock->MmPfnDatabase);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmSystemPtesStart\n", KdDebuggerDataBlock->MmSystemPtesStart);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmSystemPtesEnd\n", KdDebuggerDataBlock->MmSystemPtesEnd);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmSubsectionBase\n", KdDebuggerDataBlock->MmSubsectionBase);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmNumberOfPagingFiles\n", KdDebuggerDataBlock->MmNumberOfPagingFiles);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmLowestPhysicalPage\n", KdDebuggerDataBlock->MmLowestPhysicalPage);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmHighestPhysicalPage\n", KdDebuggerDataBlock->MmHighestPhysicalPage);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmNumberOfPhysicalPages\n", KdDebuggerDataBlock->MmNumberOfPhysicalPages);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmMaximumNonPagedPoolInBytes\n", KdDebuggerDataBlock->MmMaximumNonPagedPoolInBytes);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmNonPagedSystemStart\n", KdDebuggerDataBlock->MmNonPagedSystemStart);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmNonPagedPoolStart\n", KdDebuggerDataBlock->MmNonPagedPoolStart);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmNonPagedPoolEnd\n", KdDebuggerDataBlock->MmNonPagedPoolEnd);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmPagedPoolStart\n", KdDebuggerDataBlock->MmPagedPoolStart);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmPagedPoolEnd\n", KdDebuggerDataBlock->MmPagedPoolEnd);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmPagedPoolInformation\n", KdDebuggerDataBlock->MmPagedPoolInformation);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmPageSize\n", KdDebuggerDataBlock->MmPageSize);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmSizeOfPagedPoolInBytes\n", KdDebuggerDataBlock->MmSizeOfPagedPoolInBytes);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmTotalCommitLimit\n", KdDebuggerDataBlock->MmTotalCommitLimit);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmTotalCommittedPages\n", KdDebuggerDataBlock->MmTotalCommittedPages);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmSharedCommit\n", KdDebuggerDataBlock->MmSharedCommit);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmDriverCommit\n", KdDebuggerDataBlock->MmDriverCommit);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmProcessCommit\n", KdDebuggerDataBlock->MmProcessCommit);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmPagedPoolCommit\n", KdDebuggerDataBlock->MmPagedPoolCommit);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmExtendedCommit\n", KdDebuggerDataBlock->MmExtendedCommit);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmZeroedPageListHead\n", KdDebuggerDataBlock->MmZeroedPageListHead);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmFreePageListHead\n", KdDebuggerDataBlock->MmFreePageListHead);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmStandbyPageListHead\n", KdDebuggerDataBlock->MmStandbyPageListHead);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmModifiedPageListHead\n", KdDebuggerDataBlock->MmModifiedPageListHead);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmModifiedNoWritePageListHead\n", KdDebuggerDataBlock->MmModifiedNoWritePageListHead);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmAvailablePages\n", KdDebuggerDataBlock->MmAvailablePages);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmResidentAvailablePages\n", KdDebuggerDataBlock->MmResidentAvailablePages);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > PoolTrackTable\n", KdDebuggerDataBlock->PoolTrackTable);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > NonPagedPoolDescriptor\n", KdDebuggerDataBlock->NonPagedPoolDescriptor);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmHighestUserAddress\n", KdDebuggerDataBlock->MmHighestUserAddress);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmSystemRangeStart\n", KdDebuggerDataBlock->MmSystemRangeStart);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmUserProbeAddress\n", KdDebuggerDataBlock->MmUserProbeAddress);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > KdPrintCircularBuffer\n", KdDebuggerDataBlock->KdPrintCircularBuffer);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > KdPrintCircularBufferEnd\n", KdDebuggerDataBlock->KdPrintCircularBufferEnd);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > KdPrintWritePointer\n", KdDebuggerDataBlock->KdPrintWritePointer);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > KdPrintRolloverCount\n", KdDebuggerDataBlock->KdPrintRolloverCount);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmLoadedUserImageList\n", KdDebuggerDataBlock->MmLoadedUserImageList);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > NtBuildLab\n", KdDebuggerDataBlock->NtBuildLab);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > KiNormalSystemCall\n", KdDebuggerDataBlock->KiNormalSystemCall);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > KiProcessorBlock\n", KdDebuggerDataBlock->KiProcessorBlock);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmUnloadedDrivers\n", KdDebuggerDataBlock->MmUnloadedDrivers);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmLastUnloadedDriver\n", KdDebuggerDataBlock->MmLastUnloadedDriver);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmTriageActionTaken\n", KdDebuggerDataBlock->MmTriageActionTaken);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmSpecialPoolTag\n", KdDebuggerDataBlock->MmSpecialPoolTag);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > KernelVerifier\n", KdDebuggerDataBlock->KernelVerifier);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmVerifierData\n", KdDebuggerDataBlock->MmVerifierData);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmAllocatedNonPagedPool\n", KdDebuggerDataBlock->MmAllocatedNonPagedPool);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmPeakCommitment\n", KdDebuggerDataBlock->MmPeakCommitment);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmTotalCommitLimitMaximum\n", KdDebuggerDataBlock->MmTotalCommitLimitMaximum);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > CmNtCSDVersion\n", KdDebuggerDataBlock->CmNtCSDVersion);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmPhysicalMemoryBlock\n", KdDebuggerDataBlock->MmPhysicalMemoryBlock);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmSessionBase\n", KdDebuggerDataBlock->MmSessionBase);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmSessionSize\n", KdDebuggerDataBlock->MmSessionSize);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmSystemParentTablePage\n", KdDebuggerDataBlock->MmSystemParentTablePage);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > MmVirtualTranslationBase\n", KdDebuggerDataBlock->MmVirtualTranslationBase);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > OffsetKThreadNextProcessor\n", KdDebuggerDataBlock->OffsetKThreadNextProcessor);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > OffsetKThreadTeb\n", KdDebuggerDataBlock->OffsetKThreadTeb);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > OffsetKThreadKernelStack\n", KdDebuggerDataBlock->OffsetKThreadKernelStack);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > OffsetKThreadInitialStack\n", KdDebuggerDataBlock->OffsetKThreadInitialStack);
+        DbgPrint("[Sefirot] [Tiferet] < %p > OffsetKThreadApcProcess\n", KdDebuggerDataBlock->OffsetKThreadApcProcess);
+        DbgPrint("[Sefirot] [Tiferet] < %p > OffsetKThreadState\n", KdDebuggerDataBlock->OffsetKThreadState);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > OffsetKThreadBStore\n", KdDebuggerDataBlock->OffsetKThreadBStore);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > OffsetKThreadBStoreLimit\n", KdDebuggerDataBlock->OffsetKThreadBStoreLimit);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > SizeEProcess\n", KdDebuggerDataBlock->SizeEProcess);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > OffsetEprocessPeb\n", KdDebuggerDataBlock->OffsetEprocessPeb);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > OffsetEprocessParentCID\n", KdDebuggerDataBlock->OffsetEprocessParentCID);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > OffsetEprocessDirectoryTableBase\n", KdDebuggerDataBlock->OffsetEprocessDirectoryTableBase);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > SizePrcb\n", KdDebuggerDataBlock->SizePrcb);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > OffsetPrcbDpcRoutine\n", KdDebuggerDataBlock->OffsetPrcbDpcRoutine);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > OffsetPrcbCurrentThread\n", KdDebuggerDataBlock->OffsetPrcbCurrentThread);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > OffsetPrcbMhz\n", KdDebuggerDataBlock->OffsetPrcbMhz);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > OffsetPrcbCpuType\n", KdDebuggerDataBlock->OffsetPrcbCpuType);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > OffsetPrcbVendorString\n", KdDebuggerDataBlock->OffsetPrcbVendorString);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > OffsetPrcbProcStateContext\n", KdDebuggerDataBlock->OffsetPrcbProcStateContext);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > OffsetPrcbNumber\n", KdDebuggerDataBlock->OffsetPrcbNumber);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > SizeEThread\n", KdDebuggerDataBlock->SizeEThread);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > KdPrintCircularBufferPtr\n", KdDebuggerDataBlock->KdPrintCircularBufferPtr);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > KdPrintBufferSize\n", KdDebuggerDataBlock->KdPrintBufferSize);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > KeLoaderBlock\n", KdDebuggerDataBlock->KeLoaderBlock);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > SizePcr\n", KdDebuggerDataBlock->SizePcr);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > OffsetPcrSelfPcr\n", KdDebuggerDataBlock->OffsetPcrSelfPcr);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > OffsetPcrCurrentPrcb\n", KdDebuggerDataBlock->OffsetPcrCurrentPrcb);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > OffsetPcrContainedPrcb\n", KdDebuggerDataBlock->OffsetPcrContainedPrcb);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > OffsetPcrInitialBStore\n", KdDebuggerDataBlock->OffsetPcrInitialBStore);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > OffsetPcrBStoreLimit\n", KdDebuggerDataBlock->OffsetPcrBStoreLimit);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > OffsetPcrInitialStack\n", KdDebuggerDataBlock->OffsetPcrInitialStack);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > OffsetPcrStackLimit\n", KdDebuggerDataBlock->OffsetPcrStackLimit);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > OffsetPrcbPcrPage\n", KdDebuggerDataBlock->OffsetPrcbPcrPage);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > OffsetPrcbProcStateSpecialReg\n", KdDebuggerDataBlock->OffsetPrcbProcStateSpecialReg);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > GdtR0Code\n", KdDebuggerDataBlock->GdtR0Code);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > GdtR0Data\n", KdDebuggerDataBlock->GdtR0Data);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > GdtR0Pcr\n", KdDebuggerDataBlock->GdtR0Pcr);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > GdtR3Code\n", KdDebuggerDataBlock->GdtR3Code);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > GdtR3Data\n", KdDebuggerDataBlock->GdtR3Data);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > GdtR3Teb\n", KdDebuggerDataBlock->GdtR3Teb);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > GdtLdt\n", KdDebuggerDataBlock->GdtLdt);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > GdtTss\n", KdDebuggerDataBlock->GdtTss);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > Gdt64R3CmCode\n", KdDebuggerDataBlock->Gdt64R3CmCode);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > Gdt64R3CmTeb\n", KdDebuggerDataBlock->Gdt64R3CmTeb);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > IopNumTriageDumpDataBlocks\n", KdDebuggerDataBlock->IopNumTriageDumpDataBlocks);
+        // DbgPrint("[Sefirot] [Tiferet] < %p > IopTriageDumpDataBlocks\n", KdDebuggerDataBlock->IopTriageDumpDataBlocks);
 
         if (ReloaderBlock->BuildNumber >= 10586) {
-            DbgPrint("[Shark] <%p> PteBase\n", KdDebuggerDataAdditionBlock->PteBase);
+            DbgPrint("[Sefirot] [Tiferet] < %p > PteBase\n", KdDebuggerDataAdditionBlock->PteBase);
         }
 #endif // !PUBLIC
 
@@ -624,17 +502,17 @@ InitializeLoadedModuleList(
 
     InitializeListHead(&Block->LoadedPrivateImageList);
 
-    if (NULL != Block->DataTableEntry) {
-        Block->DataTableEntry->LoadCount++;
+    if (NULL != Block->CoreDataTableEntry) {
+        Block->CoreDataTableEntry->LoadCount++;
 
         InsertTailList(
             &Block->LoadedPrivateImageList,
-            &Block->DataTableEntry->InLoadOrderLinks);
+            &Block->CoreDataTableEntry->InLoadOrderLinks);
 
         CaptureImageExceptionValues(
-            Block->DataTableEntry->DllBase,
-            &Block->DataTableEntry->ExceptionTable,
-            &Block->DataTableEntry->ExceptionTableSize);
+            Block->CoreDataTableEntry->DllBase,
+            &Block->CoreDataTableEntry->ExceptionTable,
+            &Block->CoreDataTableEntry->ExceptionTableSize);
     }
 
 #ifndef _WIN64
@@ -1309,7 +1187,7 @@ SnapKernelThunk(
                         }
                         else {
                             DbgPrint(
-                                "[Shark] import procedure ordinal@%d not found\n",
+                                "[Sefirot] [Tiferet] import procedure ordinal@%d not found\n",
                                 Ordinal);
                         }
                     }
@@ -1334,7 +1212,7 @@ SnapKernelThunk(
                         }
                         else {
                             DbgPrint(
-                                "[Shark] import procedure %hs not found\n",
+                                "[Sefirot] [Tiferet] import procedure %hs not found\n",
                                 ImportByName->Name);
                         }
                     }
@@ -1345,7 +1223,7 @@ SnapKernelThunk(
             }
             else {
                 DbgPrint(
-                    "[Shark] import dll %hs not found\n",
+                    "[Sefirot] [Tiferet] import dll %hs not found\n",
                     ImportImageName);
             }
 
@@ -1365,7 +1243,7 @@ AllocateKernelPrivateImage(
 
     SizeOfEntry = GetSizeOfImage(ViewBase) + PAGE_SIZE;
 
-    ImageBase = AllocateDriverPages(SizeOfEntry);
+    ImageBase = ExAllocatePool(NonPagedPool, SizeOfEntry);
 
     if (NULL != ImageBase) {
         ImageBase = (PCHAR)ImageBase + PAGE_SIZE;
@@ -1463,8 +1341,6 @@ LoadKernelPrivateImage(
         ImageBase = MapKernelPrivateImage(ViewBase);
 
         if (NULL != ImageBase) {
-            SetImageProtection(ImageBase, FALSE);
-
             DataTableEntry = (PKLDR_DATA_TABLE_ENTRY)
                 ((PCHAR)ImageBase - PAGE_SIZE);
 
@@ -1501,17 +1377,17 @@ LoadKernelPrivateImage(
             DataTableEntry->BaseDllName.Length =
                 wcslen(DataTableEntry->BaseDllName.Buffer) * sizeof(WCHAR);
 
-            if (Insert) {
+            if (FALSE != Insert) {
                 DataTableEntry->LoadCount++;
-
-                InsertTailList(
-                    &ReloaderBlock->LoadedPrivateImageList,
-                    &DataTableEntry->InLoadOrderLinks);
 
                 CaptureImageExceptionValues(
                     DataTableEntry->DllBase,
                     &DataTableEntry->ExceptionTable,
                     &DataTableEntry->ExceptionTableSize);
+
+                InsertTailList(
+                    &ReloaderBlock->LoadedPrivateImageList,
+                    &DataTableEntry->InLoadOrderLinks);
             }
         }
     }
@@ -1529,7 +1405,7 @@ UnloadKernelPrivateImage(
         DereferenceKernelImageImports(DataTableEntry->DllBase);
         RemoveEntryList(&DataTableEntry->InLoadOrderLinks);
 
-        FreeDriverPages(DataTableEntry);
+        ExFreePool(DataTableEntry);
     }
     else {
         DataTableEntry->LoadCount--;
@@ -1538,7 +1414,7 @@ UnloadKernelPrivateImage(
             DereferenceKernelImageImports(DataTableEntry->DllBase);
             RemoveEntryList(&DataTableEntry->InLoadOrderLinks);
 
-            FreeDriverPages(DataTableEntry);
+            ExFreePool(DataTableEntry);
         }
     }
 }
