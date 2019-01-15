@@ -224,6 +224,8 @@ DeviceControl(
     switch (IrpSp->Parameters.DeviceIoControl.IoControlCode) {
     case 0: {
         PPATCHGUARD_BLOCK PatchGuardBlock = NULL;
+        PCCHAR NumberProcessors = NULL;
+        UNICODE_STRING RoutineString = { 0 };
 
         ReloaderBlock = ExAllocatePool(
             NonPagedPool,
@@ -236,15 +238,23 @@ DeviceControl(
 
             PsGetVersion(NULL, NULL, &ReloaderBlock->BuildNumber, NULL);
 
+            RtlInitUnicodeString(&RoutineString, L"KeNumberProcessors");
+
+            NumberProcessors = MmGetSystemRoutineAddress(&RoutineString);
+
+            ReloaderBlock->NumberProcessors = *NumberProcessors;
+
             InitializeLoadedModuleList(ReloaderBlock);
             InitializeSystemSpace(ReloaderBlock);
 
             PatchGuardBlock =
                 (PCHAR)ReloaderBlock + sizeof(RELOADER_PARAMETER_BLOCK);
 
-            ReloaderBlock->DeployPatchGuard = TRUE;
             PatchGuardBlock->BuildNumber = ReloaderBlock->BuildNumber;
+            PatchGuardBlock->NumberProcessors = ReloaderBlock->NumberProcessors;
             PatchGuardBlock->KernelBase = (PVOID)ReloaderBlock->DebuggerDataBlock.KernBase;
+
+            ReloaderBlock->DeployPatchGuard = TRUE;
 
             DisablePatchGuard(PatchGuardBlock);
         }

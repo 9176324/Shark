@@ -45,6 +45,20 @@ extern "C" {
             __in ULONG Count
         );
 
+    VOID
+        NTAPI
+        PrintSymbol(
+            __in PVOID Address
+        );
+
+    VOID
+        NTAPI
+        PrintFrameChain(
+            __in PCALLERS Callers,
+            __in_opt ULONG FramesToSkip,
+            __in ULONG Count
+        );
+
 #ifdef __cplusplus
 }
 #endif	/* __cplusplus */
