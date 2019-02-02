@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2018 by blindtiger. All rights reserved.
+* Copyright (c) 2019 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License"); you may not use this file except in compliance with
@@ -48,6 +48,11 @@ extern "C" {
         ULONG_PTR Result;
     }ROUTINES, *PROUTINES;
 
+    typedef struct _WORKER_LIST {
+        SINGLE_LIST_ENTRY NextEntry;
+        ROUTINES Routines;
+    }WORKER_LIST, *PWORKER_LIST;
+
     typedef struct _RTX {
         PVOID Object;
         PVOID Target;
@@ -84,7 +89,7 @@ extern "C" {
 
     NTSTATUS
         NTAPI
-        RemoteCall(
+        AsyncCall(
             __in HANDLE UniqueThread,
             __in PPS_APC_ROUTINE ApcRoutine,
             __in PKSYSTEM_ROUTINE SystemRoutine,

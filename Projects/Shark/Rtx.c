@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2018 by blindtiger. All rights reserved.
+* Copyright (c) 2019 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License")); you may not use this file except in compliance with
@@ -21,12 +21,12 @@
 #include "Rtx.h"
 
 #include "Ctx.h"
-#include "Jump.h"
+#include "Detours.h"
 #include "Scan.h"
 
 VOID
 NTAPI
-RemoteDispatcher(
+AsyncDispatcher(
     __in PKAPC Apc,
     __in PKNORMAL_ROUTINE * NormalRoutine,
     __in PVOID * NormalContext,
@@ -49,7 +49,7 @@ RemoteDispatcher(
 
 NTSTATUS
 NTAPI
-RemoteCall(
+AsyncCall(
     __in HANDLE UniqueThread,
     __in PPS_APC_ROUTINE ApcRoutine,
     __in PKSYSTEM_ROUTINE SystemRoutine,
@@ -81,13 +81,13 @@ RemoteCall(
                 &Atx.Apc,
                 Thread,
                 OriginalApcEnvironment,
-                RemoteDispatcher,
+                AsyncDispatcher,
                 NULL,
                 NULL,
                 KernelMode,
                 NULL);
 
-            if (KeInsertQueueApc(
+            if (FALSE != KeInsertQueueApc(
                 &Atx.Apc,
                 NULL,
                 NULL,
@@ -108,12 +108,74 @@ RemoteCall(
             }
         }
         else {
-            RemoteDispatcher(&Atx.Apc, NULL, NULL, NULL, NULL);
+            AsyncDispatcher(&Atx.Apc, NULL, NULL, NULL, NULL);
 
             Status = Atx.Rtx.Routines.Result;
         }
 
         ObDereferenceObject(Thread);
+    }
+
+    return Status;
+}
+
+VOID
+NTAPI
+UserSpecialApc(
+    __in PKAPC Apc,
+    __in PKNORMAL_ROUTINE * NormalRoutine,
+    __in PVOID * NormalContext,
+    __in PVOID * SystemArgument1,
+    __in PVOID * SystemArgument2
+)
+{
+    ExFreePool(Apc);
+}
+
+NTSTATUS
+NTAPI
+UserAsyncCall(
+    __in PKTHREAD Thread,
+    __in PPS_APC_ROUTINE ApcRoutine,
+    __in PKSYSTEM_ROUTINE SystemRoutine,
+    __in PUSER_THREAD_START_ROUTINE StartRoutine,
+    __in PVOID StartContext
+)
+{
+    NTSTATUS Status = STATUS_SUCCESS;
+    PKAPC Apc = NULL;
+
+    Apc = ExAllocatePoolWithQuotaTag(
+        NonPagedPool | POOL_QUOTA_FAIL_INSTEAD_OF_RAISE,
+        sizeof(*Apc),
+        'pasP');
+
+    if (NULL == Apc) {
+        Status = STATUS_NO_MEMORY;
+    }
+    else {
+        KeInitializeApc(
+            Apc,
+            Thread,
+            OriginalApcEnvironment,
+            UserSpecialApc,
+            NULL,
+            (PKNORMAL_ROUTINE)ApcRoutine,
+            UserMode,
+            SystemRoutine);
+
+        if (FALSE == KeInsertQueueApc(
+            Apc,
+            StartRoutine,
+            StartContext,
+            0)) {
+            ExFreePool(Apc);
+
+            Status = STATUS_UNSUCCESSFUL;
+        }
+        else {
+            KeTestAlertThread(UserMode);
+        }
     }
 
     return Status;

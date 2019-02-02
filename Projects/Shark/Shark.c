@@ -21,7 +21,7 @@
 
 #include "Shark.h"
 
-#include "Jump.h"
+#include "Detours.h"
 #include "Reload.h"
 #include "PatchGuard.h"
 #include "Space.h"
@@ -254,6 +254,15 @@ DeviceControl(
             PatchGuardBlock->NumberProcessors = ReloaderBlock->NumberProcessors;
             PatchGuardBlock->KernelBase = (PVOID)ReloaderBlock->DebuggerDataBlock.KernBase;
 
+            PatchGuardBlock->PsLoadedModuleList =
+                (PLIST_ENTRY)ReloaderBlock->DebuggerDataBlock.PsLoadedModuleList;
+
+            PatchGuardBlock->KernelDataTableEntry = CONTAINING_RECORD(
+                PatchGuardBlock->PsLoadedModuleList->Flink,
+                KLDR_DATA_TABLE_ENTRY,
+                InLoadOrderLinks);
+
+            ReloaderBlock->KernelDataTableEntry = PatchGuardBlock->KernelDataTableEntry;
             ReloaderBlock->DeployPatchGuard = TRUE;
 
             DisablePatchGuard(PatchGuardBlock);

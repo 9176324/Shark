@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2018 by blindtiger. All rights reserved.
+* Copyright (c) 2019 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License"); you may not use this file except in compliance with
@@ -48,12 +48,13 @@ extern "C" {
     }KPRIQUEUE, *PKPRIQUEUE;
 
     typedef struct _PATCHGUARD_BLOCK {
-#define PG_MAXIMUM_CONTEXT_COUNT            0x00000002UI32 // Worker 中可能存在的 Context 最大数量
-#define PG_FIRST_FIELD_OFFSET               0x00000100UI32 // 搜索使用的第一个 Context 成员偏移
-#define PG_CMP_APPEND_DLL_SECTION_END       0x000000c0UI32 // CmpAppendDllSection 长度
-#define PG_COMPARE_FIELDS_COUNT             0x00000004UI32 // 搜索时比较的 Context 成员数量
-#define PG_MAXIMUM_EP_BUFFER_COUNT          PG_COMPARE_FIELDS_COUNT // EntryPoint 缓存大小 用来搜索头部的代码片段
-        // ( 最小长度 =  max(2 * 8 + 7, sizeof(JMP_CODE)) )
+#define PG_MAXIMUM_CONTEXT_COUNT 0x00000002UI32 // Worker 中可能存在的 Context 最大数量
+#define PG_FIRST_FIELD_OFFSET 0x00000100UI32 // 搜索使用的第一个 Context 成员偏移
+#define PG_CMP_APPEND_DLL_SECTION_END 0x000000c0UI32 // CmpAppendDllSection 长度
+#define PG_COMPARE_FIELDS_COUNT 0x00000004UI32 // 搜索时比较的 Context 成员数量
+
+        // EntryPoint 缓存大小 用来搜索头部的代码片段 ( 最小长度 =  max(2 * 8 + 7, sizeof(JMP_CODE)) )
+#define PG_MAXIMUM_EP_BUFFER_COUNT PG_COMPARE_FIELDS_COUNT 
 
 #define PG_FIELD_BITS \
             ((ULONG)((((PG_FIRST_FIELD_OFFSET + PG_COMPARE_FIELDS_COUNT * sizeof(PVOID)) \
@@ -141,11 +142,19 @@ extern "C" {
             __in PVOID P
             );
 
+        VOID
+        (NTAPI * MmFreeIndependentPages)(
+            __in PVOID VirtualAddress,
+            __in SIZE_T NumberOfBytes
+            );
+
         LONG_PTR ReferenceCount;
 
-        KEVENT Notify;
-
         PVOID KernelBase;
+        PLIST_ENTRY PsLoadedModuleList;
+        PKLDR_DATA_TABLE_ENTRY KernelDataTableEntry;
+
+        PVOID PsInvertedFunctionTable;
 
         ULONG BuildNumber;
         CCHAR NumberProcessors;
@@ -165,18 +174,9 @@ extern "C" {
         ULONG SizeOfNtSection;
         ULONG_PTR CompareFields[PG_COMPARE_FIELDS_COUNT];
         ULONG_PTR EntryPoint[PG_COMPARE_FIELDS_COUNT];
-        WORK_QUEUE_ITEM ClearWorkerItem;
 
-        KIRQL
-        (NTAPI * ExAcquireSpinLockShared)(
-            __inout PEX_SPIN_LOCK SpinLock
-            );
-
-        VOID
-        (NTAPI * ExReleaseSpinLockShared)(
-            __inout PEX_SPIN_LOCK SpinLock,
-            __in KIRQL OldIrql
-            );
+        KEVENT Notify;
+        WORK_QUEUE_ITEM Worker;
 
         POOL_TYPE
         (NTAPI * MmDeterminePoolType)(
@@ -219,17 +219,31 @@ extern "C" {
 
 #ifndef _WIN64
 #else
+    C_ASSERT(FIELD_OFFSET(PATCHGUARD_BLOCK, IoGetInitialStack) == 0x00);
+    C_ASSERT(FIELD_OFFSET(PATCHGUARD_BLOCK, WorkerContext) == 0x08);
+    C_ASSERT(FIELD_OFFSET(PATCHGUARD_BLOCK, ExpWorkerThread) == 0x10);
+    C_ASSERT(FIELD_OFFSET(PATCHGUARD_BLOCK, PspSystemThreadStartup) == 0x18);
+    C_ASSERT(FIELD_OFFSET(PATCHGUARD_BLOCK, KiStartSystemThread) == 0x20);
+    C_ASSERT(FIELD_OFFSET(PATCHGUARD_BLOCK, DbgPrint) == 0x28);
+    C_ASSERT(FIELD_OFFSET(PATCHGUARD_BLOCK, ClearEncryptedContextMessage) == 0x30);
+    C_ASSERT(FIELD_OFFSET(PATCHGUARD_BLOCK, RevertWorkerToSelfMessage) == 0x38);
+    C_ASSERT(FIELD_OFFSET(PATCHGUARD_BLOCK, RtlCompareMemory) == 0x40);
+    C_ASSERT(FIELD_OFFSET(PATCHGUARD_BLOCK, SdbpCheckDll) == 0x48);
+    C_ASSERT(FIELD_OFFSET(PATCHGUARD_BLOCK, SizeOfSdbpCheckDll) == 0x50);
+    C_ASSERT(FIELD_OFFSET(PATCHGUARD_BLOCK, CheckPatchGuardCode) == 0x58);
+    C_ASSERT(FIELD_OFFSET(PATCHGUARD_BLOCK, ClearEncryptedContext) == 0x60);
+    C_ASSERT(FIELD_OFFSET(PATCHGUARD_BLOCK, RevertWorkerToSelf) == 0x68);
+    C_ASSERT(FIELD_OFFSET(PATCHGUARD_BLOCK, RtlRestoreContext) == 0x70);
+    C_ASSERT(FIELD_OFFSET(PATCHGUARD_BLOCK, ExQueueWorkItem) == 0x78);
+    C_ASSERT(FIELD_OFFSET(PATCHGUARD_BLOCK, ExFreePool) == 0x80);
+    C_ASSERT(FIELD_OFFSET(PATCHGUARD_BLOCK, MmFreeIndependentPages) == 0x88);
+    C_ASSERT(FIELD_OFFSET(PATCHGUARD_BLOCK, ReferenceCount) == 0x90);
+
     ULONG64
         NTAPI
         _btc64(
             __in ULONG64 a,
             __in ULONG64 b
-        );
-
-    VOID
-        NTAPI
-        _MakePgFire(
-            VOID
         );
 
     PVOID

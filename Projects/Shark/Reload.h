@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2018 by blindtiger. All rights reserved.
+* Copyright (c) 2019 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License"); you may not use this file except in compliance with
@@ -38,16 +38,23 @@ extern "C" {
         KDDEBUGGER_DATA64 DebuggerDataBlock;
         KDDEBUGGER_DATA_ADDITION64 DebuggerDataAdditionBlock;
 
+        PKLDR_DATA_TABLE_ENTRY KernelDataTableEntry;
+
         PKLDR_DATA_TABLE_ENTRY CoreDataTableEntry;
 
         PVOID PrivateHeader;
 
         PVOID CpuControlBlock;
         PKLDR_DATA_TABLE_ENTRY RootDataTableEntry;
+
         BOOLEAN DeployRoot;
+        BOOLEAN DeployPatchGuard;
+        CCHAR Phase;
+        CCHAR NumberProcessors;
 
         ULONG BuildNumber;
-        CCHAR NumberProcessors;
+
+        struct _FUNCTION_TABLE * InvertedFunctionTable;
 
 #ifdef _WIN64
         PMMPTE PxeBase;
@@ -71,7 +78,7 @@ extern "C" {
         USHORT OffsetKThreadTrapFrame;
 
         NTSTATUS
-        (NTAPI * PsCreateThread)(
+        (NTAPI * PspCreateThread)(
             __out PHANDLE ThreadHandle,
             __in ACCESS_MASK DesiredAccess,
             __in_opt POBJECT_ATTRIBUTES ObjectAttributes,
@@ -87,7 +94,37 @@ extern "C" {
             __in PVOID StartContext
             );
 
-        BOOLEAN DeployPatchGuard;
+        PEX_CALLBACK_ROUTINE_BLOCK
+        (NTAPI * ExReferenceCallBackBlock)(
+            __inout PEX_CALLBACK CallBack
+            );
+
+        PEX_CALLBACK_FUNCTION
+        (NTAPI * ExGetCallBackBlockRoutine)(
+            __in PEX_CALLBACK_ROUTINE_BLOCK CallBackBlock
+            );
+
+        BOOLEAN
+        (NTAPI * ExCompareExchangeCallBack)(
+            __inout PEX_CALLBACK CallBack,
+            __in PEX_CALLBACK_ROUTINE_BLOCK NewBlock,
+            __in PEX_CALLBACK_ROUTINE_BLOCK OldBlock
+            );
+
+        VOID
+        (NTAPI * ExDereferenceCallBackBlock)(
+            __inout PEX_CALLBACK CallBack,
+            __in PEX_CALLBACK_ROUTINE_BLOCK CallBackBlock
+            );
+
+        PVOID WorkerObject;
+
+#ifdef _WIN64
+        PVOID Wx86WorkerObject;
+#endif // _WIN64
+
+        LIST_ENTRY FreeObjectList;
+        LIST_ENTRY ObjectList;
 
         // PATCHGUARD_BLOCK PatchGuardBlock;
     } RELOADER_PARAMETER_BLOCK, *PRELOADER_PARAMETER_BLOCK;
@@ -196,6 +233,25 @@ extern "C" {
         NTAPI
         UnloadKernelPrivateImage(
             __in PKLDR_DATA_TABLE_ENTRY DataTableEntry
+        );
+
+    typedef struct _DUMP_WORKER {
+        WORK_QUEUE_ITEM Worker;
+        PVOID ImageBase;
+        SIZE_T ImageSize;
+        LARGE_INTEGER Interval;
+    }DUMP_WORKER, *PDUMP_WORKER;
+
+    NTSTATUS
+        NTAPI
+        DumpImage(
+            __in PDUMP_WORKER DumpWorker
+        );
+
+    NTSTATUS
+        NTAPI
+        DumpFile(
+            __in PUNICODE_STRING ImageFIleName
         );
 
     extern PRELOADER_PARAMETER_BLOCK ReloaderBlock;

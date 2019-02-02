@@ -55,8 +55,8 @@ CCARCHOBJS = \
 CCOBJS = \
     $(OBJD)\$(PROJ).obj \
     $(OBJD)\Ctx.obj \
+    $(OBJD)\Detours.obj \
     $(OBJD)\Except.obj \
-    $(OBJD)\Jump.obj \
     $(OBJD)\PatchGuard.obj \
     $(OBJD)\Reload.obj \
     $(OBJD)\Rtx.obj \
@@ -76,8 +76,8 @@ PROJSRCS = \
     $(PROJ).c \
     Ctx.c \
     Cmp$(ARCTARG).asm \
+    Detours.c \
     Except.c \
-    Jump.c \
     PatchGuard.c \
     Reload.c \
     Rtx.c \
