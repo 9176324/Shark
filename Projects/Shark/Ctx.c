@@ -20,7 +20,7 @@
 
 #include "Ctx.h"
 
-#include "Jump.h"
+#include "Detours.h"
 #include "Reload.h"
 #include "Scan.h"
 

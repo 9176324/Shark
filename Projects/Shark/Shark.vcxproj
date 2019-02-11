@@ -116,6 +116,7 @@
       <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">true</UseSafeExceptionHandlers>
     </ClCompile>
     <ClCompile Include="AMD64\SpaceAMD64.c" />
+    <ClCompile Include="Detours.c" />
     <ClCompile Include="Except.c" />
     <ClCompile Include="I386\PatchGuardI386.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">false</ExcludedFromBuild>
@@ -125,7 +126,6 @@
     </ClCompile>
     <ClCompile Include="I386\SpaceI386.c" />
     <ClCompile Include="Ctx.c" />
-    <ClCompile Include="Jump.c" />
     <ClCompile Include="Reload.c" />
     <ClCompile Include="Rtx.c" />
     <ClCompile Include="Shark.c" />
@@ -142,8 +142,8 @@
     <ResourceCompile Include="Shark.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Detours.h" />
     <ClInclude Include="Except.h" />
-    <ClInclude Include="Jump.h" />
     <ClInclude Include="Reload.h" />
     <ClInclude Include="Rtx.h" />
     <ClInclude Include="Shark.h" />

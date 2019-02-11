@@ -1,6 +1,6 @@
 ;
 ;
-; Copyright (c) 2018 by blindtiger. All rights reserved.
+; Copyright (c) 2019 by blindtiger. All rights reserved.
 ;
 ; The contents of this file are subject to the Mozilla Public License Version
 ; 2.0 (the "License"); you may not use this file except in compliance with
@@ -36,7 +36,8 @@ PgbRevertWorkerToSelf                   equ 00000068h
 PgbRtlRestoreContext                    equ 00000070h
 PgbExQueueWorkItem                      equ 00000078h
 PgbExFreePool                           equ 00000080h
-PgbReferenceCount                       equ 00000088h
+PgbMmFreeIndependentPages               equ 00000088h
+PgbReferenceCount                       equ 00000090h
 
 ; ULONG64
 ; NTAPI
@@ -52,32 +53,6 @@ PgbReferenceCount                       equ 00000088h
         ret
     
     LEAF_END _btc64, _TEXT$00
-        
-; VOID
-;     NTAPI
-;     _MakePgFire(
-;         VOID
-; );
-
-    LEAF_ENTRY _MakePgFire, _TEXT$00
-        
-        sub rsp, 10h
-
-        lea rcx, [rsp + 2]
-
-        sidt fword ptr [rcx]
-
-        mov ax, 0ffffh
-        mov [rcx], ax
-
-        lidt fword ptr [rcx]
-        sidt fword ptr [rcx]
-
-        add rsp, 10h
-
-        ret
-
-    LEAF_END _MakePgFire, _TEXT$00
         
 ; PVOID
 ; NTAPI
