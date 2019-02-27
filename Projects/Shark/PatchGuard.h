@@ -167,7 +167,7 @@ extern "C" {
 
         CHAR _SdbpCheckDll[0x3c];
         CHAR _Btc64[8];
-        CHAR _ClearCallback[0x2db];
+        CHAR _ClearCallback[0x2e0];
         CHAR _Message[0x55];
     }PGBLOCK, *PPGBLOCK;
 
