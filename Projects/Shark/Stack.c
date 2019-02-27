@@ -33,7 +33,7 @@ PrintSymbol(
         if (0 == Symbol->Offset) {
 #ifndef PUBLIC
             DbgPrint(
-                "%s< %p > %wZ!%hs\n",
+                "%s < %p > %wZ!%hs\n",
                 Prefix,
                 Symbol->Address,
                 &Symbol->DataTableEntry->BaseDllName,
@@ -43,7 +43,7 @@ PrintSymbol(
         else {
 #ifndef PUBLIC
             DbgPrint(
-                "%s< %p > %wZ!%hs + %x\n",
+                "%s < %p > %wZ!%hs + %x\n",
                 Prefix,
                 Symbol->Address,
                 &Symbol->DataTableEntry->BaseDllName,
@@ -56,7 +56,7 @@ PrintSymbol(
         if (0 == Symbol->Offset) {
 #ifndef PUBLIC
             DbgPrint(
-                "%s< %p > %wZ!@%d\n",
+                "%s < %p > %wZ!@%d\n",
                 Prefix,
                 Symbol->Address,
                 &Symbol->DataTableEntry->BaseDllName,
@@ -66,7 +66,7 @@ PrintSymbol(
         else {
 #ifndef PUBLIC
             DbgPrint(
-                "%s< %p > %wZ!@%d + %x\n",
+                "%s < %p > %wZ!@%d + %x\n",
                 Prefix,
                 Symbol->Address,
                 &Symbol->DataTableEntry->BaseDllName,
@@ -78,7 +78,7 @@ PrintSymbol(
     else if (NULL != Symbol->DataTableEntry) {
 #ifndef PUBLIC
         DbgPrint(
-            "%s< %p > %wZ + %x\n",
+            "%s < %p > %wZ + %x\n",
             Prefix,
             Symbol->Address,
             &Symbol->DataTableEntry->BaseDllName,
@@ -88,7 +88,7 @@ PrintSymbol(
     else {
 #ifndef PUBLIC
         DbgPrint(
-            "%s< %p > symbol not found\n",
+            "%s < %p > symbol not found\n",
             Prefix,
             Symbol->Address);
 #endif // !PUBLIC

@@ -308,7 +308,7 @@ InitializePgBlock(
 
 #ifndef PUBLIC
                             FindAndPrintSymbol(
-                                "[Shark] ",
+                                "[Shark]",
                                 (PVOID)PgBlock->Fields[0]);
 #endif // !PUBLIC
 
@@ -317,7 +317,7 @@ InitializePgBlock(
 
 #ifndef PUBLIC
                             FindAndPrintSymbol(
-                                "[Shark] ",
+                                "[Shark]",
                                 (PVOID)PgBlock->Fields[1]);
 #endif // !PUBLIC
 
@@ -326,7 +326,7 @@ InitializePgBlock(
 
 #ifndef PUBLIC
                             FindAndPrintSymbol(
-                                "[Shark] ",
+                                "[Shark]",
                                 (PVOID)PgBlock->Fields[2]);
 #endif // !PUBLIC
 
@@ -335,7 +335,7 @@ InitializePgBlock(
 
 #ifndef PUBLIC
                             FindAndPrintSymbol(
-                                "[Shark] ",
+                                "[Shark]",
                                 (PVOID)PgBlock->Fields[3]);
 #endif // !PUBLIC
 
@@ -1369,7 +1369,7 @@ PgLocateSystemPtesObject(
                         Object->RegionSize);
 #endif // !PUBLIC
 
-                    Object->Type = 1;
+                    Object->Type = PgSystemPtes;
 
                     break;
                 }
@@ -1416,7 +1416,7 @@ PgLocateObject(
                             Object->RegionSize);
 #endif // !PUBLIC
 
-                        Object->Type = 1;
+                        Object->Type = PgPoolBigPage;
 
                         break;
                     }
