@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2018 by blindtiger. All rights reserved.
+* Copyright (c) 2019 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License")); you may not use this file except in compliance with
@@ -19,31 +19,6 @@
 #include <defs.h>
 
 #include "Except.h"
-
-#include "Reload.h"
-
-ULONG
-NTAPI
-EncodeSystemPointer(
-    __in ULONG Pointer
-)
-{
-    return ((SharedUserData->Cookie ^
-        Pointer) >> (SharedUserData->Cookie & 0x1f)) |
-        ((SharedUserData->Cookie ^ Pointer) <<
-        (32 - (SharedUserData->Cookie & 0x1f)));
-}
-
-ULONG
-NTAPI
-RtlDecodeSystemPointer(
-    __in ULONG Pointer
-)
-{
-    return SharedUserData->Cookie ^
-        ((Pointer >> (32 - (SharedUserData->Cookie & 0x1f))) |
-        (Pointer << (SharedUserData->Cookie & 0x1f)));
-}
 
 VOID
 NTAPI
@@ -113,22 +88,4 @@ CaptureImageExceptionValues(
                 TableSize);
         }
     }
-}
-
-PVOID
-NTAPI
-LookupFunctionTableEx(
-    __in PVOID ControlPc,
-    __inout PVOID * ImageBase,
-    __out PULONG SizeOfTable
-)
-{
-    PVOID FunctionTable = NULL;
-
-    CaptureImageExceptionValues(
-        *ImageBase,
-        &FunctionTable,
-        SizeOfTable);
-
-    return FunctionTable;
 }

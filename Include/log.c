@@ -63,3 +63,55 @@ vDbgPrint(
         }
     }
 }
+
+VOID
+NTAPI
+PrintHexadecimal(
+    __in PCTSTR Prefix,
+    __in PCSTR Hexadecimal,
+    __in ULONG Length
+)
+{
+#define MAXIMUM_LINE_CHARACTERS 16
+#define SINGLE_CHARACTER 3
+
+    ULONG Index = 0;
+    ULONG SubIndex = 0;
+    TCHAR Line[SINGLE_CHARACTER * (MAXIMUM_LINE_CHARACTERS + 1)] = { 0 };
+
+    for (Index = 0;
+        Index < Length;
+        Index++) {
+        if ((MAXIMUM_LINE_CHARACTERS - 1) == SubIndex) {
+            _stprintf(
+                &Line[SubIndex * SINGLE_CHARACTER],
+                TEXT("%02x"),
+                Hexadecimal[Index] & 0xff);
+
+            Line[SubIndex * SINGLE_CHARACTER + (SINGLE_CHARACTER - 1)] = 0;
+
+            SubIndex = 0;
+
+            vDbgPrint(
+                TEXT("%s %s\n"),
+                Prefix,
+                Line);
+        }
+        else if ((MAXIMUM_LINE_CHARACTERS / 2 - 1) == SubIndex) {
+            _stprintf(
+                &Line[SubIndex * SINGLE_CHARACTER],
+                TEXT("%02x-"),
+                Hexadecimal[Index] & 0xff);
+
+            SubIndex++;
+        }
+        else {
+            _stprintf(
+                &Line[SubIndex * SINGLE_CHARACTER],
+                TEXT("%02x "),
+                Hexadecimal[Index] & 0xff);
+
+            SubIndex++;
+        }
+    }
+}

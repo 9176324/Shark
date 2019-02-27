@@ -60,7 +60,13 @@
     <ClCompile Include="Rtx.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Detours.c">
+    <ClCompile Include="AMD64\StackAMD64.c">
+      <Filter>Source Files\AMD64</Filter>
+    </ClCompile>
+    <ClCompile Include="I386\StackI386.c">
+      <Filter>Source Files\I386</Filter>
+    </ClCompile>
+    <ClCompile Include="Detour.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -86,12 +92,6 @@
       <Filter>Source Files\AMD64</Filter>
     </MASM>
     <MASM Include="I386\CmpI386.asm">
-      <Filter>Source Files\I386</Filter>
-    </MASM>
-    <MASM Include="AMD64\PatchGuardInlineAMD64.asm">
-      <Filter>Source Files\AMD64</Filter>
-    </MASM>
-    <MASM Include="I386\PatchGuardInlineI386.c">
       <Filter>Source Files\I386</Filter>
     </MASM>
   </ItemGroup>
@@ -123,7 +123,7 @@
     <ClInclude Include="Rtx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Detours.h">
+    <ClInclude Include="Detour.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

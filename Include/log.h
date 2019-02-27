@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2018 by blindtiger. All rights reserved.
+* Copyright (c) 2019 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License"); you may not use this file except in compliance with
@@ -24,6 +24,23 @@
 extern "C" {
 #endif	/* __cplusplus */
 
+#ifndef NTOS_KERNEL_RUNTIME
+    VOID
+        CDECL
+        vDbgPrint(
+            __in PCTSTR Format,
+            ...
+        );
+
+    VOID
+        NTAPI
+        PrintHexadecimal(
+            __in PCTSTR Prefix,
+            __in PCSTR Hexadecimal,
+            __in ULONG Length
+        );
+#endif // !NTOS_KERNEL_RUNTIME
+
 #ifndef TRACE
 #ifndef PUBLIC
 #ifndef NTOS_KERNEL_RUNTIME
@@ -36,13 +53,6 @@ extern "C" {
                     __LINE__, \
                     __FUNCDNAME__, \
                     exp), FALSE)
-
-    VOID
-        CDECL
-        vDbgPrint(
-            __in PCTSTR Format,
-            ...
-        );
 #else
 #define TRACE(exp) \
             (((NTSTATUS)exp) >= 0) ? \

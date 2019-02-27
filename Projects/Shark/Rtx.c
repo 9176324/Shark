@@ -21,7 +21,7 @@
 #include "Rtx.h"
 
 #include "Ctx.h"
-#include "Detours.h"
+#include "Detour.h"
 #include "Scan.h"
 
 VOID
@@ -38,7 +38,7 @@ AsyncDispatcher(
 
     Atx = CONTAINING_RECORD(Apc, ATX, Apc);
 
-    Atx->Rtx.Routines.Result = _MultipleDispatcher(
+    Atx->Rtx.Routines.Result = MultipleDispatcher(
         Atx->Rtx.Routines.ApcRoutine,
         Atx->Rtx.Routines.SystemRoutine,
         Atx->Rtx.Routines.StartRoutine,
@@ -51,15 +51,16 @@ NTSTATUS
 NTAPI
 AsyncCall(
     __in HANDLE UniqueThread,
-    __in PPS_APC_ROUTINE ApcRoutine,
-    __in PKSYSTEM_ROUTINE SystemRoutine,
-    __in PUSER_THREAD_START_ROUTINE StartRoutine,
-    __in PVOID StartContext
+    __in_opt PPS_APC_ROUTINE ApcRoutine,
+    __in_opt PKSYSTEM_ROUTINE SystemRoutine,
+    __in_opt PUSER_THREAD_START_ROUTINE StartRoutine,
+    __in_opt PVOID StartContext
 )
 {
     NTSTATUS Status = STATUS_SUCCESS;
     PETHREAD Thread = NULL;
     ATX Atx = { 0 };
+    LARGE_INTEGER Timeout = { 0 };
 
     Status = PsLookupThreadByThreadId(
         UniqueThread,
@@ -71,12 +72,12 @@ AsyncCall(
         Atx.Rtx.Routines.StartRoutine = StartRoutine;
         Atx.Rtx.Routines.StartContext = StartContext;
 
-        if ((ULONG_PTR)KeGetCurrentThread() != (ULONG_PTR)Thread) {
-            KeInitializeEvent(
-                &Atx.Rtx.Notify,
-                SynchronizationEvent,
-                FALSE);
+        KeInitializeEvent(
+            &Atx.Rtx.Notify,
+            SynchronizationEvent,
+            FALSE);
 
+        if ((ULONG_PTR)KeGetCurrentThread() != (ULONG_PTR)Thread) {
             KeInitializeApc(
                 &Atx.Apc,
                 Thread,
@@ -86,6 +87,8 @@ AsyncCall(
                 NULL,
                 KernelMode,
                 NULL);
+
+            Timeout.QuadPart = Int32x32To64(10, -10 * 1000 * 1000);
 
             if (FALSE != KeInsertQueueApc(
                 &Atx.Apc,
@@ -97,7 +100,7 @@ AsyncCall(
                     Executive,
                     KernelMode,
                     FALSE,
-                    NULL);
+                    &Timeout);
 
                 if (STATUS_SUCCESS == Status) {
                     Status = Atx.Rtx.Routines.Result;
@@ -121,74 +124,12 @@ AsyncCall(
 
 VOID
 NTAPI
-UserSpecialApc(
-    __in PKAPC Apc,
-    __in PKNORMAL_ROUTINE * NormalRoutine,
-    __in PVOID * NormalContext,
-    __in PVOID * SystemArgument1,
-    __in PVOID * SystemArgument2
-)
-{
-    ExFreePool(Apc);
-}
-
-NTSTATUS
-NTAPI
-UserAsyncCall(
-    __in PKTHREAD Thread,
-    __in PPS_APC_ROUTINE ApcRoutine,
-    __in PKSYSTEM_ROUTINE SystemRoutine,
-    __in PUSER_THREAD_START_ROUTINE StartRoutine,
-    __in PVOID StartContext
-)
-{
-    NTSTATUS Status = STATUS_SUCCESS;
-    PKAPC Apc = NULL;
-
-    Apc = ExAllocatePoolWithQuotaTag(
-        NonPagedPool | POOL_QUOTA_FAIL_INSTEAD_OF_RAISE,
-        sizeof(*Apc),
-        'pasP');
-
-    if (NULL == Apc) {
-        Status = STATUS_NO_MEMORY;
-    }
-    else {
-        KeInitializeApc(
-            Apc,
-            Thread,
-            OriginalApcEnvironment,
-            UserSpecialApc,
-            NULL,
-            (PKNORMAL_ROUTINE)ApcRoutine,
-            UserMode,
-            SystemRoutine);
-
-        if (FALSE == KeInsertQueueApc(
-            Apc,
-            StartRoutine,
-            StartContext,
-            0)) {
-            ExFreePool(Apc);
-
-            Status = STATUS_UNSUCCESSFUL;
-        }
-        else {
-            KeTestAlertThread(UserMode);
-        }
-    }
-
-    return Status;
-}
-
-VOID
-NTAPI
 IpiDispatcher(
     __in PRTX Rtx
 )
 {
     if (-1 == Rtx->Processor) {
-        _MultipleDispatcher(
+        MultipleDispatcher(
             Rtx->Routines.ApcRoutine,
             Rtx->Routines.SystemRoutine,
             Rtx->Routines.StartRoutine,
@@ -196,7 +137,7 @@ IpiDispatcher(
     }
     else {
         if (KeGetCurrentProcessorNumber() == Rtx->Processor) {
-            Rtx->Routines.Result = _MultipleDispatcher(
+            Rtx->Routines.Result = MultipleDispatcher(
                 Rtx->Routines.ApcRoutine,
                 Rtx->Routines.SystemRoutine,
                 Rtx->Routines.StartRoutine,
@@ -208,10 +149,10 @@ IpiDispatcher(
 ULONG_PTR
 NTAPI
 IpiSingleCall(
-    __in PPS_APC_ROUTINE ApcRoutine,
-    __in PKSYSTEM_ROUTINE SystemRoutine,
-    __in PUSER_THREAD_START_ROUTINE StartRoutine,
-    __in PVOID StartContext
+    __in_opt PPS_APC_ROUTINE ApcRoutine,
+    __in_opt PKSYSTEM_ROUTINE SystemRoutine,
+    __in_opt PUSER_THREAD_START_ROUTINE StartRoutine,
+    __in_opt PVOID StartContext
 )
 {
     ULONG_PTR Result = 0;
@@ -236,10 +177,10 @@ IpiSingleCall(
 VOID
 NTAPI
 IpiGenericCall(
-    __in PPS_APC_ROUTINE ApcRoutine,
-    __in PKSYSTEM_ROUTINE SystemRoutine,
-    __in PUSER_THREAD_START_ROUTINE StartRoutine,
-    __in PVOID StartContext
+    __in_opt PPS_APC_ROUTINE ApcRoutine,
+    __in_opt PKSYSTEM_ROUTINE SystemRoutine,
+    __in_opt PUSER_THREAD_START_ROUTINE StartRoutine,
+    __in_opt PVOID StartContext
 )
 {
     RTX Rtx = { 0 };

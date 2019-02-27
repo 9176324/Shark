@@ -26,10 +26,10 @@ extern "C" {
 
 #include <devioctl.h>
 
-#define LOADER_IMAGE_STRING L"Shark.sys"
-#define LOADER_SERVICE_STRING L"Shark"
-#define LOADER_DEVICE_STRING L"\\Device\\Shark"
-#define LOADER_SYMBOLIC_STRING L"\\DosDevices\\Shark"
+#define LOADER_STRING L"Shark.sys"
+#define SERVICE_STRING L"Shark"
+#define DEVICE_STRING L"\\Device\\Shark"
+#define SYMBOLIC_STRING L"\\DosDevices\\Shark"
 
 #ifdef __cplusplus
 }

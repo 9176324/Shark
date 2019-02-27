@@ -18,8 +18,34 @@
 
 #include <defs.h>
 
-#include "Ctx.h"
+#include "Stack.h"
 
-#include "Detour.h"
-#include "Reload.h"
-#include "Scan.h"
+DECLSPEC_NOINLINE
+ULONG
+NTAPI
+WalkFrameChain(
+    __out PCALLERS Callers,
+    __in ULONG Count
+)
+{
+    ULONG Fp = 0;
+    ULONG Index = 0;
+    ULONG Top = 0;
+    ULONG Bottom = 0;
+
+    IoGetStackLimits(&Bottom, &Top);
+
+    _asm mov Fp, ebp;
+
+    while (Index < Count &&
+        Fp >= Bottom &&
+        Fp < Top) {
+        Callers[Index].Establisher = (PVOID)(*(PULONG)(Fp + 4));
+        Callers[Index].EstablisherFrame = (PVOID *)(Fp + 8);
+
+        Index += 1;
+        Fp = *(PULONG)Fp;
+    }
+
+    return Index;
+}

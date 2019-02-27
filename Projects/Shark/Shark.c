@@ -21,7 +21,7 @@
 
 #include "Shark.h"
 
-#include "Detours.h"
+#include "Detour.h"
 #include "Reload.h"
 #include "PatchGuard.h"
 #include "Space.h"
@@ -79,7 +79,7 @@ DriverEntry(
     UNICODE_STRING DeviceName = { 0 };
     UNICODE_STRING SymbolicLinkName = { 0 };
 
-    RtlInitUnicodeString(&DeviceName, LOADER_DEVICE_STRING);
+    RtlInitUnicodeString(&DeviceName, DEVICE_STRING);
 
     Status = IoCreateDevice(
         DriverObject,
@@ -97,7 +97,7 @@ DriverEntry(
         DriverObject->MajorFunction[IRP_MJ_READ] = (PDRIVER_DISPATCH)DeviceRead;
         DriverObject->MajorFunction[IRP_MJ_DEVICE_CONTROL] = (PDRIVER_DISPATCH)DeviceControl;
 
-        RtlInitUnicodeString(&SymbolicLinkName, LOADER_SYMBOLIC_STRING);
+        RtlInitUnicodeString(&SymbolicLinkName, SYMBOLIC_STRING);
 
         Status = IoCreateSymbolicLink(&SymbolicLinkName, &DeviceName);
 
@@ -124,13 +124,13 @@ DriverUnload(
 {
     UNICODE_STRING SymbolicLinkName = { 0 };
 
-    RtlInitUnicodeString(&SymbolicLinkName, LOADER_SYMBOLIC_STRING);
+    RtlInitUnicodeString(&SymbolicLinkName, SYMBOLIC_STRING);
     IoDeleteSymbolicLink(&SymbolicLinkName);
     IoDeleteDevice(DriverObject->DeviceObject);
 
-#ifndef VMP
-    DbgPrint("Shark - unload\n");
-#endif // !VMP
+#ifndef PUBLIC
+    DbgPrint("[Shark] - unload\n");
+#endif // !PUBLIC
 }
 
 NTSTATUS
@@ -223,49 +223,25 @@ DeviceControl(
 
     switch (IrpSp->Parameters.DeviceIoControl.IoControlCode) {
     case 0: {
-        PPATCHGUARD_BLOCK PatchGuardBlock = NULL;
-        PCCHAR NumberProcessors = NULL;
-        UNICODE_STRING RoutineString = { 0 };
+        PPGBLOCK PgBlock = NULL;
 
-        ReloaderBlock = ExAllocatePool(
+        GpBlock = ExAllocatePool(
             NonPagedPool,
-            sizeof(RELOADER_PARAMETER_BLOCK) + sizeof(PATCHGUARD_BLOCK));
+            sizeof(GPBLOCK) + sizeof(PGBLOCK));
 
-        if (NULL != ReloaderBlock) {
+        if (NULL != GpBlock) {
             RtlZeroMemory(
-                ReloaderBlock,
-                sizeof(RELOADER_PARAMETER_BLOCK) + sizeof(PATCHGUARD_BLOCK));
+                GpBlock,
+                sizeof(GPBLOCK) + sizeof(PGBLOCK));
 
-            PsGetVersion(NULL, NULL, &ReloaderBlock->BuildNumber, NULL);
+            InitializeGpBlock(GpBlock);
+            InitializeSystemSpace(GpBlock);
 
-            RtlInitUnicodeString(&RoutineString, L"KeNumberProcessors");
+            PgBlock =(PCHAR)GpBlock + sizeof(GPBLOCK);
 
-            NumberProcessors = MmGetSystemRoutineAddress(&RoutineString);
+            GpBlock->Features.PatchGuard = TRUE;
 
-            ReloaderBlock->NumberProcessors = *NumberProcessors;
-
-            InitializeLoadedModuleList(ReloaderBlock);
-            InitializeSystemSpace(ReloaderBlock);
-
-            PatchGuardBlock =
-                (PCHAR)ReloaderBlock + sizeof(RELOADER_PARAMETER_BLOCK);
-
-            PatchGuardBlock->BuildNumber = ReloaderBlock->BuildNumber;
-            PatchGuardBlock->NumberProcessors = ReloaderBlock->NumberProcessors;
-            PatchGuardBlock->KernelBase = (PVOID)ReloaderBlock->DebuggerDataBlock.KernBase;
-
-            PatchGuardBlock->PsLoadedModuleList =
-                (PLIST_ENTRY)ReloaderBlock->DebuggerDataBlock.PsLoadedModuleList;
-
-            PatchGuardBlock->KernelDataTableEntry = CONTAINING_RECORD(
-                PatchGuardBlock->PsLoadedModuleList->Flink,
-                KLDR_DATA_TABLE_ENTRY,
-                InLoadOrderLinks);
-
-            ReloaderBlock->KernelDataTableEntry = PatchGuardBlock->KernelDataTableEntry;
-            ReloaderBlock->DeployPatchGuard = TRUE;
-
-            DisablePatchGuard(PatchGuardBlock);
+            PgClear(PgBlock);
         }
 
         Irp->IoStatus.Information = 0;

@@ -177,7 +177,9 @@ extern "C" {
 
 #define WOW64_CONTEXT_LENGTH  (sizeof(WOW64_CONTEXT))
 #define WOW64_CONTEXT_ALIGN   (sizeof(ULONG))
-#define WOW64_CONTEXT_ROUND   (CONTEXT_ALIGN - 1)
+#define WOW64_CONTEXT_ROUND   (WOW64_CONTEXT_ALIGN - 1)
+
+#define ThreadWow64Context 29
 
 #include "poppack.h"
 

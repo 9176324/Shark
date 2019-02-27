@@ -53,6 +53,11 @@ extern "C" {
 
 #include <log.h>
 
+#define SystemRootDirectory L"\\SystemRoot\\System32\\"
+#define Wow64SystemRootDirectory L"\\SystemRoot\\SysWOW64\\"
+
+#define ServicesDirectory L"\\Registry\\Machine\\System\\CurrentControlSet\\Services\\"
+
 #ifdef __cplusplus
 }
 #endif	/* __cplusplus */

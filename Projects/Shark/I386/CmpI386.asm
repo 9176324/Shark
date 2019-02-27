@@ -1,6 +1,6 @@
 ;
 ;
-; Copyright (c) 2018 by blindtiger. All rights reserved.
+; Copyright (c) 2019 by blindtiger. All rights reserved.
 ;
 ; The contents of this file are subject to the Mozilla Public License Version
 ; 2.0 (the "License"); you may not use this file except in compliance with
@@ -16,9 +16,7 @@
 ;
 ;
 
-.386p
-
-.model flat, stdcall
+.686
 
         .xlist
 include callconv.inc
@@ -26,44 +24,68 @@ include callconv.inc
         
 _TEXT$00    SEGMENT PAGE 'CODE'
 
-_CmpByte@8 :
+; BOOLEAN
+;     NTAPI
+;     _CmpByte(
+;         __in CHAR b1,
+;         __in CHAR b2
+;     );
+
+    cPublicProc __CmpByte, 2
 
         mov cl, [esp + 4]
         mov dl, [esp + 8]
         cmp cl, dl
         setnz al
 
-        ret 8
+        stdRET __CmpByte
 
-PUBLIC _CmpByte@8
+    stdENDP __CmpByte
+    
+; BOOLEAN
+;     NTAPI
+;     _CmpShort(
+;         __in SHORT s1,
+;         __in SHORT s2
+;     );
 
-align 20h
-
-_CmpShort@8 :
+    cPublicProc __CmpShort, 2
 
         mov cx, [esp + 4]
         mov dx, [esp + 8]
         cmp cx, dx
         setnz al
+        
+        stdRET __CmpShort
 
-        ret 8
+    stdENDP __CmpShort
 
-PUBLIC _CmpShort@8
+; BOOLEAN
+;     NTAPI
+;     _CmpLong(
+;         __in LONG l1,
+;         __in LONG l2
+;     );
 
-align 20h
-
-_CmpLong@8 :
+    cPublicProc __CmpLong, 2
 
         mov ecx, [esp + 4]
         mov edx, [esp + 8]
         cmp ecx, edx
         setnz al
+        
+        stdRET __CmpLong
 
-        ret 8
+    stdENDP __CmpLong
+    
+; BOOLEAN
+;     NTAPI
+;     _CmpLongLong(
+;         __in LONGLONG ll1,
+;         __in LONGLONG ll2
+;     );
 
-PUBLIC _CmpLong@8
-
-_CmpLongLong@16 :
+    cPublicProc __CmpLongLong, 4
 
         mov ecx, [esp + 4]
         mov edx, [esp + 0ch]
@@ -77,10 +99,10 @@ _CmpLongLong@16 :
 
     @@ :
         setnz al
+        
+        stdRET __CmpLongLong
 
-        ret 10h
-
-PUBLIC _CmpLongLong@16
+    stdENDP __CmpLongLong
 
 _TEXT$00    ends
 

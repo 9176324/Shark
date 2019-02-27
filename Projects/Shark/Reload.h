@@ -29,32 +29,44 @@
 extern "C" {
 #endif	/* __cplusplus */
 
-#define BinDirectory "H:\\Labs\\Sefirot\\Build\\Bins\\"
+    typedef LONG EX_SPIN_LOCK, *PEX_SPIN_LOCK;
 
-#define SystemDirectory L"\\SystemRoot\\System32\\"
-#define Wow64SystemDirectory L"\\SystemRoot\\SysWOW64\\"
+    typedef enum _OB_PREOP_CALLBACK_STATUS OB_PREOP_CALLBACK_STATUS;
+    typedef struct _OB_PRE_OPERATION_INFORMATION *POB_PRE_OPERATION_INFORMATION;
+    typedef struct _OB_POST_OPERATION_INFORMATION *POB_POST_OPERATION_INFORMATION;
 
-    typedef struct _RELOADER_PARAMETER_BLOCK {
-        KDDEBUGGER_DATA64 DebuggerDataBlock;
-        KDDEBUGGER_DATA_ADDITION64 DebuggerDataAdditionBlock;
+    typedef struct _GPBLOCK {
+        PLIST_ENTRY PsLoadedModuleList;
+        PEPROCESS PsInitialSystemProcess;
+        PERESOURCE PsLoadedModuleResource;
+        struct _FUNCTION_TABLE * PsInvertedFunctionTable;
+        KSERVICE_TABLE_DESCRIPTOR * KeServiceDescriptorTable;
+        KSERVICE_TABLE_DESCRIPTOR * KeServiceDescriptorTableShadow;
 
-        PKLDR_DATA_TABLE_ENTRY KernelDataTableEntry;
+        PKLDR_DATA_TABLE_ENTRY KernelDataTableEntry; // ntoskrnl.exe
+        PKLDR_DATA_TABLE_ENTRY CoreDataTableEntry; // self
+        PVOID CpuControlBlock; // hypervisor
+        struct _PRIVATE_HEADER * PrivateHeader; // private data
 
-        PKLDR_DATA_TABLE_ENTRY CoreDataTableEntry;
+        struct _PRIVATE_OBJECT * NativeObject;
 
-        PVOID PrivateHeader;
+#ifdef _WIN64
+        struct _PRIVATE_OBJECT * Wx86NativeObject;
+#endif // _WIN64
+        LIST_ENTRY LoadedPrivateImageList;
+        LIST_ENTRY ObjectList;
+        KSPIN_LOCK ObjectLock;
 
-        PVOID CpuControlBlock;
-        PKLDR_DATA_TABLE_ENTRY RootDataTableEntry;
+        struct {
+            BOOLEAN Hypervisor : 1; // deploy hypervisor
+            BOOLEAN PatchGuard : 1; // deploy bypass patchguard
+            BOOLEAN Callback : 1; // deploy callback
+        }Features;
 
-        BOOLEAN DeployRoot;
-        BOOLEAN DeployPatchGuard;
-        CCHAR Phase;
         CCHAR NumberProcessors;
+        CCHAR Reserved[2];
 
         ULONG BuildNumber;
-
-        struct _FUNCTION_TABLE * InvertedFunctionTable;
 
 #ifdef _WIN64
         PMMPTE PxeBase;
@@ -70,12 +82,22 @@ extern "C" {
         PMMPTE PteBase;
         PMMPTE PteTop;
 
-        LIST_ENTRY LoadedPrivateImageList;
+        VOID
+        (NTAPI * CaptureContext)(
+            __in ULONG ProgramCounter,
+            __in PVOID Detour,
+            __in struct _GUARD * Guard
+            );
 
-        KSERVICE_TABLE_DESCRIPTOR * ServiceDescriptorTable;
-        KSERVICE_TABLE_DESCRIPTOR * ServiceDescriptorTableShadow;
+        VOID
+        (NTAPI * KeEnterCriticalRegion)(
+            VOID
+            );
 
-        USHORT OffsetKThreadTrapFrame;
+        VOID
+        (NTAPI * KeLeaveCriticalRegion)(
+            VOID
+            );
 
         NTSTATUS
         (NTAPI * PspCreateThread)(
@@ -92,6 +114,37 @@ extern "C" {
             __in BOOLEAN CreateSuspended,
             __in_opt PKSTART_ROUTINE StartRoutine,
             __in PVOID StartContext
+            );
+
+        BOOLEAN
+        (FASTCALL * ExAcquireRundownProtection)(
+            __inout PEX_RUNDOWN_REF RunRef
+            );
+
+        VOID
+        (FASTCALL * ExReleaseRundownProtection)(
+            __inout PEX_RUNDOWN_REF RunRef
+            );
+
+        VOID
+        (FASTCALL * ExWaitForRundownProtectionRelease)(
+            __inout PEX_RUNDOWN_REF RunRef
+            );
+
+        PEX_CALLBACK_ROUTINE_BLOCK
+        (NTAPI * ExAllocateCallBack)(
+            __in PEX_CALLBACK_FUNCTION Function,
+            __in PVOID Context
+            );
+
+        VOID
+        (NTAPI * ExFreeCallBack)(
+            __in PEX_CALLBACK_ROUTINE_BLOCK CallBackBlock
+            );
+
+        VOID
+        (NTAPI * ExWaitForCallBacks)(
+            __in PEX_CALLBACK_ROUTINE_BLOCK CallBackBlock
             );
 
         PEX_CALLBACK_ROUTINE_BLOCK
@@ -117,47 +170,97 @@ extern "C" {
             __in PEX_CALLBACK_ROUTINE_BLOCK CallBackBlock
             );
 
-        PVOID WorkerObject;
+        KIRQL
+        (NTAPI * ExAcquireSpinLockShared)(
+            __inout PEX_SPIN_LOCK SpinLock
+            );
 
-#ifdef _WIN64
-        PVOID Wx86WorkerObject;
-#endif // _WIN64
+        VOID
+        (NTAPI * ExReleaseSpinLockShared)(
+            __inout PEX_SPIN_LOCK SpinLock,
+            __in KIRQL OldIrql
+            );
 
-        LIST_ENTRY FreeObjectList;
-        LIST_ENTRY ObjectList;
+        ULONG
+        (NTAPI * DbgPrint)(
+            __in PCH Format,
+            ...
+            );
 
-        // PATCHGUARD_BLOCK PatchGuardBlock;
-    } RELOADER_PARAMETER_BLOCK, *PRELOADER_PARAMETER_BLOCK;
+        SIZE_T
+        (NTAPI * RtlCompareMemory)(
+            const VOID * Destination,
+            const VOID * Source,
+            SIZE_T Length
+            );
 
-    ULONG
-        NTAPI
-        GetPlatform(
-            __in PVOID ImageBase
-        );
+        VOID
+        (NTAPI * RtlRestoreContext)(
+            __in PCONTEXT ContextRecord,
+            __in_opt struct _EXCEPTION_RECORD *ExceptionRecord
+            );
 
-    ULONG
-        NTAPI
-        GetTimeStamp(
-            __in PVOID ImageBase
-        );
+        VOID
+        (NTAPI * ExQueueWorkItem)(
+            __inout PWORK_QUEUE_ITEM WorkItem,
+            __in WORK_QUEUE_TYPE QueueType
+            );
 
-    USHORT
-        NTAPI
-        GetSubsystem(
-            __in PVOID ImageBase
-        );
+        VOID
+        (NTAPI * ExFreePoolWithTag)(
+            __in PVOID P,
+            __in ULONG Tag
+            );
 
-    ULONG
-        NTAPI
-        GetSizeOfImage(
-            __in PVOID ImageBase
-        );
+        VOID
+        (NTAPI * KeBugCheckEx)(
+            __in ULONG BugCheckCode,
+            __in ULONG_PTR P1,
+            __in ULONG_PTR P2,
+            __in ULONG_PTR P3,
+            __in ULONG_PTR P4
+            );
 
-    PVOID
-        NTAPI
-        GetAddressOfEntryPoint(
-            __in PVOID ImageBase
-        );
+        HANDLE ObjectCallback;
+
+#define MAXIMUM_NOTIFY 64
+
+#define PROCESS_NOTIFY 0
+#define THREAD_NOTIFY 1
+#define IMAGE_NOTIFY 2
+
+        ULONG ProcessNotifyRoutineCount;
+        EX_CALLBACK ProcessNotifyRoutine[MAXIMUM_NOTIFY];
+
+        ULONG ThreadNotifyRoutineCount;
+        EX_CALLBACK ThreadNotifyRoutine[MAXIMUM_NOTIFY];
+
+        ULONG ImageNotifyRoutineCount;
+        EX_CALLBACK ImageNotifyRoutine[MAXIMUM_NOTIFY];
+
+        OB_PREOP_CALLBACK_STATUS
+        (NTAPI * ObjectPreCallback)(
+            __in PVOID RegistrationContext,
+            __in POB_PRE_OPERATION_INFORMATION OperationInformation
+            );
+
+        VOID
+        (NTAPI * ObjectPostCallback)(
+            __in PVOID RegistrationContext,
+            __in POB_POST_OPERATION_INFORMATION OperationInformation
+            );
+
+        KDDEBUGGER_DATA64 DebuggerDataBlock;
+        KDDEBUGGER_DATA_ADDITION64 DebuggerDataAdditionBlock;
+
+#ifndef _WIN64
+        CHAR _CaptureContext[0x91];
+#else
+        CHAR _CaptureContext[0x152];
+#endif // !_WIN64
+
+        // struct _PGBLOCK PgBlock;
+    } GPBLOCK, *PGPBLOCK;
 
     PIMAGE_SECTION_HEADER
         NTAPI
@@ -168,22 +271,8 @@ extern "C" {
 
     VOID
         NTAPI
-        RelocateImage(
-            __in PVOID ImageBase,
-            __in LONG_PTR Diff
-        );
-
-    VOID
-        NTAPI
-        InitializeLoadedModuleList(
-            __in PRELOADER_PARAMETER_BLOCK Block
-        );
-
-    NTSTATUS
-        NTAPI
-        FindEntryForKernelPrivateImage(
-            __in PUNICODE_STRING ImageFileName,
-            __out PKLDR_DATA_TABLE_ENTRY * DataTableEntry
+        InitializeGpBlock(
+            __in PGPBLOCK Block
         );
 
     NTSTATUS
@@ -195,66 +284,12 @@ extern "C" {
 
     NTSTATUS
         NTAPI
-        FindEntryForKernelPrivateImageAddress(
-            __in PVOID Address,
-            __out PKLDR_DATA_TABLE_ENTRY * DataTableEntry
-        );
-
-    NTSTATUS
-        NTAPI
         FindEntryForKernelImageAddress(
             __in PVOID Address,
             __out PKLDR_DATA_TABLE_ENTRY * DataTableEntry
         );
 
-    PVOID
-        NTAPI
-        GetKernelProcedureAddress(
-            __in PVOID ImageBase,
-            __in_opt PSTR ProcedureName,
-            __in_opt ULONG ProcedureNumber
-        );
-
-    PVOID
-        NTAPI
-        NameToAddress(
-            __in PSTR String
-        );
-
-    PKLDR_DATA_TABLE_ENTRY
-        NTAPI
-        LoadKernelPrivateImage(
-            __in PVOID ViewBase,
-            __in PCWSTR ImageName,
-            __in BOOLEAN Insert
-        );
-
-    VOID
-        NTAPI
-        UnloadKernelPrivateImage(
-            __in PKLDR_DATA_TABLE_ENTRY DataTableEntry
-        );
-
-    typedef struct _DUMP_WORKER {
-        WORK_QUEUE_ITEM Worker;
-        PVOID ImageBase;
-        SIZE_T ImageSize;
-        LARGE_INTEGER Interval;
-    }DUMP_WORKER, *PDUMP_WORKER;
-
-    NTSTATUS
-        NTAPI
-        DumpImage(
-            __in PDUMP_WORKER DumpWorker
-        );
-
-    NTSTATUS
-        NTAPI
-        DumpFile(
-            __in PUNICODE_STRING ImageFIleName
-        );
-
-    extern PRELOADER_PARAMETER_BLOCK ReloaderBlock;
+    extern PGPBLOCK GpBlock;
 
 #ifdef __cplusplus
 }

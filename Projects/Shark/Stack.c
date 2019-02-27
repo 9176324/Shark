@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2018 by blindtiger. All rights reserved.
+* Copyright (c) 2019 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License")); you may not use this file except in compliance with
@@ -22,213 +22,183 @@
 
 #include "Reload.h"
 
-#ifndef _WIN64
-DECLSPEC_NOINLINE
-ULONG
+VOID
 NTAPI
-WalkFrameChain(
-    __out PCALLERS Callers,
-    __in ULONG Count
+PrintSymbol(
+    __in PCSTR Prefix,
+    __in PSYMBOL Symbol
 )
 {
-    ULONG Fp = 0;
-    ULONG Index = 0;
-
-    _asm mov Fp, ebp;
-
-    while (Index < Count &&
-        MmIsAddressValid((PVOID)Fp)) {
-        Callers[Index].Establisher = (PVOID)(*(PULONG)(Fp + 4));
-        Callers[Index].EstablisherFrame = (PVOID *)(Fp + 8);
-
-        Index += 1;
-        Fp = *(PULONG)Fp;
-    }
-
-    return Index;
-}
-#else
-DECLSPEC_NOINLINE
-ULONG
-NTAPI
-WalkFrameChain(
-    __out PCALLERS Callers,
-    __in ULONG Count
-)
-{
-    CONTEXT ContextRecord = { 0 };
-    PVOID HandlerData = NULL;
-    ULONG Index = 0;
-    PRUNTIME_FUNCTION FunctionEntry = NULL;
-    ULONG64 ImageBase = 0;
-    ULONG64 EstablisherFrame = 0;
-
-    RtlCaptureContext(&ContextRecord);
-
-    while (Index < Count &&
-        MmIsAddressValid((PVOID)ContextRecord.Rip)) {
-        FunctionEntry = RtlLookupFunctionEntry(
-            ContextRecord.Rip,
-            &ImageBase,
-            NULL);
-
-        if (NULL != FunctionEntry) {
-            RtlVirtualUnwind(
-                UNW_FLAG_NHANDLER,
-                ImageBase,
-                ContextRecord.Rip,
-                FunctionEntry,
-                &ContextRecord,
-                &HandlerData,
-                &EstablisherFrame,
-                NULL);
-
-            Callers[Index].Establisher = (PVOID)ContextRecord.Rip;
-            Callers[Index].EstablisherFrame = (PVOID *)EstablisherFrame;
-
-            Index += 1;
+    if (NULL != Symbol->String) {
+        if (0 == Symbol->Offset) {
+#ifndef PUBLIC
+            DbgPrint(
+                "%s< %p > %wZ!%hs\n",
+                Prefix,
+                Symbol->Address,
+                &Symbol->DataTableEntry->BaseDllName,
+                Symbol->String);
+#endif // !PUBLIC
         }
         else {
-            break;
+#ifndef PUBLIC
+            DbgPrint(
+                "%s< %p > %wZ!%hs + %x\n",
+                Prefix,
+                Symbol->Address,
+                &Symbol->DataTableEntry->BaseDllName,
+                Symbol->String,
+                Symbol->Offset);
+#endif // !PUBLIC
         }
     }
-
-    return Index;
+    else if (0 != Symbol->Ordinal) {
+        if (0 == Symbol->Offset) {
+#ifndef PUBLIC
+            DbgPrint(
+                "%s< %p > %wZ!@%d\n",
+                Prefix,
+                Symbol->Address,
+                &Symbol->DataTableEntry->BaseDllName,
+                Symbol->Ordinal);
+#endif // !PUBLIC
+        }
+        else {
+#ifndef PUBLIC
+            DbgPrint(
+                "%s< %p > %wZ!@%d + %x\n",
+                Prefix,
+                Symbol->Address,
+                &Symbol->DataTableEntry->BaseDllName,
+                Symbol->Ordinal,
+                Symbol->Offset);
+#endif // !PUBLIC
+        }
+    }
+    else if (NULL != Symbol->DataTableEntry) {
+#ifndef PUBLIC
+        DbgPrint(
+            "%s< %p > %wZ + %x\n",
+            Prefix,
+            Symbol->Address,
+            &Symbol->DataTableEntry->BaseDllName,
+            Symbol->Offset);
+#endif // !PUBLIC
+    }
+    else {
+#ifndef PUBLIC
+        DbgPrint(
+            "%s< %p > symbol not found\n",
+            Prefix,
+            Symbol->Address);
+#endif // !PUBLIC
+    }
 }
-#endif // !_WIN64
 
-PSTR
+VOID
 NTAPI
-FindSymbol(
+WalkImageSymbol(
     __in PVOID Address,
-    __out_opt PKLDR_DATA_TABLE_ENTRY * DataTableEntry
+    __inout PSYMBOL Symbol
 )
 {
     NTSTATUS Status = STATUS_SUCCESS;
-    PKLDR_DATA_TABLE_ENTRY FoundDataTableEntry = NULL;
     PIMAGE_EXPORT_DIRECTORY ExportDirectory = NULL;
     ULONG Size = 0;
     PULONG NameTable = NULL;
     PUSHORT OrdinalTable = NULL;
     PULONG AddressTable = NULL;
+    PSTR NameTableName = NULL;
     USHORT HintIndex = 0;
+    USHORT NameIndex = 0;
     PVOID ProcedureAddress = NULL;
     PVOID NearAddress = NULL;
-    PSTR ProcedureName = NULL;
 
-    Status = FindEntryForKernelImageAddress(
-        Address,
-        &FoundDataTableEntry);
+    Symbol->Address = Address;
 
-    if (NT_SUCCESS(Status)) {
-        ExportDirectory = RtlImageDirectoryEntryToData(
-            FoundDataTableEntry->DllBase,
-            TRUE,
-            IMAGE_DIRECTORY_ENTRY_EXPORT,
-            &Size);
+    Symbol->Offset =
+        (ULONG_PTR)Address - (ULONG_PTR)Symbol->DataTableEntry->DllBase;
 
-        if (NULL != ExportDirectory) {
-            NameTable = (PCHAR)FoundDataTableEntry->DllBase + ExportDirectory->AddressOfNames;
-            OrdinalTable = (PCHAR)FoundDataTableEntry->DllBase + ExportDirectory->AddressOfNameOrdinals;
-            AddressTable = (PCHAR)FoundDataTableEntry->DllBase + ExportDirectory->AddressOfFunctions;
+    ExportDirectory = RtlImageDirectoryEntryToData(
+        Symbol->DataTableEntry->DllBase,
+        TRUE,
+        IMAGE_DIRECTORY_ENTRY_EXPORT,
+        &Size);
 
-            if (NULL != NameTable &&
-                NULL != OrdinalTable &&
-                NULL != AddressTable) {
-                for (HintIndex = 0;
-                    HintIndex < ExportDirectory->NumberOfNames;
-                    HintIndex++) {
-                    ProcedureAddress = (PCHAR)FoundDataTableEntry->DllBase + AddressTable[OrdinalTable[HintIndex]];
+    if (NULL != ExportDirectory) {
+        NameTable =
+            (PCHAR)Symbol->DataTableEntry->DllBase + ExportDirectory->AddressOfNames;
 
-                    if ((ULONG_PTR)ProcedureAddress <=
-                        (ULONG_PTR)Address) {
-                        if (NULL == NearAddress) {
-                            NearAddress = ProcedureAddress;
-                            ProcedureName = (PCHAR)FoundDataTableEntry->DllBase + NameTable[HintIndex];
-                        }
-                        else if ((ULONG_PTR)ProcedureAddress >(ULONG_PTR)NearAddress) {
-                            NearAddress = ProcedureAddress;
-                            ProcedureName = (PCHAR)FoundDataTableEntry->DllBase + NameTable[HintIndex];
+        OrdinalTable =
+            (PCHAR)Symbol->DataTableEntry->DllBase + ExportDirectory->AddressOfNameOrdinals;
+
+        AddressTable =
+            (PCHAR)Symbol->DataTableEntry->DllBase + ExportDirectory->AddressOfFunctions;
+
+        if (NULL != NameTable &&
+            NULL != OrdinalTable &&
+            NULL != AddressTable) {
+            for (HintIndex = 0;
+                HintIndex < ExportDirectory->NumberOfFunctions;
+                HintIndex++) {
+                ProcedureAddress =
+                    (PCHAR)Symbol->DataTableEntry->DllBase + AddressTable[HintIndex];
+
+                if ((ULONG_PTR)ProcedureAddress <= (ULONG_PTR)Symbol->Address &&
+                    (ULONG_PTR)ProcedureAddress > (ULONG_PTR)NearAddress) {
+                    NearAddress = ProcedureAddress;
+
+                    for (NameIndex = 0;
+                        NameIndex < ExportDirectory->NumberOfNames;
+                        NameIndex++) {
+                        if (HintIndex == OrdinalTable[NameIndex]) {
+                            Symbol->String =
+                                (PCHAR)Symbol->DataTableEntry->DllBase + NameTable[HintIndex];
                         }
                     }
+
+                    Symbol->Ordinal =
+                        HintIndex + ExportDirectory->Base;
+
+                    Symbol->Offset =
+                        (ULONG_PTR)Symbol->Address - (ULONG_PTR)ProcedureAddress;
                 }
             }
         }
-
-        if (NULL != DataTableEntry) {
-            *DataTableEntry = FoundDataTableEntry;
-        }
     }
-    else {
-        if (NULL != DataTableEntry) {
-            *DataTableEntry = NULL;
-        }
-    }
-
-    return ProcedureName;
 }
 
 VOID
 NTAPI
-PrintSymbol(
+FindSymbol(
+    __in PVOID Address,
+    __inout PSYMBOL Symbol
+)
+{
+    if (NT_SUCCESS(FindEntryForKernelImageAddress(
+        Address,
+        &Symbol->DataTableEntry))) {
+        WalkImageSymbol(Address, Symbol);
+    }
+}
+
+VOID
+NTAPI
+FindAndPrintSymbol(
+    __in PCSTR Prefix,
     __in PVOID Address
 )
 {
-    PKLDR_DATA_TABLE_ENTRY DataTableEnry = NULL;
-    PVOID ProcedureAddress = NULL;
-    PSTR ProcedureName = NULL;
+    SYMBOL Symbol = { 0 };
 
-    ProcedureName = FindSymbol(
-        (PVOID)Address,
-        &DataTableEnry);
-
-    if (NULL != ProcedureName) {
-        ProcedureAddress = GetKernelProcedureAddress(
-            DataTableEnry->DllBase,
-            ProcedureName,
-            0);
-
-        if (0 == (ULONG64)Address - (ULONG64)ProcedureAddress) {
-#ifndef PUBLIC
-            DbgPrint(
-                "[Shark] < %p > < %wZ!%hs >\n",
-                Address,
-                &DataTableEnry->BaseDllName,
-                ProcedureName);
-#endif // !PUBLIC
-        }
-        else {
-#ifndef PUBLIC
-            DbgPrint(
-                "[Shark] < %p > < %wZ!%hs + 0x%x >\n",
-                Address,
-                &DataTableEnry->BaseDllName,
-                ProcedureName,
-                (ULONG64)Address - (ULONG64)ProcedureAddress);
-#endif // !PUBLIC
-        }
-    }
-    else if (NULL != DataTableEnry) {
-#ifndef PUBLIC
-        DbgPrint(
-            "[Shark] < %p > < %wZ!%s + 0x%x >\n",
-            Address,
-            &DataTableEnry->BaseDllName,
-            (ULONG64)Address - (ULONG64)DataTableEnry->DllBase);
-#endif // !PUBLIC
-    }
-    else {
-#ifndef PUBLIC
-        DbgPrint(
-            "[Shark] < %p >\n",
-            Address);
-#endif // !PUBLIC
-    }
+    FindSymbol(Address, &Symbol);
+    PrintSymbol(Prefix, &Symbol);
 }
 
 VOID
 NTAPI
 PrintFrameChain(
+    __in PCSTR Prefix,
     __in PCALLERS Callers,
     __in_opt ULONG FramesToSkip,
     __in ULONG Count
@@ -239,6 +209,8 @@ PrintFrameChain(
     for (Index = FramesToSkip;
         Index < Count;
         Index++) {
-        PrintSymbol(Callers[Index].Establisher);
+        FindAndPrintSymbol(
+            Prefix,
+            Callers[Index].Establisher);
     }
 }

@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2018 by blindtiger. All rights reserved.
+* Copyright (c) 2019 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License"); you may not use this file except in compliance with
@@ -18,6 +18,8 @@
 
 #ifndef _CTX_H_
 #define _CTX_H_
+
+#include "Reload.h"
 
 #ifdef __cplusplus
 /* Assume byte packing throughout */
@@ -69,42 +71,31 @@ extern "C" {
             __in PETHREAD Thread
         );
 
-    PKTRAP_FRAME
-        NTAPI
-        GetTrapFrameThread(
-            __in PKTHREAD Thread
-        );
 
-    VOID
-        NTAPI
-        SetTrapFrameThread(
-            __in PKTHREAD Thread,
-            __in PKTRAP_FRAME TrapFrame
-        );
-
-    PKAPC_STATE
+    FORCEINLINE
+        PKAPC_STATE
         NTAPI
         GetApcStateThread(
             __in PKTHREAD Thread
-        );
+        )
+    {
+        return CONTAINING_RECORD(
+            (ULONG_PTR)Thread +
+            GpBlock->DebuggerDataBlock.OffsetKThreadApcProcess,
+            KAPC_STATE,
+            Process);
+    }
 
-#ifdef _WIN64
-    NTSTATUS
+    FORCEINLINE
+        KTHREAD_STATE
         NTAPI
-        PsWow64GetContextThread(
-            __in PETHREAD Thread,
-            __inout PWOW64_CONTEXT ThreadContext,
-            __in KPROCESSOR_MODE Mode
-        );
-
-    NTSTATUS
-        NTAPI
-        PsWow64SetContextThread(
-            __in PETHREAD Thread,
-            __in PWOW64_CONTEXT ThreadContext,
-            __in KPROCESSOR_MODE Mode
-        );
-#endif // _WIN64
+        GetThreadState(
+            __in PKTHREAD Thread
+        )
+    {
+        return *(PCCHAR)((ULONG_PTR)Thread +
+            GpBlock->DebuggerDataBlock.OffsetKThreadState);
+    }
 
 #ifdef __cplusplus
 }

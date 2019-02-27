@@ -35,44 +35,58 @@ NtProcessStartup(
     UNICODE_STRING FilePath = { 0 };
     OBJECT_ATTRIBUTES ObjectAttributes = { 0 };
     IO_STATUS_BLOCK IoStatusBlock = { 0 };
+    UNICODE_STRING ImagePath = { 0 };
+    WCHAR ImagePathBuffer[MAXIMUM_FILENAME_LENGTH] = { 0 };
 
-    Status = LoadKernelImage(LOADER_IMAGE_STRING, LOADER_SERVICE_STRING);
+    Status = RtlDosPathNameToNtPathName_U_WithStatus(
+        LOADER_STRING,
+        &ImagePath,
+        NULL,
+        NULL);
 
-    if (NT_SUCCESS(Status)) {
-        RtlInitUnicodeString(&FilePath, LOADER_DEVICE_STRING);
+    if (TRACE(Status)) {
+        RtlCopyMemory(ImagePathBuffer, ImagePath.Buffer, ImagePath.Length);
 
-        InitializeObjectAttributes(
-            &ObjectAttributes,
-            &FilePath,
-            OBJ_CASE_INSENSITIVE,
-            NULL,
-            NULL);
-
-        Status = NtOpenFile(
-            &FileHandle,
-            FILE_ALL_ACCESS,
-            &ObjectAttributes,
-            &IoStatusBlock,
-            FILE_SHARE_VALID_FLAGS,
-            FILE_NON_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT);
+        Status = LoadKernelImage(ImagePathBuffer, SERVICE_STRING);
 
         if (NT_SUCCESS(Status)) {
-            Status = NtDeviceIoControlFile(
-                FileHandle,
-                NULL,
-                NULL,
-                NULL,
-                &IoStatusBlock,
-                0,
-                NULL,
-                0,
-                NULL,
-                0);
+            RtlInitUnicodeString(&FilePath, DEVICE_STRING);
 
-            TRACE(NtClose(FileHandle));
+            InitializeObjectAttributes(
+                &ObjectAttributes,
+                &FilePath,
+                OBJ_CASE_INSENSITIVE,
+                NULL,
+                NULL);
+
+            Status = NtOpenFile(
+                &FileHandle,
+                FILE_ALL_ACCESS,
+                &ObjectAttributes,
+                &IoStatusBlock,
+                FILE_SHARE_VALID_FLAGS,
+                FILE_NON_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT);
+
+            if (NT_SUCCESS(Status)) {
+                Status = NtDeviceIoControlFile(
+                    FileHandle,
+                    NULL,
+                    NULL,
+                    NULL,
+                    &IoStatusBlock,
+                    0,
+                    NULL,
+                    0,
+                    NULL,
+                    0);
+
+                TRACE(NtClose(FileHandle));
+            }
+
+            UnloadKernelImage(SERVICE_STRING);
         }
 
-        UnloadKernelImage(LOADER_SERVICE_STRING);
+        RtlFreeUnicodeString(&ImagePath);
     }
 
     return  NtTerminateProcess(NtCurrentProcess(), STATUS_SUCCESS);

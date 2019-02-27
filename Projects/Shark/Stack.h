@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2018 by blindtiger. All rights reserved.
+* Copyright (c) 2019 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License"); you may not use this file except in compliance with
@@ -32,28 +32,51 @@ extern "C" {
     DECLSPEC_NOINLINE
         ULONG
         NTAPI
-        WalkFrameChainEx(
-            __out PCALLERS Callers,
-            __in ULONG Count
-        );
-
-    DECLSPEC_NOINLINE
-        ULONG
-        NTAPI
         WalkFrameChain(
             __out PCALLERS Callers,
             __in ULONG Count
         );
 
+    typedef struct _SYMBOL {
+        PKLDR_DATA_TABLE_ENTRY DataTableEntry;
+        PVOID Address;
+        PCHAR String;
+        USHORT Ordinal;
+        LONG Offset;
+    }SYMBOL, *PSYMBOL;
+
     VOID
         NTAPI
         PrintSymbol(
+            __in PCSTR Prefix,
+            __in PSYMBOL Symbol
+        );
+
+    VOID
+        NTAPI
+        WalkImageSymbol(
+            __in PVOID Address,
+            __inout PSYMBOL Symbol
+        );
+
+    VOID
+        NTAPI
+        FindSymbol(
+            __in PVOID Address,
+            __inout PSYMBOL Symbol
+        );
+
+    VOID
+        NTAPI
+        FindAndPrintSymbol(
+            __in PCSTR Prefix,
             __in PVOID Address
         );
 
     VOID
         NTAPI
         PrintFrameChain(
+            __in PCSTR Prefix,
             __in PCALLERS Callers,
             __in_opt ULONG FramesToSkip,
             __in ULONG Count

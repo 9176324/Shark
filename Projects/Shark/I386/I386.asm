@@ -1,6 +1,6 @@
 ;
 ;
-; Copyright (c) 2018 by blindtiger. All rights reserved.
+; Copyright (c) 2019 by blindtiger. All rights reserved.
 ;
 ; The contents of this file are subject to the Mozilla Public License Version
 ; 2.0 (the "License"); you may not use this file except in compliance with
@@ -25,6 +25,15 @@ include callconv.inc
         
 _TEXT$00    SEGMENT PAGE 'CODE'
 
+    cPublicProc __FlushSingleTb, 1
+        
+        mov eax, [esp + 4]
+        invlpg [eax]
+
+        stdRET __FlushSingleTb
+        
+    stdENDP __FlushSingleTb
+        
     cPublicProc __GetPdeAddress, 2
     
         mov eax, [esp + 4]
@@ -105,15 +114,6 @@ _TEXT$00    SEGMENT PAGE 'CODE'
         
     stdENDP __GetVirtualAddressMappedByPdePae
     
-    cPublicProc __FlushSingleTb, 1
-        
-        mov eax, [esp + 4]
-        invlpg [eax]
-
-        stdRET __FlushSingleTb
-        
-    stdENDP __FlushSingleTb
-        
     cPublicProc __MultipleDispatcher, 4
 
         mov edi, edi

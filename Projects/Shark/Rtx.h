@@ -19,6 +19,8 @@
 #ifndef _RTX_H_
 #define _RTX_H_
 
+#include <devicedefs.h>
+
 #ifdef __cplusplus
 /* Assume byte packing throughout */
 extern "C" {
@@ -48,15 +50,15 @@ extern "C" {
         ULONG_PTR Result;
     }ROUTINES, *PROUTINES;
 
-    typedef struct _WORKER_LIST {
+    typedef struct _WORKER_OBJECT {
         SINGLE_LIST_ENTRY NextEntry;
         ROUTINES Routines;
-    }WORKER_LIST, *PWORKER_LIST;
+    }WORKER_OBJECT, *PWORKER_OBJECT;
 
     typedef struct _RTX {
-        PVOID Object;
-        PVOID Target;
-        PVOID ApiMessage;
+        struct _OBJECT * Object;
+        struct _OBJECT * Target;
+        struct _API_MESSAGE * ApiMessage;
         KEVENT Notify;
 
         USHORT Platform;
@@ -81,38 +83,64 @@ extern "C" {
     ULONG_PTR
         NTAPI
         _MultipleDispatcher(
-            __in PPS_APC_ROUTINE ApcRoutine,
-            __in PKSYSTEM_ROUTINE SystemRoutine,
-            __in PUSER_THREAD_START_ROUTINE StartRoutine,
-            __in PVOID StartContext
+            __in_opt PPS_APC_ROUTINE ApcRoutine,
+            __in_opt PKSYSTEM_ROUTINE SystemRoutine,
+            __in_opt PUSER_THREAD_START_ROUTINE StartRoutine,
+            __in_opt PVOID StartContext
         );
+
+    FORCEINLINE
+    ULONG_PTR
+        NTAPI
+        MultipleDispatcher(
+            __in_opt PPS_APC_ROUTINE ApcRoutine,
+            __in_opt PKSYSTEM_ROUTINE SystemRoutine,
+            __in_opt PUSER_THREAD_START_ROUTINE StartRoutine,
+            __in_opt PVOID StartContext
+        )
+    {
+        ULONG_PTR Result = 0;
+
+        __try {
+            Result = _MultipleDispatcher(
+                ApcRoutine,
+                SystemRoutine,
+                StartRoutine,
+                StartContext);
+        }
+        __except (EXCEPTION_EXECUTE_HANDLER) {
+            NOTHING;
+        }
+
+        return Result;
+    }
 
     NTSTATUS
         NTAPI
         AsyncCall(
             __in HANDLE UniqueThread,
-            __in PPS_APC_ROUTINE ApcRoutine,
-            __in PKSYSTEM_ROUTINE SystemRoutine,
-            __in PUSER_THREAD_START_ROUTINE StartRoutine,
-            __in PVOID StartContext
+            __in_opt PPS_APC_ROUTINE ApcRoutine,
+            __in_opt PKSYSTEM_ROUTINE SystemRoutine,
+            __in_opt PUSER_THREAD_START_ROUTINE StartRoutine,
+            __in_opt PVOID StartContext
         );
 
     ULONG_PTR
         NTAPI
         IpiSingleCall(
-            __in PPS_APC_ROUTINE ApcRoutine,
-            __in PKSYSTEM_ROUTINE SystemRoutine,
-            __in PUSER_THREAD_START_ROUTINE StartRoutine,
-            __in PVOID StartContext
+            __in_opt PPS_APC_ROUTINE ApcRoutine,
+            __in_opt PKSYSTEM_ROUTINE SystemRoutine,
+            __in_opt PUSER_THREAD_START_ROUTINE StartRoutine,
+            __in_opt PVOID StartContext
         );
 
     VOID
         NTAPI
         IpiGenericCall(
-            __in PPS_APC_ROUTINE ApcRoutine,
-            __in PKSYSTEM_ROUTINE SystemRoutine,
-            __in PUSER_THREAD_START_ROUTINE StartRoutine,
-            __in PVOID StartContext
+            __in_opt PPS_APC_ROUTINE ApcRoutine,
+            __in_opt PKSYSTEM_ROUTINE SystemRoutine,
+            __in_opt PUSER_THREAD_START_ROUTINE StartRoutine,
+            __in_opt PVOID StartContext
         );
 
 #ifdef __cplusplus

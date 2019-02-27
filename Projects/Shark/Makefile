@@ -49,13 +49,13 @@ ASOBJS = \
 
 CCARCHOBJS = \
     $(OBJD)\PatchGuard$(ARCTARG).obj \
-    $(OBJD)\PatchGuardInline$(ARCTARG).obj \
-    $(OBJD)\Space$(ARCTARG).obj
+    $(OBJD)\Space$(ARCTARG).obj \
+    $(OBJD)\Stack$(ARCTARG).obj
 
 CCOBJS = \
     $(OBJD)\$(PROJ).obj \
     $(OBJD)\Ctx.obj \
-    $(OBJD)\Detours.obj \
+    $(OBJD)\Detour.obj \
     $(OBJD)\Except.obj \
     $(OBJD)\PatchGuard.obj \
     $(OBJD)\Reload.obj \
@@ -71,12 +71,12 @@ PROJOBJS = $(ASOBJS) $(CCARCHOBJS) $(CCOBJS) $(RCOBJS)
 PROJSRCS = \
     $(ARCTARG)\$(ARCTARG).asm \
     $(ARCTARG)\PatchGuard$(ARCTARG).c \
-    $(ARCTARG)\PatchGuardInline$(ARCTARG).c \
     $(ARCTARG)\Space$(ARCTARG).c \
+    $(ARCTARG)\Stack$(ARCTARG).c \
     $(PROJ).c \
     Ctx.c \
     Cmp$(ARCTARG).asm \
-    Detours.c \
+    Detour.c \
     Except.c \
     PatchGuard.c \
     Reload.c \

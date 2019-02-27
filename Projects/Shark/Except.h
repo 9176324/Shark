@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2018 by blindtiger. All rights reserved.
+* Copyright (c) 2019 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License"); you may not use this file except in compliance with
@@ -19,10 +19,69 @@
 #ifndef _EXCEPT_H_
 #define _EXCEPT_H_
 
+#include "Reload.h"
+
 #ifdef __cplusplus
 /* Assume byte packing throughout */
 extern "C" {
 #endif	/* __cplusplus */
+
+    enum {
+        KiDivideErrorFault,
+        KiDebugTrapOrFault,
+        KiNmiInterrupt,
+        KiBreakpointTrap,
+        KiOverflowTrap,
+        KiBoundFault,
+        KiInvalidOpcodeFault,
+        KiNpxNotAvailableFault,
+        KiDoubleFaultAbort,
+        KiNpxSegmentOverrunAbort,
+        KiInvalidTssFault,
+        KiSegmentNotPresentFault,
+        KiStackFault,
+        KiGeneralProtectionFault,
+        KiPageFault,
+        KiFloatingErrorFault,
+        KiAlignmentFault,
+        KiMcheckAbort,
+        KiXmmException,
+        KiApcInterrupt,
+        KiRaiseAssertion,
+        KiDebugServiceTrap,
+        KiDpcInterrupt,
+        KiIpiInterrupt,
+        KiMaxInterrupt
+    };
+
+    typedef
+        VOID
+        (NTAPI * PINTERRUPT_HANDLER) (
+            VOID
+            );
+
+    typedef struct _INTERRUPTION_FRAME {
+        ULONG_PTR ProgramCounter;
+        ULONG_PTR SegCs;
+        ULONG_PTR Eflags;
+    }INTERRUPTION_FRAME, *PINTERRUPTION_FRAME;
+
+    typedef union _INTERRUPT_ADDRESS {
+        struct {
+#ifndef _WIN64
+            USHORT Offset;
+            USHORT ExtendedOffset;
+#else
+            USHORT OffsetLow;
+            USHORT OffsetMiddle;
+            ULONG OffsetHigh;
+#endif // !_WIN64
+        };
+
+        ULONG_PTR Address;
+    } INTERRUPT_ADDRESS, *PINTERRUPT_ADDRESS;
+
+    typedef struct _OBJECT OBJECT, *POBJECT;
 
 #define MAXIMUM_USER_FUNCTION_TABLE_SIZE 512
 #define MAXIMUM_KERNEL_FUNCTION_TABLE_SIZE 256
@@ -64,18 +123,6 @@ extern "C" {
 
     C_ASSERT(FIELD_OFFSET(FUNCTION_TABLE_LEGACY, TableEntry) == 0xc);
 
-    ULONG
-        NTAPI
-        EncodeSystemPointer(
-            __in ULONG Pointer
-        );
-
-    ULONG
-        NTAPI
-        RtlDecodeSystemPointer(
-            __in ULONG Pointer
-        );
-
     VOID
         NTAPI
         CaptureImageExceptionValues(
@@ -84,6 +131,17 @@ extern "C" {
             __out PULONG TableSize
         );
 
+    VOID
+        NTAPI
+        InitializeExcept(
+            __inout PGPBLOCK Block
+        );
+
+#ifndef _WIN64
+    typedef struct _DISPATCHER_CONTEXT {
+        PEXCEPTION_REGISTRATION_RECORD RegistrationPointer;
+    } DISPATCHER_CONTEXT;
+#else
     VOID
         NTAPI
         InsertInvertedFunctionTable(
@@ -96,60 +154,7 @@ extern "C" {
         RemoveInvertedFunctionTable(
             __in PVOID ImageBase
         );
-
-#ifdef _WIN64
-    VOID
-        NTAPI
-        Wx86InsertInvertedFunctionTable(
-            __in PVOID ImageBase,
-            __in ULONG SizeOfImage
-        );
-
-    VOID
-        NTAPI
-        Wx86RemoveInvertedFunctionTable(
-            __in PVOID ImageBase
-        );
-#endif // _WIN64
-
-    PVOID
-        NTAPI
-        LookupFunctionTableEx(
-            __in PVOID ControlPc,
-            __inout PVOID * ImageBase,
-            __out PULONG SizeOfTable
-        );
-
-    PVOID
-        NTAPI
-        LookupFunctionTable(
-            __in PVOID ControlPc,
-            __out PVOID * ImageBase,
-            __out PULONG SizeOfTable
-        );
-
-#ifdef _WIN64
-    PRUNTIME_FUNCTION
-        NTAPI
-        LookupFunctionEntry(
-            __in ULONG64 ControlPc,
-            __out PULONG64 ImageBase,
-            __inout_opt PUNWIND_HISTORY_TABLE HistoryTable
-        );
-
-    PEXCEPTION_ROUTINE
-        NTAPI
-        VirtualUnwind(
-            __in ULONG HandlerType,
-            __in ULONG64 ImageBase,
-            __in ULONG64 ControlPc,
-            __in PRUNTIME_FUNCTION FunctionEntry,
-            __inout PCONTEXT ContextRecord,
-            __out PVOID * HandlerData,
-            __out PULONG64 EstablisherFrame,
-            __inout_opt PKNONVOLATILE_CONTEXT_POINTERS ContextPointers
-        );
-#endif // _WIN64
+#endif // !_WIN64
 
 #ifdef __cplusplus
 }
