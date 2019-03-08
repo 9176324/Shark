@@ -31,8 +31,6 @@
 #define GetGpBlock(pgblock) \
             ((PGPBLOCK)((PCHAR)pgblock - sizeof(GPBLOCK)))
 
-C_ASSERT(sizeof(GPBLOCK));
-
 VOID
 NTAPI
 InitializePgBlock(
