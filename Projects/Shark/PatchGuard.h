@@ -103,7 +103,7 @@ extern "C" {
         }; // pool big page
 
         struct {
-            PRTL_BITMAP BitMap;
+            ULONG_PTR NumberOfPtes;
             PMMPTE BasePte;
         }; // system ptes
 
@@ -167,8 +167,8 @@ extern "C" {
 
         CHAR _SdbpCheckDll[0x3c];
         CHAR _Btc64[8];
-        CHAR _ClearCallback[0x2e0];
-        CHAR _Message[0x55];
+        CHAR _ClearCallback[0x320];
+        CHAR _Message[0x75];
     }PGBLOCK, *PPGBLOCK;
 
     VOID

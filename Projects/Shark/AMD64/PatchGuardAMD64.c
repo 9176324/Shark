@@ -57,6 +57,7 @@ InitializePgBlock(
 
     PPOOL_BIG_PAGES * PageTable = NULL;
     PSIZE_T PageTableSize = NULL;
+    PRTL_BITMAP BitMap = NULL;
 
     ULONG_PTR TempField = 0;
 
@@ -93,34 +94,39 @@ InitializePgBlock(
         0x4cf08b4ce88b4ce0, 0xcccccccce6fff88b
     };
 
+    CHAR MiGetSystemRegionType[] =
+        "48 b8 00 00 00 00 00 80 ff ff 48 3b c8 72 1c 48 c1 e9 27 81 e1 ff 01 00 00 8d 81 00 ff ff ff";
+
     ULONG64 Btc64[] = {
         0xc3c18b48d1bb0f48
     };
 
     ULONG64 ClearCallback[] = {
-        0x4c89481024548948, 0xc74858ec83480824, 0x4800000000302444, 0x00000000402444c7,
-        0x000000382444c748, 0x0000282444c74800, 0x0000202444c70000, 0x486824448b480000,
-        0x302444894818408b, 0xff48f03024448b48, 0xb60f6824448b4808, 0x8b4830244c8b4800,
-        0x8b4830244c8b4811, 0x8b48000000c8c18c, 0xfff4c890ff302444, 0xb60f6824448b48ff,
-        0x00008d840fc08500, 0x8b486024448b4800, 0x4c8b480000009880, 0x894830408b486024,
-        0x448b48000000f881, 0x000098808b486024, 0x4c8b4838c0834800, 0x0000988189486024,
-        0xbe0f6824448b4800, 0xd2331875c0850140, 0x488b486824448b48, 0x90ff3024448b4808,
-        0x8b482bebfffff4e8, 0x830140be0f682444, 0x24448b481d7501f8, 0x448b4810508b4868,
-        0x8b4808488b486824, 0x0000a890ff302444, 0x44c7000001a1e900, 0x0aeb000000002024,
-        0x4489c0ff2024448b, 0x8b482024448b2024, 0x3024548b4868244c, 0x10498b4818528b48,
-        0x830fc13b48ca2b48, 0x24448b480000016b, 0x8b000000d8054830, 0x6824548b4820244c,
-        0x24548b48084a0348, 0xd08b4818428b4c30, 0xd090ff3024448b48, 0x30244c8b48fffff4,
-        0x0128850f18413948, 0x8825048b48650000, 0x30244c8b48000001, 0x48fffffdc689b70f,
-        0x4830e8834808048b, 0x24448b4840244489, 0x44894840e8834840, 0x484024448b483824,
-        0x88898b4830244c8b, 0x8b48088948000000, 0x30244c8b48402444, 0x4800000090898b48,
-        0x4024448b48084889, 0x898b4830244c8b48, 0x1048894800000098, 0x40c7484024448b48,
-        0x448b480000000028, 0x4830244c8b483824, 0x8948000000a0898b, 0xc63824448b483848,
-        0x2824448b48012840, 0x8b48000000800548, 0x483041894838244c, 0x244c8b486024448b,
-        0x0000009888894840, 0x4c8b486024448b48, 0x0000a0898b483024, 0x000000f888894800,
-        0x40be0f6824448b48, 0x48d2331875c08501, 0x08488b486824448b, 0xe890ff3024448b48,
-        0x448b482bebfffff4, 0xf8830140be0f6824, 0x6824448b481d7501, 0x24448b4810508b48,
-        0x448b4808488b4868, 0x000000a890ff3024, 0x33fffffe69e905eb, 0x8b4868244c8b48d2,
-        0xfff4e890ff302444, 0x60244c8b48d233ff, 0xd890ff3024448b48, 0xc358c48348fffff4
+        0x4c89481024548948, 0xc74858ec83480824, 0x4800000000302444, 0x00000000482444c7,
+        0x000000402444c748, 0x0000382444c74800, 0x00282444c7480000, 0x00202444c7000000,
+        0x6824448b48000000, 0x2444894818408b48, 0x48f03024448b4830, 0x0f6824448b4808ff,
+        0x4830244c8b4800b6, 0x4830244c8b48118b, 0x48000000c8c18c8b, 0xf4c890ff3024448b,
+        0x0f6824448b48ffff, 0x008d840fc08500b6, 0x486024448b480000, 0x8b4800000098808b,
+        0x4830408b4860244c, 0x8b48000000f88189, 0x0098808b48602444, 0x8b4838c083480000,
+        0x009881894860244c, 0x0f6824448b480000, 0x331875c0850140be, 0x8b486824448b48d2,
+        0xff3024448b480848, 0x482bebfffff4e890, 0x0140be0f6824448b, 0x448b481d7501f883,
+        0x8b4810508b486824, 0x4808488b48682444, 0x00a890ff3024448b, 0xc7000001d6e90000,
+        0xeb00000000202444, 0x89c0ff2024448b0a, 0x482024448b202444, 0x24548b4868244c8b,
+        0x498b4818528b4830, 0x0fc13b48ca2b4810, 0x448b48000001a083, 0x000000d805483024,
+        0x24548b4820244c8b, 0x548b48084a034868, 0x8b4818428b4c3024, 0x90ff3024448b48d0,
+        0x244c8b48fffff4d0, 0x5d850f1841394830, 0x25048b4865000001, 0x2444894800000188,
+        0xb8813024448b4848, 0x000047bafffff404, 0x0f4824448b481a72, 0xe083000006e480b6,
+        0x818848244c8b48fe, 0x24448b48000006e4, 0xfffffdc680b70f30, 0x048b4848244c8b48,
+        0x44894830e8834801, 0x484024448b484024, 0x382444894840e883, 0x4c8b484024448b48,
+        0x000088898b483024, 0x24448b4808894800, 0x8b4830244c8b4840, 0x4889480000009089,
+        0x8b484024448b4808, 0x0098898b4830244c, 0x8b48104889480000, 0x002840c748402444,
+        0x3824448b48000000, 0x898b4830244c8b48, 0x38488948000000a0, 0x2840c63824448b48,
+        0x05482824448b4801, 0x244c8b4800000080, 0x448b483041894838, 0x4840244c8b486024,
+        0x8b48000000988889, 0x30244c8b48602444, 0x48000000a0898b48, 0x8b48000000f88889,
+        0x850140be0f682444, 0x448b48d2331875c0, 0x8b4808488b486824, 0xfff4e890ff302444,
+        0x6824448b482bebff, 0x7501f8830140be0f, 0x8b486824448b481d, 0x486824448b481050,
+        0x3024448b4808488b, 0x05eb000000a890ff, 0x48d233fffffe34e9, 0x24448b4868244c8b,
+        0x33fffff4e890ff30, 0x8b4860244c8b48d2, 0xfff4d890ff302444, 0xccccc358c48348ff
     };
 
     PSTR ClearMessage[2] = {
@@ -618,21 +624,21 @@ InitializePgBlock(
                     TargetPc = __RVA_TO_VA(ControlPc + 3);
 
                     // struct _MI_SYSTEM_PTE_TYPE *
-                    PgBlock->BitMap = TargetPc;
+                    BitMap = TargetPc;
 
+                    PgBlock->NumberOfPtes = BitMap->SizeOfBitMap * 8;
 #ifndef PUBLIC
                     DbgPrint(
-                        "[Shark] < %p > BitMap\n",
-                        PgBlock->BitMap);
+                        "[Shark] < %p > NumberOfPtes\n",
+                        PgBlock->NumberOfPtes);
 #endif // !PUBLIC
 
                     if (GetGpBlock(PgBlock)->BuildNumber < 9600) {
                         PgBlock->BasePte =
-                            *(PMMPTE *)((PCHAR)(PgBlock->BitMap + 1) + sizeof(ULONG) * 2);
+                            *(PMMPTE *)((PCHAR)(BitMap + 1) + sizeof(ULONG) * 2);
                     }
                     else {
-                        PgBlock->BasePte =
-                            *(PMMPTE *)(PgBlock->BitMap + 1);
+                        PgBlock->BasePte = *(PMMPTE *)(BitMap + 1);
                     }
 
 #ifndef PUBLIC
@@ -650,7 +656,6 @@ InitializePgBlock(
     }
 
     PgBlock->SizeSdbpCheckDll = sizeof(PgBlock->_SdbpCheckDll);
-
     PgBlock->SdbpCheckDll = (PVOID)PgBlock->_SdbpCheckDll;
 
     RtlCopyMemory(
@@ -886,7 +891,7 @@ found:
         RorKey = PgBlock->Btc64(RorKey, RorKey);
     }
 
-    // set temp buffer PatchGuard entry head jmp to _ClearEncryptedContext and encrypt
+    // set temp buffer PatchGuard entry head jmp to Callback and encrypt
 
     Pointer = (PDETOUR_BODY)((PCHAR)FieldBuffer + 8 - AlignOffset);
 
@@ -1064,9 +1069,9 @@ PgCompareFields(
 VOID
 NTAPI
 InitializeSystemPtesBitMap(
-    __inout PPGBLOCK PgBlock,
-    __in PRTL_BITMAP BitMap,
-    __in PFN_NUMBER NumberOfPtes
+    __inout PMMPTE BasePte,
+    __in PFN_NUMBER NumberOfPtes,
+    __out PRTL_BITMAP BitMap
 )
 {
     PMMPTE PointerPxe = NULL;
@@ -1079,39 +1084,39 @@ InitializeSystemPtesBitMap(
     PVOID EndAddress = NULL;
 
     /*
-        PatchGuard Context pages allocate by MmAllocateIndependentPages
+    PatchGuard Context pages allocate by MmAllocateIndependentPages
 
-        PTE field like this
+    PTE field like this
 
-        nt!_MMPTE
-        [+0x000] Long             : 0x2da963 [Type: unsigned __int64]
-        [+0x000] VolatileLong     : 0x2da963 [Type: unsigned __int64]
-        [+0x000] Hard             [Type: _MMPTE_HARDWARE]
+    nt!_MMPTE
+    [+0x000] Long             : 0x2da963 [Type: unsigned __int64]
+    [+0x000] VolatileLong     : 0x2da963 [Type: unsigned __int64]
+    [+0x000] Hard             [Type: _MMPTE_HARDWARE]
 
-            [+0x000 ( 0: 0)] Valid            : 0x1     [Type: unsigned __int64] <- MM_PTE_VALID_MASK
-            [+0x000 ( 1: 1)] Dirty1           : 0x1     [Type: unsigned __int64] <- MM_PTE_DIRTY_MASK
-            [+0x000 ( 2: 2)] Owner            : 0x0     [Type: unsigned __int64]
-            [+0x000 ( 3: 3)] WriteThrough     : 0x0     [Type: unsigned __int64]
-            [+0x000 ( 4: 4)] CacheDisable     : 0x0     [Type: unsigned __int64]
-            [+0x000 ( 5: 5)] Accessed         : 0x1     [Type: unsigned __int64] <- MM_PTE_ACCESS_MASK
-            [+0x000 ( 6: 6)] Dirty            : 0x1     [Type: unsigned __int64] <- MM_PTE_DIRTY_MASK
-            [+0x000 ( 7: 7)] LargePage        : 0x0     [Type: unsigned __int64]
-            [+0x000 ( 8: 8)] Global           : 0x1     [Type: unsigned __int64] <- MM_PTE_GLOBAL_MASK
-            [+0x000 ( 9: 9)] CopyOnWrite      : 0x0     [Type: unsigned __int64]
-            [+0x000 (10:10)] Unused           : 0x0     [Type: unsigned __int64]
-            [+0x000 (11:11)] Write            : 0x1     [Type: unsigned __int64] <- MM_PTE_WRITE_MASK
-            [+0x000 (47:12)] PageFrameNumber  : 0x2da   [Type: unsigned __int64] <- pfndata index
-            [+0x000 (51:48)] reserved1        : 0x0     [Type: unsigned __int64]
-            [+0x000 (62:52)] SoftwareWsIndex  : 0x0     [Type: unsigned __int64]
-            [+0x000 (63:63)] NoExecute        : 0x0     [Type: unsigned __int64] <- page can executable
+    [+0x000 ( 0: 0)] Valid            : 0x1     [Type: unsigned __int64] <- MM_PTE_VALID_MASK
+    [+0x000 ( 1: 1)] Dirty1           : 0x1     [Type: unsigned __int64] <- MM_PTE_DIRTY_MASK
+    [+0x000 ( 2: 2)] Owner            : 0x0     [Type: unsigned __int64]
+    [+0x000 ( 3: 3)] WriteThrough     : 0x0     [Type: unsigned __int64]
+    [+0x000 ( 4: 4)] CacheDisable     : 0x0     [Type: unsigned __int64]
+    [+0x000 ( 5: 5)] Accessed         : 0x1     [Type: unsigned __int64] <- MM_PTE_ACCESS_MASK
+    [+0x000 ( 6: 6)] Dirty            : 0x1     [Type: unsigned __int64] <- MM_PTE_DIRTY_MASK
+    [+0x000 ( 7: 7)] LargePage        : 0x0     [Type: unsigned __int64]
+    [+0x000 ( 8: 8)] Global           : 0x1     [Type: unsigned __int64] <- MM_PTE_GLOBAL_MASK
+    [+0x000 ( 9: 9)] CopyOnWrite      : 0x0     [Type: unsigned __int64]
+    [+0x000 (10:10)] Unused           : 0x0     [Type: unsigned __int64]
+    [+0x000 (11:11)] Write            : 0x1     [Type: unsigned __int64] <- MM_PTE_WRITE_MASK
+    [+0x000 (47:12)] PageFrameNumber  : 0x2da   [Type: unsigned __int64] <- pfndata index
+    [+0x000 (51:48)] reserved1        : 0x0     [Type: unsigned __int64]
+    [+0x000 (62:52)] SoftwareWsIndex  : 0x0     [Type: unsigned __int64]
+    [+0x000 (63:63)] NoExecute        : 0x0     [Type: unsigned __int64] <- page can executable
 
-        [+0x000] Flush            [Type: _HARDWARE_PTE]
-        [+0x000] Proto            [Type: _MMPTE_PROTOTYPE]
-        [+0x000] Soft             [Type: _MMPTE_SOFTWARE]
-        [+0x000] TimeStamp        [Type: _MMPTE_TIMESTAMP]
-        [+0x000] Trans            [Type: _MMPTE_TRANSITION]
-        [+0x000] Subsect          [Type: _MMPTE_SUBSECTION]
-        [+0x000] List             [Type: _MMPTE_LIST]
+    [+0x000] Flush            [Type: _HARDWARE_PTE]
+    [+0x000] Proto            [Type: _MMPTE_PROTOTYPE]
+    [+0x000] Soft             [Type: _MMPTE_SOFTWARE]
+    [+0x000] TimeStamp        [Type: _MMPTE_TIMESTAMP]
+    [+0x000] Trans            [Type: _MMPTE_TRANSITION]
+    [+0x000] Subsect          [Type: _MMPTE_SUBSECTION]
+    [+0x000] List             [Type: _MMPTE_LIST]
     */
 
 #define VALID_PTE_SET_BITS \
@@ -1120,15 +1125,8 @@ InitializeSystemPtesBitMap(
 #define VALID_PTE_UNSET_BITS \
             ( MM_PTE_WRITE_THROUGH_MASK | MM_PTE_CACHE_DISABLE_MASK | MM_PTE_COPY_ON_WRITE_MASK )
 
-    NumberOfPtes = PgBlock->BitMap->SizeOfBitMap;
-
-    BeginAddress =
-        GetVirtualAddressMappedByPte(
-            PgBlock->BasePte);
-
-    EndAddress =
-        GetVirtualAddressMappedByPte(
-            PgBlock->BasePte + NumberOfPtes);
+    BeginAddress = GetVirtualAddressMappedByPte(BasePte);
+    EndAddress = GetVirtualAddressMappedByPte(BasePte + NumberOfPtes);
 
     PointerAddress = BeginAddress;
 
@@ -1149,7 +1147,7 @@ InitializeSystemPtesBitMap(
                             if (0 == PointerPte->u.Hard.NoExecute) {
                                 if (VALID_PTE_SET_BITS == (PointerPte->u.Long & VALID_PTE_SET_BITS)) {
                                     if (0 == (PointerPte->u.Long & VALID_PTE_UNSET_BITS)) {
-                                        BitNumber = PointerPte - PgBlock->BasePte;
+                                        BitNumber = PointerPte - BasePte;
 
                                         RtlSetBit(BitMap, BitNumber);
                                     }
@@ -1187,13 +1185,13 @@ PgClearSystemPtesEncryptedContext(
     ULONG BitMapSize = 0;
     PFN_NUMBER NumberOfPtes = 0;
     ULONG HintIndex = 0;
-    ULONG StartingIndex = 0;
+    ULONG StartingRunIndex = 0;
 
-    NumberOfPtes = PgBlock->BitMap->SizeOfBitMap;
+    NumberOfPtes = PgBlock->NumberOfPtes;
 
 #ifndef PUBLIC
     DbgPrint(
-        "[Shark] < %p > SystemPtes < %p | %p >\n",
+        "[Shark] < %p > SystemPtes < %p <=> %p >\n",
         KeGetCurrentProcessorNumber(),
         PgBlock->BasePte,
         PgBlock->BasePte + NumberOfPtes);
@@ -1213,31 +1211,34 @@ PgClearSystemPtesEncryptedContext(
         RtlClearAllBits(BitMap);
 
         InitializeSystemPtesBitMap(
-            PgBlock,
-            BitMap,
-            NumberOfPtes);
+            PgBlock->BasePte,
+            NumberOfPtes,
+            BitMap);
 
         do {
             HintIndex = RtlFindSetBits(
                 BitMap,
-                BYTES_TO_PAGES(PgBlock->SizeINITKDBG),
+                1,
                 HintIndex);
 
             if (MAXULONG != HintIndex) {
-                StartingIndex = HintIndex;
-
-                HintIndex = RtlFindClearBits(
+                RtlFindNextForwardRunClear(
                     BitMap,
-                    1,
-                    StartingIndex);
+                    HintIndex,
+                    &StartingRunIndex);
 
-                RtlClearBits(BitMap, StartingIndex, HintIndex - StartingIndex);
+                RtlClearBits(BitMap, HintIndex, StartingRunIndex - HintIndex);
 
-                PgCompareFields(
-                    PgBlock,
-                    PgSystemPtes,
-                    GetVirtualAddressMappedByPte(PgBlock->BasePte + StartingIndex),
-                    (HintIndex - StartingIndex) * PAGE_SIZE);
+                if (StartingRunIndex -
+                    HintIndex >= BYTES_TO_PAGES(PgBlock->SizeINITKDBG)) {
+                    PgCompareFields(
+                        PgBlock,
+                        PgSystemPtes,
+                        GetVirtualAddressMappedByPte(PgBlock->BasePte + HintIndex),
+                        (StartingRunIndex - HintIndex) * PAGE_SIZE);
+                }
+
+                HintIndex = StartingRunIndex;
             }
         } while (HintIndex < NumberOfPtes);
 
@@ -1248,25 +1249,17 @@ PgClearSystemPtesEncryptedContext(
 VOID
 NTAPI
 PgClearPoolEncryptedContext(
-    __inout PPGBLOCK PgBlock,
-    __in BOOLEAN AllProcesors
+    __inout PPGBLOCK PgBlock
 )
 {
+    POOL_TYPE CheckType = NonPagedPool;
+    POOL_TYPE PoolType = NonPagedPool;
     SIZE_T Index = 0;
     SIZE_T PoolBigPageTableSize = 0;
     PPOOL_BIG_PAGES PoolBigPageTable = NULL;
 
-    if (FALSE != AllProcesors) {
-        PoolBigPageTableSize =
-            PgBlock->PoolBigPageTableSize / GetGpBlock(PgBlock)->NumberProcessors;
-
-        PoolBigPageTable =
-            PgBlock->PoolBigPageTable + PoolBigPageTableSize * KeGetCurrentProcessorNumber();
-    }
-    else {
-        PoolBigPageTableSize = PgBlock->PoolBigPageTableSize;
-        PoolBigPageTable = PgBlock->PoolBigPageTable;
-    }
+    PoolBigPageTableSize = PgBlock->PoolBigPageTableSize;
+    PoolBigPageTable = PgBlock->PoolBigPageTable;
 
 #ifndef PUBLIC
     DbgPrint(
@@ -1281,7 +1274,10 @@ PgClearPoolEncryptedContext(
         Index++) {
         if (POOL_BIG_TABLE_ENTRY_FREE !=
             ((ULONG64)PoolBigPageTable[Index].Va & POOL_BIG_TABLE_ENTRY_FREE)) {
-            if (NonPagedPool == PgBlock->MmDeterminePoolType(PoolBigPageTable[Index].Va)) {
+            PoolType = PgBlock->MmDeterminePoolType(PoolBigPageTable[Index].Va);
+            CheckType = PoolType & BASE_POOL_TYPE_MASK;
+
+            if (NonPagedPool == CheckType) {
                 if (PoolBigPageTable[Index].NumberOfPages > PgBlock->SizeINITKDBG) {
                     PgCompareFields(
                         PgBlock,
@@ -1296,102 +1292,15 @@ PgClearPoolEncryptedContext(
 
 VOID
 NTAPI
-PgLocateSystemPtesObject(
+PgLocatePoolObject(
     __inout PPGBLOCK PgBlock,
     __in PPGOBJECT Object
 )
 {
-    PRTL_BITMAP BitMap = NULL;
-    ULONG BitMapSize = 0;
-    PFN_NUMBER NumberOfPtes = 0;
-    ULONG HintIndex = 0;
-    ULONG StartingIndex = 0;
-    PVOID Establisher = NULL;
-
-    NumberOfPtes = PgBlock->BitMap->SizeOfBitMap;
-
-    GetCounterBody(&Object->Establisher, &Establisher);
-
-    BitMapSize =
-        sizeof(RTL_BITMAP) +
-        (ULONG)((((NumberOfPtes + 1) + 31) / 32) * 4);
-
-    BitMap = ExAllocatePool(NonPagedPool, BitMapSize);
-
-    if (NULL != BitMap) {
-        RtlInitializeBitMap(
-            BitMap,
-            (PULONG)(BitMap + 1),
-            (ULONG)(NumberOfPtes + 1));
-
-        RtlClearAllBits(BitMap);
-
-        InitializeSystemPtesBitMap(
-            PgBlock,
-            BitMap,
-            NumberOfPtes);
-
-        do {
-            HintIndex = RtlFindSetBits(
-                BitMap,
-                BYTES_TO_PAGES(PgBlock->SizeINITKDBG),
-                HintIndex);
-
-            if (MAXULONG != HintIndex) {
-                StartingIndex = HintIndex;
-
-                HintIndex = RtlFindClearBits(
-                    BitMap,
-                    1,
-                    StartingIndex);
-
-                RtlClearBits(BitMap, StartingIndex, HintIndex - StartingIndex);
-
-                if ((ULONG64)Establisher >=
-                    (ULONG64)GetVirtualAddressMappedByPte(
-                        PgBlock->BasePte + StartingIndex) &&
-                        (ULONG64)Establisher <
-                    (ULONG64)GetVirtualAddressMappedByPte(
-                        PgBlock->BasePte + HintIndex) - PgBlock->SizeCmpAppendDllSection) {
-                    Object->BaseAddress =
-                        GetVirtualAddressMappedByPte(PgBlock->BasePte + StartingIndex);
-
-                    Object->RegionSize =
-                        (SIZE_T)(HintIndex - StartingIndex)* PAGE_SIZE;
-
-#ifndef PUBLIC
-                    DbgPrint(
-                        "[Shark] < %p > found region in system ptes < %p - %08x >\n",
-                        Establisher,
-                        Object->BaseAddress,
-                        Object->RegionSize);
-#endif // !PUBLIC
-
-                    Object->Type = PgSystemPtes;
-
-                    break;
-                }
-            }
-        } while (HintIndex < NumberOfPtes);
-
-        ExFreePool(BitMap);
-    }
-}
-
-VOID
-NTAPI
-PgLocateObject(
-    __inout PPGBLOCK PgBlock,
-    __out PPGOBJECT Object
-)
-{
     PFN_NUMBER Index = 0;
-    KIRQL Irql = PASSIVE_LEVEL;
     PVOID Establisher = NULL;
 
     GetCounterBody(&Object->Establisher, &Establisher);
-
-    Irql = GetGpBlock(PgBlock)->ExAcquireSpinLockShared(PgBlock->ExpLargePoolTableLock);
 
     for (Index = 0;
         Index < PgBlock->PoolBigPageTableSize;
@@ -1422,8 +1331,104 @@ PgLocateObject(
             }
         }
     }
+}
 
-    GetGpBlock(PgBlock)->ExReleaseSpinLockShared(PgBlock->ExpLargePoolTableLock, Irql);
+VOID
+NTAPI
+PgLocateSystemPtesObject(
+    __inout PPGBLOCK PgBlock,
+    __in PPGOBJECT Object
+)
+{
+    PRTL_BITMAP BitMap = NULL;
+    ULONG BitMapSize = 0;
+    PFN_NUMBER NumberOfPtes = 0;
+    ULONG HintIndex = 0;
+    ULONG StartingRunIndex = 0;
+    PVOID Establisher = NULL;
+
+    NumberOfPtes = PgBlock->NumberOfPtes;
+
+    GetCounterBody(&Object->Establisher, &Establisher);
+
+    BitMapSize =
+        sizeof(RTL_BITMAP) +
+        (ULONG)((((NumberOfPtes + 1) + 31) / 32) * 4);
+
+    BitMap = ExAllocatePool(NonPagedPool, BitMapSize);
+
+    if (NULL != BitMap) {
+        RtlInitializeBitMap(
+            BitMap,
+            (PULONG)(BitMap + 1),
+            (ULONG)(NumberOfPtes + 1));
+
+        RtlClearAllBits(BitMap);
+
+        InitializeSystemPtesBitMap(
+            PgBlock->BasePte,
+            NumberOfPtes,
+            BitMap);
+
+        do {
+            HintIndex = RtlFindSetBits(
+                BitMap,
+                1,
+                HintIndex);
+
+            if (MAXULONG != HintIndex) {
+                RtlFindNextForwardRunClear(
+                    BitMap,
+                    HintIndex,
+                    &StartingRunIndex);
+
+                RtlClearBits(BitMap, HintIndex, StartingRunIndex - HintIndex);
+
+                if ((ULONG64)Establisher >=
+                    (ULONG64)GetVirtualAddressMappedByPte(
+                        PgBlock->BasePte + HintIndex) &&
+                        (ULONG64)Establisher <
+                    (ULONG64)GetVirtualAddressMappedByPte(
+                        PgBlock->BasePte + StartingRunIndex) - PgBlock->SizeCmpAppendDllSection) {
+                    Object->BaseAddress =
+                        GetVirtualAddressMappedByPte(PgBlock->BasePte + HintIndex);
+
+                    Object->RegionSize =
+                        (SIZE_T)(StartingRunIndex - HintIndex) * PAGE_SIZE;
+
+#ifndef PUBLIC
+                    DbgPrint(
+                        "[Shark] < %p > found region in system ptes < %p - %08x >\n",
+                        Establisher,
+                        Object->BaseAddress,
+                        Object->RegionSize);
+#endif // !PUBLIC
+
+                    Object->Type = PgSystemPtes;
+
+                    break;
+                }
+
+                HintIndex = StartingRunIndex;
+            }
+        } while (HintIndex < NumberOfPtes);
+
+        ExFreePool(BitMap);
+    }
+}
+
+VOID
+NTAPI
+PgLocateObject(
+    __inout PPGBLOCK PgBlock,
+    __out PPGOBJECT Object
+)
+{
+    IpiSingleCall(
+        (PPS_APC_ROUTINE)NULL,
+        (PKSYSTEM_ROUTINE)PgLocatePoolObject,
+        (PUSER_THREAD_START_ROUTINE)PgBlock,
+        (PVOID)Object);
 
     if (-1 == Object->Type) {
         IpiSingleCall(
@@ -1687,17 +1692,19 @@ PgClearWorker(
 
     Context = Argument;
 
+    if (9200 <= GetGpBlock(Context->PgBlock)->BuildNumber) {
+        IpiSingleCall(
+            (PPS_APC_ROUTINE)NULL,
+            (PKSYSTEM_ROUTINE)NULL,
+            (PUSER_THREAD_START_ROUTINE)PgClearSystemPtesEncryptedContext,
+            (PVOID)Context->PgBlock);
+    }
+
     IpiSingleCall(
         (PPS_APC_ROUTINE)NULL,
         (PKSYSTEM_ROUTINE)NULL,
-        (PUSER_THREAD_START_ROUTINE)PgClearSystemPtesEncryptedContext,
+        (PUSER_THREAD_START_ROUTINE)PgClearPoolEncryptedContext,
         (PVOID)Context->PgBlock);
-
-    IpiGenericCall(
-        (PPS_APC_ROUTINE)NULL,
-        (PKSYSTEM_ROUTINE)PgClearPoolEncryptedContext,
-        (PUSER_THREAD_START_ROUTINE)Context->PgBlock,
-        (PVOID)TRUE);
 
     PgCheckAllWorkerThread(Context->PgBlock);
 
@@ -1739,14 +1746,18 @@ PgClear(
             "[Shark] PgBlock->ExpLargePoolTableLock not found",
             NULL != PgBlock->ExpLargePoolTableLock) ||
         RTL_SOFT_ASSERTMSG(
-            "[Shark] PgBlock->BitMap not found",
-            NULL != PgBlock->BitMap) ||
-        RTL_SOFT_ASSERTMSG(
-            "[Shark] PgBlock->BasePte not found",
-            NULL != PgBlock->BasePte) ||
-        RTL_SOFT_ASSERTMSG(
             "[Shark] PgBlock->MmDeterminePoolType not found",
             NULL != PgBlock->MmDeterminePoolType)) {
+
+        if (GetGpBlock(PgBlock)->BuildNumber >= 9200) {
+            RTL_SOFT_ASSERTMSG(
+                "[Shark] PgBlock->NumberOfPtes not found",
+                0 != PgBlock->NumberOfPtes);
+
+            RTL_SOFT_ASSERTMSG(
+                "[Shark] PgBlock->BasePte not found",
+                NULL != PgBlock->BasePte);
+        }
 
         KeInitializeEvent(&Context.Notify, SynchronizationEvent, FALSE);
         ExInitializeWorkItem(&Context.Worker, PgClearWorker, &Context);
