@@ -87,6 +87,9 @@ InitializePgBlock(
     CHAR Header[] =
         "55 41 54 41 55 41 56 41 57 48 81 EC C0 02 00 00 48 8D A8 D8 FD FF FF 48 83 E5 80";
 
+    CHAR HeaderEx[] =
+        "55 41 54 41 55 41 56 41 57 48 8D 68 A1 48 81 EC B0 00 00 00";
+
     ULONG64 SdbpCheckDll[] = {
         0x7c8b483024748b48, 0x333824548b4c2824,
         0x08ea8349028949c0, 0x7c8948f473d43b4c,
@@ -251,10 +254,18 @@ InitializePgBlock(
                     }
                 }
 
-                ControlPc = ScanBytes(
-                    ViewBase,
-                    (PCHAR)ViewBase + ViewSize,
-                    Header);
+                if (GetGpBlock(PgBlock)->BuildNumber < 18362) {
+                    ControlPc = ScanBytes(
+                        ViewBase,
+                        (PCHAR)ViewBase + ViewSize,
+                        Header);
+                }
+                else {
+                    ControlPc = ScanBytes(
+                        ViewBase,
+                        (PCHAR)ViewBase + ViewSize,
+                        HeaderEx);
+                }
 
                 if (NULL != ControlPc) {
                     TargetPc = ControlPc + Diff;
