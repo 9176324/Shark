@@ -25,8 +25,8 @@
 #include "Space.h"
 #include "Stack.h"
 
-#define __ROL64(x, n) (((x) << ((n % 64))) | ((x) >> (64 - (n % 64))))
-#define __ROR64(x, n) (((x) >> ((n % 64))) | ((x) << (64 - (n % 64))))
+#define __ROL64(x, n) (((x) << ((( n & 0xFF) % 64))) | ((x) >> (64 - (( n & 0xFF) % 64))))
+#define __ROR64(x, n) (((x) >> ((( n & 0xFF) % 64))) | ((x) << (64 - (( n & 0xFF) % 64))))
 
 #define GetGpBlock(pgblock) \
             ((PGPBLOCK)((PCHAR)pgblock - sizeof(GPBLOCK)))
