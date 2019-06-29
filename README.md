@@ -1,5 +1,5 @@
 # Shark
-    Turn off PatchGuard in real time for win7 (7600) ~ win10 (18362.30).
+    Turn off PatchGuard in real time for win7 (7600) ~ win10 (17763).
 
 # Build labs
     md X:\Labs
