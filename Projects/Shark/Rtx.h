@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2019 by blindtiger. All rights reserved.
+* Copyright (c) 2015 - 2019 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License"); you may not use this file except in compliance with
@@ -25,6 +25,8 @@
 /* Assume byte packing throughout */
 extern "C" {
 #endif	/* __cplusplus */
+
+    typedef struct _OBJECT *POBJECT;
 
     typedef struct _ROUTINES32 {
         ULONG ApcRoutine;
@@ -56,9 +58,9 @@ extern "C" {
     }WORKER_OBJECT, *PWORKER_OBJECT;
 
     typedef struct _RTX {
-        struct _OBJECT * Object;
-        struct _OBJECT * Target;
-        struct _API_MESSAGE * ApiMessage;
+        POBJECT Object;
+        POBJECT Target;
+        PVOID ApiMessage;
         KEVENT Notify;
 
         USHORT Platform;
@@ -82,7 +84,7 @@ extern "C" {
 
     ULONG_PTR
         NTAPI
-        _MultipleDispatcher(
+        _GuardCall(
             __in_opt PPS_APC_ROUTINE ApcRoutine,
             __in_opt PKSYSTEM_ROUTINE SystemRoutine,
             __in_opt PUSER_THREAD_START_ROUTINE StartRoutine,
@@ -92,7 +94,7 @@ extern "C" {
     FORCEINLINE
     ULONG_PTR
         NTAPI
-        MultipleDispatcher(
+        GuardCall(
             __in_opt PPS_APC_ROUTINE ApcRoutine,
             __in_opt PKSYSTEM_ROUTINE SystemRoutine,
             __in_opt PUSER_THREAD_START_ROUTINE StartRoutine,
@@ -102,7 +104,7 @@ extern "C" {
         ULONG_PTR Result = 0;
 
         __try {
-            Result = _MultipleDispatcher(
+            Result = _GuardCall(
                 ApcRoutine,
                 SystemRoutine,
                 StartRoutine,

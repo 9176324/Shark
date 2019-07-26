@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2019 by blindtiger. All rights reserved.
+* Copyright (c) 2015 - 2019 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License")); you may not use this file except in compliance with
@@ -21,7 +21,7 @@
 #include "Rtx.h"
 
 #include "Ctx.h"
-#include "Detour.h"
+#include "Detours.h"
 #include "Scan.h"
 
 VOID
@@ -38,7 +38,7 @@ AsyncDispatcher(
 
     Atx = CONTAINING_RECORD(Apc, ATX, Apc);
 
-    Atx->Rtx.Routines.Result = MultipleDispatcher(
+    Atx->Rtx.Routines.Result = GuardCall(
         Atx->Rtx.Routines.ApcRoutine,
         Atx->Rtx.Routines.SystemRoutine,
         Atx->Rtx.Routines.StartRoutine,
@@ -66,7 +66,7 @@ AsyncCall(
         UniqueThread,
         &Thread);
 
-    if (TRACE(Status)) {
+    if (NT_SUCCESS(Status)) {
         Atx.Rtx.Routines.ApcRoutine = ApcRoutine;
         Atx.Rtx.Routines.SystemRoutine = SystemRoutine;
         Atx.Rtx.Routines.StartRoutine = StartRoutine;
@@ -129,7 +129,7 @@ IpiDispatcher(
 )
 {
     if (-1 == Rtx->Processor) {
-        MultipleDispatcher(
+        GuardCall(
             Rtx->Routines.ApcRoutine,
             Rtx->Routines.SystemRoutine,
             Rtx->Routines.StartRoutine,
@@ -137,7 +137,7 @@ IpiDispatcher(
     }
     else {
         if (KeGetCurrentProcessorNumber() == Rtx->Processor) {
-            Rtx->Routines.Result = MultipleDispatcher(
+            Rtx->Routines.Result = GuardCall(
                 Rtx->Routines.ApcRoutine,
                 Rtx->Routines.SystemRoutine,
                 Rtx->Routines.StartRoutine,

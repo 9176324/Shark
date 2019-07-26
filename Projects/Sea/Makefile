@@ -1,6 +1,6 @@
 #
 #
-# Copyright (c) 2018 by blindtiger. All rights reserved.
+# Copyright (c) 2015 - 2019 by blindtiger. All rights reserved.
 #
 # The contents of this file are subject to the Mozilla Public License Version
 # 2.0 (the "License"); you may not use this file except in compliance with
@@ -61,17 +61,17 @@ PROJSRCS = \
     $(ARCTARG)\$(ARCTARG).asm \
     $(PROJ).c \
     Sysload.c
-
+    
 !if "$(ARCTARG)" == "I386"
-TARGDEFS = /D_X86_=1 /Di386=1 /DSTD_CALL /DFPO=0
+TARGDEFS = /D_X86_=1 /Di386=1 /DSTD_CALL /DFPO=0 /DDOSWIN32 /DDETOURS_X86 /DDETOURS_32BIT
 TARGAOPTS = /safeseh /coff /Zm
 TARGCOPTS = /Gz /Gm- /GX- /G7 /Ze /Gi- /QIfdiv- /Od /Oy-
 TARGLOPTS = 
 HOTPATCH = /stub:$(LABS)\WRK\base\ntos\BUILD\PREBUILT\$(ARCTARG)\STUB512.com
 ARCH = X86
 ARCHML = ml
-!else
-TARGDEFS = /D_WIN64 /D_AMD64_ /DAMD64
+!else if "$(ARCTARG)" == "AMD64"
+TARGDEFS = /D_WIN64 /D_AMD64_ /DAMD64 /DDETOURS_X64 /DDETOURS_64BIT
 TARGAOPTS = 
 TARGCOPTS = /Wp64 /Od /EHs-c- /Gs12288
 TARGLOPTS = /IGNORE:4108,4088,4218,4218,4235
@@ -125,7 +125,6 @@ BUILDLIBS = ntdllp.lib bufferoverflow.lib \
 !else if "$(ARCTARG)" == "AMD64"
     gshandler.obj gshandlerseh.obj \
 !endif
-    disasm.obj log.obj\
     kernl32p.lib msvcrt.lib shell32.lib user32.lib gdi32.lib \
     nt_process_startup.obj
 

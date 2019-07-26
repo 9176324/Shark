@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2019 by blindtiger. All rights reserved.
+* Copyright (c) 2015 - 2019 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License")); you may not use this file except in compliance with
@@ -112,7 +112,7 @@ TrimBytes(
                                     16,
                                     &Digit);
 
-                                if (TRACE(Status)) {
+                                if (NT_SUCCESS(Status)) {
                                     *(Coll + Index / 2) = (CHAR)Digit;
 
                                     *Selector =

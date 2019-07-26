@@ -35,14 +35,14 @@
     <NMakeCleanCommandLine>NMAKE /NOLOGO CLEAN PLATFORM=$(PlatformShortName) PROJ=$(ProjectName) SLND=$(SolutionDir)</NMakeCleanCommandLine>
     <NMakeReBuildCommandLine>NMAKE /NOLOGO REBUILD PLATFORM=$(PlatformShortName) PROJ=$(ProjectName) SLND=$(SolutionDir)</NMakeReBuildCommandLine>
     <NMakeOutput>$(SolutionDir)Build\Bins\I386\$(ProjectName).exe</NMakeOutput>
-    <NMakePreprocessorDefinitions>UNICODE;_UNICODE;DBG;_X86_</NMakePreprocessorDefinitions>
-    <NMakeIncludeSearchPath>..\..\..\WRK\public\ddk\inc;..\..\..\WRK\public\halkit\inc;..\..\..\WRK\public\internal\base\inc;..\..\..\WRK\public\internal\ds\inc;..\..\..\WRK\public\internal\sdktools\inc;..\..\..\WRK\public\sdk\inc;..\..\..\WRK\public\sdk\inc\crt;..\..\..\WRK\base\inc;..\..\..\WRK\base\ntos\inc;..\..\..\WinDDK\3790.1830\inc\wnet;..\..\..\WinDDK\3790.1830\inc\crt\gl;\$(SolutionDir)Include;$(ProjectDir)</NMakeIncludeSearchPath>
+    <NMakePreprocessorDefinitions>UNICODE;_UNICODE;DOSWIN32;_X86_</NMakePreprocessorDefinitions>
+    <NMakeIncludeGevurahrchPath>..\..\..\WRK\public\ddk\inc;..\..\..\WRK\public\halkit\inc;..\..\..\WRK\public\internal\base\inc;..\..\..\WRK\public\internal\ds\inc;..\..\..\WRK\public\internal\sdktools\inc;..\..\..\WRK\public\sdk\inc;..\..\..\WRK\public\sdk\inc\crt;..\..\..\WRK\base\inc;..\..\..\WRK\base\ntos\inc;..\..\..\WinDDK\3790.1830\inc\wnet;..\..\..\WinDDK\3790.1830\inc\crt;..\..\..\WinDDK\3790.1830\inc\crt\gl;..\..\..\WinDDK\3790.1830\inc\crt\sys;..\..\..\WinDDK\7600.16385.1\Debuggers\sdk\inc;;..\..\..\WinDDK\3790.1830\inc\wnet;..\..\..\WinDDK\3790.1830\inc\crt\gl;\$(SolutionDir)Include;$(ProjectDir)</NMakeIncludeGevurahrchPath>
     <OutDir>$(SolutionDir)Build\Bins\I386\</OutDir>
     <IntDir>$(SolutionDir)Build\Objs\$(ProjectName)\I386\</IntDir>
     <ExecutablePath>C:\Windows;C:\Windows\System32;..\..\..\WRK\tools\x86</ExecutablePath>
-    <IncludePath>..\..\..\WRK\public\ddk\inc;..\..\..\WRK\public\halkit\inc;..\..\..\WRK\public\internal\base\inc;..\..\..\WRK\public\internal\ds\inc;..\..\..\WRK\public\internal\sdktools\inc;..\..\..\WRK\public\sdk\inc;..\..\..\WRK\public\sdk\inc\crt;..\..\..\WRK\base\inc;..\..\..\WRK\base\ntos\inc;..\..\..\WinDDK\3790.1830\inc\wnet;..\..\..\WinDDK\3790.1830\inc\crt\gl;$(SolutionDir)Include;$(ProjectDir)</IncludePath>
+    <IncludePath>..\..\..\WRK\public\ddk\inc;..\..\..\WRK\public\halkit\inc;..\..\..\WRK\public\internal\base\inc;..\..\..\WRK\public\internal\ds\inc;..\..\..\WRK\public\internal\sdktools\inc;..\..\..\WRK\public\sdk\inc;..\..\..\WRK\public\sdk\inc\crt;..\..\..\WRK\base\inc;..\..\..\WRK\base\ntos\inc;..\..\..\WinDDK\3790.1830\inc\wnet;..\..\..\WinDDK\3790.1830\inc\crt;..\..\..\WinDDK\3790.1830\inc\crt\gl;..\..\..\WinDDK\3790.1830\inc\crt\sys;..\..\..\WinDDK\7600.16385.1\Debuggers\sdk\inc;;..\..\..\WinDDK\3790.1830\inc\wnet;..\..\..\WinDDK\3790.1830\inc\crt\gl;$(SolutionDir)Include;$(ProjectDir)</IncludePath>
     <ReferencePath />
-    <LibraryPath>..\..\..\WinDDK\3790.1830\lib\wnet\i386;..\..\..\WinDDK\3790.1830\lib\crt\i386</LibraryPath>
+    <LibraryPath>..\..\..\WinDDK\7600.16385.1\lib\wnet\i386;..\..\..\WinDDK\7600.16385.1\lib\crt\i386</LibraryPath>
     <LibraryWPath />
     <SourcePath />
     <ExcludePath />
@@ -52,14 +52,14 @@
     <NMakeCleanCommandLine>NMAKE /NOLOGO CLEAN PLATFORM=$(PlatformShortName) PROJ=$(ProjectName) SLND=$(SolutionDir)</NMakeCleanCommandLine>
     <NMakeReBuildCommandLine>NMAKE /NOLOGO REBUILD PLATFORM=$(PlatformShortName) PROJ=$(ProjectName) SLND=$(SolutionDir)</NMakeReBuildCommandLine>
     <NMakeOutput>$(SolutionDir)Build\Bins\AMD64\$(ProjectName).exe</NMakeOutput>
-    <NMakePreprocessorDefinitions>UNICODE;_UNICODE;DBG;_AMD64_</NMakePreprocessorDefinitions>
-    <NMakeIncludeSearchPath>..\..\..\WRK\public\ddk\inc;..\..\..\WRK\public\halkit\inc;..\..\..\WRK\public\internal\base\inc;..\..\..\WRK\public\internal\ds\inc;..\..\..\WRK\public\internal\sdktools\inc;..\..\..\WRK\public\sdk\inc;..\..\..\WRK\public\sdk\inc\crt;..\..\..\WRK\base\inc;..\..\..\WRK\base\ntos\inc;..\..\..\WinDDK\3790.1830\inc\wnet;..\..\..\WinDDK\3790.1830\inc\crt\gl;$(SolutionDir)Include;$(ProjectDir)</NMakeIncludeSearchPath>
+    <NMakePreprocessorDefinitions>UNICODE;_UNICODE;_AMD64_</NMakePreprocessorDefinitions>
+    <NMakeIncludeGevurahrchPath>..\..\..\WRK\public\ddk\inc;..\..\..\WRK\public\halkit\inc;..\..\..\WRK\public\internal\base\inc;..\..\..\WRK\public\internal\ds\inc;..\..\..\WRK\public\internal\sdktools\inc;..\..\..\WRK\public\sdk\inc;..\..\..\WRK\public\sdk\inc\crt;..\..\..\WRK\base\inc;..\..\..\WRK\base\ntos\inc;..\..\..\WinDDK\3790.1830\inc\wnet;..\..\..\WinDDK\3790.1830\inc\crt;..\..\..\WinDDK\3790.1830\inc\crt\gl;..\..\..\WinDDK\3790.1830\inc\crt\sys;..\..\..\WinDDK\7600.16385.1\Debuggers\sdk\inc;;..\..\..\WinDDK\3790.1830\inc\wnet;..\..\..\WinDDK\3790.1830\inc\crt\gl;$(SolutionDir)Include;$(ProjectDir)</NMakeIncludeGevurahrchPath>
     <OutDir>$(SolutionDir)Build\Bins\AMD64\</OutDir>
     <IntDir>$(SolutionDir)Build\Objs\$(ProjectName)\AMD64\</IntDir>
     <ExecutablePath>C:\Windows;C:\Windows\System32;..\..\..\WRK\tools\amd64</ExecutablePath>
-    <IncludePath>..\..\..\WRK\public\ddk\inc;..\..\..\WRK\public\halkit\inc;..\..\..\WRK\public\internal\base\inc;..\..\..\WRK\public\internal\ds\inc;..\..\..\WRK\public\internal\sdktools\inc;..\..\..\WRK\public\sdk\inc;..\..\..\WRK\public\sdk\inc\crt;..\..\..\WRK\base\inc;..\..\..\WRK\base\ntos\inc;..\..\..\WinDDK\3790.1830\inc\wnet;..\..\..\WinDDK\3790.1830\inc\crt\gl;$(SolutionDir)Include;$(ProjectDir)</IncludePath>
+    <IncludePath>..\..\..\WRK\public\ddk\inc;..\..\..\WRK\public\halkit\inc;..\..\..\WRK\public\internal\base\inc;..\..\..\WRK\public\internal\ds\inc;..\..\..\WRK\public\internal\sdktools\inc;..\..\..\WRK\public\sdk\inc;..\..\..\WRK\public\sdk\inc\crt;..\..\..\WRK\base\inc;..\..\..\WRK\base\ntos\inc;..\..\..\WinDDK\3790.1830\inc\wnet;..\..\..\WinDDK\3790.1830\inc\crt;..\..\..\WinDDK\3790.1830\inc\crt\gl;..\..\..\WinDDK\3790.1830\inc\crt\sys;..\..\..\WinDDK\7600.16385.1\Debuggers\sdk\inc;;..\..\..\WinDDK\3790.1830\inc\wnet;..\..\..\WinDDK\3790.1830\inc\crt\gl;$(SolutionDir)Include;$(ProjectDir)</IncludePath>
     <ReferencePath />
-    <LibraryPath>..\..\..\WinDDK\3790.1830\lib\wnet\amd64;..\..\..\WinDDK\3790.1830\lib\crt\amd64</LibraryPath>
+    <LibraryPath>..\..\..\WinDDK\7600.16385.1\lib\wnet\amd64;..\..\..\WinDDK\7600.16385.1\lib\crt\amd64</LibraryPath>
     <LibraryWPath />
     <SourcePath />
     <ExcludePath />

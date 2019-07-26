@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2019 by blindtiger. All rights reserved.
+* Copyright (c) 2015 - 2019 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License"); you may not use this file except in compliance with
@@ -198,7 +198,7 @@ DeleteKey(
                     KeyName.Length = (USHORT)ValueBasicInformation->NameLength;
                     KeyName.MaximumLength = (USHORT)MAXIMUM_FILENAME_LENGTH * sizeof(WCHAR);
 
-                    TRACE(NtDeleteValueKey(
+                    NT_SUCCESS(NtDeleteValueKey(
                         KeyHandle,
                         &KeyName));
                 }
@@ -210,8 +210,8 @@ DeleteKey(
                 BasicInformation);
         }
 
-        TRACE(NtDeleteKey(KeyHandle));
-        TRACE(NtClose(KeyHandle));
+        NT_SUCCESS(NtDeleteKey(KeyHandle));
+        NT_SUCCESS(NtClose(KeyHandle));
     }
 }
 
@@ -240,7 +240,7 @@ LoadKernelImage(
         FALSE,
         &WasEnabled);
 
-    if (TRACE(Status)) {
+    if (NT_SUCCESS(Status)) {
         KeyPathBuffer = RtlAllocateHeap(
             RtlProcessHeap(),
             0,
@@ -272,29 +272,29 @@ LoadKernelImage(
                 REG_OPTION_VOLATILE,
                 NULL);
 
-            if (TRACE(Status)) {
-                TRACE(SetValueKey(
+            if (NT_SUCCESS(Status)) {
+                NT_SUCCESS(SetValueKey(
                     KeyHandle,
                     L"Type",
                     REG_DWORD,
                     &Type,
                     sizeof(Type)));
 
-                TRACE(SetValueKey(
+                NT_SUCCESS(SetValueKey(
                     KeyHandle,
                     L"ErrorControl",
                     REG_DWORD,
                     &ErrorControl,
                     sizeof(ErrorControl)));
 
-                TRACE(SetValueKey(
+                NT_SUCCESS(SetValueKey(
                     KeyHandle,
                     L"Start",
                     REG_DWORD,
                     &Start,
                     sizeof(Start)));
 
-                TRACE(SetValueKey(
+                NT_SUCCESS(SetValueKey(
                     KeyHandle,
                     L"DisplayName",
                     REG_SZ,
@@ -303,7 +303,7 @@ LoadKernelImage(
 
                 RtlInitUnicodeString(&ImagePath, ImageFileName);
 
-                TRACE(SetValueKey(
+                NT_SUCCESS(SetValueKey(
                     KeyHandle,
                     L"ImagePath",
                     REG_EXPAND_SZ,
@@ -312,7 +312,7 @@ LoadKernelImage(
 
                 Status = NtLoadDriver(&KeyPath);
 
-                TRACE(NtClose(KeyHandle));
+                NT_SUCCESS(NtClose(KeyHandle));
             }
 
             RtlFreeHeap(
@@ -353,7 +353,7 @@ UnloadKernelImage(
         FALSE,
         &WasEnabled);
 
-    if (TRACE(Status)) {
+    if (NT_SUCCESS(Status)) {
         KeyPathBuffer = RtlAllocateHeap(
             RtlProcessHeap(),
             0,
@@ -381,14 +381,14 @@ UnloadKernelImage(
                 KEY_ALL_ACCESS,
                 &ObjectAttributes);
 
-            if (TRACE(Status)) {
+            if (NT_SUCCESS(Status)) {
                 Status = NtUnloadDriver(&KeyPath);
 
-                if (TRACE(Status)) {
+                if (NT_SUCCESS(Status)) {
                     DeleteKey(&KeyPath);
                 }
 
-                TRACE(NtClose(KeyHandle));
+                NT_SUCCESS(NtClose(KeyHandle));
             }
 
             RtlFreeHeap(

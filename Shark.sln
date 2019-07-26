@@ -8,13 +8,11 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Include", "Include", "{2655FCA3-FA7E-4E4A-86CE-A8FCE1787952}"
 	ProjectSection(SolutionItems) = preProject
 		Include\defs.h = Include\defs.h
+		Include\detoursdefs.h = Include\detoursdefs.h
 		Include\devicedefs.h = Include\devicedefs.h
 		Include\dump.h = Include\dump.h
-		Include\log.c = Include\log.c
-		Include\log.h = Include\log.h
-		Include\unicode.inc = Include\unicode.inc
+		Include\ver.h = Include\ver.h
 		Include\WARNING.h = Include\WARNING.h
-		Include\wow64.h = Include\wow64.h
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sea", "Projects\Sea\Sea.vcxproj", "{CFDA5888-9D8D-4EFF-90E6-DA739486E10F}"

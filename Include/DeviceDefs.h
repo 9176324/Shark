@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2015-2018 by blindtiger ( blindtiger@foxmail.com )
+* Copyright (c) 2015-2015 - 2019 by blindtiger ( blindtiger@foxmail.com )
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License"); you may not use this file except in compliance with
@@ -27,9 +27,9 @@ extern "C" {
 #include <devioctl.h>
 
 #define LOADER_STRING L"Shark.sys"
-#define SERVICE_STRING L"Shark"
-#define DEVICE_STRING L"\\Device\\Shark"
-#define SYMBOLIC_STRING L"\\DosDevices\\Shark"
+#define SERVICE_STRING L"{107180F9-013A-45B4-BCE5-F046892D7426}"
+#define DEVICE_STRING L"\\Device\\{94A4D943-9D91-4DFA-AA05-5486E61BF500}"
+#define SYMBOLIC_STRING L"\\DosDevices\\{00081140-C743-454D-917B-C3F437C770DC}"
 
 #ifdef __cplusplus
 }

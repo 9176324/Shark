@@ -1,6 +1,6 @@
 ;
 ;
-; Copyright (c) 2019 by blindtiger. All rights reserved.
+; Copyright (c) 2015 - 2019 by blindtiger. All rights reserved.
 ;
 ; The contents of this file are subject to the Mozilla Public License Version
 ; 2.0 (the "License"); you may not use this file except in compliance with
@@ -27,7 +27,7 @@ include macamd64.inc
 
     LEAF_END _FlushSingleTb, _TEXT$00
         
-    NESTED_ENTRY _MultipleDispatcher, _TEXT$00
+    NESTED_ENTRY _GuardCall, _TEXT$00
 
         alloc_stack ( KSTART_FRAME_LENGTH - 8 )
         
@@ -94,6 +94,6 @@ error :
 
         ret
 
-    NESTED_END _MultipleDispatcher, _TEXT$00
+    NESTED_END _GuardCall, _TEXT$00
         
         end

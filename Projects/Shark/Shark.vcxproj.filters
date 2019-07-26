@@ -66,7 +66,7 @@
     <ClCompile Include="I386\StackI386.c">
       <Filter>Source Files\I386</Filter>
     </ClCompile>
-    <ClCompile Include="Detour.c">
+    <ClCompile Include="Detours.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -92,6 +92,12 @@
       <Filter>Source Files\AMD64</Filter>
     </MASM>
     <MASM Include="I386\CmpI386.asm">
+      <Filter>Source Files\I386</Filter>
+    </MASM>
+    <MASM Include="AMD64\ContextAMD64.asm">
+      <Filter>Source Files\AMD64</Filter>
+    </MASM>
+    <MASM Include="I386\ContextI386.asm">
       <Filter>Source Files\I386</Filter>
     </MASM>
   </ItemGroup>
@@ -123,7 +129,7 @@
     <ClInclude Include="Rtx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Detour.h">
+    <ClInclude Include="Detours.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2019 by blindtiger. All rights reserved.
+* Copyright (c) 2015 - 2019 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License")); you may not use this file except in compliance with
@@ -20,7 +20,7 @@
 
 #include "Space.h"
 
-#include "Detour.h"
+#include "Detours.h"
 #include "Reload.h"
 #include "Rtx.h"
 #include "Scan.h"

@@ -1,6 +1,6 @@
 ;
 ;
-; Copyright (c) 2019 by blindtiger. All rights reserved.
+; Copyright (c) 2015 - 2019 by blindtiger. All rights reserved.
 ;
 ; The contents of this file are subject to the Mozilla Public License Version
 ; 2.0 (the "License"); you may not use this file except in compliance with
@@ -22,7 +22,7 @@
 include ks386.inc
 include callconv.inc
         .list
-        
+
 _TEXT$00    SEGMENT PAGE 'CODE'
 
     cPublicProc __FlushSingleTb, 1
@@ -114,7 +114,7 @@ _TEXT$00    SEGMENT PAGE 'CODE'
         
     stdENDP __GetVirtualAddressMappedByPdePae
     
-    cPublicProc __MultipleDispatcher, 4
+    cPublicProc __GuardCall, 4
 
         mov edi, edi
 
@@ -135,7 +135,7 @@ _TEXT$00    SEGMENT PAGE 'CODE'
         mov esp, ebp
         pop ebp
         
-        stdRET __MultipleDispatcher
+        stdRET __GuardCall
         
 @@ :    
         mov eax, [ebp + 0ch]
@@ -151,7 +151,7 @@ _TEXT$00    SEGMENT PAGE 'CODE'
         mov esp, ebp
         pop ebp
         
-        stdRET __MultipleDispatcher
+        stdRET __GuardCall
         
 @@ :    
         mov eax, [ebp + 10h]
@@ -166,7 +166,7 @@ _TEXT$00    SEGMENT PAGE 'CODE'
         mov esp, ebp
         pop ebp
         
-        stdRET __MultipleDispatcher
+        stdRET __GuardCall
         
 @@ :    
         mov eax, [ebp + 14h]
@@ -179,7 +179,7 @@ _TEXT$00    SEGMENT PAGE 'CODE'
         mov esp, ebp
         pop ebp
         
-        stdRET __MultipleDispatcher
+        stdRET __GuardCall
         
 error : 
         xor eax, eax
@@ -187,9 +187,9 @@ error :
         mov esp, ebp
         pop ebp
         
-        stdRET __MultipleDispatcher
+        stdRET __GuardCall
         
-    stdENDP __MultipleDispatcher
+    stdENDP __GuardCall
     
 _TEXT$00    ends
 

@@ -13,4 +13,4 @@
     Method 2: run Build.cmd
 
 # Note
-    For a stable version please donate enough money for test the specific code.
+    For 1903 and higher please donate money.

@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2019 by blindtiger. All rights reserved.
+* Copyright (c) 2015 - 2019 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License")); you may not use this file except in compliance with
@@ -20,11 +20,125 @@
 
 #include "Reload.h"
 
-#include "Detour.h"
+#include "Ctx.h"
+#include "Detours.h"
 #include "Except.h"
 #include "Scan.h"
 
 PGPBLOCK GpBlock;
+
+ULONG
+NTAPI
+GetPlatform(
+    __in PVOID ImageBase
+)
+{
+    PIMAGE_NT_HEADERS NtHeaders = NULL;
+    ULONG Platform = 0;
+
+    NtHeaders = RtlImageNtHeader(ImageBase);
+
+    if (NULL != NtHeaders) {
+        Platform = NtHeaders->OptionalHeader.Magic;
+    }
+
+    return Platform;
+}
+
+PVOID
+NTAPI
+GetAddressOfEntryPoint(
+    __in PVOID ImageBase
+)
+{
+    PIMAGE_NT_HEADERS NtHeaders = NULL;
+    ULONG Offset = 0;
+    PVOID EntryPoint = NULL;
+
+    NtHeaders = RtlImageNtHeader(ImageBase);
+
+    if (NULL != NtHeaders) {
+        if (IMAGE_NT_OPTIONAL_HDR32_MAGIC == NtHeaders->OptionalHeader.Magic) {
+            Offset = ((PIMAGE_NT_HEADERS32)NtHeaders)->OptionalHeader.AddressOfEntryPoint;
+        }
+
+        if (IMAGE_NT_OPTIONAL_HDR64_MAGIC == NtHeaders->OptionalHeader.Magic) {
+            Offset = ((PIMAGE_NT_HEADERS64)NtHeaders)->OptionalHeader.AddressOfEntryPoint;
+        }
+
+        if (0 != Offset) {
+            EntryPoint = (PCHAR)ImageBase + Offset;
+        }
+    }
+
+    return EntryPoint;
+}
+
+ULONG
+NTAPI
+GetTimeStamp(
+    __in PVOID ImageBase
+)
+{
+    PIMAGE_NT_HEADERS NtHeaders = NULL;
+    ULONG TimeStamp = 0;
+
+    NtHeaders = RtlImageNtHeader(ImageBase);
+
+    if (NULL != NtHeaders) {
+        TimeStamp = NtHeaders->FileHeader.TimeDateStamp;
+    }
+
+    return TimeStamp;
+}
+
+USHORT
+NTAPI
+GetSubsystem(
+    __in PVOID ImageBase
+)
+{
+    PIMAGE_NT_HEADERS NtHeaders = NULL;
+    USHORT Subsystem = 0;
+
+    NtHeaders = RtlImageNtHeader(ImageBase);
+
+    if (NULL != NtHeaders) {
+        if (IMAGE_NT_OPTIONAL_HDR32_MAGIC == NtHeaders->OptionalHeader.Magic) {
+            Subsystem = ((PIMAGE_NT_HEADERS32)NtHeaders)->OptionalHeader.Subsystem;
+        }
+
+        if (IMAGE_NT_OPTIONAL_HDR64_MAGIC == NtHeaders->OptionalHeader.Magic) {
+            Subsystem = ((PIMAGE_NT_HEADERS64)NtHeaders)->OptionalHeader.Subsystem;
+        }
+    }
+
+    return Subsystem;
+}
+
+ULONG
+NTAPI
+GetSizeOfImage(
+    __in PVOID ImageBase
+)
+{
+    PIMAGE_NT_HEADERS NtHeaders = NULL;
+    ULONG SizeOfImage = 0;
+
+    NtHeaders = RtlImageNtHeader(ImageBase);
+
+    if (NULL != NtHeaders) {
+        if (IMAGE_NT_OPTIONAL_HDR32_MAGIC == NtHeaders->OptionalHeader.Magic) {
+            SizeOfImage = ((PIMAGE_NT_HEADERS32)NtHeaders)->OptionalHeader.SizeOfImage;
+        }
+
+        if (IMAGE_NT_OPTIONAL_HDR64_MAGIC == NtHeaders->OptionalHeader.Magic) {
+            SizeOfImage = ((PIMAGE_NT_HEADERS64)NtHeaders)->OptionalHeader.SizeOfImage;
+        }
+    }
+
+    return SizeOfImage;
+}
 
 PIMAGE_SECTION_HEADER
 NTAPI
@@ -90,14 +204,6 @@ InitializeGpBlock(
     // E8 FB E4 E9 FF                   call _ExAcquireResourceSharedLite@8
 
     CHAR PsLoadedModuleResource[] = "6a 01 68 ?? ?? ?? ?? e8 ?? ?? ?? ??";
-
-    ULONG64 CaptureContext[] = {
-        0x8d53000002d0ec81, 0x0000a4838f04245c, 0x8c00000094838c00, 0xc8938c000000bc8b,
-        0x0000989b8c000000, 0x8c00000090a38c00, 0xb083890000008cab, 0x0000ac8b89000000,
-        0x89000000a8938900, 0xa0b389000000b4ab, 0x00009cbb89000000, 0x000000c0838f9c00,
-        0x8389000002dc838d, 0x02d4838b000000c4, 0x000000b883890000, 0x8b038900010007b8,
-        0x8b0b8d000002d093, 0xff5152000002d883, 0xccccccccccccccd0
-    };
 #else
     // 48 89 A3 D8 01 00 00             mov [rbx + 1D8h], rsp
     // 8B F8                            mov edi, eax
@@ -114,21 +220,11 @@ InitializeGpBlock(
     // E8 B8 B8 E3 FF call              ExReleaseResourceLite
 
     CHAR PsLoadedModuleResource[] = "48 8d 0d ?? ?? ?? ?? e8 ?? ?? ?? ??";
-
-    ULONG64 CaptureContext[] = {
-        0x51000004d0ec8148, 0x80818f08244c8d48, 0x598c38498c000000, 0x8c42518c3c418c3a,
-        0x41894840698c3e61, 0x0000008891894878, 0x4800000090998948, 0x8948000004e8818d,
-        0xa989480000009881, 0xa8b18948000000a0, 0x00b0b98948000000, 0x0000b881894c0000,
-        0x000000c089894c00, 0x4c000000c891894c, 0x894c000000d09989, 0xa9894c000000d8a1,
-        0xe8b1894c000000e0, 0x00f0b9894c000000, 0x00010081ae0f0000, 0x0001a0817f0f6600,
-        0x0001b0897f0f6600, 0x0001c0917f0f6600, 0x0001d0997f0f6600, 0x0001e0a17f0f6600,
-        0x0001f0a97f0f6600, 0x000200b17f0f6600, 0x000210b97f0f6600, 0x0220817f0f446600,
-        0x30897f0f44660000, 0x917f0f4466000002, 0x7f0f446600000240, 0x0f44660000025099,
-        0x446600000260a17f, 0x6600000270a97f0f, 0x00000280b17f0f44, 0x000290b97f0f4466,
-        0x418f9c3459ae0f00, 0x000004d8818b4844, 0xb8000000f8818948, 0x483041890010000b,
-        0x8d48000004d0918b, 0x000004e0818b4809, 0xccccccccccccd0ff
-    };
 #endif // !_WIN64
+
+    GpBlock->Linkage[0] = 0x33;
+    GpBlock->Linkage[1] = 0xc0;
+    GpBlock->Linkage[2] = 0xc3;
 
     PsGetVersion(NULL, NULL, &GpBlock->BuildNumber, NULL);
 
@@ -190,12 +286,24 @@ InitializeGpBlock(
 
     GpBlock->KeBugCheckEx = MmGetSystemRoutineAddress(&RoutineString);
 
+    RtlInitUnicodeString(&RoutineString, L"KdDebuggerEnabled");
+
+    GpBlock->KdDebuggerEnabled = MmGetSystemRoutineAddress(&RoutineString);
+
+    RtlInitUnicodeString(&RoutineString, L"KdDebuggerNotPresent");
+
+    GpBlock->KdDebuggerNotPresent = MmGetSystemRoutineAddress(&RoutineString);
+
+    RtlInitUnicodeString(&RoutineString, L"KdEnteredDebugger");
+
+    GpBlock->KdEnteredDebugger = MmGetSystemRoutineAddress(&RoutineString);
+
     GpBlock->CaptureContext = (PVOID)GpBlock->_CaptureContext;
 
     RtlCopyMemory(
         GpBlock->_CaptureContext,
-        CaptureContext,
-        sizeof(CaptureContext));
+        _CaptureContext,
+        sizeof(GpBlock->_CaptureContext));
 
     Context.ContextFlags = CONTEXT_FULL;
 
@@ -377,6 +485,20 @@ InitializeGpBlock(
     }
 
 #ifndef _WIN64
+    GpBlock->OffsetKProcessThreadListHead = 0x2c;
+
+    if (Block->BuildNumber < 9200) {
+        GpBlock->OffsetKThreadThreadListEntry = 0x1e0;
+    }
+    else {
+        GpBlock->OffsetKThreadThreadListEntry = 0x1d4;
+    }
+#else
+    GpBlock->OffsetKProcessThreadListHead = 0x30;
+    GpBlock->OffsetKThreadThreadListEntry = 0x2f8;
+#endif // !_WIN64
+
+#ifndef _WIN64
     RtlInitUnicodeString(&RoutineString, L"KeCapturePersistentThreadState");
 
     ControlPc = MmGetSystemRoutineAddress(&RoutineString);
@@ -404,7 +526,7 @@ InitializeGpBlock(
         PsLoadedModuleResource);
 
     if (NULL != ControlPc) {
-        Block->PsLoadedModuleResource = (PERESOURCE)__RVA_TO_VA(ControlPc + 3);
+        Block->PsLoadedModuleResource = (PERESOURCE)RvaToVa(ControlPc + 3);
     }
 
     NtHeaders = RtlImageNtHeader((PVOID)Block->DebuggerDataBlock.KernBase);
@@ -425,11 +547,13 @@ InitializeGpBlock(
             KiSystemCall64);
 
         if (NULL != ControlPc) {
-            Block->KeServiceDescriptorTable = __RVA_TO_VA(ControlPc + 23);
-            Block->KeServiceDescriptorTableShadow = __RVA_TO_VA(ControlPc + 30);
-}
+            Block->KeServiceDescriptorTable = RvaToVa(ControlPc + 23);
+            Block->KeServiceDescriptorTableShadow = RvaToVa(ControlPc + 30);
+        }
     }
 #endif // !_WIN64
+
+    InitializeListHead(&Block->LoadedPrivateImageList);
 }
 
 NTSTATUS

@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2019 by blindtiger. All rights reserved.
+* Copyright (c) 2015 - 2019 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License"); you may not use this file except in compliance with
@@ -21,7 +21,7 @@
 
 #include "..\..\WRK\base\ntos\mm\mi.h"
 
-#include "Detour.h"
+#include "Detours.h"
 #include "Reload.h"
 
 #ifdef __cplusplus
@@ -49,21 +49,13 @@ extern "C" {
     };
 
     typedef struct _PGOBJECT {
+        LIST_ENTRY Entry;
         BOOLEAN Encrypted;
+        ULONG64 XorKey;
         CCHAR Type;
         PVOID BaseAddress;
         SIZE_T RegionSize;
-        struct _PGBLOCK * PgBlock;
-
-        struct {
-            COUNTER_BODY Establisher; // establisher
-        }; // only worker use
-
-        COUNTER_BODY Callback; // callback
-        COUNTER_BODY Original; // original address
-        COUNTER_BODY Self; // self address
-        COUNTER_BODY CaptureContext; // capture context
-        CHAR Ret[1];
+        GUARD_BODY Body;
     }PGOBJECT, *PPGOBJECT;
 
     typedef struct _PGBLOCK {
@@ -80,8 +72,6 @@ extern "C" {
 #define PG_FIELD_BITS \
             ((ULONG)((((PG_FIRST_FIELD_OFFSET + PG_COMPARE_FIELDS_COUNT * sizeof(PVOID)) \
                 - PG_CMP_APPEND_DLL_SECTION_END) / sizeof(PVOID)) - 1))
-
-        LONG_PTR ReferenceCount;
 
         BOOLEAN BtcEnable;
         ULONG OffsetEntryPoint;
@@ -133,6 +123,13 @@ extern "C" {
             __in SIZE_T NumberOfBytes
             );
 
+        BOOLEAN
+        (NTAPI * MmSetPageProtection)(
+            __in_bcount(NumberOfBytes) PVOID VirtualAddress,
+            __in SIZE_T NumberOfBytes,
+            __in ULONG NewProtect
+            );
+
         VOID
         (NTAPI * SdbpCheckDll)(
             __in ULONG BugCheckCode,
@@ -151,6 +148,40 @@ extern "C" {
             __in ULONG64 InitialStack
             );
 
+        VOID
+        (NTAPI * KeBugCheckEx)(
+            __in ULONG BugCheckCode,
+            __in ULONG_PTR P1,
+            __in ULONG_PTR P2,
+            __in ULONG_PTR P3,
+            __in ULONG_PTR P4
+            );
+
+        PVOID
+        (NTAPI * RtlLookupFunctionEntry)(
+            __in ULONG64 ControlPc,
+            __out PULONG64 ImageBase,
+            __inout_opt PVOID HistoryTable
+            );
+
+        PEXCEPTION_ROUTINE
+        (NTAPI * RtlVirtualUnwind)(
+            __in ULONG HandlerType,
+            __in ULONG64 ImageBase,
+            __in ULONG64 ControlPc,
+            __in PVOID FunctionEntry,
+            __inout PCONTEXT ContextRecord,
+            __out PVOID * HandlerData,
+            __out PULONG64 EstablisherFrame,
+            __inout_opt PVOID ContextPointers
+            );
+
+        PLIST_ENTRY
+        (FASTCALL * ExInterlockedRemoveHeadList)(
+            __inout PLIST_ENTRY ListHead,
+            __inout PKSPIN_LOCK Lock
+            );
+
         ULONG64
         (NTAPI *  Btc64)(
             __in ULONG64 a,
@@ -160,15 +191,22 @@ extern "C" {
         VOID
         (NTAPI * ClearCallback)(
             __in PCONTEXT Context,
-            __in PPGOBJECT Object
+            __in PPGOBJECT Object,
+            __in_opt struct _PGBLOCK * PgBlock,
+            __in_opt PVOID Reserved
             );
+
+        LIST_ENTRY List;
+        KSPIN_LOCK Lock;
+
+        PGUARD_OBJECT BugCheckHandle;
 
         PSTR Message[2];
 
         CHAR _SdbpCheckDll[0x3c];
         CHAR _Btc64[8];
-        CHAR _ClearCallback[0x320];
         CHAR _Message[0x75];
+        CHAR _ClearCallback[PAGE_SIZE];
     }PGBLOCK, *PPGBLOCK;
 
     VOID
