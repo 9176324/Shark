@@ -19,11 +19,11 @@
     restart windows
 
 # References (sort by first letter of the name)
-    * DisableWin10PatchguardPoc, https://github.com/killvxk/DisableWin10PatchguardPoc
-    * EfiGuard, https://github.com/Mattiwatti/EfiGuard
-    * findpg, https://github.com/tandasat/findpg
-    * PgResarch, https://github.com/tandasat/PgResarch
-    * UPGDSED, https://github.com/hfiref0x/UPGDSED
+    DisableWin10PatchguardPoc, https://github.com/killvxk/DisableWin10PatchguardPoc
+    EfiGuard, https://github.com/Mattiwatti/EfiGuard
+    findpg, https://github.com/tandasat/findpg
+    PgResarch, https://github.com/tandasat/PgResarch
+    UPGDSED, https://github.com/hfiref0x/UPGDSED
 
 # Note
     Micro$oft updata windows very fast, For 1903 and higher please donate money.
