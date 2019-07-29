@@ -48,81 +48,85 @@ PgClearCallback(
     PKTRAP_FRAME TrapFrame = NULL;
     ULONG Index = 0;
 
-    // protected code for donate version
-
-    GetCounterBody(
-        &Object->Body.Reserved,
-        &PgBlock);
-
-#ifndef PUBLIC
-    GetGpBlock(PgBlock)->DbgPrint(
-        PgBlock->Message[Object->Encrypted],
-        Object);
-#endif // !PUBLIC
-
-    if (PgEncrypted == Object->Encrypted) {
-        Context->Rip = UnsafeReadPointer(Context->Rsp + KSTART_FRAME_LENGTH);
-        Context->Rsp += KSTART_FRAME_LENGTH + sizeof(PVOID);
-
-        if (PgPoolBigPage == Object->Type) {
-            GetGpBlock(PgBlock)->ExFreePoolWithTag(
-                Object->BaseAddress,
-                0);
-        }
-        else if (PgSystemPtes == Object->Type) {
-            PgBlock->MmFreeIndependentPages(
-                Object->BaseAddress,
-                Object->RegionSize);
-        }
+    if (NULL != ProgramCounter) {
+        // protected code for donate version
     }
     else {
-        for (Index = 0;
-            Index < Object->RegionSize - PgBlock->SizeSdbpCheckDll;
-            Index++) {
-            if (PgBlock->SizeSdbpCheckDll == GetGpBlock(PgBlock)->RtlCompareMemory(
-                (PCHAR)Object->BaseAddress + Index,
-                PgBlock->_SdbpCheckDll,
-                PgBlock->SizeSdbpCheckDll)) {
-                Thread = (PETHREAD)__readgsqword(FIELD_OFFSET(KPCR, Prcb.CurrentThread));
+        GetCounterBody(
+            &Object->Body.Reserved,
+            &PgBlock);
 
-                // protected code for donate version
+#ifndef PUBLIC
+        GetGpBlock(PgBlock)->DbgPrint(
+            PgBlock->Message[Object->Encrypted],
+            Object);
+#endif // !PUBLIC
 
-                StartFrame =
-                    (PKSTART_FRAME)(
-                    (*(PULONG64)((ULONG64)Thread +
-                        GetGpBlock(PgBlock)->DebuggerDataBlock.OffsetKThreadInitialStack)) -
-                        KSTART_FRAME_LENGTH);
+        if (PgEncrypted == Object->Encrypted) {
+            Context->Rip = UnsafeReadPointer(Context->Rsp + KSTART_FRAME_LENGTH);
+            Context->Rsp += KSTART_FRAME_LENGTH + sizeof(PVOID);
 
-                SwitchFrame = (PKSWITCH_FRAME)((ULONG64)StartFrame - KSWITCH_FRAME_LENGTH);
-
-                StartFrame->P1Home = (ULONG64)PgBlock->WorkerContext;
-                StartFrame->P2Home = (ULONG64)PgBlock->ExpWorkerThread;
-                StartFrame->P3Home = (ULONG64)PgBlock->PspSystemThreadStartup;
-                StartFrame->Return = 0;
-                SwitchFrame->Return = (ULONG64)PgBlock->KiStartSystemThread;
-                SwitchFrame->ApcBypass = APC_LEVEL;
-                SwitchFrame->Rbp = (ULONG64)TrapFrame + FIELD_OFFSET(KTRAP_FRAME, Xmm1);
-
-                Context->Rsp = (ULONG64)StartFrame;
-                Context->Rip = (ULONG64)PgBlock->KiStartSystemThread;
-
-                if (PgPoolBigPage == Object->Type) {
-                    GetGpBlock(PgBlock)->ExFreePoolWithTag(
-                        Object->BaseAddress,
-                        0);
-                }
-                else if (PgSystemPtes == Object->Type) {
-                    PgBlock->MmFreeIndependentPages(
-                        Object->BaseAddress,
-                        Object->RegionSize);
-                }
-
-                break;
+            if (PgPoolBigPage == Object->Type) {
+                GetGpBlock(PgBlock)->ExFreePoolWithTag(
+                    Object->BaseAddress,
+                    0);
+            }
+            else if (PgSystemPtes == Object->Type) {
+                PgBlock->MmFreeIndependentPages(
+                    Object->BaseAddress,
+                    Object->RegionSize);
             }
         }
+        else {
+            for (Index = 0;
+                Index < Object->RegionSize - PgBlock->SizeSdbpCheckDll;
+                Index++) {
+                if (PgBlock->SizeSdbpCheckDll == GetGpBlock(PgBlock)->RtlCompareMemory(
+                    (PCHAR)Object->BaseAddress + Index,
+                    PgBlock->_SdbpCheckDll,
+                    PgBlock->SizeSdbpCheckDll)) {
+                    Thread = (PETHREAD)__readgsqword(FIELD_OFFSET(KPCR, Prcb.CurrentThread));
+
+                    // protected code for donate version
+
+                    StartFrame =
+                        (PKSTART_FRAME)(
+                        (*(PULONG64)((ULONG64)Thread +
+                            GetGpBlock(PgBlock)->DebuggerDataBlock.OffsetKThreadInitialStack)) -
+                            KSTART_FRAME_LENGTH);
+
+                    SwitchFrame = (PKSWITCH_FRAME)((ULONG64)StartFrame - KSWITCH_FRAME_LENGTH);
+
+                    StartFrame->P1Home = (ULONG64)PgBlock->WorkerContext;
+                    StartFrame->P2Home = (ULONG64)PgBlock->ExpWorkerThread;
+                    StartFrame->P3Home = (ULONG64)PgBlock->PspSystemThreadStartup;
+                    StartFrame->Return = 0;
+                    SwitchFrame->Return = (ULONG64)PgBlock->KiStartSystemThread;
+                    SwitchFrame->ApcBypass = APC_LEVEL;
+                    SwitchFrame->Rbp = (ULONG64)TrapFrame + FIELD_OFFSET(KTRAP_FRAME, Xmm1);
+
+                    Context->Rsp = (ULONG64)StartFrame;
+                    Context->Rip = (ULONG64)PgBlock->KiStartSystemThread;
+
+                    if (PgPoolBigPage == Object->Type) {
+                        GetGpBlock(PgBlock)->ExFreePoolWithTag(
+                            Object->BaseAddress,
+                            0);
+                    }
+                    else if (PgSystemPtes == Object->Type) {
+                        PgBlock->MmFreeIndependentPages(
+                            Object->BaseAddress,
+                            Object->RegionSize);
+                    }
+
+                    break;
+                }
+            }
+        }
+
+        GetGpBlock(PgBlock)->ExFreePoolWithTag(Object, 0);
     }
 
-    GetGpBlock(PgBlock)->ExFreePoolWithTag(Object, 0);
     GetGpBlock(PgBlock)->RtlRestoreContext(Context, NULL);
 }
 
@@ -1718,9 +1722,9 @@ PgCheckAllWorkerThread(
                                         Context->Object.BaseAddress,
                                         Context->Object.RegionSize,
                                         PgBlock,
-                                        (PVOID)Context->ContextRecord.Rip,
+                                        NULL,
                                         PgBlock->ClearCallback,
-                                        (PVOID)Context->ContextRecord.Rip,
+                                        NULL,
                                         GetGpBlock(PgBlock)->CaptureContext);
 
                                     if (NULL != Object) {

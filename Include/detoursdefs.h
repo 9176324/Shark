@@ -107,22 +107,20 @@ extern "C" {
 
 #ifndef _WIN64
 #define SetCounterBody(body, address) \
-            RtlCopyMemory( \
-                (body), \
-                COUNTER_BODY_CODE32, \
-                COUNTER_BODY_CODE32_LENGTH), \
-            *(PLONG)(body)->Address = *(PLONG)&(address)
+            *(PLONG)(body)->Address = *(PLONG)&(address), \
+            (body)->Push[0] = 0x68
 
 #define GetCounterBody(body, address) \
            *(PLONG)(address) = *(PLONG)(body)->Address
 #else
 #define SetCounterBody(body, address) \
-            RtlCopyMemory( \
-                (body), \
-                COUNTER_BODY_CODE64, \
-                COUNTER_BODY_CODE64_LENGTH), \
             *(PLONG)(body)->Address = *(PLONG)&(address), \
-            *(PLONG)(body)->AddressExtend = *((PLONG)&(address) + 1)
+            *(PLONG)(body)->AddressExtend = *((PLONG)&(address) + 1), \
+            (body)->Move[0] = 0xc7, \
+            (body)->Move[1] = 0x44, \
+            (body)->Move[2] = 0x24, \
+            (body)->Move[3] = 0x04, \
+            (body)->Push[0] = 0x68
 
 #define GetCounterBody(body, address) \
            *(PLONG)(address) = *(PLONG)(body)->Address, \
