@@ -26,4 +26,4 @@
     UPGDSED, https://github.com/hfiref0x/UPGDSED
 
 # Note
-    Micro$oft updata windows very fast, For 1903 and higher please donate money.
+    Micro$oft updata windows very fast, For 1903 and higher please donate 3000$.
