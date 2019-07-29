@@ -18,8 +18,7 @@
 # Uninstall
     restart windows
 
-# References
-    sort by first letter of the project's name
+# References (sort by first letter of the name)
     * DisableWin10PatchguardPoc, https://github.com/killvxk/DisableWin10PatchguardPoc
     * EfiGuard, https://github.com/Mattiwatti/EfiGuard
     * findpg, https://github.com/tandasat/findpg
