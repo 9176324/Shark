@@ -13,7 +13,7 @@
     Method 2: run Build.cmd
     
 # Install
-    run Sea.exe
+    run Sea.exe (The driver has no signature, you must mount windbg, or you can sign it)
 
 # Uninstall
     restart windows
