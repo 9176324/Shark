@@ -40,7 +40,8 @@ extern "C" {
 
     enum {
         PgPoolBigPage,
-        PgSystemPtes
+        PgSystemPtes,
+        PgMaximumType
     };
 
     enum {
@@ -50,6 +51,7 @@ extern "C" {
 
     typedef struct _PGOBJECT {
         LIST_ENTRY Entry;
+        WORK_QUEUE_ITEM Worker;
         BOOLEAN Encrypted;
         ULONG64 XorKey;
         CCHAR Type;
@@ -148,15 +150,6 @@ extern "C" {
             __in ULONG64 InitialStack
             );
 
-        VOID
-        (NTAPI * KeBugCheckEx)(
-            __in ULONG BugCheckCode,
-            __in ULONG_PTR P1,
-            __in ULONG_PTR P2,
-            __in ULONG_PTR P3,
-            __in ULONG_PTR P4
-            );
-
         PVOID
         (NTAPI * RtlLookupFunctionEntry)(
             __in ULONG64 ControlPc,
@@ -176,10 +169,10 @@ extern "C" {
             __inout_opt PVOID ContextPointers
             );
 
-        PLIST_ENTRY
-        (FASTCALL * ExInterlockedRemoveHeadList)(
-            __inout PLIST_ENTRY ListHead,
-            __inout PKSPIN_LOCK Lock
+        VOID
+        (NTAPI * ExQueueWorkItem)(
+            __inout PWORK_QUEUE_ITEM WorkItem,
+            __in WORK_QUEUE_TYPE QueueType
             );
 
         ULONG64
@@ -196,16 +189,20 @@ extern "C" {
             __in_opt PVOID Reserved
             );
 
+        VOID
+        (NTAPI * FreeWorker)(
+            __in PPGOBJECT Object
+            );
+
         LIST_ENTRY List;
         KSPIN_LOCK Lock;
 
-        PGUARD_OBJECT BugCheckHandle;
-
         PSTR Message[2];
 
-        CHAR _SdbpCheckDll[0x3c];
+        CHAR _SdbpCheckDll[0x40];
         CHAR _Btc64[8];
-        CHAR _Message[0x75];
+        CHAR _Message[0x80];
+        CHAR _FreeWorker[0x100];
         CHAR _ClearCallback[PAGE_SIZE];
     }PGBLOCK, *PPGBLOCK;
 

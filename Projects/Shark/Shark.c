@@ -239,8 +239,6 @@ DeviceControl(
 
             PgBlock =(PCHAR)GpBlock + sizeof(GPBLOCK);
 
-            GpBlock->Flags.Guard = TRUE;
-
             PgClear(PgBlock);
         }
 

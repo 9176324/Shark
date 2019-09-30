@@ -27,157 +27,6 @@
 
 PGPBLOCK GpBlock;
 
-ULONG
-NTAPI
-GetPlatform(
-    __in PVOID ImageBase
-)
-{
-    PIMAGE_NT_HEADERS NtHeaders = NULL;
-    ULONG Platform = 0;
-
-    NtHeaders = RtlImageNtHeader(ImageBase);
-
-    if (NULL != NtHeaders) {
-        Platform = NtHeaders->OptionalHeader.Magic;
-    }
-
-    return Platform;
-}
-
-PVOID
-NTAPI
-GetAddressOfEntryPoint(
-    __in PVOID ImageBase
-)
-{
-    PIMAGE_NT_HEADERS NtHeaders = NULL;
-    ULONG Offset = 0;
-    PVOID EntryPoint = NULL;
-
-    NtHeaders = RtlImageNtHeader(ImageBase);
-
-    if (NULL != NtHeaders) {
-        if (IMAGE_NT_OPTIONAL_HDR32_MAGIC == NtHeaders->OptionalHeader.Magic) {
-            Offset = ((PIMAGE_NT_HEADERS32)NtHeaders)->OptionalHeader.AddressOfEntryPoint;
-        }
-
-        if (IMAGE_NT_OPTIONAL_HDR64_MAGIC == NtHeaders->OptionalHeader.Magic) {
-            Offset = ((PIMAGE_NT_HEADERS64)NtHeaders)->OptionalHeader.AddressOfEntryPoint;
-        }
-
-        if (0 != Offset) {
-            EntryPoint = (PCHAR)ImageBase + Offset;
-        }
-    }
-
-    return EntryPoint;
-}
-
-ULONG
-NTAPI
-GetTimeStamp(
-    __in PVOID ImageBase
-)
-{
-    PIMAGE_NT_HEADERS NtHeaders = NULL;
-    ULONG TimeStamp = 0;
-
-    NtHeaders = RtlImageNtHeader(ImageBase);
-
-    if (NULL != NtHeaders) {
-        TimeStamp = NtHeaders->FileHeader.TimeDateStamp;
-    }
-
-    return TimeStamp;
-}
-
-USHORT
-NTAPI
-GetSubsystem(
-    __in PVOID ImageBase
-)
-{
-    PIMAGE_NT_HEADERS NtHeaders = NULL;
-    USHORT Subsystem = 0;
-
-    NtHeaders = RtlImageNtHeader(ImageBase);
-
-    if (NULL != NtHeaders) {
-        if (IMAGE_NT_OPTIONAL_HDR32_MAGIC == NtHeaders->OptionalHeader.Magic) {
-            Subsystem = ((PIMAGE_NT_HEADERS32)NtHeaders)->OptionalHeader.Subsystem;
-        }
-
-        if (IMAGE_NT_OPTIONAL_HDR64_MAGIC == NtHeaders->OptionalHeader.Magic) {
-            Subsystem = ((PIMAGE_NT_HEADERS64)NtHeaders)->OptionalHeader.Subsystem;
-        }
-    }
-
-    return Subsystem;
-}
-
-ULONG
-NTAPI
-GetSizeOfImage(
-    __in PVOID ImageBase
-)
-{
-    PIMAGE_NT_HEADERS NtHeaders = NULL;
-    ULONG SizeOfImage = 0;
-
-    NtHeaders = RtlImageNtHeader(ImageBase);
-
-    if (NULL != NtHeaders) {
-        if (IMAGE_NT_OPTIONAL_HDR32_MAGIC == NtHeaders->OptionalHeader.Magic) {
-            SizeOfImage = ((PIMAGE_NT_HEADERS32)NtHeaders)->OptionalHeader.SizeOfImage;
-        }
-
-        if (IMAGE_NT_OPTIONAL_HDR64_MAGIC == NtHeaders->OptionalHeader.Magic) {
-            SizeOfImage = ((PIMAGE_NT_HEADERS64)NtHeaders)->OptionalHeader.SizeOfImage;
-        }
-    }
-
-    return SizeOfImage;
-}
-
-PIMAGE_SECTION_HEADER
-NTAPI
-SectionTableFromVirtualAddress(
-    __in PVOID ImageBase,
-    __in PVOID Address
-)
-{
-    PIMAGE_NT_HEADERS NtHeaders = NULL;
-    ULONG Index = 0;
-    ULONG Offset = 0;
-    PIMAGE_SECTION_HEADER FountSection = NULL;
-    PIMAGE_SECTION_HEADER NtSection = NULL;
-    ULONG SizeToLock = 0;
-
-    NtHeaders = RtlImageNtHeader(ImageBase);
-
-    if (NULL != NtHeaders) {
-        FountSection = IMAGE_FIRST_SECTION(NtHeaders);
-        Offset = (ULONG)((ULONG_PTR)Address - (ULONG_PTR)ImageBase);
-
-        for (Index = 0;
-            Index < NtHeaders->FileHeader.NumberOfSections;
-            Index++) {
-            SizeToLock = max(
-                FountSection[Index].SizeOfRawData,
-                FountSection[Index].Misc.VirtualSize);
-
-            if (Offset >= FountSection[Index].VirtualAddress &&
-                Offset < FountSection[Index].VirtualAddress + SizeToLock) {
-                NtSection = &FountSection[Index];
-                break;
-            }
-        }
-    }
-
-    return NtSection;
-}
-
 VOID
 NTAPI
 InitializeGpBlock(
@@ -186,7 +35,6 @@ InitializeGpBlock(
 {
     PKLDR_DATA_TABLE_ENTRY DataTableEntry = NULL;
     UNICODE_STRING KernelString = { 0 };
-    PIMAGE_NT_HEADERS NtHeaders = NULL;
     PIMAGE_SECTION_HEADER NtSection = NULL;
     PCHAR SectionBase = NULL;
     ULONG SizeToLock = 0;
@@ -228,6 +76,12 @@ InitializeGpBlock(
 
     PsGetVersion(NULL, NULL, &GpBlock->BuildNumber, NULL);
 
+#ifndef PUBLIC
+    DbgPrint(
+        "[Shark] < %p > BuildNumber\n",
+        GpBlock->BuildNumber);
+#endif // !PUBLIC
+
     RtlInitUnicodeString(&RoutineString, L"PsInitialSystemProcess");
 
     RoutineAddress = MmGetSystemRoutineAddress(&RoutineString);
@@ -236,6 +90,12 @@ InitializeGpBlock(
         &GpBlock->PsInitialSystemProcess,
         RoutineAddress,
         sizeof(PVOID));
+
+#ifndef PUBLIC
+    DbgPrint(
+        "[Shark] < %p > PsInitialSystemProcess\n",
+        GpBlock->PsInitialSystemProcess);
+#endif // !PUBLIC
 
     RtlInitUnicodeString(&RoutineString, L"KeNumberProcessors");
 
@@ -246,57 +106,181 @@ InitializeGpBlock(
         RoutineAddress,
         sizeof(CCHAR));
 
+#ifndef PUBLIC
+    DbgPrint(
+        "[Shark] < %p > NumberProcessors\n",
+        GpBlock->NumberProcessors);
+#endif // !PUBLIC
+
     RtlInitUnicodeString(&RoutineString, L"KeEnterCriticalRegion");
 
     GpBlock->KeEnterCriticalRegion = MmGetSystemRoutineAddress(&RoutineString);
+
+#ifndef PUBLIC
+    DbgPrint(
+        "[Shark] < %p > KeEnterCriticalRegion\n",
+        GpBlock->KeEnterCriticalRegion);
+#endif // !PUBLIC
 
     RtlInitUnicodeString(&RoutineString, L"KeLeaveCriticalRegion");
 
     GpBlock->KeLeaveCriticalRegion = MmGetSystemRoutineAddress(&RoutineString);
 
+#ifndef PUBLIC
+    DbgPrint(
+        "[Shark] < %p > KeLeaveCriticalRegion\n",
+        GpBlock->KeLeaveCriticalRegion);
+#endif // !PUBLIC
+
     RtlInitUnicodeString(&RoutineString, L"ExAcquireSpinLockShared");
 
     GpBlock->ExAcquireSpinLockShared = MmGetSystemRoutineAddress(&RoutineString);
+
+#ifndef PUBLIC
+    DbgPrint(
+        "[Shark] < %p > ExAcquireSpinLockShared\n",
+        GpBlock->ExAcquireSpinLockShared);
+#endif // !PUBLIC
 
     RtlInitUnicodeString(&RoutineString, L"ExReleaseSpinLockShared");
 
     GpBlock->ExReleaseSpinLockShared = MmGetSystemRoutineAddress(&RoutineString);
 
+#ifndef PUBLIC
+    DbgPrint(
+        "[Shark] < %p > ExReleaseSpinLockShared\n",
+        GpBlock->ExReleaseSpinLockShared);
+#endif // !PUBLIC
+
     RtlInitUnicodeString(&RoutineString, L"DbgPrint");
 
     GpBlock->DbgPrint = MmGetSystemRoutineAddress(&RoutineString);
+
+#ifndef PUBLIC
+    DbgPrint(
+        "[Shark] < %p > DbgPrint\n",
+        GpBlock->DbgPrint);
+#endif // !PUBLIC
 
     RtlInitUnicodeString(&RoutineString, L"RtlCompareMemory");
 
     GpBlock->RtlCompareMemory = MmGetSystemRoutineAddress(&RoutineString);
 
+#ifndef PUBLIC
+    DbgPrint(
+        "[Shark] < %p > RtlCompareMemory\n",
+        GpBlock->RtlCompareMemory);
+#endif // !PUBLIC
+
     RtlInitUnicodeString(&RoutineString, L"RtlRestoreContext");
 
     GpBlock->RtlRestoreContext = MmGetSystemRoutineAddress(&RoutineString);
+
+#ifndef PUBLIC
+    DbgPrint(
+        "[Shark] < %p > RtlRestoreContext\n",
+        GpBlock->RtlRestoreContext);
+#endif // !PUBLIC
 
     RtlInitUnicodeString(&RoutineString, L"ExQueueWorkItem");
 
     GpBlock->ExQueueWorkItem = MmGetSystemRoutineAddress(&RoutineString);
 
+#ifndef PUBLIC
+    DbgPrint(
+        "[Shark] < %p > ExQueueWorkItem\n",
+        GpBlock->ExQueueWorkItem);
+#endif // !PUBLIC
+
     RtlInitUnicodeString(&RoutineString, L"ExFreePoolWithTag");
 
     GpBlock->ExFreePoolWithTag = MmGetSystemRoutineAddress(&RoutineString);
+
+#ifndef PUBLIC
+    DbgPrint(
+        "[Shark] < %p > ExFreePoolWithTag\n",
+        GpBlock->ExFreePoolWithTag);
+#endif // !PUBLIC
 
     RtlInitUnicodeString(&RoutineString, L"KeBugCheckEx");
 
     GpBlock->KeBugCheckEx = MmGetSystemRoutineAddress(&RoutineString);
 
+#ifndef PUBLIC
+    DbgPrint(
+        "[Shark] < %p > KeBugCheckEx\n",
+        GpBlock->KeBugCheckEx);
+#endif // !PUBLIC
+
     RtlInitUnicodeString(&RoutineString, L"KdDebuggerEnabled");
 
     GpBlock->KdDebuggerEnabled = MmGetSystemRoutineAddress(&RoutineString);
+
+#ifndef PUBLIC
+    DbgPrint(
+        "[Shark] < %p > KdDebuggerEnabled\n",
+        GpBlock->KdDebuggerEnabled);
+#endif // !PUBLIC
 
     RtlInitUnicodeString(&RoutineString, L"KdDebuggerNotPresent");
 
     GpBlock->KdDebuggerNotPresent = MmGetSystemRoutineAddress(&RoutineString);
 
+#ifndef PUBLIC
+    DbgPrint(
+        "[Shark] < %p > KdDebuggerNotPresent\n",
+        GpBlock->KdDebuggerNotPresent);
+#endif // !PUBLIC
+
     RtlInitUnicodeString(&RoutineString, L"KdEnteredDebugger");
 
     GpBlock->KdEnteredDebugger = MmGetSystemRoutineAddress(&RoutineString);
+
+#ifndef PUBLIC
+    DbgPrint(
+        "[Shark] < %p > KdEnteredDebugger\n",
+        GpBlock->KdEnteredDebugger);
+#endif // !PUBLIC
+
+    RtlInitUnicodeString(&RoutineString, L"ExInterlockedRemoveHeadList");
+
+    GpBlock->ExInterlockedRemoveHeadList = MmGetSystemRoutineAddress(&RoutineString);
+
+#ifndef PUBLIC
+    DbgPrint(
+        "[Shark] < %p > ExInterlockedRemoveHeadList\n",
+        GpBlock->ExInterlockedRemoveHeadList);
+#endif // !PUBLIC
+
+    RtlInitUnicodeString(&RoutineString, L"ExAcquireRundownProtection");
+
+    Block->ExAcquireRundownProtection = MmGetSystemRoutineAddress(&RoutineString);
+
+#ifndef PUBLIC
+    DbgPrint(
+        "[Shark] < %p > ExAcquireRundownProtection\n",
+        GpBlock->ExAcquireRundownProtection);
+#endif // !PUBLIC
+
+    RtlInitUnicodeString(&RoutineString, L"ExReleaseRundownProtection");
+
+    Block->ExReleaseRundownProtection = MmGetSystemRoutineAddress(&RoutineString);
+
+#ifndef PUBLIC
+    DbgPrint(
+        "[Shark] < %p > ExReleaseRundownProtection\n",
+        GpBlock->ExReleaseRundownProtection);
+#endif // !PUBLIC
+
+    RtlInitUnicodeString(&RoutineString, L"ExWaitForRundownProtectionRelease");
+
+    Block->ExWaitForRundownProtectionRelease = MmGetSystemRoutineAddress(&RoutineString);
+
+#ifndef PUBLIC
+    DbgPrint(
+        "[Shark] < %p > ExWaitForRundownProtectionRelease\n",
+        GpBlock->ExWaitForRundownProtectionRelease);
+#endif // !PUBLIC
 
     GpBlock->CaptureContext = (PVOID)GpBlock->_CaptureContext;
 
@@ -529,17 +513,17 @@ InitializeGpBlock(
         Block->PsLoadedModuleResource = (PERESOURCE)RvaToVa(ControlPc + 3);
     }
 
-    NtHeaders = RtlImageNtHeader((PVOID)Block->DebuggerDataBlock.KernBase);
+    NtSection = FindSection(
+        (PVOID)Block->DebuggerDataBlock.KernBase,
+        ".text");
 
-    if (NULL != NtHeaders) {
-        NtSection = IMAGE_FIRST_SECTION(NtHeaders);
-
+    if (NULL != NtSection) {
         SectionBase =
-            (PCHAR)Block->DebuggerDataBlock.KernBase + NtSection[0].VirtualAddress;
+            (PCHAR)Block->DebuggerDataBlock.KernBase + NtSection->VirtualAddress;
 
         SizeToLock = max(
-            NtSection[0].SizeOfRawData,
-            NtSection[0].Misc.VirtualSize);
+            NtSection->SizeOfRawData,
+            NtSection->Misc.VirtualSize);
 
         ControlPc = ScanBytes(
             SectionBase,
@@ -554,6 +538,195 @@ InitializeGpBlock(
 #endif // !_WIN64
 
     InitializeListHead(&Block->LoadedPrivateImageList);
+}
+
+ULONG
+NTAPI
+GetPlatform(
+    __in PVOID ImageBase
+)
+{
+    PIMAGE_NT_HEADERS NtHeaders = NULL;
+    ULONG Platform = 0;
+
+    NtHeaders = RtlImageNtHeader(ImageBase);
+
+    if (NULL != NtHeaders) {
+        Platform = NtHeaders->OptionalHeader.Magic;
+    }
+
+    return Platform;
+}
+
+PVOID
+NTAPI
+GetAddressOfEntryPoint(
+    __in PVOID ImageBase
+)
+{
+    PIMAGE_NT_HEADERS NtHeaders = NULL;
+    ULONG Offset = 0;
+    PVOID EntryPoint = NULL;
+
+    NtHeaders = RtlImageNtHeader(ImageBase);
+
+    if (NULL != NtHeaders) {
+        if (IMAGE_NT_OPTIONAL_HDR32_MAGIC == NtHeaders->OptionalHeader.Magic) {
+            Offset = ((PIMAGE_NT_HEADERS32)NtHeaders)->OptionalHeader.AddressOfEntryPoint;
+        }
+
+        if (IMAGE_NT_OPTIONAL_HDR64_MAGIC == NtHeaders->OptionalHeader.Magic) {
+            Offset = ((PIMAGE_NT_HEADERS64)NtHeaders)->OptionalHeader.AddressOfEntryPoint;
+        }
+
+        if (0 != Offset) {
+            EntryPoint = (PCHAR)ImageBase + Offset;
+        }
+    }
+
+    return EntryPoint;
+}
+
+ULONG
+NTAPI
+GetTimeStamp(
+    __in PVOID ImageBase
+)
+{
+    PIMAGE_NT_HEADERS NtHeaders = NULL;
+    ULONG TimeStamp = 0;
+
+    NtHeaders = RtlImageNtHeader(ImageBase);
+
+    if (NULL != NtHeaders) {
+        TimeStamp = NtHeaders->FileHeader.TimeDateStamp;
+    }
+
+    return TimeStamp;
+}
+
+USHORT
+NTAPI
+GetSubsystem(
+    __in PVOID ImageBase
+)
+{
+    PIMAGE_NT_HEADERS NtHeaders = NULL;
+    USHORT Subsystem = 0;
+
+    NtHeaders = RtlImageNtHeader(ImageBase);
+
+    if (NULL != NtHeaders) {
+        if (IMAGE_NT_OPTIONAL_HDR32_MAGIC == NtHeaders->OptionalHeader.Magic) {
+            Subsystem = ((PIMAGE_NT_HEADERS32)NtHeaders)->OptionalHeader.Subsystem;
+        }
+
+        if (IMAGE_NT_OPTIONAL_HDR64_MAGIC == NtHeaders->OptionalHeader.Magic) {
+            Subsystem = ((PIMAGE_NT_HEADERS64)NtHeaders)->OptionalHeader.Subsystem;
+        }
+    }
+
+    return Subsystem;
+}
+
+ULONG
+NTAPI
+GetSizeOfImage(
+    __in PVOID ImageBase
+)
+{
+    PIMAGE_NT_HEADERS NtHeaders = NULL;
+    ULONG SizeOfImage = 0;
+
+    NtHeaders = RtlImageNtHeader(ImageBase);
+
+    if (NULL != NtHeaders) {
+        if (IMAGE_NT_OPTIONAL_HDR32_MAGIC == NtHeaders->OptionalHeader.Magic) {
+            SizeOfImage = ((PIMAGE_NT_HEADERS32)NtHeaders)->OptionalHeader.SizeOfImage;
+        }
+
+        if (IMAGE_NT_OPTIONAL_HDR64_MAGIC == NtHeaders->OptionalHeader.Magic) {
+            SizeOfImage = ((PIMAGE_NT_HEADERS64)NtHeaders)->OptionalHeader.SizeOfImage;
+        }
+    }
+
+    return SizeOfImage;
+}
+
+PIMAGE_SECTION_HEADER
+NTAPI
+SectionTableFromVirtualAddress(
+    __in PVOID ImageBase,
+    __in PVOID Address
+)
+{
+    PIMAGE_NT_HEADERS NtHeaders = NULL;
+    ULONG Index = 0;
+    ULONG Offset = 0;
+    PIMAGE_SECTION_HEADER FoundSection = NULL;
+    PIMAGE_SECTION_HEADER NtSection = NULL;
+    ULONG SizeToLock = 0;
+
+    NtHeaders = RtlImageNtHeader(ImageBase);
+
+    if (NULL != NtHeaders) {
+        FoundSection = IMAGE_FIRST_SECTION(NtHeaders);
+        Offset = (ULONG)((ULONG_PTR)Address - (ULONG_PTR)ImageBase);
+
+        for (Index = 0;
+            Index < NtHeaders->FileHeader.NumberOfSections;
+            Index++) {
+            SizeToLock = max(
+                FoundSection[Index].SizeOfRawData,
+                FoundSection[Index].Misc.VirtualSize);
+
+            if (Offset >= FoundSection[Index].VirtualAddress &&
+                Offset < FoundSection[Index].VirtualAddress + SizeToLock) {
+                NtSection = &FoundSection[Index];
+
+                break;
+            }
+        }
+    }
+
+    return NtSection;
+}
+
+PIMAGE_SECTION_HEADER
+NTAPI
+FindSection(
+    __in PVOID ImageBase,
+    __in PCSTR SectionName
+)
+{
+    PIMAGE_NT_HEADERS NtHeaders = NULL;
+    PIMAGE_SECTION_HEADER NtSection = NULL;
+    PIMAGE_SECTION_HEADER FoundSection = NULL;
+    ULONG Index = 0;
+    ULONG Maximun = 0;
+
+    NtHeaders = RtlImageNtHeader(ImageBase);
+
+    if (NULL != NtHeaders) {
+        FoundSection = IMAGE_FIRST_SECTION(NtHeaders);
+
+        Maximun = min(strlen(SectionName), 8);
+
+        for (Index = 0;
+            Index < NtHeaders->FileHeader.NumberOfSections;
+            Index++) {
+            if (0 == _strnicmp(
+                FoundSection[Index].Name,
+                SectionName,
+                Maximun)) {
+                NtSection = &FoundSection[Index];
+
+                break;
+            }
+        }
+    }
+
+    return NtSection;
 }
 
 NTSTATUS

@@ -19,6 +19,7 @@
 #ifndef _RELOAD_H_
 #define _RELOAD_H_
 
+#include <detoursdefs.h>
 #include <devicedefs.h>
 #include <dump.h>
 
@@ -46,25 +47,20 @@ extern "C" {
         PKLDR_DATA_TABLE_ENTRY KernelDataTableEntry; // ntoskrnl.exe
         PKLDR_DATA_TABLE_ENTRY CoreDataTableEntry; // self
         PVOID CpuControlBlock; // hypervisor
-        PVOID PrivateHeader; // private data
+        struct _PRIVATE_HEADER * PrivateHeader; // private data
 
         PVOID NativeObject;
 
 #ifdef _WIN64
         PVOID Wx86NativeObject;
 #endif // _WIN64
+
         LIST_ENTRY LoadedPrivateImageList;
         LIST_ENTRY ObjectList;
         KSPIN_LOCK ObjectLock;
 
-        struct {
-            BOOLEAN Hypervisor : 1; // deploy hypervisor
-            BOOLEAN Guard : 1; // deploy bypass patchguard
-        }Flags;
-
-        CCHAR NumberProcessors;
-        CCHAR Linkage[3];// { 0x33, 0xc0, 0xc3 };
-        CCHAR Reserved[3];
+        CHAR NumberProcessors;
+        CHAR Linkage[3];// { 0x33, 0xc0, 0xc3 };
 
         LONG BuildNumber;
 
@@ -198,6 +194,8 @@ extern "C" {
             __in ULONG Tag
             );
 
+        PGUARD_OBJECT BugCheckHandle;
+
         VOID
         (NTAPI * KeBugCheckEx)(
             __in ULONG BugCheckCode,
@@ -205,6 +203,12 @@ extern "C" {
             __in ULONG_PTR P2,
             __in ULONG_PTR P3,
             __in ULONG_PTR P4
+            );
+
+        PLIST_ENTRY
+        (FASTCALL * ExInterlockedRemoveHeadList)(
+            __inout PLIST_ENTRY ListHead,
+            __inout PKSPIN_LOCK Lock
             );
 
         HANDLE ObjectCallback;
@@ -254,6 +258,12 @@ extern "C" {
 #define FastReleaseObjectLock(irql) \
             GpBlock->ExReleaseSpinLockShared(&GpBlock->ObjectLock, (irql))
 
+    VOID
+        NTAPI
+        InitializeGpBlock(
+            __in PGPBLOCK Block
+        );
+
     ULONG
         NTAPI
         GetPlatform(
@@ -291,10 +301,11 @@ extern "C" {
             __in PVOID Address
         );
 
-    VOID
+    PIMAGE_SECTION_HEADER
         NTAPI
-        InitializeGpBlock(
-            __in PGPBLOCK Block
+        FindSection(
+            __in PVOID ImageBase,
+            __in PCSTR SectionName
         );
 
     NTSTATUS

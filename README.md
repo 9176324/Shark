@@ -1,5 +1,5 @@
 # Shark
-    Turn off PatchGuard in real time for win7 (7600) ~ win10 (17763).
+    Turn off PatchGuard in real time for win7 (7600) ~ win10 (18950).
 
 # Create labs
     md X:\Labs
@@ -26,4 +26,4 @@
     UPGDSED, https://github.com/hfiref0x/UPGDSED
 
 # Note
-    Micro$oft updata windows very fast, For 1903 and higher please donate 3000$.
+    祖国生日快乐!
