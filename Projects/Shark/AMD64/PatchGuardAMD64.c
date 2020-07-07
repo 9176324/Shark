@@ -2103,7 +2103,6 @@ PgClear(
         0 != PgBlock->PoolBigPageTableSize ||
         NULL != PgBlock->ExpLargePoolTableLock ||
         NULL != PgBlock->MmDeterminePoolType) {
-
         if (GetGpBlock(PgBlock)->BuildNumber >= 9200) {
             if (0 == PgBlock->NumberOfPtes || NULL == PgBlock->BasePte) {
                 Chance = FALSE;

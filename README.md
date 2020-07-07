@@ -24,6 +24,3 @@
     findpg, https://github.com/tandasat/findpg
     PgResarch, https://github.com/tandasat/PgResarch
     UPGDSED, https://github.com/hfiref0x/UPGDSED
-
-# Note
-    祖国生日快乐!

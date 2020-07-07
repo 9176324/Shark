@@ -161,9 +161,9 @@ DisCopy8B(
         UCHAR Source : 3;
         UCHAR Destination : 3;
         UCHAR Mod : 2;
-    }*OpCode;
+    }*ModRM;
 
-    C_ASSERT(sizeof(*OpCode) == 1);
+    C_ASSERT(sizeof(*ModRM) == 1);
 
     struct DECLSPEC_ALIGN(1) {
         UCHAR Prefix;
@@ -191,44 +191,44 @@ DisCopy8B(
 
     Prefix = Instruction[0];
     Code = Instruction[1];
-    OpCode = &Instruction[2];
+    ModRM = &Instruction[2];
 
     Instruction += 3;
 
-    if (0 == OpCode->Mod) {
-        GpReg = OpCode->Destination;
+    if (0 == ModRM->Mod &&
+        5 == ModRM->Source) {
+        // [disp32]
 
-        if (5 == OpCode->Source) {
-            RealAddress = RvaToVa(Instruction);
+        GpReg = ModRM->Destination;
+        RealAddress = RvaToVa(Instruction);
 
-            if (NULL != Target) {
-                *Target = NULL;
-            }
-
-            if (NULL != Extra) {
-                *Extra += 6;
-            }
-
-            if (NULL != Dst && NULL != DstPool) {
-                if ((PCHAR)*DstPool - (PCHAR)Dst >= sizeof(CopyOpCode)) {
-                    CopyOpCode = Dst;
-
-                    CopyOpCode->Prefix = Prefix;
-                    CopyOpCode->Code.Inst = 0x17; // Reg <- Immediate
-                    CopyOpCode->Code.GpReg = GpReg;
-
-                    *(PVOID *)&CopyOpCode->RealAddress = RealAddress;
-
-                    CopyOpCode->CopyPrefix = Prefix;
-                    CopyOpCode->CopyInst = 0x8b; // Reg <- [Reg]
-                    CopyOpCode->CopyMod.Destination = GpReg;
-                    CopyOpCode->CopyMod.Source = GpReg;
-                    CopyOpCode->CopyMod.Mod = 0;
-                }
-            }
-
-            ReturnAddress = Instruction + sizeof(LONG);
+        if (NULL != Target) {
+            *Target = NULL;
         }
+
+        if (NULL != Extra) {
+            *Extra += 6;
+        }
+
+        if (NULL != Dst && NULL != DstPool) {
+            if ((PCHAR)*DstPool - (PCHAR)Dst >= sizeof(CopyOpCode)) {
+                CopyOpCode = Dst;
+
+                CopyOpCode->Prefix = Prefix;
+                CopyOpCode->Code.Inst = 0x17; // Reg <- Immediate
+                CopyOpCode->Code.GpReg = GpReg;
+
+                *(PVOID *)&CopyOpCode->RealAddress = RealAddress;
+
+                CopyOpCode->CopyPrefix = Prefix;
+                CopyOpCode->CopyInst = 0x8b; // Reg <- [Reg]
+                CopyOpCode->CopyMod.Destination = GpReg;
+                CopyOpCode->CopyMod.Source = GpReg;
+                CopyOpCode->CopyMod.Mod = 0;
+            }
+        }
+
+        ReturnAddress = Instruction + sizeof(LONG);
     }
 
     return ReturnAddress;
@@ -367,6 +367,14 @@ DetourAttach(
         UCHAR Reserved : 4; // always 0100
     }*Rex;
 
+    struct {
+        UCHAR Source : 3;
+        UCHAR Destination : 3;
+        UCHAR Mod : 2;
+    }*ModRM;
+
+    C_ASSERT(sizeof(*ModRM) == 1);
+
     Address = *Pointer;
     *Pointer = NULL;
 
@@ -387,12 +395,19 @@ DetourAttach(
 
                 if ((4 == Rex->Reserved && 1 == Rex->W) &&
                     0 == _CmpByte(ControlPc[1], 0x8b)) {
-                    TargetPc = DisCopy8B(
-                        NULL,
-                        NULL,
-                        ControlPc,
-                        &Target,
-                        &Extra);
+                    ModRM = &ControlPc[2];
+
+                    if (0 == ModRM->Mod &&
+                        5 == ModRM->Source) {
+                        // [disp32]
+
+                        TargetPc = DisCopy8B(
+                            NULL,
+                            NULL,
+                            ControlPc,
+                            &Target,
+                            &Extra);
+                    }
                 }
             }
 #endif // _WIN64
@@ -448,12 +463,19 @@ DetourAttach(
 
                                 if ((4 == Rex->Reserved && 1 == Rex->W) &&
                                     0 == _CmpByte(ControlPc[1], 0x8b)) {
-                                    TargetPc = DisCopy8B(
-                                        DetourBody + BytesCopied,
-                                        &Import,
-                                        ControlPc,
-                                        &Target,
-                                        &Extra);
+                                    ModRM = &ControlPc[2];
+
+                                    if (0 == ModRM->Mod &&
+                                        5 == ModRM->Source) {
+                                        // [disp32]
+
+                                        TargetPc = DisCopy8B(
+                                            DetourBody + BytesCopied,
+                                            &Import,
+                                            ControlPc,
+                                            &Target,
+                                            &Extra);
+                                    }
                                 }
                             }
 #endif // _WIN64
@@ -598,6 +620,14 @@ DetourGuardAttach(
         UCHAR Reserved : 4; // always 0100
     }*Rex;
 
+    struct {
+        UCHAR Source : 3;
+        UCHAR Destination : 3;
+        UCHAR Mod : 2;
+    }*ModRM;
+
+    C_ASSERT(sizeof(*ModRM) == 1);
+
     Address = *Pointer;
     *Pointer = NULL;
 
@@ -618,12 +648,19 @@ DetourGuardAttach(
 
                 if ((4 == Rex->Reserved && 1 == Rex->W) &&
                     0 == _CmpByte(ControlPc[1], 0x8b)) {
-                    TargetPc = DisCopy8B(
-                        NULL,
-                        NULL,
-                        ControlPc,
-                        &Target,
-                        &Extra);
+                    ModRM = &ControlPc[2];
+
+                    if (0 == ModRM->Mod &&
+                        5 == ModRM->Source) {
+                        // [disp32]
+
+                        TargetPc = DisCopy8B(
+                            NULL,
+                            NULL,
+                            ControlPc,
+                            &Target,
+                            &Extra);
+                    }
                 }
             }
 #endif // _WIN64
@@ -679,12 +716,19 @@ DetourGuardAttach(
 
                                 if ((4 == Rex->Reserved && 1 == Rex->W) &&
                                     0 == _CmpByte(ControlPc[1], 0x8b)) {
-                                    TargetPc = DisCopy8B(
-                                        DetourBody + BytesCopied,
-                                        &Import,
-                                        ControlPc,
-                                        &Target,
-                                        &Extra);
+                                    ModRM = &ControlPc[2];
+
+                                    if (0 == ModRM->Mod &&
+                                        5 == ModRM->Source) {
+                                        // [disp32]
+
+                                        TargetPc = DisCopy8B(
+                                            DetourBody + BytesCopied,
+                                            &Import,
+                                            ControlPc,
+                                            &Target,
+                                            &Extra);
+                                    }
                                 }
                             }
 #endif // _WIN64
