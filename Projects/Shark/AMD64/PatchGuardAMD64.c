@@ -258,10 +258,10 @@ PgClearCallback(
                     Thread = (PETHREAD)__readgsqword(FIELD_OFFSET(KPCR, Prcb.CurrentThread));
 
                     if (GetGpBlock(PgBlock)->BuildNumber >= 18362) {
-                        // THREAD + 0x6e4 ReservedCrossThreadFlags
+                        // ETHREAD->ReservedCrossThreadFlags
                         // clear SameThreadPassiveFlags Bit 0 (BugCheck 139)
 
-                        *((PBOOLEAN)Thread + 0x6e4) &= 0xFFFFFFFE;
+                        *((PBOOLEAN)Thread + PgBlock->OffsetSameThreadPassive) &= 0xFFFFFFFE;
                     }
 
                     StartFrame =
@@ -2003,6 +2003,8 @@ PgClearWorker(
     PULONG64 InitialStack = 0;
     DISPATCHER_HEADER * Header = NULL;
     ULONG ReturnLength = 0;
+    PCHAR TargetPc = NULL;
+    ULONG Length = 0;
 
     struct {
         PPGBLOCK PgBlock;
@@ -2065,6 +2067,31 @@ PgClearWorker(
                 GetGpBlock(Context->PgBlock)->OffsetKThreadWin32StartAddress = Index;
 
                 break;
+            }
+        }
+
+        if (GetGpBlock(Context->PgBlock)->BuildNumber >= 18362) {
+            TargetPc = (PCHAR)Context->PgBlock->ExpWorkerThread;
+
+            while (TRUE) {
+                Length = DetourGetInstructionLength(TargetPc);
+
+                if (6 == Length) {
+                    if (0 == _CmpByte(TargetPc[0], 0x8b) &&
+                        0 == _CmpByte(TargetPc[1], 0x83)) {
+                        Context->PgBlock->OffsetSameThreadPassive = *(PULONG)(TargetPc + 2);
+
+#ifndef PUBLIC
+                        DbgPrint(
+                            "[Shark] < %p > OffsetSameThreadPassive\n",
+                            Context->PgBlock->OffsetSameThreadPassive);
+#endif // !PUBLIC
+
+                        break;
+                    }
+                }
+
+                TargetPc += Length;
             }
         }
 

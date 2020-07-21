@@ -117,6 +117,8 @@ extern "C" {
             (NTAPI * KiStartSystemThread)(
                 VOID
                 );
+
+            ULONG OffsetSameThreadPassive;
         }; // restart ExpWorkerThread
 
         VOID
