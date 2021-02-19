@@ -2,7 +2,7 @@
 *
 * Copyright (c) 2015 - 2021 by blindtiger. All rights reserved.
 *
-* The contents of this file are subject to the Mozilla Disk License Version
+* The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License"); you may not use this file except in compliance with
 * the License. You may obtain a copy of the License at
 * http://www.mozilla.org/MPL/
