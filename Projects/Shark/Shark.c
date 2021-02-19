@@ -26,7 +26,7 @@
 #include "PatchGuard.h"
 #include "Space.h"
 
-#pragma section( ".block", read, write, execute )
+#pragma section( ".block", read, write )
 
 __declspec(allocate(".block")) GPBLOCK GpBlock = { 0 };
 __declspec(allocate(".block")) PGBLOCK PgBlock = { 0 };
@@ -87,6 +87,8 @@ DriverEntry(
     PDEVICE_OBJECT DeviceObject = NULL;
     UNICODE_STRING DeviceName = { 0 };
     UNICODE_STRING SymbolicLinkName = { 0 };
+    PMMPTE PointerPte = NULL;
+    PFN_NUMBER NumberOfPages = 0;
 
     RtlInitUnicodeString(&DeviceName, DEVICE_STRING);
 
@@ -118,6 +120,26 @@ DriverEntry(
 
             InitializeGpBlock(&GpBlock);
             InitializeSpace(&GpBlock);
+
+            PointerPte = GetPteAddress(&GpBlock);
+            NumberOfPages = BYTES_TO_PAGES(sizeof(GPBLOCK));
+
+            while (NumberOfPages--) {
+                PointerPte[NumberOfPages].u.Hard.NoExecute = 0;
+            }
+
+            FlushMultipleTb(&GpBlock, sizeof(GPBLOCK), TRUE);
+
+            PointerPte = GetPteAddress(&PgBlock);
+            NumberOfPages = BYTES_TO_PAGES(sizeof(PGBLOCK));
+
+            while (NumberOfPages--) {
+                PointerPte[NumberOfPages].u.Hard.NoExecute = 0;
+            }
+
+            FlushMultipleTb(&PgBlock, sizeof(PGBLOCK), TRUE);
+
+            InitializeGuardTrampoline();
 
 #ifndef PUBLIC
             DbgPrint("[Shark] load\n");

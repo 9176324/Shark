@@ -2120,16 +2120,16 @@ PgClearWorker(
 
         /*
         if (os build >= 9600){
-        // Header->Type = 0x15
-        // Header->Hand = 0xac
+            // Header->Type = 0x15
+            // Header->Hand = 0xac
 
-        PgBlock->WorkerContext = struct _DISPATCHER_HEADER
+            PgBlock->WorkerContext = struct _DISPATCHER_HEADER
         }
         else {
-        // CriticalWorkQueue = 0
-        // DelayedWorkQueue = 1
+            // CriticalWorkQueue = 0
+            // DelayedWorkQueue = 1
 
-        PgBlock->WorkerContext = enum _WORK_QUEUE_TYPE
+            PgBlock->WorkerContext = enum _WORK_QUEUE_TYPE
         }
         */
 

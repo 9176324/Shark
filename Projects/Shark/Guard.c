@@ -23,7 +23,7 @@
 #include "Scan.h"
 #include "Reload.h"
 
-#pragma section( ".guard", read, write, execute )
+#pragma section( ".guard", read, write )
 
 #pragma pack (push, 1)
 __declspec(allocate(".guard")) struct {
@@ -34,6 +34,25 @@ __declspec(allocate(".guard")) struct {
 #pragma pack (pop)
 
 C_ASSERT(sizeof(Trampoline) == 4 * PAGE_SIZE);
+
+void
+NTAPI
+InitializeGuardTrampoline(
+    void
+)
+{
+    PMMPTE PointerPte = NULL;
+    PFN_NUMBER NumberOfPages = 0;
+
+    PointerPte = GetPteAddress(&Trampoline);
+    NumberOfPages = BYTES_TO_PAGES(sizeof(Trampoline));
+
+    while (NumberOfPages--) {
+        PointerPte[NumberOfPages].u.Hard.NoExecute = 0;
+    }
+
+    FlushMultipleTb(&Trampoline, sizeof(Trampoline), TRUE);
+}
 
 ptr
 NTAPI
