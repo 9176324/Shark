@@ -112,7 +112,10 @@ DriverEntry(
 
         if (NT_SUCCESS(Status)) {
             DriverObject->DriverUnload = (PDRIVER_UNLOAD)DriverUnload;
-            
+
+            GpBlock.PgBlock = &PgBlock;
+            PgBlock.GpBlock = &GpBlock;
+
             InitializeGpBlock(&GpBlock);
             InitializeSpace(&GpBlock);
 
@@ -235,9 +238,6 @@ DeviceControl(
 
     switch (IrpSp->Parameters.DeviceIoControl.IoControlCode) {
     case 0: {
-        InitializeGpBlock(&GpBlock);
-        InitializeSpace(&GpBlock);
-
         PgClear(&PgBlock);
 
         Irp->IoStatus.Information = 0;

@@ -175,6 +175,7 @@ extern "C" {
         SafeGuardAttach(
             __inout ptr * Pointer,
             __in PGUARD_CALLBACK Callback,
+            __in_opt ptr CaptureContext,
             __in_opt ptr Parameter,
             __in_opt ptr Reserved
         );

@@ -646,6 +646,7 @@ NTAPI
 SafeGuardAttach(
     __inout ptr * Pointer,
     __in PGUARD_CALLBACK Callback,
+    __in_opt ptr CaptureContext,
     __in_opt ptr Parameter,
     __in_opt ptr Reserved
 )
@@ -663,7 +664,6 @@ SafeGuardAttach(
     u8ptr Header = NULL;
     u32 FunctionCount = 1;
     u32 CodeLength = 0;
-    ptr CaptureContext = NULL;
 
 #ifdef _WIN64
     u32 FunctionIndex = 1;
@@ -838,7 +838,9 @@ SafeGuardAttach(
                             if (Length >= GUARD_BODY_CODE_LENGTH) {
                                 LockedBuildJumpCode(&Import, TargetPc);
 
-                                CaptureContext = _CaptureContext;
+                                CaptureContext =
+                                    NULL == CaptureContext ?
+                                    _CaptureContext : CaptureContext;
 
                                 SetStackBody(
                                     &GuardObject->Body,

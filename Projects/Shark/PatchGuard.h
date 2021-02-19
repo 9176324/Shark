@@ -83,7 +83,7 @@ extern "C" {
     typedef struct _PGBLOCK {
         struct _GPBLOCK * GpBlock;
 
-#define GetGpBlock(pgb) ((PGPBLOCK)((PCHAR)pgb - sizeof(GPBLOCK)))
+#define GetGpBlock(pgb) (pgb->GpBlock)
 
 #define PG_MAXIMUM_CONTEXT_COUNT 0x00000003UI32 // 可能存在的 Context 最大数量
 #define PG_FIRST_FIELD_OFFSET 0x00000100UI32 // 搜索使用的第一个 Context 成员偏移

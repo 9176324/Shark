@@ -952,7 +952,7 @@ InitializePgBlock(
 
 #ifdef DEBUG
     vDbgPrint(
-        "[FRK] [PatchGuard] < %p > CaptureContext\n",
+        "[Shark] [PatchGuard] < %p > CaptureContext\n",
         PgBlock->CaptureContext);
 #endif // DEBUG
 
@@ -985,7 +985,7 @@ InitializePgBlock(
         &PgBlock->_FreeWorker[0],
         PgFreeWorker,
         RTL_NUMBER_OF(PgBlock->_FreeWorker));
-    
+
     PgBlock->FreeWorker = __utop(&PgBlock->_FreeWorker[0]);
     */
 
@@ -994,7 +994,7 @@ InitializePgBlock(
 
 #ifdef DEBUG
     vDbgPrint(
-        "[FRK] [PatchGuard] < %p > FreeWorker\n",
+        "[Shark] [PatchGuard] < %p > FreeWorker\n",
         PgBlock->FreeWorker);
 #endif // DEBUG
 
@@ -1012,7 +1012,7 @@ InitializePgBlock(
 
 #ifdef DEBUG
     vDbgPrint(
-        "[FRK] [PatchGuard] < %p > ClearCallback\n",
+        "[Shark] [PatchGuard] < %p > ClearCallback\n",
         PgBlock->ClearCallback);
 #endif // DEBUG
 }
@@ -2074,6 +2074,16 @@ PgClearAll(
     __inout PPGBLOCK PgBlock
 )
 {
+
+    if (GetGpBlock(PgBlock)->BuildNumber >= 18362) {
+        GetGpBlock(PgBlock)->BugCheckHandle = SafeGuardAttach(
+            (ptr *)&GetGpBlock(PgBlock)->KeBugCheckEx,
+            PgBlock->ClearCallback,
+            NULL,
+            NULL,
+            PgBlock);
+    }
+
     PgClearPoolEncryptedContext(PgBlock);
 
     if (GetGpBlock(PgBlock)->BuildNumber >= 9200) {
@@ -2095,6 +2105,7 @@ PgClearWorker(
     u32 ReturnLength = 0;
     u8ptr TargetPc = NULL;
     u32 Length = 0;
+    b Chance = TRUE;
 
     struct {
         PPGBLOCK PgBlock;
@@ -2104,22 +2115,24 @@ PgClearWorker(
 
     Context = Argument;
 
-    /*
-    if (os build >= 9600){
-    PgBlock->WorkerContext = struct _DISPATCHER_HEADER
-
-    // Header->Type = 0x15
-    // Header->Hand = 0xac
-    }
-    else {
-    PgBlock->WorkerContext = enum _WORK_QUEUE_TYPE
-
-    // CriticalWorkQueue = 0
-    // DelayedWorkQueue = 1
-    }
-    */
-
     if (0 == Context->PgBlock->Repeat) {
+        InitializePgBlock(Context->PgBlock);
+
+        /*
+        if (os build >= 9600){
+        // Header->Type = 0x15
+        // Header->Hand = 0xac
+
+        PgBlock->WorkerContext = struct _DISPATCHER_HEADER
+        }
+        else {
+        // CriticalWorkQueue = 0
+        // DelayedWorkQueue = 1
+
+        PgBlock->WorkerContext = enum _WORK_QUEUE_TYPE
+        }
+        */
+
         InitialStack = IoGetInitialStack();
 
         if (GetGpBlock(Context->PgBlock)->BuildNumber >= 9600) {
@@ -2185,15 +2198,49 @@ PgClearWorker(
                     TargetPc += Length;
                 }
             }
-
         }
     }
 
-    IpiSingleCall(
-        (PGKERNEL_ROUTINE)NULL,
-        (PGSYSTEM_ROUTINE)NULL,
-        (PGRUNDOWN_ROUTINE)PgClearAll,
-        (PGNORMAL_ROUTINE)Context->PgBlock);
+    if (0 == Context->PgBlock->SizeCmpAppendDllSection ||
+        0 == Context->PgBlock->OffsetEntryPoint ||
+        0 == Context->PgBlock->SizeINITKDBG ||
+        NULL == GetGpBlock(Context->PgBlock)->PsInvertedFunctionTable ||
+        NULL == Context->PgBlock->KiStartSystemThread ||
+        NULL == Context->PgBlock->PspSystemThreadStartup ||
+        NULL == Context->PgBlock->Pool.PoolBigPageTable ||
+        NULL == Context->PgBlock->Pool.PoolBigPageTableSize) {
+        Chance = FALSE;
+    }
+
+    if (GetGpBlock(Context->PgBlock)->BuildNumber >= 9200) {
+        if (0 == Context->PgBlock->SystemPtes.NumberOfPtes ||
+            NULL == Context->PgBlock->SystemPtes.BasePte ||
+            NULL == Context->PgBlock->MmAllocateIndependentPages ||
+            NULL == Context->PgBlock->MmFreeIndependentPages ||
+            NULL == Context->PgBlock->MmSetPageProtection) {
+            Chance = FALSE;
+        }
+    }
+
+    if (GetGpBlock(Context->PgBlock)->BuildNumber >= 9600) {
+        if (0 == Context->PgBlock->WorkerContext) {
+            Chance = FALSE;
+        }
+    }
+
+    if (GetGpBlock(Context->PgBlock)->BuildNumber >= 18362) {
+        if (0 == Context->PgBlock->OffsetSameThreadPassive) {
+            Chance = FALSE;
+        }
+    }
+
+    if (FALSE != Chance) {
+        IpiSingleCall(
+            (PGKERNEL_ROUTINE)NULL,
+            (PGSYSTEM_ROUTINE)NULL,
+            (PGRUNDOWN_ROUTINE)PgClearAll,
+            (PGNORMAL_ROUTINE)Context->PgBlock);
+    }
 
     KeSetEvent(&Context->Notify, LOW_PRIORITY, FALSE);
 }
@@ -2204,8 +2251,6 @@ PgClear(
     __inout PPGBLOCK PgBlock
 )
 {
-    b Chance = TRUE;
-
     struct {
         PPGBLOCK PgBlock;
         KEVENT Notify;
@@ -2215,34 +2260,16 @@ PgClear(
     Context.PgBlock = PgBlock;
 
     if (PgBlock->Cleared < PG_MAXIMUM_CONTEXT_COUNT) {
-        if (0 == PgBlock->Repeat) {
-            InitializePgBlock(Context.PgBlock);
-        }
+        KeInitializeEvent(&Context.Notify, SynchronizationEvent, FALSE);
+        ExInitializeWorkItem(&Context.Worker, PgClearWorker, &Context);
+        ExQueueWorkItem(&Context.Worker, CriticalWorkQueue);
 
-        if (0 != PgBlock->OffsetEntryPoint ||
-            0 != PgBlock->SizeCmpAppendDllSection ||
-            0 != PgBlock->SizeINITKDBG ||
-            NULL != PgBlock->Pool.PoolBigPageTable ||
-            NULL != PgBlock->Pool.PoolBigPageTableSize) {
-            if (GetGpBlock(PgBlock)->BuildNumber >= 9200) {
-                if (0 == PgBlock->SystemPtes.NumberOfPtes || NULL == PgBlock->SystemPtes.BasePte) {
-                    Chance = FALSE;
-                }
-            }
-
-            if (FALSE != Chance) {
-                KeInitializeEvent(&Context.Notify, SynchronizationEvent, FALSE);
-                ExInitializeWorkItem(&Context.Worker, PgClearWorker, &Context);
-                ExQueueWorkItem(&Context.Worker, CriticalWorkQueue);
-
-                KeWaitForSingleObject(
-                    &Context.Notify,
-                    Executive,
-                    KernelMode,
-                    FALSE,
-                    NULL);
-            }
-        }
+        KeWaitForSingleObject(
+            &Context.Notify,
+            Executive,
+            KernelMode,
+            FALSE,
+            NULL);
 
         PgBlock->Repeat++;
     }
