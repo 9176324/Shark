@@ -938,60 +938,81 @@ InitializePgBlock(
         PgBlock->ExQueueWorkItem);
 #endif // DEBUG
 
+    /*
     RtlCopyMemory(
         &PgBlock->_CaptureContext[0],
         _CaptureContext,
         RTL_NUMBER_OF(PgBlock->_CaptureContext));
 
     PgBlock->CaptureContext = __utop(&PgBlock->_CaptureContext[0]);
+    */
+
+    // for debug
+    PgBlock->CaptureContext = _CaptureContext;
 
 #ifdef DEBUG
     vDbgPrint(
-        "[Shark] [PatchGuard] < %p > CaptureContext\n",
+        "[FRK] [PatchGuard] < %p > CaptureContext\n",
         PgBlock->CaptureContext);
 #endif // DEBUG
 
+    /*
     RtlCopyMemory(
         &PgBlock->_ClearMessage[0],
         ClearMessage[0],
         strlen(ClearMessage[0]));
 
     PgBlock->ClearMessage[0] = &PgBlock->_ClearMessage[0];
+    */
 
+    // for debug
+    PgBlock->ClearMessage[0] = ClearMessage[0];
+
+    /*
     RtlCopyMemory(
         &PgBlock->_ClearMessage[0x40],
         ClearMessage[1],
         strlen(ClearMessage[1]));
 
     PgBlock->ClearMessage[1] = &PgBlock->_ClearMessage[0x40];
+    */
 
+    // for debug
+    PgBlock->ClearMessage[1] = ClearMessage[1];
+
+    /*
     RtlCopyMemory(
         &PgBlock->_FreeWorker[0],
         PgFreeWorker,
         RTL_NUMBER_OF(PgBlock->_FreeWorker));
-
+    
     PgBlock->FreeWorker = __utop(&PgBlock->_FreeWorker[0]);
+    */
+
+    // for debug
+    PgBlock->FreeWorker = PgFreeWorker;
 
 #ifdef DEBUG
     vDbgPrint(
-        "[Shark] [PatchGuard] < %p > FreeWorker\n",
+        "[FRK] [PatchGuard] < %p > FreeWorker\n",
         PgBlock->FreeWorker);
 #endif // DEBUG
 
     /*
     RtlCopyMemory(
-    &PgBlock->_ClearCallback[0],
-    PgClearCallback,
-    RTL_NUMBER_OF(PgBlock->_ClearCallback));
+        &PgBlock->_ClearCallback[0],
+        PgClearCallback,
+        RTL_NUMBER_OF(PgBlock->_ClearCallback));
 
     PgBlock->ClearCallback = __utop(&PgBlock->_ClearCallback[0]);
     */
 
+    // for debug
     PgBlock->ClearCallback = PgClearCallback;
 
 #ifdef DEBUG
     vDbgPrint(
-        "[Shark] [PatchGuard] < %p > ClearCallback\n",
+        "[FRK] [PatchGuard] < %p > ClearCallback\n",
         PgBlock->ClearCallback);
 #endif // DEBUG
 }
