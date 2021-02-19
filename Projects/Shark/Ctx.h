@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2015 - 2019 by blindtiger. All rights reserved.
+* Copyright (c) 2015 - 2021 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License"); you may not use this file except in compliance with
@@ -108,17 +108,6 @@ extern "C" {
 
 #define GetBaseTrapFrame(Thread) GetBaseTrapFrameThread(Thread)
 
-    DECLSPEC_NORETURN
-        VOID
-        NTAPI
-        _CaptureContext(
-            __in ULONG ProgramCounter,
-            __in PVOID Detour,
-            __in PVOID Guard,
-            __in_opt PVOID Parameter,
-            __in_opt PVOID Reserved
-        );
-
     PKTRAP_FRAME
         NTAPI
         GetBaseTrapFrameThread(
@@ -134,7 +123,7 @@ extern "C" {
     {
         return CONTAINING_RECORD(
             (ULONG_PTR)Thread +
-            GpBlock->DebuggerDataBlock.OffsetKThreadApcProcess,
+            GpBlock.DebuggerDataBlock.OffsetKThreadApcProcess,
             KAPC_STATE,
             Process);
     }
@@ -147,7 +136,7 @@ extern "C" {
         )
     {
         return *(PCCHAR)((ULONG_PTR)Thread +
-            GpBlock->DebuggerDataBlock.OffsetKThreadState);
+            GpBlock.DebuggerDataBlock.OffsetKThreadState);
     }
 
     FORCEINLINE

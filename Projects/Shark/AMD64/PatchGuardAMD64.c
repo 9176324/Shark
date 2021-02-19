@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2015 - 2019 by blindtiger. All rights reserved.
+* Copyright (c) 2015 - 2021 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License")); you may not use this file except in compliance with
@@ -21,19 +21,13 @@
 #include "PatchGuard.h"
 
 #include "Ctx.h"
-#include "Detours.h"
+#include "Guard.h"
 #include "Rtx.h"
 #include "Scan.h"
 #include "Space.h"
 #include "Stack.h"
 
-#define __ROL64(x, n) (((x) << ((( n & 0xFF) % 64))) | ((x) >> (64 - (( n & 0xFF) % 64))))
-#define __ROR64(x, n) (((x) >> ((( n & 0xFF) % 64))) | ((x) << (64 - (( n & 0xFF) % 64))))
-
-#define GetGpBlock(pgblock) \
-            ((PGPBLOCK)((PCHAR)pgblock - sizeof(GPBLOCK)))
-
-VOID
+void
 NTAPI
 PgFreeWorker(
     __in PPGOBJECT Object
@@ -62,11 +56,11 @@ PgFreeWorker(
     GetGpBlock(PgBlock)->ExFreePoolWithTag(Object, 0);
 }
 
-VOID
+void
 NTAPI
 PgClearCallback(
     __in PCONTEXT Context,
-    __in_opt PVOID ProgramCounter,
+    __in_opt ptr ProgramCounter,
     __in_opt PPGOBJECT Object,
     __in_opt PPGBLOCK PgBlock
 )
@@ -75,18 +69,18 @@ PgClearCallback(
     PKSTART_FRAME StartFrame = NULL;
     PKSWITCH_FRAME SwitchFrame = NULL;
     PKTRAP_FRAME TrapFrame = NULL;
-    ULONG Index = 0;
+    u32 Index = 0;
     KNONVOLATILE_CONTEXT_POINTERS ContextPointers = { 0 };
-    ULONG64 ControlPc = 0;
-    ULONG64 EstablisherFrame = 0;
+    u64 ControlPc = 0;
+    u64 EstablisherFrame = 0;
     PRUNTIME_FUNCTION FunctionEntry = NULL;
-    PVOID HandlerData = NULL;
-    ULONG64 ImageBase = 0;
+    ptr HandlerData = NULL;
+    u64 ImageBase = 0;
     PMMPTE PointerPte = NULL;
-    ULONG BugCheckCode = 0;
+    u32 BugCheckCode = 0;
 
     if (NULL != ProgramCounter) {
-        BugCheckCode = UnsafeReadLong(&Context->Rcx);
+        BugCheckCode = __rds32(&Context->Rcx);
 
         if (ATTEMPTED_EXECUTE_OF_NOEXECUTE_MEMORY == BugCheckCode) {
             TrapFrame = (PKTRAP_FRAME)Context->R9;
@@ -133,10 +127,10 @@ PgClearCallback(
                             &ContextPointers);
                     }
                     else {
-                        Context->Rip = *(PULONG64)(Context->Rsp);
+                        Context->Rip = *(u64ptr)(Context->Rsp);
                         Context->Rsp += 8;
                     }
-                } while (EstablisherFrame != (ULONG64)TrapFrame);
+                } while (EstablisherFrame != (u64)TrapFrame);
 
                 Context->Rax = TrapFrame->Rax;
                 Context->Rcx = TrapFrame->Rcx;
@@ -156,37 +150,36 @@ PgClearCallback(
                 Context->MxCsr = TrapFrame->MxCsr;
             }
 
-            if (FALSE == IsListEmpty(&PgBlock->List)) {
+            if (FALSE == IsListEmpty(&PgBlock->ObjectList)) {
                 Object = CONTAINING_RECORD(
-                    PgBlock->List.Flink,
+                    PgBlock->ObjectList.Flink,
                     PGOBJECT,
                     Entry);
 
-                while (&Object->Entry != &PgBlock->List) {
-                    if (TrapFrame->Rip >= (ULONG64)Object->BaseAddress &&
-                        TrapFrame->Rip < (ULONG64)Object->BaseAddress + PAGE_SIZE) {
+                while (&Object->Entry != &PgBlock->ObjectList) {
+                    if (TrapFrame->Rip >= (u64)Object->BaseAddress &&
+                        TrapFrame->Rip < (u64)Object->BaseAddress + PAGE_SIZE) {
                         GetGpBlock(PgBlock)->ExInterlockedRemoveHeadList(
                             Object->Entry.Blink,
-                            &PgBlock->Lock);
+                            &PgBlock->ObjectLock);
 
-                        if (0x1131482e == UnsafeReadLong(TrapFrame->Rip)) {
-                            Context->Rip = UnsafeReadPointer(TrapFrame->Rsp);
-                            Context->Rsp = TrapFrame->Rsp + sizeof(PVOID);
+                        if (0x1131482e == __rds32(TrapFrame->Rip)) {
+                            Context->Rip = __rdsptr(TrapFrame->Rsp);
+                            Context->Rsp = TrapFrame->Rsp + sizeof(ptr);
 
-#ifndef PUBLIC
-                            GetGpBlock(PgBlock)->DbgPrint(
-                                PgBlock->Message[PgEncrypted],
+#ifdef DEBUG
+                            GetGpBlock(PgBlock)->vDbgPrint(
+                                PgBlock->ClearMessage[PgEncrypted],
                                 Object);
-#endif // !PUBLIC
+
+                            PgBlock->Cleared++;
+#endif // DEBUG
 
                             ExInitializeWorkItem(
-                                &Object->Worker,
-                                PgBlock->FreeWorker,
-                                Object);
+                                &Object->Worker, PgBlock->FreeWorker, Object);
 
                             PgBlock->ExQueueWorkItem(
-                                &Object->Worker,
-                                CriticalWorkQueue);
+                                &Object->Worker, CriticalWorkQueue);
                         }
                         else {
                             PgBlock->MmSetPageProtection(
@@ -197,13 +190,10 @@ PgClearCallback(
                             Object->Type = PgMaximumType;
 
                             ExInitializeWorkItem(
-                                &Object->Worker,
-                                PgBlock->FreeWorker,
-                                Object);
+                                &Object->Worker, PgBlock->FreeWorker, Object);
 
                             PgBlock->ExQueueWorkItem(
-                                &Object->Worker,
-                                CriticalWorkQueue);
+                                &Object->Worker, CriticalWorkQueue);
 
                             Context->Rip = TrapFrame->Rip;
                             Context->Rsp = TrapFrame->Rsp;
@@ -228,122 +218,138 @@ PgClearCallback(
             &Object->Body.Reserved,
             &PgBlock);
 
-#ifndef PUBLIC
-        GetGpBlock(PgBlock)->DbgPrint(
-            PgBlock->Message[Object->Encrypted],
+#ifdef DEBUG
+        GetGpBlock(PgBlock)->vDbgPrint(
+            PgBlock->ClearMessage[Object->Encrypted],
             Object);
-#endif // !PUBLIC
+
+        PgBlock->Cleared++;
+#endif // DEBUG
+
+        GetGpBlock(PgBlock)->ExInterlockedRemoveHeadList(
+            Object->Entry.Blink,
+            &PgBlock->ObjectLock);
 
         if (PgEncrypted == Object->Encrypted) {
-            Context->Rip = UnsafeReadPointer(Context->Rsp + KSTART_FRAME_LENGTH);
-            Context->Rsp += KSTART_FRAME_LENGTH + sizeof(PVOID);
+            Context->Rip = __rdsptr(Context->Rsp + KSTART_FRAME_LENGTH);
+            Context->Rsp += KSTART_FRAME_LENGTH + sizeof(ptr);
 
             ExInitializeWorkItem(
-                &Object->Worker,
-                PgBlock->FreeWorker,
-                Object);
+                &Object->Worker, PgBlock->FreeWorker, Object);
 
             PgBlock->ExQueueWorkItem(
-                &Object->Worker,
-                CriticalWorkQueue);
+                &Object->Worker, CriticalWorkQueue);
         }
         else {
-            for (Index = 0;
-                Index < Object->RegionSize - PgBlock->SizeSdbpCheckDll;
-                Index++) {
-                if (PgBlock->SizeSdbpCheckDll == GetGpBlock(PgBlock)->RtlCompareMemory(
-                    (PCHAR)Object->BaseAddress + Index,
-                    PgBlock->_SdbpCheckDll,
-                    PgBlock->SizeSdbpCheckDll)) {
-                    Thread = (PETHREAD)__readgsqword(FIELD_OFFSET(KPCR, Prcb.CurrentThread));
+            Thread = (PETHREAD)__readgsqword(FIELD_OFFSET(KPCR, Prcb.CurrentThread));
 
-                    if (GetGpBlock(PgBlock)->BuildNumber >= 18362) {
-                        // ETHREAD->ReservedCrossThreadFlags
-                        // clear SameThreadPassiveFlags Bit 0 (BugCheck 139)
+            if (GetGpBlock(PgBlock)->BuildNumber >= 18362) {
+                // ETHREAD->ReservedCrossThreadFlags
+                // clear SameThreadPassiveFlags Bit 0 (BugCheck 139)
 
-                        *((PBOOLEAN)Thread + PgBlock->OffsetSameThreadPassive) &= 0xFFFFFFFE;
-                    }
-
-                    StartFrame =
-                        (PKSTART_FRAME)(
-                        (*(PULONG64)((ULONG64)Thread +
-                            GetGpBlock(PgBlock)->DebuggerDataBlock.OffsetKThreadInitialStack)) -
-                            KSTART_FRAME_LENGTH);
-
-                    SwitchFrame = (PKSWITCH_FRAME)((ULONG64)StartFrame - KSWITCH_FRAME_LENGTH);
-
-                    StartFrame->P1Home = (ULONG64)PgBlock->WorkerContext;
-                    StartFrame->P2Home = (ULONG64)PgBlock->ExpWorkerThread;
-                    StartFrame->P3Home = (ULONG64)PgBlock->PspSystemThreadStartup;
-                    StartFrame->Return = 0;
-                    SwitchFrame->Return = (ULONG64)PgBlock->KiStartSystemThread;
-                    SwitchFrame->ApcBypass = APC_LEVEL;
-                    SwitchFrame->Rbp = (ULONG64)TrapFrame + FIELD_OFFSET(KTRAP_FRAME, Xmm1);
-
-                    Context->Rsp = (ULONG64)StartFrame;
-                    Context->Rip = (ULONG64)PgBlock->KiStartSystemThread;
-
-                    ExInitializeWorkItem(
-                        &Object->Worker,
-                        PgBlock->FreeWorker,
-                        Object);
-
-                    PgBlock->ExQueueWorkItem(
-                        &Object->Worker,
-                        CriticalWorkQueue);
-
-                    break;
-                }
+                *((PBOOLEAN)Thread + PgBlock->OffsetSameThreadPassive) &= 0xFFFFFFFE;
             }
+
+            StartFrame =
+                (PKSTART_FRAME)(
+                (*(u64ptr)((u64)Thread +
+                    GetGpBlock(PgBlock)->DebuggerDataBlock.OffsetKThreadInitialStack)) -
+                    KSTART_FRAME_LENGTH);
+
+            SwitchFrame = (PKSWITCH_FRAME)((u64)StartFrame - KSWITCH_FRAME_LENGTH);
+
+            StartFrame->P1Home = (u64)PgBlock->WorkerContext;
+            StartFrame->P2Home = (u64)PgBlock->ExpWorkerThread;
+            StartFrame->P3Home = (u64)PgBlock->PspSystemThreadStartup;
+            StartFrame->Return = 0;
+            SwitchFrame->Return = (u64)PgBlock->KiStartSystemThread;
+            SwitchFrame->ApcBypass = APC_LEVEL;
+            SwitchFrame->Rbp = (u64)TrapFrame + FIELD_OFFSET(KTRAP_FRAME, Xmm1);
+
+            Context->Rsp = (u64)StartFrame;
+            Context->Rip = (u64)PgBlock->KiStartSystemThread;
+
+            ExInitializeWorkItem(
+                &Object->Worker, PgBlock->FreeWorker, Object);
+
+            PgBlock->ExQueueWorkItem(
+                &Object->Worker, CriticalWorkQueue);
         }
     }
 
     GetGpBlock(PgBlock)->RtlRestoreContext(Context, NULL);
 }
 
-VOID
+void
 NTAPI
 InitializePgBlock(
     __inout PPGBLOCK PgBlock
 )
 {
-    NTSTATUS Status = STATUS_SUCCESS;
-    HANDLE FileHandle = NULL;
-    HANDLE SectionHandle = NULL;
+    status Status = STATUS_SUCCESS;
+    ptr FileHandle = NULL;
+    ptr SectionHandle = NULL;
     OBJECT_ATTRIBUTES ObjectAttributes = { 0 };
     IO_STATUS_BLOCK IoStatusBlock = { 0 };
-    PVOID ViewBase = NULL;
-    SIZE_T ViewSize = 0;
-    PCHAR ControlPc = NULL;
-    PCHAR TargetPc = NULL;
-    ULONG Length = 0;
+    ptr ViewBase = NULL;
+    u ViewSize = 0;
+    u64 ImageBase = 0;
+    u8ptr ControlPc = NULL;
+    u8ptr TargetPc = NULL;
+    u32 Length = 0;
     PIMAGE_NT_HEADERS NtHeaders = NULL;
     PIMAGE_SECTION_HEADER NtSection = NULL;
-    PVOID EndToLock = NULL;
+    ptr EndToLock = NULL;
     PRUNTIME_FUNCTION FunctionEntry = NULL;
     LONG64 Diff = 0;
     UNICODE_STRING RoutineString = { 0 };
-    PVOID RoutineAddress = NULL;
+    ptr RoutineAddress = NULL;
 
     PPOOL_BIG_PAGES * PageTable = NULL;
-    PSIZE_T PageTableSize = NULL;
+    uptr PageTableSize = NULL;
     PRTL_BITMAP BitMap = NULL;
 
-    ULONG_PTR TempField = 0;
+    u TempField = 0;
 
-    CHAR CmpAppendDllSection[] = "2e 48 31 11 48 31 51 08 48 31 51 10 48 31 51 18";
+    s8 CmpAppendDllSection[] = "2E 48 31 11 48 31 51 08 48 31 51 10 48 31 51 18";
 
     // Fields
-    CHAR Fields[] = "fb 48 8d 05";
-    CHAR FirstField[] = "?? 89 ?? 00 01 00 00 48 8D 05 ?? ?? ?? ?? ?? 89 ?? 08 01 00 00";
-    CHAR NextField[] = "48 8D 05 ?? ?? ?? ?? ?? 89 86 ?? ?? 00 00";
+    s8 Fields[] = "FB 48 8D 05";
+    s8 FirstField[] = "?? 89 ?? 00 01 00 00 48 8D 05 ?? ?? ?? ?? ?? 89 ?? 08 01 00 00";
+    s8 NextField[] = "48 8D 05 ?? ?? ?? ?? ?? 89 86 ?? ?? 00 00";
 
-    CHAR KiStartSystemThread[] = "b9 01 00 00 00 44 0f 22 c1 48 8b 14 24 48 8b 4c 24 08";
-    CHAR PspSystemThreadStartup[] = "eb ?? b9 1e 00 00 00 e8";
+    s8 KiStartSystemThread[] = "B9 01 00 00 00 44 0F 22 C1 48 8B 14 24 48 8B 4C 24 08";
+    s8 PspSystemThreadStartup[] = "EB ?? B9 1E 00 00 00 E8";
 
-    // MiDeterminePoolType
-    CHAR MiDeterminePoolType[] = "ff 0f 00 00 0f 85 ?? ?? ?? ?? 48 8b ?? e8";
-    CHAR ConfirmMiDeterminePoolType[] = "?? c1 ?? 0c";
+    // 48 8B 35 D4 C8 0C 00                     mov rsi, cs:PoolBigPageTableSize
+    // 48 8D 3C 76                              lea rdi, [rsi + rsi * 2]
+    // 48 C1 E7 03                              shl rdi, 3
+    // 4D 85 E4                                 test r12, r12
+    // 74 08                                    jz short loc_1401498F1
+
+    // 83 FE 01                                 cmp esi, 1
+    // 75 10                                    jnz short loc_1401BDE4E
+    // 48 8B 15 8B 36 0D 00                     mov rdx, cs:PoolBigPageTable
+    // 48 8B 35 9C 36 0D 00                     mov rsi, cs:PoolBigPageTableSize
+    // EB 29                                    jmp short loc_1401BDE77
+
+    u8ptr ExGetBigPoolInfo[] = {
+        "48 83 3D ?? ?? ?? ?? 00 75 10 4D 85 C0 74 04 41 83 20 00 33 C0",
+        "83 ?? 01 75 10 48 8B 15 ?? ?? ?? ?? ?? 8B ?? ?? ?? ?? ?? EB",
+    };
+
+    // MiGetSystemRegionType
+    // 48 B8 00 00 00 00 00 80 FF FF	        mov     rax, 0FFFF800000000000h
+    // 48 3B C8                     	        cmp     rcx, rax
+    // 72 1D                        	        jb      short loc_14020A90C
+    // 48 C1 E9 27                  	        shr     rcx, 27h
+    // 81 E1 FF 01 00 00            	        and     ecx, 1FFh
+    // 8D 81 00 FF FF FF            	        lea     eax, [rcx-100h]
+    // 48 8D 0D 02 7F A4 00         	        lea     rcx, unk_140C52808
+    // 0F B6 04 08                  	        movzx   eax, byte ptr [rax+rcx]
+
+    s8 MiGetSystemRegionType[] =
+        "48 c1 e9 27 81 e1 ff 01 00 00 8d 81 00 ff ff ff 48 8d 0d ?? ?? ?? ?? 0f b6 04 08";
 
     // 55                                       push    rbp
     // 41 54                                    push    r12
@@ -354,42 +360,31 @@ InitializePgBlock(
     // 48 8D A8 D8 FD FF FF                     lea     rbp, [rax - 228h]
     // 48 83 E5 80 and rbp, 0FFFFFFFFFFFFFF80h
 
-    CHAR Header[] =
-        "55 41 54 41 55 41 56 41 57 48 81 EC C0 02 00 00 48 8D A8 D8 FD FF FF 48 83 E5 80";
-
-    CHAR HeaderEx[] =
-        "55 41 54 41 55 41 56 41 57 48 8D 68 A1 48 81 EC B0 00 00 00 8B 82";
-
-    ULONG64 SdbpCheckDll[] = {
-        0x7c8b483024748b48, 0x333824548b4c2824,
-        0x08ea8349028949c0, 0x7c8948f473d43b4c,
-        0xe88bf88bd88b2824, 0x8b4cd88b4cd08b4c,
-        0x4cf08b4ce88b4ce0, 0xcccccccce6fff88b
+    u8ptr Header[2] = {
+        "55 41 54 41 55 41 56 41 57 48 81 EC C0 02 00 00 48 8D A8 D8 FD FF FF 48 83 E5 80",
+        "55 41 54 41 55 41 56 41 57 48 8D 68 A1 48 81 EC B0 00 00 00 8B 82"
     };
 
-    CHAR MiGetSystemRegionType[] =
-        "48 b8 00 00 00 00 00 80 ff ff 48 3b c8 72 1c 48 c1 e9 27 81 e1 ff 01 00 00 8d 81 00 ff ff ff";
-
-    CHAR ReservedCrossThreadFlags[] =
+    s8 ReservedCrossThreadFlags[] =
         "89 83 ?? ?? F0 83 0C 24 00 80 3D ?? ?? ?? ?? ?? 0F";
 
-    ULONG64 Btc64[] = {
-        0xc3c18b48d1bb0f48
+    u64 Btc64[] = { 0xC3C18B48D1BB0F48 };
+    u64 Rol64[] = { 0xC3C0D348CA869148 };
+    u64 Ror64[] = { 0xC3C8D348CA869148 };
+
+    cptr ClearMessage[2] = {
+        "[Shark] [PatchGuard] < %p > declassified context cleared\n",
+        "[Shark] [PatchGuard] < %p > encrypted context cleared\n"
     };
 
-    PSTR ClearMessage[2] = {
-        "[Shark] < %p > declassified context cleared\n",
-        "[Shark] < %p > encrypted context cleared\n"
-    };
-
-#ifndef PUBLIC
-    DbgPrint(
-        "[Shark] < %p > PgBlock\n",
+#ifdef DEBUG
+    vDbgPrint(
+        "[Shark] [PatchGuard] < %p > PgBlock\n",
         PgBlock);
-#endif // !PUBLIC
+#endif // DEBUG
 
-    InitializeListHead(&PgBlock->List);
-    KeInitializeSpinLock(&PgBlock->Lock);
+    InitializeListHead(&PgBlock->ObjectList);
+    KeInitializeSpinLock(&PgBlock->ObjectLock);
 
     InitializeObjectAttributes(
         &ObjectAttributes,
@@ -438,62 +433,62 @@ InitializePgBlock(
 
             if (NT_SUCCESS(Status)) {
                 Diff =
-                    (ULONG64)GetGpBlock(PgBlock)->DebuggerDataBlock.KernBase -
-                    (ULONG64)ViewBase;
+                    (u64)GetGpBlock(PgBlock)->DebuggerDataBlock.KernBase -
+                    (u64)ViewBase;
 
                 ControlPc = ScanBytes(
                     ViewBase,
-                    (PCHAR)ViewBase + ViewSize,
+                    (u8ptr)ViewBase + ViewSize,
                     CmpAppendDllSection);
 
                 if (NULL != ControlPc) {
                     TargetPc = ControlPc;
 
-                    while (0 != _CmpByte(TargetPc[0], 0x41) &&
-                        0 != _CmpByte(TargetPc[1], 0xff) &&
-                        0 != _CmpByte(TargetPc[2], 0xe0)) {
+                    while (0 != _cmpbyte(TargetPc[0], 0x41) &&
+                        0 != _cmpbyte(TargetPc[1], 0xff) &&
+                        0 != _cmpbyte(TargetPc[2], 0xe0)) {
                         Length = DetourGetInstructionLength(TargetPc);
 
                         if (0 == PgBlock->SizeCmpAppendDllSection) {
                             if (8 == Length) {
-                                if (0 == _CmpByte(TargetPc[0], 0x48) &&
-                                    0 == _CmpByte(TargetPc[1], 0x31) &&
-                                    0 == _CmpByte(TargetPc[2], 0x84) &&
-                                    0 == _CmpByte(TargetPc[3], 0xca)) {
-                                    PgBlock->SizeCmpAppendDllSection = *(PULONG)(TargetPc + 4);
+                                if (0 == _cmpbyte(TargetPc[0], 0x48) &&
+                                    0 == _cmpbyte(TargetPc[1], 0x31) &&
+                                    0 == _cmpbyte(TargetPc[2], 0x84) &&
+                                    0 == _cmpbyte(TargetPc[3], 0xca)) {
+                                    PgBlock->SizeCmpAppendDllSection = *(u32ptr)(TargetPc + 4);
 
-#ifndef PUBLIC
-                                    DbgPrint(
-                                        "[Shark] < %p > SizeCmpAppendDllSection\n",
+#ifdef DEBUG
+                                    vDbgPrint(
+                                        "[Shark] [PatchGuard] < %p > SizeCmpAppendDllSection\n",
                                         PgBlock->SizeCmpAppendDllSection);
-#endif // !PUBLIC
+#endif // DEBUG
 
-                                    if (0 == _CmpByte(TargetPc[11], 0x48) ||
-                                        0 == _CmpByte(TargetPc[12], 0x0f) ||
-                                        0 == _CmpByte(TargetPc[13], 0xbb) ||
-                                        0 == _CmpByte(TargetPc[14], 0xc0)) {
+                                    if (0 == _cmpbyte(TargetPc[11], 0x48) ||
+                                        0 == _cmpbyte(TargetPc[12], 0x0f) ||
+                                        0 == _cmpbyte(TargetPc[13], 0xbb) ||
+                                        0 == _cmpbyte(TargetPc[14], 0xc0)) {
                                         PgBlock->BtcEnable = TRUE;
 
-#ifndef PUBLIC
-                                        DbgPrint(
-                                            "[Shark] < %p > BtcEnable\n",
+#ifdef DEBUG
+                                        vDbgPrint(
+                                            "[Shark] [PatchGuard] < %p > BtcEnable\n",
                                             PgBlock->BtcEnable);
-#endif // !PUBLIC
+#endif // DEBUG
                                     }
                                 }
                             }
                         }
 
                         if (6 == Length) {
-                            if (0 == _CmpByte(TargetPc[0], 0x8b) &&
-                                0 == _CmpByte(TargetPc[1], 0x82)) {
-                                PgBlock->OffsetEntryPoint = *(PULONG)(TargetPc + 2);
+                            if (0 == _cmpbyte(TargetPc[0], 0x8b) &&
+                                0 == _cmpbyte(TargetPc[1], 0x82)) {
+                                PgBlock->OffsetEntryPoint = *(u32ptr)(TargetPc + 2);
 
-#ifndef PUBLIC
-                                DbgPrint(
-                                    "[Shark] < %p > OffsetEntryPoint\n",
+#ifdef DEBUG
+                                vDbgPrint(
+                                    "[Shark] [PatchGuard] < %p > OffsetEntryPoint\n",
                                     PgBlock->OffsetEntryPoint);
-#endif // !PUBLIC
+#endif // DEBUG
                                 break;
                             }
                         }
@@ -502,30 +497,22 @@ InitializePgBlock(
                     }
                 }
 
-                if (GetGpBlock(PgBlock)->BuildNumber >= 18362) {
-                    ControlPc = ScanBytes(
-                        ViewBase,
-                        (PCHAR)ViewBase + ViewSize,
-                        HeaderEx);
-                }
-                else {
-                    ControlPc = ScanBytes(
-                        ViewBase,
-                        (PCHAR)ViewBase + ViewSize,
-                        Header);
-                }
+                ControlPc = ScanBytes(
+                    ViewBase,
+                    (u8ptr)ViewBase + ViewSize,
+                    Header[GetGpBlock(PgBlock)->BuildNumber >= 18362 ? 1 : 0]);
 
                 if (NULL != ControlPc) {
                     TargetPc = ControlPc + Diff;
 
                     FunctionEntry = RtlLookupFunctionEntry(
-                        (ULONG64)TargetPc,
-                        (PULONG64)&GetGpBlock(PgBlock)->DebuggerDataBlock.KernBase,
+                        (u64)TargetPc,
+                        (u64ptr)&ImageBase,
                         NULL);
 
                     if (NULL != FunctionEntry) {
                         TargetPc =
-                            (PCHAR)GetGpBlock(PgBlock)->DebuggerDataBlock.KernBase +
+                            (u8ptr)GetGpBlock(PgBlock)->DebuggerDataBlock.KernBase +
                             FunctionEntry->BeginAddress - Diff;
 
                         RtlCopyMemory(
@@ -539,15 +526,28 @@ InitializePgBlock(
                         ControlPc);
 
                     if (NULL != NtSection) {
-                        PgBlock->SizeINITKDBG = max(
-                            NtSection->SizeOfRawData,
-                            NtSection->Misc.VirtualSize);
+                        PgBlock->SizeINITKDBG =
+                            max(NtSection->SizeOfRawData, NtSection->Misc.VirtualSize);
 
-#ifndef PUBLIC
-                        DbgPrint(
-                            "[Shark] < %p > SizeINITKDBG\n",
+#ifdef DEBUG
+                        vDbgPrint(
+                            "[Shark] [PatchGuard] < %p > SizeINITKDBG\n",
                             PgBlock->SizeINITKDBG);
-#endif // !PUBLIC
+#endif // DEBUG
+
+                        PgBlock->INITKDBG = __malloc(PgBlock->SizeINITKDBG);
+
+                        if (NULL != PgBlock->INITKDBG) {
+                            RtlCopyMemory(
+                                PgBlock->INITKDBG,
+                                (u8ptr)ViewBase + NtSection->VirtualAddress,
+                                PgBlock->SizeINITKDBG);
+#ifdef DEBUG
+                            vDbgPrint(
+                                "[Shark] [PatchGuard] < %p > INITKDBG\n",
+                                PgBlock->INITKDBG);
+#endif // DEBUG
+                        }
                     }
                 }
 
@@ -556,7 +556,7 @@ InitializePgBlock(
                 while (NULL != ControlPc) {
                     ControlPc = ScanBytes(
                         ControlPc,
-                        (PCHAR)ViewBase + ViewSize,
+                        (u8ptr)ViewBase + ViewSize,
                         Fields);
 
                     if (NULL != ControlPc) {
@@ -567,77 +567,93 @@ InitializePgBlock(
 
                         if (NULL != TargetPc) {
                             PgBlock->Fields[0] =
-                                (ULONG64)RvaToVa(TargetPc - 4) + Diff;
+                                (u64)__rva_to_va(TargetPc - 4) + Diff;
 
-#ifndef PUBLIC
+#ifdef DEBUG
                             FindAndPrintSymbol(
-                                "[Shark]",
-                                (PVOID)PgBlock->Fields[0]);
-#endif // !PUBLIC
+                                "[Shark] [PatchGuard]",
+                                (ptr)PgBlock->Fields[0]);
+#endif // DEBUG
 
                             PgBlock->Fields[1] =
-                                (ULONG64)RvaToVa(TargetPc + 10) + Diff;
+                                (u64)__rva_to_va(TargetPc + 10) + Diff;
 
-#ifndef PUBLIC
+#ifdef DEBUG
                             FindAndPrintSymbol(
-                                "[Shark]",
-                                (PVOID)PgBlock->Fields[1]);
-#endif // !PUBLIC
+                                "[Shark] [PatchGuard]",
+                                (ptr)PgBlock->Fields[1]);
+#endif // DEBUG
 
                             PgBlock->Fields[2] =
-                                (ULONG64)RvaToVa(TargetPc + 24) + Diff;
+                                (u64)__rva_to_va(TargetPc + 24) + Diff;
 
-#ifndef PUBLIC
+#ifdef DEBUG
                             FindAndPrintSymbol(
-                                "[Shark]",
-                                (PVOID)PgBlock->Fields[2]);
-#endif // !PUBLIC
+                                "[Shark] [PatchGuard]",
+                                (ptr)PgBlock->Fields[2]);
+#endif // DEBUG
 
                             PgBlock->Fields[3] =
-                                (ULONG64)RvaToVa(TargetPc + 38) + Diff;
+                                (u64)__rva_to_va(TargetPc + 38) + Diff;
 
-#ifndef PUBLIC
+#ifdef DEBUG
                             FindAndPrintSymbol(
-                                "[Shark]",
-                                (PVOID)PgBlock->Fields[3]);
-#endif // !PUBLIC
+                                "[Shark] [PatchGuard]",
+                                (ptr)PgBlock->Fields[3]);
+#endif // DEBUG
 
                             if (GetGpBlock(PgBlock)->BuildNumber >= 9200) {
                                 while (TRUE) {
                                     TargetPc = ScanBytes(
                                         TargetPc,
-                                        (PCHAR)ViewBase + ViewSize,
+                                        (u8ptr)ViewBase + ViewSize,
                                         NextField);
 
-                                    TempField = (ULONG64)RvaToVa(TargetPc + 3) + Diff;
+                                    TempField = (u64)__rva_to_va(TargetPc + 3) + Diff;
 
-                                    if ((ULONG_PTR)TempField ==
-                                        (ULONG_PTR)GetGpBlock(PgBlock)->DbgPrint) {
-                                        TempField = (ULONG64)RvaToVa(TargetPc + 31) + Diff;
+                                    if ((u)TempField ==
+                                        (u)GetGpBlock(PgBlock)->DbgPrint) {
+                                        // if (GetGpBlock(PgBlock)->BuildNumber >= 18362) {
+                                        if (GetGpBlock(PgBlock)->BuildNumber >= 9200) {
+                                            TempField = (u64)__rva_to_va(TargetPc + 17) + Diff;
+
+                                            RtlCopyMemory(
+                                                &PgBlock->MmAllocateIndependentPages,
+                                                &TempField,
+                                                sizeof(ptr));
+
+#ifdef DEBUG
+                                            vDbgPrint(
+                                                "[Shark] [PatchGuard] < %p > MmAllocateIndependentPages\n",
+                                                PgBlock->MmAllocateIndependentPages);
+#endif // DEBUG
+                                        }
+
+                                        TempField = (u64)__rva_to_va(TargetPc + 31) + Diff;
 
                                         RtlCopyMemory(
                                             &PgBlock->MmFreeIndependentPages,
                                             &TempField,
-                                            sizeof(PVOID));
+                                            sizeof(ptr));
 
-#ifndef PUBLIC
-                                        DbgPrint(
-                                            "[Shark] < %p > MmFreeIndependentPages\n",
+#ifdef DEBUG
+                                        vDbgPrint(
+                                            "[Shark] [PatchGuard] < %p > MmFreeIndependentPages\n",
                                             PgBlock->MmFreeIndependentPages);
-#endif // !PUBLIC
+#endif // DEBUG
 
-                                        TempField = (ULONG64)RvaToVa(TargetPc + 45) + Diff;
+                                        TempField = (u64)__rva_to_va(TargetPc + 45) + Diff;
 
                                         RtlCopyMemory(
                                             &PgBlock->MmSetPageProtection,
                                             &TempField,
-                                            sizeof(PVOID));
+                                            sizeof(ptr));
 
-#ifndef PUBLIC
-                                        DbgPrint(
-                                            "[Shark] < %p > MmSetPageProtection\n",
+#ifdef DEBUG
+                                        vDbgPrint(
+                                            "[Shark] [PatchGuard] < %p > MmSetPageProtection\n",
                                             PgBlock->MmSetPageProtection);
-#endif // !PUBLIC
+#endif // DEBUG
 
                                         break;
                                     }
@@ -649,25 +665,25 @@ InitializePgBlock(
                             while (TRUE) {
                                 TargetPc = ScanBytes(
                                     TargetPc,
-                                    (PCHAR)ViewBase + ViewSize,
+                                    (u8ptr)ViewBase + ViewSize,
                                     NextField);
 
-                                TempField = (ULONG64)RvaToVa(TargetPc + 3) + Diff;
+                                TempField = (u64)__rva_to_va(TargetPc + 3) + Diff;
 
-                                if ((ULONG_PTR)TempField ==
-                                    (ULONG_PTR)GetGpBlock(PgBlock)->PsLoadedModuleList) {
-                                    TempField = (ULONG64)RvaToVa(TargetPc - 11) + Diff;
+                                if ((u)TempField ==
+                                    (u)GetGpBlock(PgBlock)->PsLoadedModuleList) {
+                                    TempField = (u64)__rva_to_va(TargetPc - 11) + Diff;
 
                                     RtlCopyMemory(
                                         &GetGpBlock(PgBlock)->PsInvertedFunctionTable,
                                         &TempField,
-                                        sizeof(PVOID));
+                                        sizeof(ptr));
 
-#ifndef PUBLIC
-                                    DbgPrint(
-                                        "[Shark] < %p > PsInvertedFunctionTable\n",
+#ifdef DEBUG
+                                    vDbgPrint(
+                                        "[Shark] [PatchGuard] < %p > PsInvertedFunctionTable\n",
                                         GetGpBlock(PgBlock)->PsInvertedFunctionTable);
-#endif // !PUBLIC
+#endif // DEBUG
 
                                     break;
                                 }
@@ -687,44 +703,44 @@ InitializePgBlock(
 
                 ControlPc = ScanBytes(
                     ViewBase,
-                    (PCHAR)ViewBase + ViewSize,
+                    (u8ptr)ViewBase + ViewSize,
                     KiStartSystemThread);
 
                 if (NULL != ControlPc) {
                     TargetPc = ControlPc;
 
-                    PgBlock->KiStartSystemThread = (PVOID)(TargetPc + Diff);
+                    PgBlock->KiStartSystemThread = (ptr)(TargetPc + Diff);
 
-#ifndef PUBLIC
-                    DbgPrint(
-                        "[Shark] < %p > KiStartSystemThread\n",
+#ifdef DEBUG
+                    vDbgPrint(
+                        "[Shark] [PatchGuard] < %p > KiStartSystemThread\n",
                         PgBlock->KiStartSystemThread);
-#endif // !PUBLIC
+#endif // DEBUG
                 }
 
                 ControlPc = ScanBytes(
                     ViewBase,
-                    (PCHAR)ViewBase + ViewSize,
+                    (u8ptr)ViewBase + ViewSize,
                     PspSystemThreadStartup);
 
                 if (NULL != ControlPc) {
-                    TargetPc = (PVOID)(ControlPc + Diff);
+                    TargetPc = (ptr)(ControlPc + Diff);
 
                     FunctionEntry = RtlLookupFunctionEntry(
-                        (ULONG64)TargetPc,
-                        (PULONG64)&GetGpBlock(PgBlock)->DebuggerDataBlock.KernBase,
+                        (u64)TargetPc,
+                        (u64ptr)&ImageBase,
                         NULL);
 
                     if (NULL != FunctionEntry) {
                         PgBlock->PspSystemThreadStartup =
-                            (PVOID)((PCHAR)GetGpBlock(PgBlock)->DebuggerDataBlock.KernBase +
+                            (ptr)((u8ptr)GetGpBlock(PgBlock)->DebuggerDataBlock.KernBase +
                                 FunctionEntry->BeginAddress);
 
-#ifndef PUBLIC
-                        DbgPrint(
-                            "[Shark] < %p > PspSystemThreadStartup\n",
+#ifdef DEBUG
+                        vDbgPrint(
+                            "[Shark] [PatchGuard] < %p > PspSystemThreadStartup\n",
                             PgBlock->PspSystemThreadStartup);
-#endif // !PUBLIC
+#endif // DEBUG
                     }
                 }
 
@@ -737,135 +753,77 @@ InitializePgBlock(
         ZwClose(FileHandle);
     }
 
+    RtlInitUnicodeString(&RoutineString, L"MmIsNonPagedSystemAddressValid");
+
+    PgBlock->Pool.MmIsNonPagedSystemAddressValid = MmGetSystemRoutineAddress(&RoutineString);
+
+#ifdef DEBUG
+    vDbgPrint(
+        "[Shark] [PatchGuard] < %p > MmIsNonPagedSystemAddressValid\n",
+        PgBlock->Pool.MmIsNonPagedSystemAddressValid);
+#endif // DEBUG
+
     NtSection = FindSection(
-        (PVOID)GetGpBlock(PgBlock)->DebuggerDataBlock.KernBase,
+        (ptr)GetGpBlock(PgBlock)->DebuggerDataBlock.KernBase,
         ".text");
 
     if (NULL != NtSection) {
         ControlPc =
-            (PCHAR)GetGpBlock(PgBlock)->DebuggerDataBlock.KernBase +
+            (u8ptr)GetGpBlock(PgBlock)->DebuggerDataBlock.KernBase +
             NtSection->VirtualAddress;
 
         EndToLock =
-            (PCHAR)GetGpBlock(PgBlock)->DebuggerDataBlock.KernBase +
+            (u8ptr)GetGpBlock(PgBlock)->DebuggerDataBlock.KernBase +
             NtSection->VirtualAddress +
             max(NtSection->SizeOfRawData, NtSection->Misc.VirtualSize);
 
-        while (TRUE) {
-            ControlPc = ScanBytes(
+        if (GetGpBlock(PgBlock)->BuildNumber >= 18362) {
+            TargetPc = ScanBytes(
                 ControlPc,
                 EndToLock,
-                MiDeterminePoolType);
+                MiGetSystemRegionType);
 
-            if (NULL != ControlPc) {
-                if (NULL != ScanBytes(
-                    ControlPc,
-                    ControlPc + 0x40,
-                    ConfirmMiDeterminePoolType)) {
-                    TargetPc = RvaToVa(ControlPc + 14);
+            if (NULL != TargetPc) {
+                TargetPc -= 0xf;
 
-                    RtlCopyMemory(
-                        (PVOID)&PgBlock->MmDeterminePoolType,
-                        &TargetPc,
-                        sizeof(PVOID));
+                RtlCopyMemory(
+                    (ptr)&PgBlock->MiGetSystemRegionType,
+                    &TargetPc,
+                    sizeof(ptr));
 
-#ifndef PUBLIC
-                    DbgPrint(
-                        "[Shark] < %p > MmDeterminePoolType\n",
-                        PgBlock->MmDeterminePoolType);
-#endif // !PUBLIC
-
-                    TargetPc = ControlPc;
-
-                    while (TRUE) {
-                        Length = DetourGetInstructionLength(TargetPc);
-
-                        if (1 == Length) {
-                            if (0 == _CmpByte(TargetPc[0], 0xc3)) {
-                                break;
-                            }
-                        }
-
-                        if (7 == Length) {
-                            if (0x40 == (TargetPc[0] & 0xf0)) {
-                                if (0 == _CmpByte(TargetPc[1], 0x8b)) {
-                                    if (NULL == PageTable) {
-                                        PageTable = (PPOOL_BIG_PAGES *)RvaToVa(TargetPc + 3);
-
-                                        if (0 == (ULONG64)*PageTable ||
-                                            0 != ((ULONG64)(*PageTable) & 0xfff)) {
-                                            PageTable = NULL;
-                                        }
-                                    }
-                                    else if (NULL == PageTableSize) {
-                                        PageTableSize = (PSIZE_T)RvaToVa(TargetPc + 3);
-
-                                        if (0 == *PageTableSize ||
-                                            0 != ((ULONG64)(*PageTableSize) & 0xfff)) {
-                                            PageTableSize = NULL;
-                                        }
-                                    }
-                                }
-                                else if (0 == _CmpByte(TargetPc[1], 0x8d)) {
-                                    if (NULL == PgBlock->ExpLargePoolTableLock) {
-                                        PgBlock->ExpLargePoolTableLock =
-                                            (PEX_SPIN_LOCK)RvaToVa(TargetPc + 3);
-                                    }
-                                }
-                            }
-
-                            if (0 == _CmpByte(TargetPc[0], 0x0f) &&
-                                0 == _CmpByte(TargetPc[1], 0x0d) &&
-                                0 == _CmpByte(TargetPc[2], 0x0d)) {
-                                if (NULL == PgBlock->ExpLargePoolTableLock) {
-                                    PgBlock->ExpLargePoolTableLock =
-                                        (PEX_SPIN_LOCK)RvaToVa(TargetPc + 3);
-                                }
-                            }
-                        }
-
-                        if (NULL != PageTable &&
-                            NULL != PageTableSize &&
-                            NULL != PgBlock->ExpLargePoolTableLock) {
-                            if ((ULONG64)*PageTable > (ULONG64)*PageTableSize) {
-                                PgBlock->PoolBigPageTable = (PPOOL_BIG_PAGES)*PageTable;
-                                PgBlock->PoolBigPageTableSize = (SIZE_T)*PageTableSize;
-                            }
-                            else {
-                                // swap
-
-                                PgBlock->PoolBigPageTable = (PPOOL_BIG_PAGES)*PageTableSize;
-                                PgBlock->PoolBigPageTableSize = (SIZE_T)*PageTable;
-                            }
-
-#ifndef PUBLIC
-                            DbgPrint(
-                                "[Shark] < %p > PoolBigPageTable\n",
-                                PgBlock->PoolBigPageTable);
-
-                            DbgPrint(
-                                "[Shark] < %p > PoolBigPageTableSize\n",
-                                PgBlock->PoolBigPageTableSize);
-
-                            DbgPrint(
-                                "[Shark] < %p > ExpLargePoolTableLock\n",
-                                PgBlock->ExpLargePoolTableLock);
-#endif // !PUBLIC
-
-                            break;
-                        }
-
-                        TargetPc += Length;
-                    }
-
-                    break;
-                }
+#ifdef DEBUG
+                vDbgPrint(
+                    "[Shark] [PatchGuard] < %p > MiGetSystemRegionType\n",
+                    PgBlock->MiGetSystemRegionType);
+#endif // DEBUG
             }
-            else {
-                break;
-            }
+        }
 
-            ControlPc++;
+        ControlPc = ScanBytes(
+            ControlPc,
+            EndToLock,
+            ExGetBigPoolInfo[GetGpBlock(PgBlock)->BuildNumber >= 9200 ? 1 : 0]);
+
+        if (NULL != ControlPc) {
+            PgBlock->Pool.PoolBigPageTable =
+                __rva_to_va(ControlPc
+                    + (GetGpBlock(PgBlock)->BuildNumber >= 9200 ? 8 : 3));
+
+#ifdef DEBUG
+            vDbgPrint(
+                "[Shark] [PatchGuard] < %p > PoolBigPageTable\n",
+                PgBlock->Pool.PoolBigPageTable);
+#endif // DEBUG
+
+            PgBlock->Pool.PoolBigPageTableSize =
+                __rva_to_va(ControlPc
+                    + (GetGpBlock(PgBlock)->BuildNumber >= 9200 ? 0xF : 0x1D));
+
+#ifdef DEBUG
+            vDbgPrint(
+                "[Shark] [PatchGuard] < %p > PoolBigPageTableSize\n",
+                PgBlock->Pool.PoolBigPageTableSize);
+#endif // DEBUG
         }
     }
 
@@ -886,40 +844,40 @@ InitializePgBlock(
             Length = DetourGetInstructionLength(ControlPc);
 
             if (1 == Length) {
-                if (0 == _CmpByte(ControlPc[0], 0xc3)) {
+                if (0 == _cmpbyte(ControlPc[0], 0xc3)) {
                     break;
                 }
             }
 
             if (7 == Length) {
-                if (0 == _CmpByte(ControlPc[0], 0x48) &&
-                    0 == _CmpByte(ControlPc[1], 0x8d) &&
-                    0 == _CmpByte(ControlPc[2], 0x0d)) {
-                    TargetPc = RvaToVa(ControlPc + 3);
+                if (0 == _cmpbyte(ControlPc[0], 0x48) &&
+                    0 == _cmpbyte(ControlPc[1], 0x8d) &&
+                    0 == _cmpbyte(ControlPc[2], 0x0d)) {
+                    TargetPc = __rva_to_va(ControlPc + 3);
 
                     // struct _MI_SYSTEM_PTE_TYPE *
                     BitMap = TargetPc;
 
-                    PgBlock->NumberOfPtes = BitMap->SizeOfBitMap * 8;
-#ifndef PUBLIC
-                    DbgPrint(
-                        "[Shark] < %p > NumberOfPtes\n",
-                        PgBlock->NumberOfPtes);
-#endif // !PUBLIC
+                    PgBlock->SystemPtes.NumberOfPtes = BitMap->SizeOfBitMap * 8;
+#ifdef DEBUG
+                    vDbgPrint(
+                        "[Shark] [PatchGuard] < %p > NumberOfPtes\n",
+                        PgBlock->SystemPtes.NumberOfPtes);
+#endif // DEBUG
 
                     if (GetGpBlock(PgBlock)->BuildNumber < 9600) {
-                        PgBlock->BasePte =
-                            *(PMMPTE *)((PCHAR)(BitMap + 1) + sizeof(ULONG) * 2);
+                        PgBlock->SystemPtes.BasePte =
+                            *(PMMPTE *)((u8ptr)(BitMap + 1) + sizeof(u32) * 2);
                     }
                     else {
-                        PgBlock->BasePte = *(PMMPTE *)(BitMap + 1);
+                        PgBlock->SystemPtes.BasePte = *(PMMPTE *)(BitMap + 1);
                     }
 
-#ifndef PUBLIC
-                    DbgPrint(
-                        "[Shark] < %p > BasePte\n",
-                        PgBlock->BasePte);
-#endif // !PUBLIC
+#ifdef DEBUG
+                    vDbgPrint(
+                        "[Shark] [PatchGuard] < %p > BasePte\n",
+                        PgBlock->SystemPtes.BasePte);
+#endif // DEBUG
 
                     break;
                 }
@@ -929,99 +887,132 @@ InitializePgBlock(
         }
     }
 
-    RtlInitUnicodeString(&RoutineString, L"RtlLookupFunctionEntry");
-
-    PgBlock->RtlLookupFunctionEntry = MmGetSystemRoutineAddress(&RoutineString);
-
-#ifndef PUBLIC
-    DbgPrint(
-        "[Shark] < %p > RtlLookupFunctionEntry\n",
-        PgBlock->RtlLookupFunctionEntry);
-#endif // !PUBLIC
-
-    RtlInitUnicodeString(&RoutineString, L"RtlVirtualUnwind");
-
-    PgBlock->RtlVirtualUnwind = MmGetSystemRoutineAddress(&RoutineString);
-
-#ifndef PUBLIC
-    DbgPrint(
-        "[Shark] < %p > RtlVirtualUnwind\n",
-        PgBlock->RtlVirtualUnwind);
-#endif // !PUBLIC
-
-    RtlInitUnicodeString(&RoutineString, L"ExQueueWorkItem");
-
-    PgBlock->ExQueueWorkItem = MmGetSystemRoutineAddress(&RoutineString);
-
-#ifndef PUBLIC
-    DbgPrint(
-        "[Shark] < %p > ExQueueWorkItem\n",
-        PgBlock->ExQueueWorkItem);
-#endif // !PUBLIC
-
-    PgBlock->SizeSdbpCheckDll = sizeof(PgBlock->_SdbpCheckDll);
-    PgBlock->SdbpCheckDll = (PVOID)PgBlock->_SdbpCheckDll;
-
-    RtlCopyMemory(
-        PgBlock->SdbpCheckDll,
-        SdbpCheckDll,
-        sizeof(PgBlock->_SdbpCheckDll));
-
-    PgBlock->Btc64 = (PVOID)PgBlock->_Btc64;
-
     RtlCopyMemory(
         PgBlock->_Btc64,
         Btc64,
         sizeof(PgBlock->_Btc64));
 
-    PgBlock->FreeWorker = (PVOID)PgBlock->_FreeWorker;
+    PgBlock->Btc64 = (ptr)PgBlock->_Btc64;
 
     RtlCopyMemory(
-        PgBlock->_FreeWorker,
-        PgFreeWorker,
-        sizeof(PgBlock->_FreeWorker));
+        PgBlock->_Rol64,
+        Rol64,
+        sizeof(PgBlock->_Rol64));
 
-    PgBlock->ClearCallback = (PVOID)PgBlock->_ClearCallback;
-
-    RtlCopyMemory(
-        PgBlock->_ClearCallback,
-        PgClearCallback,
-        sizeof(PgBlock->_ClearCallback));
-
-    PgBlock->Message[0] = &PgBlock->_Message[0];
+    PgBlock->Rol64 = (ptr)PgBlock->_Rol64;
 
     RtlCopyMemory(
-        PgBlock->Message[0],
+        PgBlock->_Ror64,
+        Ror64,
+        sizeof(PgBlock->_Ror64));
+
+    PgBlock->Ror64 = (ptr)PgBlock->_Ror64;
+
+    RtlInitUnicodeString(&RoutineString, L"RtlLookupFunctionEntry");
+
+    PgBlock->RtlLookupFunctionEntry = MmGetSystemRoutineAddress(&RoutineString);
+
+#ifdef DEBUG
+    vDbgPrint(
+        "[Shark] [PatchGuard] < %p > RtlLookupFunctionEntry\n",
+        PgBlock->RtlLookupFunctionEntry);
+#endif // DEBUG
+
+    RtlInitUnicodeString(&RoutineString, L"RtlVirtualUnwind");
+
+    PgBlock->RtlVirtualUnwind = MmGetSystemRoutineAddress(&RoutineString);
+
+#ifdef DEBUG
+    vDbgPrint(
+        "[Shark] [PatchGuard] < %p > RtlVirtualUnwind\n",
+        PgBlock->RtlVirtualUnwind);
+#endif // DEBUG
+
+    RtlInitUnicodeString(&RoutineString, L"ExQueueWorkItem");
+
+    PgBlock->ExQueueWorkItem = MmGetSystemRoutineAddress(&RoutineString);
+
+#ifdef DEBUG
+    vDbgPrint(
+        "[Shark] [PatchGuard] < %p > ExQueueWorkItem\n",
+        PgBlock->ExQueueWorkItem);
+#endif // DEBUG
+
+    RtlCopyMemory(
+        &PgBlock->_CaptureContext[0],
+        _CaptureContext,
+        RTL_NUMBER_OF(PgBlock->_CaptureContext));
+
+    PgBlock->CaptureContext = __utop(&PgBlock->_CaptureContext[0]);
+
+#ifdef DEBUG
+    vDbgPrint(
+        "[Shark] [PatchGuard] < %p > CaptureContext\n",
+        PgBlock->CaptureContext);
+#endif // DEBUG
+
+    RtlCopyMemory(
+        &PgBlock->_ClearMessage[0],
         ClearMessage[0],
         strlen(ClearMessage[0]));
 
-    PgBlock->Message[1] = &PgBlock->_Message[strlen(ClearMessage[0]) + 1];
+    PgBlock->ClearMessage[0] = &PgBlock->_ClearMessage[0];
 
     RtlCopyMemory(
-        PgBlock->Message[1],
+        &PgBlock->_ClearMessage[0x40],
         ClearMessage[1],
         strlen(ClearMessage[1]));
+
+    PgBlock->ClearMessage[1] = &PgBlock->_ClearMessage[0x40];
+
+    RtlCopyMemory(
+        &PgBlock->_FreeWorker[0],
+        PgFreeWorker,
+        RTL_NUMBER_OF(PgBlock->_FreeWorker));
+
+    PgBlock->FreeWorker = __utop(&PgBlock->_FreeWorker[0]);
+
+#ifdef DEBUG
+    vDbgPrint(
+        "[Shark] [PatchGuard] < %p > FreeWorker\n",
+        PgBlock->FreeWorker);
+#endif // DEBUG
+
+    /*
+    RtlCopyMemory(
+    &PgBlock->_ClearCallback[0],
+    PgClearCallback,
+    RTL_NUMBER_OF(PgBlock->_ClearCallback));
+
+    PgBlock->ClearCallback = __utop(&PgBlock->_ClearCallback[0]);
+    */
+
+    PgBlock->ClearCallback = PgClearCallback;
+
+#ifdef DEBUG
+    vDbgPrint(
+        "[Shark] [PatchGuard] < %p > ClearCallback\n",
+        PgBlock->ClearCallback);
+#endif // DEBUG
 }
 
 PPGOBJECT
 NTAPI
 PgCreateObject(
-    __in_opt CCHAR Encrypted,
-    __in CCHAR Type,
-    __in PVOID BaseAddress,
-    __in_opt SIZE_T RegionSize,
+    __in_opt u8 Encrypted,
+    __in u8 Type,
+    __in ptr BaseAddress,
+    __in_opt u RegionSize,
     __in PPGBLOCK PgBlock,
-    __in PVOID Return,
-    __in PVOID Callback,
-    __in_opt PVOID ProgramCounter,
-    __in PVOID CaptureContext
+    __in ptr Return,
+    __in ptr Callback,
+    __in_opt ptr ProgramCounter,
+    __in ptr CaptureContext
 )
 {
     PPGOBJECT Object = NULL;
 
-    Object = ExAllocatePool(
-        NonPagedPool,
-        sizeof(PGOBJECT));
+    Object = __malloc(sizeof(PGOBJECT));
 
     if (NULL != Object) {
         RtlZeroMemory(Object, sizeof(PGOBJECT));
@@ -1031,7 +1022,7 @@ PgCreateObject(
         Object->BaseAddress = BaseAddress;
         Object->RegionSize = RegionSize;
 
-        SetGuardBody(
+        SetStackBody(
             &Object->Body,
             PgBlock,
             Object,
@@ -1041,39 +1032,37 @@ PgCreateObject(
             CaptureContext);
 
         ExInterlockedInsertTailList(
-            &PgBlock->List,
-            &Object->Entry,
-            &PgBlock->Lock);
+            &PgBlock->ObjectList, &Object->Entry, &PgBlock->ObjectLock);
     }
 
     return Object;
 }
 
-VOID
+void
 NTAPI
 PgSetNewEntry(
     __inout PPGBLOCK PgBlock,
     __in PPGOBJECT Object,
-    __in PVOID PatchGuardContext,
-    __in ULONG64 RorKey
+    __in ptr PatchGuardContext,
+    __in u64 RorKey
 )
 {
-    ULONG64 LastRorKey = 0;
-    ULONG RvaOfEntry = 0;
-    ULONG64 FieldBuffer[PG_COMPARE_FIELDS_COUNT] = { 0 };
-    ULONG FieldIndex = 0;
-    ULONG Index = 0;
-    PVOID Pointer = NULL;
+    u64 LastRorKey = 0;
+    u32 RvaOfEntry = 0;
+    u64 FieldBuffer[PG_COMPARE_FIELDS_COUNT] = { 0 };
+    u32 FieldIndex = 0;
+    u32 Index = 0;
+    ptr Pointer = NULL;
 
     // xor code must be align 8 byte;
     // get PatchGuard entry offset in encrypted code
 
     FieldIndex = (PgBlock->OffsetEntryPoint -
-        PgBlock->SizeCmpAppendDllSection) / sizeof(ULONG64);
+        PgBlock->SizeCmpAppendDllSection) / sizeof(u64);
 
     RtlCopyMemory(
         FieldBuffer,
-        (PCHAR)PatchGuardContext + (PgBlock->OffsetEntryPoint & ~7),
+        (u8ptr)PatchGuardContext + (PgBlock->OffsetEntryPoint & ~7),
         sizeof(FieldBuffer));
 
     LastRorKey = RorKey;
@@ -1081,25 +1070,25 @@ PgSetNewEntry(
     for (Index = 0;
         Index < FieldIndex;
         Index++) {
-        LastRorKey = __ROL64(LastRorKey, Index);
+        LastRorKey = ROL64(PgBlock, LastRorKey, Index);
     }
 
     for (Index = 0;
         Index < RTL_NUMBER_OF(FieldBuffer);
         Index++) {
-        LastRorKey = __ROL64(LastRorKey, FieldIndex + Index);
+        LastRorKey = ROL64(PgBlock, LastRorKey, FieldIndex + Index);
         FieldBuffer[Index] = FieldBuffer[Index] ^ LastRorKey;
     }
 
-    RvaOfEntry = *(PULONG)((PCHAR)FieldBuffer + (PgBlock->OffsetEntryPoint & 7));
+    RvaOfEntry = *(u32ptr)((u8ptr)FieldBuffer + (PgBlock->OffsetEntryPoint & 7));
 
     // copy PatchGuard entry head code to temp bufer and decode
 
-    FieldIndex = (RvaOfEntry - PgBlock->SizeCmpAppendDllSection) / sizeof(ULONG64);
+    FieldIndex = (RvaOfEntry - PgBlock->SizeCmpAppendDllSection) / sizeof(u64);
 
     RtlCopyMemory(
         FieldBuffer,
-        (PCHAR)PatchGuardContext + (RvaOfEntry & ~7),
+        (u8ptr)PatchGuardContext + (RvaOfEntry & ~7),
         sizeof(FieldBuffer));
 
     LastRorKey = RorKey;
@@ -1107,64 +1096,62 @@ PgSetNewEntry(
     for (Index = 0;
         Index < FieldIndex;
         Index++) {
-        LastRorKey = __ROL64(LastRorKey, Index);
+        LastRorKey = ROL64(PgBlock, LastRorKey, Index);
     }
 
     for (Index = 0;
         Index < RTL_NUMBER_OF(FieldBuffer);
         Index++) {
-        LastRorKey = __ROL64(LastRorKey, FieldIndex + Index);
+        LastRorKey = ROL64(PgBlock, LastRorKey, FieldIndex + Index);
         FieldBuffer[Index] = FieldBuffer[Index] ^ LastRorKey;
     }
 
     // set temp buffer PatchGuard entry head jmp to PgClearCallback and encrypt
 
-    Pointer = (PCHAR)FieldBuffer + (RvaOfEntry & 7);
+    Pointer = (u8ptr)FieldBuffer + (RvaOfEntry & 7);
 
-    DetourLockedBuildJumpCode(
-        &Pointer,
-        &Object->Body);
+    LockedBuildJumpCode(&Pointer, &Object->Body);
 
     while (Index--) {
         FieldBuffer[Index] = FieldBuffer[Index] ^ LastRorKey;
-        LastRorKey = __ROR64(LastRorKey, FieldIndex + Index);
+        LastRorKey = ROR64(PgBlock, LastRorKey, FieldIndex + Index);
     }
 
     // copy temp buffer PatchGuard entry head to old address, 
     // when PatchGuard code decrypt self jmp PgClearCallback.
 
     RtlCopyMemory(
-        (PCHAR)PatchGuardContext + (RvaOfEntry & ~7),
+        (u8ptr)PatchGuardContext + (RvaOfEntry & ~7),
         FieldBuffer,
         sizeof(FieldBuffer));
 
-#ifndef PUBLIC
-    DbgPrint(
-        "[Shark] < %p > set new entry for encrypted context\n",
+#ifdef DEBUG
+    vDbgPrint(
+        "[Shark] [PatchGuard] < %p > set new entry for encrypted context\n",
         Object);
-#endif // !PUBLIC
+#endif // DEBUG
 }
 
-VOID
+void
 NTAPI
 PgSetNewEntryWithBtc(
     __inout PPGBLOCK PgBlock,
     __in PPGOBJECT Object,
-    __in PVOID Context,
-    __in SIZE_T ContextSize
+    __in ptr Context,
+    __in u ContextSize
 )
 {
-    ULONG64 RorKey = 0;
-    ULONG64 LastRorKey = 0;
-    ULONG LastRorKeyOffset = 0;
-    ULONG64 FieldBuffer[PG_COMPARE_FIELDS_COUNT] = { 0 };
-    ULONG FieldIndex = 0;
-    ULONG AlignOffset = 0;
-    ULONG Index = 0;
-    PULONG64 ControlPc = NULL;
-    PULONG64 TargetPc = NULL;
-    ULONG CompareCount = 0;
-    PVOID Pointer = NULL;
+    u64 RorKey = 0;
+    u64 LastRorKey = 0;
+    u32 LastRorKeyOffset = 0;
+    u64 FieldBuffer[PG_COMPARE_FIELDS_COUNT] = { 0 };
+    u32 FieldIndex = 0;
+    u32 AlignOffset = 0;
+    u32 Index = 0;
+    u64ptr ControlPc = NULL;
+    u64ptr TargetPc = NULL;
+    u32 CompareCount = 0;
+    ptr Pointer = NULL;
 
     // xor decrypt must align 8 bytes
     CompareCount = (ContextSize - PgBlock->SizeCmpAppendDllSection) / 8 - 1;
@@ -1172,15 +1159,15 @@ PgSetNewEntryWithBtc(
     for (AlignOffset = 0;
         AlignOffset < 8;
         AlignOffset++) {
-        ControlPc = (PULONG64)((PCHAR)PgBlock->Header + AlignOffset);
-        TargetPc = (PULONG64)((PCHAR)Context + PgBlock->SizeCmpAppendDllSection);
+        ControlPc = (u64ptr)((u8ptr)PgBlock->Header + AlignOffset);
+        TargetPc = (u64ptr)((u8ptr)Context + PgBlock->SizeCmpAppendDllSection);
 
         for (Index = 0;
             Index < CompareCount;
             Index++) {
             RorKey = TargetPc[Index + 1] ^ ControlPc[1];
             LastRorKey = RorKey;
-            RorKey = __ROR64(RorKey, Index + 1);
+            RorKey = ROR64(PgBlock, RorKey, Index + 1);
             RorKey = PgBlock->Btc64(RorKey, RorKey);
 
             if ((TargetPc[Index] ^ RorKey) == ControlPc[0]) {
@@ -1195,7 +1182,7 @@ found:
 
     RtlCopyMemory(
         FieldBuffer,
-        (PCHAR)Context + PgBlock->SizeCmpAppendDllSection + FieldIndex * 8,
+        (u8ptr)Context + PgBlock->SizeCmpAppendDllSection + FieldIndex * 8,
         sizeof(FieldBuffer));
 
     RorKey = LastRorKey;
@@ -1203,162 +1190,200 @@ found:
 
     while (Index--) {
         FieldBuffer[Index] = FieldBuffer[Index] ^ RorKey;
-        RorKey = __ROR64(RorKey, FieldIndex + Index);
+        RorKey = ROR64(PgBlock, RorKey, FieldIndex + Index);
         RorKey = PgBlock->Btc64(RorKey, RorKey);
     }
 
     // set temp buffer PatchGuard entry head jmp to PgClearCallback and encrypt
 
-    Pointer = (PDETOUR_BODY)((PCHAR)FieldBuffer + 8 - AlignOffset);
+    Pointer = (PGUARD_BODY)((u8ptr)FieldBuffer + 8 - AlignOffset);
 
-    DetourLockedBuildJumpCode(
-        &Pointer,
-        &Object->Body);
+    LockedBuildJumpCode(&Pointer, &Object->Body);
 
     RorKey = LastRorKey;
     Index = LastRorKeyOffset;
 
     while (Index--) {
         FieldBuffer[Index] = FieldBuffer[Index] ^ RorKey;
-        RorKey = __ROR64(RorKey, FieldIndex + Index);
+        RorKey = ROR64(PgBlock, RorKey, FieldIndex + Index);
         RorKey = PgBlock->Btc64(RorKey, RorKey);
     }
 
     RtlCopyMemory(
-        (PCHAR)Context + PgBlock->SizeCmpAppendDllSection + FieldIndex * 8,
+        (u8ptr)Context + PgBlock->SizeCmpAppendDllSection + FieldIndex * 8,
         FieldBuffer,
         sizeof(FieldBuffer));
 
-#ifndef PUBLIC
-    DbgPrint(
-        "[Shark] < %p > set new entry for btc encrypted context\n",
+#ifdef DEBUG
+    vDbgPrint(
+        "[Shark] [PatchGuard] < %p > set new entry for btc encrypted context\n",
         Object);
-#endif // !PUBLIC
+#endif // DEBUG
 }
 
-VOID
+void
 NTAPI
 PgCompareFields(
     __inout PPGBLOCK PgBlock,
-    __in CCHAR Type,
-    __in PVOID BaseAddress,
-    __in SIZE_T RegionSize
+    __in u8 Type,
+    __in ptr BaseAddress,
+    __in u RegionSize
 )
 {
-    PVOID EndAddress = NULL;
-    PCHAR TargetPc = NULL;
-    SIZE_T Index = 0;
-    ULONG64 RorKey = 0;
-    ULONG RorKeyIndex = 0;
-    PULONG64 Fields = NULL;
-    PVOID Context = NULL;
+    ptr EndAddress = NULL;
+    u8ptr TargetPc = NULL;
+    u Index = 0;
+    u64 RorKey = 0;
+    u32 RorKeyIndex = 0;
+    u64ptr Fields = NULL;
+    ptr Context = NULL;
     PPGOBJECT Object = NULL;
+    PMMPTE PointerPde = NULL;
+    PMMPTE PointerPte = NULL;
     PFN_NUMBER NumberOfPages = 0;
-    BOOLEAN Chance = TRUE;
+    b Chance = TRUE;
+    u8 VaType = 0;
 
-    if (GetGpBlock(PgBlock)->BuildNumber >= 18362) {
-        if (GetGpBlock(PgBlock) >= BaseAddress &&
-            GetGpBlock(PgBlock) < (PCHAR)BaseAddress + RegionSize) {
+    if (0 != PgBlock->Repeat) {
+        if (FALSE == IsListEmpty(&PgBlock->ObjectList)) {
+            Object = CONTAINING_RECORD(
+                PgBlock->ObjectList.Flink,
+                PGOBJECT,
+                Entry);
 
-        }
-        else {
-            NumberOfPages = BYTES_TO_PAGES(RegionSize);
+            while (&Object->Entry != &PgBlock->ObjectList) {
+                if (BaseAddress == Object->BaseAddress)return;
 
-            for (Index = 0;
-                Index < NumberOfPages;
-                Index++) {
-                if (0 == _CmpShort(
-                    *(PSHORT)((PCHAR)BaseAddress + PAGE_SIZE * Index),
-                    IMAGE_DOS_SIGNATURE)) {
-                    Chance = FALSE;
-
-                    break;
-                }
-            }
-
-            if (FALSE != Chance) {
-                if (FALSE != PgBlock->MmSetPageProtection(
-                    BaseAddress,
-                    PAGE_SIZE,
-                    PAGE_READWRITE)) {
-                    Object = PgCreateObject(
-                        TRUE,
-                        Type,
-                        BaseAddress,
-                        RegionSize,
-                        PgBlock,
-                        NULL,
-                        PgBlock->ClearCallback,
-                        NULL,
-                        GetGpBlock(PgBlock)->CaptureContext);
-
-#ifndef PUBLIC
-                    DbgPrint(
-                        "[Shark] < %p > insert check list\n",
-                        Object);
-#endif // !PUBLIC
-                }
+                Object = CONTAINING_RECORD(
+                    Object->Entry.Flink,
+                    PGOBJECT,
+                    Entry);
             }
         }
     }
-    else {
-        TargetPc = BaseAddress;
-        EndAddress = (PCHAR)BaseAddress + RegionSize - sizeof(PgBlock->Fields);
 
-        do {
-            Fields = TargetPc;
+    if (FALSE != MmIsAddressValid(BaseAddress)) {
+        if ((__ptou(PgBlock) >= __ptou(BaseAddress)) &&
+            (__ptou(PgBlock) < (__ptou(BaseAddress) + RegionSize))) {
+            // pass self
+        }
+        else {
+            if (GetGpBlock(PgBlock)->BuildNumber >= 18362) {
+                if (MiVaSystemPtes == PgBlock->MiGetSystemRegionType(BaseAddress)) {
+                    VaType = PgSystemPtes;
+                }
+                else if (MiVaNonPagedPool == PgBlock->MiGetSystemRegionType(BaseAddress)) {
+                    VaType = PgPoolBigPage;
+                }
 
-            if ((ULONG64)Fields == (ULONG64)PgBlock->Fields) {
-                break;
-            }
+                NumberOfPages = BYTES_TO_PAGES(RegionSize);
 
-            RorKey = Fields[3] ^ PgBlock->Fields[3];
+                for (Index = 0;
+                    Index < NumberOfPages;
+                    Index++) {
+                    if (0 == _cmpword(
+                        *(PSHORT)((u8ptr)BaseAddress + PAGE_SIZE * Index),
+                        IMAGE_DOS_SIGNATURE)) {
+                        Chance = FALSE;
 
-            // CmpAppendDllSection + 98
+                        // pass memory pe
 
-            // xor [rdx + rcx * 8 + 0c0h], rax
-            // ror rax, cl
+                        break;
+                    }
+                }
 
-            // if >= win10 17134 btc rax, rax here
+                if (FALSE != Chance) {
+                    if (PgPoolBigPage == VaType) {
+                        PointerPde = GetPdeAddress(BaseAddress);
 
-            // loop CmpAppendDllSection + 98
+                        if (0 == PointerPde->u.Hard.LargePage) {
+                            PointerPte = GetPteAddress(BaseAddress);
 
-            if (0 == RorKey) {
-                if (Fields[2] == PgBlock->Fields[2] &&
-                    Fields[1] == PgBlock->Fields[1] &&
-                    Fields[0] == PgBlock->Fields[0]) {
-                    Context = TargetPc - PG_FIRST_FIELD_OFFSET;
+                            if (1 == PointerPte->u.Hard.NoExecute) {
+                                Chance = FALSE;
+                            }
+                        }
+                        else if (1 == PointerPde->u.Hard.NoExecute) {
+                            Chance = FALSE;
+                        }
+                        else {
+                            __debugbreak();
+                        }
+                    }
+                    else {
+                        if (ROUND_TO_PAGES(*(u64ptr)BaseAddress) != RegionSize) {
+                            Chance = FALSE;
+                        }
+                    }
+                }
 
-#ifndef PUBLIC
-                    DbgPrint(
-                        "[Shark] < %p > found declassified context\n",
-                        Context);
-#endif // !PUBLIC
-                    break;
+                if (FALSE != Chance) {
+                    if (FALSE != PgBlock->MmSetPageProtection(
+                        BaseAddress,
+                        PAGE_SIZE,
+                        PAGE_READWRITE)) {
+                        Object = PgCreateObject(
+                            TRUE,
+                            Type,
+                            BaseAddress,
+                            RegionSize,
+                            PgBlock,
+                            NULL,
+                            PgBlock->ClearCallback,
+                            NULL,
+                            PgBlock->CaptureContext);
+
+#ifdef DEBUG
+                        vDbgPrint(
+                            "[Shark] [PatchGuard] < %p > clear region execute mask < %p - %08x >\n",
+                            Object,
+                            BaseAddress,
+                            RegionSize);
+#endif // DEBUG
+                    }
                 }
             }
             else {
-                RorKeyIndex = 0;
+                TargetPc = BaseAddress;
+                // EndAddress = (u8ptr)BaseAddress + RegionSize - sizeof(PgBlock->Fields);
+                EndAddress = (u8ptr)BaseAddress + PAGE_SIZE - sizeof(PgBlock->Fields);
 
-                RorKey = __ROR64(RorKey, PG_FIELD_BITS);
+                do {
+                    Fields = TargetPc;
 
-                if (PgBlock->BtcEnable) {
-                    RorKey = PgBlock->Btc64(RorKey, RorKey);
-                }
-
-                RorKeyIndex++;
-
-                if ((ULONG64)(Fields[2] ^ RorKey) == (ULONG64)PgBlock->Fields[2]) {
-                    RorKey = __ROR64(RorKey, PG_FIELD_BITS - RorKeyIndex);
-
-                    if (PgBlock->BtcEnable) {
-                        RorKey = PgBlock->Btc64(RorKey, RorKey);
+                    if ((u64)Fields == (u64)PgBlock->Fields) {
+                        break;
                     }
 
-                    RorKeyIndex++;
+                    RorKey = Fields[3] ^ PgBlock->Fields[3];
 
-                    if ((ULONG64)(Fields[1] ^ RorKey) == (ULONG64)PgBlock->Fields[1]) {
-                        RorKey = __ROR64(RorKey, PG_FIELD_BITS - RorKeyIndex);
+                    // CmpAppendDllSection + 98
+
+                    // xor [rdx + rcx * 8 + 0c0h], rax
+                    // ror rax, cl
+
+                    // if >= win10 17134 btc rax, rax here
+
+                    // loop CmpAppendDllSection + 98
+
+                    if (0 == RorKey) {
+                        if (Fields[2] == PgBlock->Fields[2] &&
+                            Fields[1] == PgBlock->Fields[1] &&
+                            Fields[0] == PgBlock->Fields[0]) {
+                            Context = TargetPc - PG_FIRST_FIELD_OFFSET;
+
+#ifdef DEBUG
+                            vDbgPrint(
+                                "[Shark] [PatchGuard] < %p > found declassified context\n",
+                                Context);
+#endif // DEBUG
+                            break;
+                        }
+                    }
+                    else {
+                        RorKeyIndex = 0;
+
+                        RorKey = ROR64(PgBlock, RorKey, PG_FIELD_BITS);
 
                         if (PgBlock->BtcEnable) {
                             RorKey = PgBlock->Btc64(RorKey, RorKey);
@@ -1366,70 +1391,88 @@ PgCompareFields(
 
                         RorKeyIndex++;
 
-                        if ((ULONG64)(Fields[0] ^ RorKey) == (ULONG64)PgBlock->Fields[0]) {
-                            Context = TargetPc - PG_FIRST_FIELD_OFFSET;
+                        if ((u64)(Fields[2] ^ RorKey) == (u64)PgBlock->Fields[2]) {
+                            RorKey = ROR64(PgBlock, RorKey, PG_FIELD_BITS - RorKeyIndex);
 
-                            RorKey = Fields[0] ^ PgBlock->Fields[0];
-
-#ifndef PUBLIC
-                            DbgPrint(
-                                "[Shark] < %p > found encrypted context < %p - %08x >\n",
-                                Context,
-                                BaseAddress,
-                                RegionSize);
-#endif // !PUBLIC
-
-                            Object = PgCreateObject(
-                                PgEncrypted,
-                                Type,
-                                BaseAddress,
-                                RegionSize,
-                                PgBlock,
-                                NULL,
-                                PgBlock->ClearCallback,
-                                NULL,
-                                GetGpBlock(PgBlock)->CaptureContext);
-
-                            if (NULL != Object) {
-                                if (FALSE != PgBlock->BtcEnable) {
-                                    PgSetNewEntryWithBtc(
-                                        PgBlock,
-                                        Object,
-                                        Context,
-                                        (ULONG_PTR)EndAddress - (ULONG_PTR)Context);
-                                }
-                                else {
-                                    for (;
-                                        RorKeyIndex < PG_FIELD_BITS;
-                                        RorKeyIndex++) {
-                                        RorKey = __ROR64(RorKey, PG_FIELD_BITS - RorKeyIndex);
-                                    }
-
-#ifndef PUBLIC
-                                    DbgPrint(
-                                        "[Shark] < %p > first rorkey\n",
-                                        RorKey);
-#endif // !PUBLIC
-                                    PgSetNewEntry(
-                                        PgBlock,
-                                        Object,
-                                        Context,
-                                        RorKey);
-                                }
+                            if (PgBlock->BtcEnable) {
+                                RorKey = PgBlock->Btc64(RorKey, RorKey);
                             }
 
-                            break;
+                            RorKeyIndex++;
+
+                            if ((u64)(Fields[1] ^ RorKey) == (u64)PgBlock->Fields[1]) {
+                                RorKey = ROR64(PgBlock, RorKey, PG_FIELD_BITS - RorKeyIndex);
+
+                                if (PgBlock->BtcEnable) {
+                                    RorKey = PgBlock->Btc64(RorKey, RorKey);
+                                }
+
+                                RorKeyIndex++;
+
+                                if ((u64)(Fields[0] ^ RorKey) == (u64)PgBlock->Fields[0]) {
+                                    Context = TargetPc - PG_FIRST_FIELD_OFFSET;
+
+                                    RorKey = Fields[0] ^ PgBlock->Fields[0];
+
+#ifdef DEBUG
+                                    vDbgPrint(
+                                        "[Shark] [PatchGuard] < %p > found encrypted context < %p - %08x >\n",
+                                        Context,
+                                        BaseAddress,
+                                        RegionSize);
+#endif // DEBUG
+
+                                    Object = PgCreateObject(
+                                        PgEncrypted,
+                                        Type,
+                                        BaseAddress,
+                                        RegionSize,
+                                        PgBlock,
+                                        NULL,
+                                        PgBlock->ClearCallback,
+                                        NULL,
+                                        PgBlock->CaptureContext);
+
+                                    if (NULL != Object) {
+                                        PgBlock->Count++;
+
+                                        if (FALSE != PgBlock->BtcEnable) {
+                                            PgSetNewEntryWithBtc(
+                                                PgBlock,
+                                                Object,
+                                                Context,
+                                                (u)EndAddress - (u)Context);
+                                        }
+                                        else {
+                                            for (;
+                                                RorKeyIndex < PG_FIELD_BITS;
+                                                RorKeyIndex++) {
+                                                RorKey = ROR64(PgBlock, RorKey, PG_FIELD_BITS - RorKeyIndex);
+                                            }
+
+#ifdef DEBUG
+                                            vDbgPrint(
+                                                "[Shark] [PatchGuard] < %p > first rorkey\n",
+                                                RorKey);
+#endif // DEBUG
+                                            PgSetNewEntry(PgBlock, Object, Context, RorKey);
+                                        }
+                                    }
+
+                                    break;
+                                }
+                            }
                         }
                     }
-                }
-            }
 
-            TargetPc++;
-        } while ((ULONG64)TargetPc < (ULONG64)EndAddress);
+                    TargetPc++;
+                } while ((u64)TargetPc < (u64)EndAddress);
+            }
+        }
     }
 }
 
-VOID
+void
 NTAPI
 InitializeSystemPtesBitMap(
     __inout PMMPTE BasePte,
@@ -1441,10 +1484,10 @@ InitializeSystemPtesBitMap(
     PMMPTE PointerPpe = NULL;
     PMMPTE PointerPde = NULL;
     PMMPTE PointerPte = NULL;
-    PVOID PointerAddress = NULL;
-    ULONG BitNumber = 0;
-    PVOID BeginAddress = NULL;
-    PVOID EndAddress = NULL;
+    ptr PointerAddress = NULL;
+    u32 BitNumber = 0;
+    ptr BeginAddress = NULL;
+    ptr EndAddress = NULL;
 
     /*
     PatchGuard Context pages allocate by MmAllocateIndependentPages
@@ -1488,8 +1531,8 @@ InitializeSystemPtesBitMap(
 #define VALID_PTE_UNSET_BITS \
             ( MM_PTE_WRITE_THROUGH_MASK | MM_PTE_CACHE_DISABLE_MASK | MM_PTE_COPY_ON_WRITE_MASK )
 
-    BeginAddress = GetVirtualAddressMappedByPte(BasePte);
-    EndAddress = GetVirtualAddressMappedByPte(BasePte + NumberOfPtes);
+    BeginAddress = GetVaMappedByPte(BasePte);
+    EndAddress = GetVaMappedByPte(BasePte + NumberOfPtes);
 
     PointerAddress = BeginAddress;
 
@@ -1518,63 +1561,65 @@ InitializeSystemPtesBitMap(
                             }
                         }
 
-                        PointerAddress = GetVirtualAddressMappedByPte(PointerPte + 1);
+                        PointerAddress = GetVaMappedByPte(PointerPte + 1);
                     }
                     else {
-                        PointerAddress = GetVirtualAddressMappedByPde(PointerPde + 1);
+                        PointerAddress = GetVaMappedByPde(PointerPde + 1);
                     }
                 }
                 else {
-                    PointerAddress = GetVirtualAddressMappedByPde(PointerPde + 1);
+                    PointerAddress = GetVaMappedByPde(PointerPde + 1);
                 }
             }
             else {
-                PointerAddress = GetVirtualAddressMappedByPpe(PointerPpe + 1);
+                PointerAddress = GetVaMappedByPpe(PointerPpe + 1);
             }
         }
         else {
-            PointerAddress = GetVirtualAddressMappedByPxe(PointerPxe + 1);
+            PointerAddress = GetVaMappedByPxe(PointerPxe + 1);
         }
-    } while ((ULONG_PTR)PointerAddress < (ULONG_PTR)EndAddress);
+    } while ((u)PointerAddress < (u)EndAddress);
 }
 
-VOID
+void
 NTAPI
 PgClearSystemPtesEncryptedContext(
     __inout PPGBLOCK PgBlock
 )
 {
     PRTL_BITMAP BitMap = NULL;
-    ULONG BitMapSize = 0;
+    u32 BitMapSize = 0;
     PFN_NUMBER NumberOfPtes = 0;
-    ULONG HintIndex = 0;
-    ULONG StartingRunIndex = 0;
+    u32 HintIndex = 0;
+    u32 StartingRunIndex = 0;
 
-    NumberOfPtes = PgBlock->NumberOfPtes;
+    NumberOfPtes = PgBlock->SystemPtes.NumberOfPtes;
 
-#ifndef PUBLIC
-    DbgPrint(
-        "[Shark] < %p > SystemPtes < %p - %p >\n",
-        KeGetCurrentProcessorNumber(),
-        PgBlock->BasePte,
-        PgBlock->BasePte + NumberOfPtes);
-#endif // !PUBLIC
+#ifdef DEBUG
+    if (0 == PgBlock->Repeat) {
+        vDbgPrint(
+            "[Shark] [PatchGuard] < %p > SystemPtes < %p - %p >\n",
+            KeGetCurrentProcessorNumber(),
+            PgBlock->SystemPtes.BasePte,
+            PgBlock->SystemPtes.BasePte + NumberOfPtes);
+    }
+#endif // DEBUG
 
     BitMapSize =
-        sizeof(RTL_BITMAP) + (ULONG)((((NumberOfPtes + 1) + 31) / 32) * 4);
+        sizeof(RTL_BITMAP) + (u32)((((NumberOfPtes + 1) + 31) / 32) * 4);
 
-    BitMap = ExAllocatePool(NonPagedPool, BitMapSize);
+    BitMap = __malloc(BitMapSize);
 
     if (NULL != BitMap) {
         RtlInitializeBitMap(
             BitMap,
-            (PULONG)(BitMap + 1),
-            (ULONG)(NumberOfPtes + 1));
+            (u32ptr)(BitMap + 1),
+            (u32)(NumberOfPtes + 1));
 
         RtlClearAllBits(BitMap);
 
         InitializeSystemPtesBitMap(
-            PgBlock->BasePte,
+            PgBlock->SystemPtes.BasePte,
             NumberOfPtes,
             BitMap);
 
@@ -1597,7 +1642,7 @@ PgClearSystemPtesEncryptedContext(
                     PgCompareFields(
                         PgBlock,
                         PgSystemPtes,
-                        GetVirtualAddressMappedByPte(PgBlock->BasePte + HintIndex),
+                        GetVaMappedByPte(PgBlock->SystemPtes.BasePte + HintIndex),
                         (StartingRunIndex - HintIndex) * PAGE_SIZE);
                 }
 
@@ -1605,84 +1650,79 @@ PgClearSystemPtesEncryptedContext(
             }
         } while (HintIndex < NumberOfPtes);
 
-        ExFreePool(BitMap);
+        __free(BitMap);
     }
 }
 
-VOID
+void
 NTAPI
 PgClearPoolEncryptedContext(
     __inout PPGBLOCK PgBlock
 )
 {
-    POOL_TYPE CheckType = NonPagedPool;
-    POOL_TYPE PoolType = NonPagedPool;
-    SIZE_T Index = 0;
-    SIZE_T PoolBigPageTableSize = 0;
-    PPOOL_BIG_PAGES PoolBigPageTable = NULL;
+    u Index = 0;
 
-    PoolBigPageTableSize = PgBlock->PoolBigPageTableSize;
-    PoolBigPageTable = PgBlock->PoolBigPageTable;
-
-#ifndef PUBLIC
-    DbgPrint(
-        "[Shark] < %p > BigPool < %p - %08x >\n",
-        KeGetCurrentProcessorNumber(),
-        PoolBigPageTable,
-        PoolBigPageTableSize);
-#endif // !PUBLIC
+#ifdef DEBUG
+    if (0 == PgBlock->Repeat) {
+        vDbgPrint(
+            "[Shark] [PatchGuard] < %p > BigPool < %p - %08x >\n",
+            KeGetCurrentProcessorNumber(),
+            POOL_TABLE,
+            POOL_TABLE_SIZE);
+    }
+#endif // DEBUG
 
     for (Index = 0;
-        Index < PoolBigPageTableSize;
+        Index < POOL_TABLE_SIZE;
         Index++) {
         if (POOL_BIG_TABLE_ENTRY_FREE !=
-            ((ULONG64)PoolBigPageTable[Index].Va & POOL_BIG_TABLE_ENTRY_FREE)) {
-            PoolType = PgBlock->MmDeterminePoolType(PoolBigPageTable[Index].Va);
-            CheckType = PoolType & BASE_POOL_TYPE_MASK;
-
-            if (NonPagedPool == CheckType) {
-                if (PoolBigPageTable[Index].NumberOfPages > PgBlock->SizeINITKDBG) {
+            ((u64)POOL_TABLE[Index].Va & POOL_BIG_TABLE_ENTRY_FREE)) {
+            if (FALSE !=
+                PgBlock->Pool.MmIsNonPagedSystemAddressValid(POOL_TABLE[Index].Va)) {
+                if (POOL_TABLE[Index].NumberOfPages > PgBlock->SizeINITKDBG) {
                     PgCompareFields(
                         PgBlock,
                         PgPoolBigPage,
-                        PoolBigPageTable[Index].Va,
-                        PoolBigPageTable[Index].NumberOfPages);
+                        POOL_TABLE[Index].Va,
+                        POOL_TABLE[Index].NumberOfPages);
                 }
             }
         }
     }
 }
 
-VOID
+void
 NTAPI
 PgLocatePoolObject(
     __inout PPGBLOCK PgBlock,
-    __in PVOID Establisher,
+    __in ptr Establisher,
     __in PPGOBJECT Object
 )
 {
     PFN_NUMBER Index = 0;
 
     for (Index = 0;
-        Index < PgBlock->PoolBigPageTableSize;
+        Index < POOL_TABLE_SIZE;
         Index++) {
         if (POOL_BIG_TABLE_ENTRY_FREE !=
-            ((ULONG64)PgBlock->PoolBigPageTable[Index].Va & POOL_BIG_TABLE_ENTRY_FREE)) {
-            if (NonPagedPool == PgBlock->MmDeterminePoolType(PgBlock->PoolBigPageTable[Index].Va)) {
-                if (PgBlock->PoolBigPageTable[Index].NumberOfPages > PgBlock->SizeINITKDBG) {
-                    if ((ULONG64)Establisher >= (ULONG64)PgBlock->PoolBigPageTable[Index].Va &&
-                        (ULONG64)Establisher < (ULONG64)PgBlock->PoolBigPageTable[Index].Va +
-                        PgBlock->PoolBigPageTable[Index].NumberOfPages) {
-                        Object->BaseAddress = PgBlock->PoolBigPageTable[Index].Va;
-                        Object->RegionSize = PgBlock->PoolBigPageTable[Index].NumberOfPages;
+            ((u64)POOL_TABLE[Index].Va & POOL_BIG_TABLE_ENTRY_FREE)) {
+            if (FALSE !=
+                PgBlock->Pool.MmIsNonPagedSystemAddressValid(
+                    POOL_TABLE[Index].Va)) {
+                if (POOL_TABLE[Index].NumberOfPages > PgBlock->SizeINITKDBG) {
+                    if ((u64)Establisher >= (u64)POOL_TABLE[Index].Va &&
+                        (u64)Establisher < (u64)POOL_TABLE[Index].Va +
+                        POOL_TABLE[Index].NumberOfPages) {
+                        Object->BaseAddress = POOL_TABLE[Index].Va;
+                        Object->RegionSize = POOL_TABLE[Index].NumberOfPages;
 
-#ifndef PUBLIC
-                        GetGpBlock(PgBlock)->DbgPrint(
-                            "[Shark] < %p > found region in pool < %p - %08x >\n",
+#ifdef DEBUG
+                        GetGpBlock(PgBlock)->vDbgPrint(
+                            "[Shark] [PatchGuard] < %p > found region in pool < %p - %08x >\n",
                             Establisher,
                             Object->BaseAddress,
                             Object->RegionSize);
-#endif // !PUBLIC
+#endif // DEBUG
 
                         Object->Type = PgPoolBigPage;
 
@@ -1694,38 +1734,38 @@ PgLocatePoolObject(
     }
 }
 
-VOID
+void
 NTAPI
 PgLocateSystemPtesObject(
     __inout PPGBLOCK PgBlock,
-    __in PVOID Establisher,
+    __in ptr Establisher,
     __in PPGOBJECT Object
 )
 {
     PRTL_BITMAP BitMap = NULL;
-    ULONG BitMapSize = 0;
+    u32 BitMapSize = 0;
     PFN_NUMBER NumberOfPtes = 0;
-    ULONG HintIndex = 0;
-    ULONG StartingRunIndex = 0;
+    u32 HintIndex = 0;
+    u32 StartingRunIndex = 0;
 
-    NumberOfPtes = PgBlock->NumberOfPtes;
+    NumberOfPtes = PgBlock->SystemPtes.NumberOfPtes;
 
     BitMapSize =
         sizeof(RTL_BITMAP) +
-        (ULONG)((((NumberOfPtes + 1) + 31) / 32) * 4);
+        (u32)((((NumberOfPtes + 1) + 31) / 32) * 4);
 
-    BitMap = ExAllocatePool(NonPagedPool, BitMapSize);
+    BitMap = __malloc(BitMapSize);
 
     if (NULL != BitMap) {
         RtlInitializeBitMap(
             BitMap,
-            (PULONG)(BitMap + 1),
-            (ULONG)(NumberOfPtes + 1));
+            (u32ptr)(BitMap + 1),
+            (u32)(NumberOfPtes + 1));
 
         RtlClearAllBits(BitMap);
 
         InitializeSystemPtesBitMap(
-            PgBlock->BasePte,
+            PgBlock->SystemPtes.BasePte,
             NumberOfPtes,
             BitMap);
 
@@ -1743,25 +1783,35 @@ PgLocateSystemPtesObject(
 
                 RtlClearBits(BitMap, HintIndex, StartingRunIndex - HintIndex);
 
-                if ((ULONG64)Establisher >=
-                    (ULONG64)GetVirtualAddressMappedByPte(
-                        PgBlock->BasePte + HintIndex) &&
-                        (ULONG64)Establisher <
-                    (ULONG64)GetVirtualAddressMappedByPte(
-                        PgBlock->BasePte + StartingRunIndex) - PgBlock->SizeCmpAppendDllSection) {
-                    Object->BaseAddress =
-                        GetVirtualAddressMappedByPte(PgBlock->BasePte + HintIndex);
+                if ((u64)Establisher >=
+                    (u64)GetVaMappedByPte(
+                        PgBlock->SystemPtes.BasePte + HintIndex) &&
+                        (u64)Establisher <
+                    (u64)GetVaMappedByPte(
+                        PgBlock->SystemPtes.BasePte + StartingRunIndex) - PgBlock->SizeCmpAppendDllSection) {
+                    // align clear execute mask region
 
-                    Object->RegionSize =
-                        (SIZE_T)(StartingRunIndex - HintIndex) * PAGE_SIZE;
+                    if (GetGpBlock(PgBlock)->BuildNumber >= 18362) {
+                        Object->BaseAddress =
+                            GetVaMappedByPte(PgBlock->SystemPtes.BasePte + HintIndex - 1);
 
-#ifndef PUBLIC
-                    DbgPrint(
-                        "[Shark] < %p > found region in system ptes < %p - %08x >\n",
+                        Object->RegionSize =
+                            (u)(StartingRunIndex - HintIndex + 1) * PAGE_SIZE;
+                    }
+                    else {
+                        Object->BaseAddress =
+                            GetVaMappedByPte(PgBlock->SystemPtes.BasePte + HintIndex);
+
+                        Object->RegionSize =
+                            (u)(StartingRunIndex - HintIndex) * PAGE_SIZE;
+                    }
+#ifdef DEBUG
+                    vDbgPrint(
+                        "[Shark] [PatchGuard] < %p > found region in system ptes < %p - %08x >\n",
                         Establisher,
                         Object->BaseAddress,
                         Object->RegionSize);
-#endif // !PUBLIC
+#endif // DEBUG
 
                     Object->Type = PgSystemPtes;
 
@@ -1772,15 +1822,15 @@ PgLocateSystemPtesObject(
             }
         } while (HintIndex < NumberOfPtes);
 
-        ExFreePool(BitMap);
+        __free(BitMap);
     }
 }
 
-VOID
+void
 NTAPI
 PgLocateAllObject(
     __inout PPGBLOCK PgBlock,
-    __in PVOID Establisher,
+    __in ptr Establisher,
     __out PPGOBJECT Object
 )
 {
@@ -1797,7 +1847,7 @@ PgLocateAllObject(
     }
 }
 
-VOID
+void
 NTAPI
 PgCheckAllWorkerThread(
     __inout PPGBLOCK PgBlock
@@ -1805,13 +1855,13 @@ PgCheckAllWorkerThread(
 {
     PETHREAD Thread = NULL;
     PEXCEPTION_FRAME ExceptionFrame = NULL;
-    ULONG64 ControlPc = 0;
-    ULONG64 EstablisherFrame = 0;
+    u64 ControlPc = 0;
+    u64 EstablisherFrame = 0;
     PRUNTIME_FUNCTION FunctionEntry = NULL;
-    PVOID HandlerData = NULL;
-    ULONG64 ImageBase = 0;
+    ptr HandlerData = NULL;
+    u64 ImageBase = 0;
     PPGOBJECT Object = NULL;
-    PMMPTE PointerPte = NULL;
+    u32 Index = 0;
 
     struct {
         CONTEXT ContextRecord;
@@ -1819,171 +1869,190 @@ PgCheckAllWorkerThread(
         PGOBJECT Object;
     }*Context;
 
-    Context = ExAllocatePool(
-        NonPagedPool,
-        sizeof(CONTEXT) + sizeof(KNONVOLATILE_CONTEXT_POINTERS) + sizeof(PGOBJECT));
+    if (NULL != PgBlock->INITKDBG) {
+        Context =
+            __malloc(sizeof(CONTEXT)
+                + sizeof(KNONVOLATILE_CONTEXT_POINTERS)
+                + sizeof(PGOBJECT));
 
-    if (NULL != Context) {
-        Thread = GetProcessFirstThread(
-            GetGpBlock(PgBlock),
-            PsGetCurrentThreadProcess());
-
-        while (GetThreadListEntry(
-            GetGpBlock(PgBlock),
-            Thread) != GetProcessThreadListHead(
+        if (NULL != Context) {
+            Thread = GetProcessFirstThread(
                 GetGpBlock(PgBlock),
-                PsGetCurrentThreadProcess())) {
-            if (PsGetCurrentThreadId() != PsGetThreadId(Thread) &&
-                (ULONG64)PgBlock->ExpWorkerThread == UnsafeReadPointer(
-                (PCHAR)Thread +
-                    GetGpBlock(PgBlock)->OffsetKThreadWin32StartAddress)) {
-                // SwapContext
-                ExceptionFrame = (PEXCEPTION_FRAME)UnsafeReadPointer(
-                    (PCHAR)Thread +
-                    GetGpBlock(PgBlock)->DebuggerDataBlock.OffsetKThreadKernelStack);
+                PsGetCurrentThreadProcess());
 
-                PointerPte = GetPteAddress(ExceptionFrame);
+            while (GetThreadListEntry(
+                GetGpBlock(PgBlock),
+                Thread) != GetProcessThreadListHead(
+                    GetGpBlock(PgBlock),
+                    PsGetCurrentThreadProcess())) {
+                if (PsGetCurrentThreadId() != PsGetThreadId(Thread) &&
+                    (u64)PgBlock->ExpWorkerThread == __rdsptr(
+                    (u8ptr)Thread +
+                        GetGpBlock(PgBlock)->OffsetKThreadWin32StartAddress)) {
+                    // SwapContext
+                    ExceptionFrame = (PEXCEPTION_FRAME)__rdsptr(
+                        (u8ptr)Thread +
+                        GetGpBlock(PgBlock)->DebuggerDataBlock.OffsetKThreadKernelStack);
 
-                if (0 != PointerPte->u.Hard.Valid) {
-                    EstablisherFrame =
-                        (ULONG64)(ExceptionFrame + 1) +
-                        KSTART_FRAME_LENGTH + sizeof(PVOID);
+                    if (FALSE != MmIsAddressValid(ExceptionFrame)) {
+                        EstablisherFrame =
+                            (u64)(ExceptionFrame + 1) +
+                            KSTART_FRAME_LENGTH + sizeof(ptr);
 
-                    Context->ContextRecord.Rip = UnsafeReadPointer(EstablisherFrame);
-                    Context->ContextRecord.Rsp = EstablisherFrame + sizeof(PVOID);
+                        Context->ContextRecord.Rip = __rdsptr(EstablisherFrame);
+                        Context->ContextRecord.Rsp = EstablisherFrame + sizeof(ptr);
 
-                    Context->ContextRecord.Rbx = ExceptionFrame->Rbx;
-                    Context->ContextRecord.Rbp = ExceptionFrame->Rbp;
-                    Context->ContextRecord.Rsi = ExceptionFrame->Rsi;
-                    Context->ContextRecord.Rdi = ExceptionFrame->Rdi;
-                    Context->ContextRecord.R12 = ExceptionFrame->R12;
-                    Context->ContextRecord.R13 = ExceptionFrame->R13;
-                    Context->ContextRecord.R14 = ExceptionFrame->R14;
-                    Context->ContextRecord.R15 = ExceptionFrame->R15;
+                        Context->ContextRecord.Rbx = ExceptionFrame->Rbx;
+                        Context->ContextRecord.Rbp = ExceptionFrame->Rbp;
+                        Context->ContextRecord.Rsi = ExceptionFrame->Rsi;
+                        Context->ContextRecord.Rdi = ExceptionFrame->Rdi;
+                        Context->ContextRecord.R12 = ExceptionFrame->R12;
+                        Context->ContextRecord.R13 = ExceptionFrame->R13;
+                        Context->ContextRecord.R14 = ExceptionFrame->R14;
+                        Context->ContextRecord.R15 = ExceptionFrame->R15;
 
-                    Context->ContextRecord.Xmm6 = ExceptionFrame->Xmm6;
-                    Context->ContextRecord.Xmm7 = ExceptionFrame->Xmm7;
-                    Context->ContextRecord.Xmm8 = ExceptionFrame->Xmm8;
-                    Context->ContextRecord.Xmm9 = ExceptionFrame->Xmm9;
-                    Context->ContextRecord.Xmm10 = ExceptionFrame->Xmm10;
-                    Context->ContextRecord.Xmm11 = ExceptionFrame->Xmm11;
-                    Context->ContextRecord.Xmm12 = ExceptionFrame->Xmm12;
-                    Context->ContextRecord.Xmm13 = ExceptionFrame->Xmm13;
-                    Context->ContextRecord.Xmm14 = ExceptionFrame->Xmm14;
-                    Context->ContextRecord.Xmm15 = ExceptionFrame->Xmm15;
+                        Context->ContextRecord.Xmm6 = ExceptionFrame->Xmm6;
+                        Context->ContextRecord.Xmm7 = ExceptionFrame->Xmm7;
+                        Context->ContextRecord.Xmm8 = ExceptionFrame->Xmm8;
+                        Context->ContextRecord.Xmm9 = ExceptionFrame->Xmm9;
+                        Context->ContextRecord.Xmm10 = ExceptionFrame->Xmm10;
+                        Context->ContextRecord.Xmm11 = ExceptionFrame->Xmm11;
+                        Context->ContextRecord.Xmm12 = ExceptionFrame->Xmm12;
+                        Context->ContextRecord.Xmm13 = ExceptionFrame->Xmm13;
+                        Context->ContextRecord.Xmm14 = ExceptionFrame->Xmm14;
+                        Context->ContextRecord.Xmm15 = ExceptionFrame->Xmm15;
 
-                    Context->ContextPointers.Rbx = &Context->ContextRecord.Rbx;
-                    Context->ContextPointers.Rsp = &Context->ContextRecord.Rsp;
-                    Context->ContextPointers.Rbp = &Context->ContextRecord.Rbp;
-                    Context->ContextPointers.Rsi = &Context->ContextRecord.Rsi;
-                    Context->ContextPointers.Rdi = &Context->ContextRecord.Rdi;
-                    Context->ContextPointers.R12 = &Context->ContextRecord.R12;
-                    Context->ContextPointers.R13 = &Context->ContextRecord.R13;
-                    Context->ContextPointers.R14 = &Context->ContextRecord.R14;
-                    Context->ContextPointers.R15 = &Context->ContextRecord.R15;
+                        Context->ContextPointers.Rbx = &Context->ContextRecord.Rbx;
+                        Context->ContextPointers.Rsp = &Context->ContextRecord.Rsp;
+                        Context->ContextPointers.Rbp = &Context->ContextRecord.Rbp;
+                        Context->ContextPointers.Rsi = &Context->ContextRecord.Rsi;
+                        Context->ContextPointers.Rdi = &Context->ContextRecord.Rdi;
+                        Context->ContextPointers.R12 = &Context->ContextRecord.R12;
+                        Context->ContextPointers.R13 = &Context->ContextRecord.R13;
+                        Context->ContextPointers.R14 = &Context->ContextRecord.R14;
+                        Context->ContextPointers.R15 = &Context->ContextRecord.R15;
 
-                    Context->ContextPointers.Xmm6 = &Context->ContextRecord.Xmm6;
-                    Context->ContextPointers.Xmm7 = &Context->ContextRecord.Xmm7;
-                    Context->ContextPointers.Xmm8 = &Context->ContextRecord.Xmm8;
-                    Context->ContextPointers.Xmm9 = &Context->ContextRecord.Xmm9;
-                    Context->ContextPointers.Xmm10 = &Context->ContextRecord.Xmm10;
-                    Context->ContextPointers.Xmm11 = &Context->ContextRecord.Xmm11;
-                    Context->ContextPointers.Xmm12 = &Context->ContextRecord.Xmm12;
-                    Context->ContextPointers.Xmm13 = &Context->ContextRecord.Xmm13;
-                    Context->ContextPointers.Xmm14 = &Context->ContextRecord.Xmm14;
-                    Context->ContextPointers.Xmm15 = &Context->ContextRecord.Xmm15;
+                        Context->ContextPointers.Xmm6 = &Context->ContextRecord.Xmm6;
+                        Context->ContextPointers.Xmm7 = &Context->ContextRecord.Xmm7;
+                        Context->ContextPointers.Xmm8 = &Context->ContextRecord.Xmm8;
+                        Context->ContextPointers.Xmm9 = &Context->ContextRecord.Xmm9;
+                        Context->ContextPointers.Xmm10 = &Context->ContextRecord.Xmm10;
+                        Context->ContextPointers.Xmm11 = &Context->ContextRecord.Xmm11;
+                        Context->ContextPointers.Xmm12 = &Context->ContextRecord.Xmm12;
+                        Context->ContextPointers.Xmm13 = &Context->ContextRecord.Xmm13;
+                        Context->ContextPointers.Xmm14 = &Context->ContextRecord.Xmm14;
+                        Context->ContextPointers.Xmm15 = &Context->ContextRecord.Xmm15;
 
-                    while (EstablisherFrame >= UnsafeReadPointer(
-                        (PCHAR)Thread +
-                        GetGpBlock(PgBlock)->DebuggerDataBlock.OffsetKThreadKernelStack) &&
-                        EstablisherFrame < UnsafeReadPointer(
-                        (PCHAR)Thread +
-                            GetGpBlock(PgBlock)->DebuggerDataBlock.OffsetKThreadInitialStack)) {
-                        FunctionEntry = RtlLookupFunctionEntry(
-                            Context->ContextRecord.Rip,
-                            &ImageBase,
-                            NULL);
+                        while (EstablisherFrame >= __rdu64(
+                            (u8ptr)Thread +
+                            GetGpBlock(PgBlock)->DebuggerDataBlock.OffsetKThreadKernelStack) &&
+                            EstablisherFrame < __rdu64(
+                            (u8ptr)Thread +
+                                GetGpBlock(PgBlock)->DebuggerDataBlock.OffsetKThreadInitialStack)) {
+                            if (FALSE !=
+                                MmIsAddressValid((ptr)Context->ContextRecord.Rip)) {
+                                FunctionEntry = RtlLookupFunctionEntry(
+                                    Context->ContextRecord.Rip,
+                                    &ImageBase,
+                                    NULL);
 
-                        if (NULL != FunctionEntry) {
-                            RtlVirtualUnwind(
-                                UNW_FLAG_NHANDLER,
-                                ImageBase,
-                                Context->ContextRecord.Rip,
-                                FunctionEntry,
-                                &Context->ContextRecord,
-                                &HandlerData,
-                                &EstablisherFrame,
-                                &Context->ContextPointers);
+                                if (NULL != FunctionEntry) {
+                                    RtlVirtualUnwind(
+                                        UNW_FLAG_NHANDLER,
+                                        ImageBase,
+                                        Context->ContextRecord.Rip,
+                                        FunctionEntry,
+                                        &Context->ContextRecord,
+                                        &HandlerData,
+                                        &EstablisherFrame,
+                                        &Context->ContextPointers);
+                                }
+                                else {
+                                    break;
+                                }
+                            }
+                            else {
+                                break;
+                            }
                         }
-                        else {
+
+                        if (FALSE !=
+                            MmIsAddressValid((ptr)Context->ContextRecord.Rip)) {
                             if (0 != Context->ContextRecord.Rip) {
-#ifndef PUBLIC
-                                DbgPrint(
-                                    "[Shark] < %p > found noimage return address in worker thread stack\n",
+#ifdef DEBUG
+                                vDbgPrint(
+                                    "[Shark] [PatchGuard] < %p > found noimage return address in worker thread stack\n",
                                     Context->ContextRecord.Rip);
-#endif // !PUBLIC
+#endif // DEBUG
 
-                                Context->Object.Type = -1;
+                                for (Index = 0;
+                                    Index < PgBlock->SizeINITKDBG - PG_COMPARE_BYTE_COUNT;
+                                    Index++) {
+                                    if (PG_COMPARE_BYTE_COUNT == RtlCompareMemory(
+                                        (u8ptr)PgBlock->INITKDBG + Index,
+                                        (ptr)Context->ContextRecord.Rip,
+                                        PG_COMPARE_BYTE_COUNT)) {
+                                        Context->Object.Type = -1;
 
-                                PgLocateAllObject(
-                                    PgBlock,
-                                    (PVOID)Context->ContextRecord.Rip,
-                                    &Context->Object);
+                                        PgLocateAllObject(
+                                            PgBlock,
+                                            (ptr)Context->ContextRecord.Rip,
+                                            &Context->Object);
 
-                                if (-1 != Context->Object.Type) {
-                                    Object = PgCreateObject(
-                                        PgDeclassified,
-                                        Context->Object.Type,
-                                        Context->Object.BaseAddress,
-                                        Context->Object.RegionSize,
-                                        PgBlock,
-                                        NULL,
-                                        PgBlock->ClearCallback,
-                                        NULL,
-                                        GetGpBlock(PgBlock)->CaptureContext);
+                                        if (-1 != Context->Object.Type) {
+                                            Object = PgCreateObject(
+                                                PgDeclassified,
+                                                Context->Object.Type,
+                                                Context->Object.BaseAddress,
+                                                Context->Object.RegionSize,
+                                                PgBlock,
+                                                NULL,
+                                                PgBlock->ClearCallback,
+                                                NULL,
+                                                PgBlock->CaptureContext);
 
-                                    if (NULL != Object) {
-                                        // align stack must start at Body.Parameter
-                                        UnsafeWritePointer(
-                                            Context->ContextRecord.Rsp - 8,
-                                            &Object->Body.Parameter);
+                                            if (NULL != Object) {
+                                                PgBlock->Count++;
 
-#ifndef PUBLIC
-                                        DbgPrint(
-                                            "[Shark] < %p > insert worker thread check code\n",
-                                            Object);
-#endif // !PUBLIC
+                                                // align stack must start at Body.Parameter
+                                                __wruptr(
+                                                    Context->ContextRecord.Rsp - 8,
+                                                    &Object->Body.Parameter);
+
+#ifdef DEBUG
+                                                vDbgPrint(
+                                                    "[Shark] [PatchGuard] < %p > insert worker thread check code\n",
+                                                    Object);
+#endif // DEBUG
+                                            }
+                                        }
+
+                                        break;
                                     }
                                 }
                             }
-
-                            break;
                         }
                     }
                 }
+
+                Thread = GetNexThread(GetGpBlock(PgBlock), Thread);
             }
 
-            Thread = GetNexThread(GetGpBlock(PgBlock), Thread);
+            __free(Context);
         }
 
-        ExFreePool(Context);
+        __free(PgBlock->INITKDBG);
+
+        PgBlock->INITKDBG = NULL;
     }
 }
 
-VOID
+void
 NTAPI
 PgClearAll(
     __inout PPGBLOCK PgBlock
 )
 {
-    if (GetGpBlock(PgBlock)->BuildNumber >= 18362) {
-        GetGpBlock(PgBlock)->BugCheckHandle = DetourGuardAttach(
-            (PVOID *)&GetGpBlock(PgBlock)->KeBugCheckEx,
-            PgBlock->ClearCallback,
-            NULL,
-            PgBlock);
-    }
-
     PgClearPoolEncryptedContext(PgBlock);
 
     if (GetGpBlock(PgBlock)->BuildNumber >= 9200) {
@@ -1993,18 +2062,18 @@ PgClearAll(
     PgCheckAllWorkerThread(PgBlock);
 }
 
-VOID
+void
 NTAPI
 PgClearWorker(
-    __inout PVOID Argument
+    __inout ptr Argument
 )
 {
-    ULONG Index = 0;
-    PULONG64 InitialStack = 0;
+    u32 Index = 0;
+    u64ptr InitialStack = 0;
     DISPATCHER_HEADER * Header = NULL;
-    ULONG ReturnLength = 0;
-    PCHAR TargetPc = NULL;
-    ULONG Length = 0;
+    u32 ReturnLength = 0;
+    u8ptr TargetPc = NULL;
+    u32 Length = 0;
 
     struct {
         PPGBLOCK PgBlock;
@@ -2016,102 +2085,105 @@ PgClearWorker(
 
     /*
     if (os build >= 9600){
-        PgBlock->WorkerContext = struct _DISPATCHER_HEADER
+    PgBlock->WorkerContext = struct _DISPATCHER_HEADER
 
-        // Header->Type = 0x15
-        // Header->Hand = 0xac
+    // Header->Type = 0x15
+    // Header->Hand = 0xac
     }
     else {
-        PgBlock->WorkerContext = enum _WORK_QUEUE_TYPE
+    PgBlock->WorkerContext = enum _WORK_QUEUE_TYPE
 
-        // CriticalWorkQueue = 0
-        // DelayedWorkQueue = 1
+    // CriticalWorkQueue = 0
+    // DelayedWorkQueue = 1
     }
     */
 
-    InitialStack = IoGetInitialStack();
+    if (0 == Context->PgBlock->Repeat) {
+        InitialStack = IoGetInitialStack();
 
-    if (GetGpBlock(Context->PgBlock)->BuildNumber >= 9600) {
-        while ((ULONG64)InitialStack != (ULONG64)&Argument) {
-            Header = *(PVOID *)InitialStack;
+        if (GetGpBlock(Context->PgBlock)->BuildNumber >= 9600) {
+            while ((u64)InitialStack != (u64)&Argument) {
+                Header = *(ptr *)InitialStack;
 
-            if (FALSE != MmIsAddressValid(Header)) {
-                if (FALSE != MmIsAddressValid((PCHAR)(Header + 1) - 1)) {
-                    if (0x15 == Header->Type &&
-                        0xac == Header->Hand) {
-                        Context->PgBlock->WorkerContext = Header;
+                if (FALSE != MmIsAddressValid(Header)) {
+                    if (FALSE != MmIsAddressValid((u8ptr)(Header + 1) - 1)) {
+                        if (0x15 == Header->Type &&
+                            0xac == Header->Hand) {
+                            Context->PgBlock->WorkerContext = Header;
 
-                        break;
-                    }
-                }
-            }
-
-            InitialStack--;
-        }
-    }
-    else {
-        Context->PgBlock->WorkerContext = UlongToPtr(CriticalWorkQueue);
-    }
-
-    if (NT_SUCCESS(ZwQueryInformationThread(
-        ZwCurrentThread(),
-        ThreadQuerySetWin32StartAddress,
-        &Context->PgBlock->ExpWorkerThread,
-        sizeof(PVOID),
-        &ReturnLength))) {
-        for (Index = 0;
-            Index < GetGpBlock(Context->PgBlock)->DebuggerDataBlock.SizeEThread;
-            Index += 8) {
-            if ((ULONG_PTR)Context->PgBlock->ExpWorkerThread ==
-                UnsafeReadPointer((PCHAR)KeGetCurrentThread() + Index)) {
-                GetGpBlock(Context->PgBlock)->OffsetKThreadWin32StartAddress = Index;
-
-                break;
-            }
-        }
-
-        if (GetGpBlock(Context->PgBlock)->BuildNumber >= 18362) {
-            TargetPc = (PCHAR)Context->PgBlock->ExpWorkerThread;
-
-            while (TRUE) {
-                Length = DetourGetInstructionLength(TargetPc);
-
-                if (6 == Length) {
-                    if (0 == _CmpByte(TargetPc[0], 0x8b) &&
-                        0 == _CmpByte(TargetPc[1], 0x83)) {
-                        Context->PgBlock->OffsetSameThreadPassive = *(PULONG)(TargetPc + 2);
-
-#ifndef PUBLIC
-                        DbgPrint(
-                            "[Shark] < %p > OffsetSameThreadPassive\n",
-                            Context->PgBlock->OffsetSameThreadPassive);
-#endif // !PUBLIC
-
-                        break;
+                            break;
+                        }
                     }
                 }
 
-                TargetPc += Length;
+                InitialStack--;
             }
         }
+        else {
+            Context->PgBlock->WorkerContext = UlongToPtr(CriticalWorkQueue);
+        }
 
-        IpiSingleCall(
-            (PPS_APC_ROUTINE)NULL,
-            (PKSYSTEM_ROUTINE)NULL,
-            (PUSER_THREAD_START_ROUTINE)PgClearAll,
-            (PVOID)Context->PgBlock);
+        if (NT_SUCCESS(ZwQueryInformationThread(
+            ZwCurrentThread(),
+            ThreadQuerySetWin32StartAddress,
+            &Context->PgBlock->ExpWorkerThread,
+            sizeof(ptr),
+            &ReturnLength))) {
+            for (Index = 0;
+                Index < GetGpBlock(Context->PgBlock)->DebuggerDataBlock.SizeEThread;
+                Index += 8) {
+                if ((u)Context->PgBlock->ExpWorkerThread ==
+                    __rdsptr((u8ptr)KeGetCurrentThread() + Index)) {
+                    GetGpBlock(Context->PgBlock)->OffsetKThreadWin32StartAddress = Index;
+
+                    break;
+                }
+            }
+
+            if (GetGpBlock(Context->PgBlock)->BuildNumber >= 18362) {
+                TargetPc = (u8ptr)Context->PgBlock->ExpWorkerThread;
+
+                while (TRUE) {
+                    Length = DetourGetInstructionLength(TargetPc);
+
+                    if (6 == Length) {
+                        if (0 == _cmpbyte(TargetPc[0], 0x8b) &&
+                            0 == _cmpbyte(TargetPc[1], 0x83)) {
+                            Context->PgBlock->OffsetSameThreadPassive = *(u32ptr)(TargetPc + 2);
+
+#ifdef DEBUG
+                            vDbgPrint(
+                                "[Shark] [PatchGuard] < %p > OffsetSameThreadPassive\n",
+                                Context->PgBlock->OffsetSameThreadPassive);
+#endif // DEBUG
+
+                            break;
+                        }
+                    }
+
+                    TargetPc += Length;
+                }
+            }
+
+        }
     }
+
+    IpiSingleCall(
+        (PGKERNEL_ROUTINE)NULL,
+        (PGSYSTEM_ROUTINE)NULL,
+        (PGRUNDOWN_ROUTINE)PgClearAll,
+        (PGNORMAL_ROUTINE)Context->PgBlock);
 
     KeSetEvent(&Context->Notify, LOW_PRIORITY, FALSE);
 }
 
-VOID
+void
 NTAPI
 PgClear(
     __inout PPGBLOCK PgBlock
 )
 {
-    BOOLEAN Chance = TRUE;
+    b Chance = TRUE;
 
     struct {
         PPGBLOCK PgBlock;
@@ -2121,32 +2193,36 @@ PgClear(
 
     Context.PgBlock = PgBlock;
 
-    InitializePgBlock(Context.PgBlock);
+    if (PgBlock->Cleared < PG_MAXIMUM_CONTEXT_COUNT) {
+        if (0 == PgBlock->Repeat) {
+            InitializePgBlock(Context.PgBlock);
+        }
 
-    if (0 != PgBlock->OffsetEntryPoint ||
-        0 != PgBlock->SizeCmpAppendDllSection ||
-        0 != PgBlock->SizeINITKDBG ||
-        NULL != PgBlock->PoolBigPageTable ||
-        0 != PgBlock->PoolBigPageTableSize ||
-        NULL != PgBlock->ExpLargePoolTableLock ||
-        NULL != PgBlock->MmDeterminePoolType) {
-        if (GetGpBlock(PgBlock)->BuildNumber >= 9200) {
-            if (0 == PgBlock->NumberOfPtes || NULL == PgBlock->BasePte) {
-                Chance = FALSE;
+        if (0 != PgBlock->OffsetEntryPoint ||
+            0 != PgBlock->SizeCmpAppendDllSection ||
+            0 != PgBlock->SizeINITKDBG ||
+            NULL != PgBlock->Pool.PoolBigPageTable ||
+            NULL != PgBlock->Pool.PoolBigPageTableSize) {
+            if (GetGpBlock(PgBlock)->BuildNumber >= 9200) {
+                if (0 == PgBlock->SystemPtes.NumberOfPtes || NULL == PgBlock->SystemPtes.BasePte) {
+                    Chance = FALSE;
+                }
+            }
+
+            if (FALSE != Chance) {
+                KeInitializeEvent(&Context.Notify, SynchronizationEvent, FALSE);
+                ExInitializeWorkItem(&Context.Worker, PgClearWorker, &Context);
+                ExQueueWorkItem(&Context.Worker, CriticalWorkQueue);
+
+                KeWaitForSingleObject(
+                    &Context.Notify,
+                    Executive,
+                    KernelMode,
+                    FALSE,
+                    NULL);
             }
         }
 
-        if (FALSE != Chance) {
-            KeInitializeEvent(&Context.Notify, SynchronizationEvent, FALSE);
-            ExInitializeWorkItem(&Context.Worker, PgClearWorker, &Context);
-            ExQueueWorkItem(&Context.Worker, CriticalWorkQueue);
-
-            KeWaitForSingleObject(
-                &Context.Notify,
-                Executive,
-                KernelMode,
-                FALSE,
-                NULL);
-        }
+        PgBlock->Repeat++;
     }
 }

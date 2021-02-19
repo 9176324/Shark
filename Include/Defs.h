@@ -1,8 +1,8 @@
 /*
 *
-* Copyright (c) 2015-2015 - 2019 by blindtiger ( blindtiger@foxmail.com )
+* Copyright (c) 2015 - 2021 by blindtiger. All rights reserved.
 *
-* The contents of this file are subject to the Mozilla Public License Version
+* The contents of this file are subject to the Mozilla Disk License Version
 * 2.0 (the "License"); you may not use this file except in compliance with
 * the License. You may obtain a copy of the License at
 * http://www.mozilla.org/MPL/
@@ -19,16 +19,23 @@
 #ifndef _DEFS_H_
 #define _DEFS_H_
 
+#ifndef PUBLIC
+// #define PUBLIC
+#endif // !PUBLIC
+
+#define _WIN32_WINNT 0x0500
+
+#include <statusdefs.h>
+#include <typesdefs.h>
+
 #ifdef __cplusplus
 /* Assume byte packing throughout */
 extern "C" {
 #endif	/* __cplusplus */
 
-#define SERIAL "9ARX-3J9H-HCQK"
-
-#ifndef PUBLIC
-// #define PUBLIC
-#endif // !PUBLIC
+#ifndef DEBUG
+#define DEBUG
+#endif // !DEBUG
 
 #ifndef NTOS_KERNEL_RUNTIME
 #include <nt.h>
@@ -36,16 +43,51 @@ extern "C" {
 #include <nturtl.h>
 
 #include <windows.h>
-#include <windowsx.h>
 
 #define PAGE_SIZE 0x1000
+
+    void
+        CDECL
+        vDbgPrint(
+            __in tcptr Format,
+            ...
+        );
+
+#ifndef _DebugBreak
+#define _DebugBreak \
+    if (FALSE != NtCurrentPeb()->BeingDebugged) __debugbreak
+#endif // !_DebugBreak
+
+#ifndef __malloc
+#define __malloc(size) RtlAllocateHeap(RtlProcessHeap(), 0, size);
+#endif // !__malloc
+
+#ifndef __free
+#define __free(pointer) RtlFreeHeap(RtlProcessHeap(), 0, pointer)
+#endif // !__free
 #else
 #include <ntos.h>
 #include <zwapi.h>
+
+#define vDbgPrint DbgPrint
+
+#ifndef _DebugBreak
+#define _DebugBreak \
+    if (FALSE == KdDebuggerNotPresent) __debugbreak
+#endif // !_DebugBreak
+
+#ifndef __malloc
+#define __malloc(size) ExAllocatePool(NonPagedPool, size);
+#endif // !__malloc
+
+#ifndef __free
+#define __free(pointer) ExFreePool(pointer);
+#endif // !__free
 #endif // !NTOS_KERNEL_RUNTIME
 
 #ifdef _WIN64
 #include <wow64t.h>
+#include <wow64.h>
 #endif // _WIN64
 
 #include <stdio.h>
@@ -55,6 +97,48 @@ extern "C" {
 #include <arccodes.h>
 #include <ntddkbd.h>
 #include <ntddmou.h>
+
+    char *
+        __cdecl
+        strcpy_s(
+            char * strDestination,
+            size_t numberOfElements,
+            const char * strSource
+        );
+
+    wchar_t *
+        __cdecl
+        wcscpy_s(
+            wchar_t * strDestination,
+            size_t numberOfElements,
+            const wchar_t * strSource
+        );
+
+#ifndef DEBUG
+#define TRACE(exp) (((status)exp) >= 0)
+#else
+#ifndef NTOS_KERNEL_RUNTIME
+#define TRACE(exp) \
+            (((status)exp) >= 0) ? \
+                TRUE : \
+                (vDbgPrint( \
+                    _T("[Shark] %hs[%d] %hs failed < %08x >\n"), \
+                    __FILE__, \
+                    __LINE__, \
+                    __FUNCDNAME__, \
+                    exp),/* _DebugBreak(),*/ FALSE)
+#else
+#define TRACE(exp) \
+            (((status)exp) >= 0) ? \
+                TRUE : \
+                (vDbgPrint( \
+                    "[Shark] %hs[%d] %hs failed < %08x >\n", \
+                    __FILE__, \
+                    __LINE__, \
+                    __FUNCDNAME__, \
+                    exp),/* _DebugBreak(),*/ FALSE)
+#endif // !NTOS_KERNEL_RUNTIME
+#endif // !DEBUG
 
 #define SystemRootDirectory L"\\SystemRoot\\System32\\"
 #define Wow64SystemRootDirectory L"\\SystemRoot\\SysWOW64\\"

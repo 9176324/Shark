@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2015 - 2019 by blindtiger. All rights reserved.
+* Copyright (c) 2015 - 2021 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License"); you may not use this file except in compliance with
@@ -21,7 +21,7 @@
 
 #include "..\..\WRK\base\ntos\mm\mi.h"
 
-#include "Detours.h"
+#include "Guard.h"
 #include "Reload.h"
 
 #ifdef __cplusplus
@@ -32,10 +32,10 @@ extern "C" {
 #define POOL_BIG_TABLE_ENTRY_FREE 0x1
 
     typedef struct _POOL_BIG_PAGES {
-        PVOID Va;
-        ULONG Key;
-        ULONG PoolType;
-        SIZE_T NumberOfPages;
+        ptr Va;
+        u32 Key;
+        u32 PoolType;
+        u NumberOfPages;
     } POOL_BIG_PAGES, *PPOOL_BIG_PAGES;
 
     enum {
@@ -52,163 +52,217 @@ extern "C" {
     typedef struct _PGOBJECT {
         LIST_ENTRY Entry;
         WORK_QUEUE_ITEM Worker;
-        BOOLEAN Encrypted;
-        ULONG64 XorKey;
-        CCHAR Type;
-        PVOID BaseAddress;
-        SIZE_T RegionSize;
-        GUARD_BODY Body;
+        b Encrypted;
+        u64 XorKey;
+        u8 Type;
+        ptr BaseAddress;
+        u RegionSize;
+        SAFEGUARD_BODY Body;
     }PGOBJECT, *PPGOBJECT;
 
-    typedef struct _PGBLOCK {
-        // struct _GPBLOCK Block;
+    typedef enum _MI_SYSTEM_VA_TYPE {
+        MiVaUnused,
+        MiVaSessionSpace,
+        MiVaProcessSpace,
+        MiVaBootLoaded,
+        MiVaPfnDatabase,
+        MiVaNonPagedPool,
+        MiVaPagedPool,
+        MiVaSpecialPoolPaged,
+        MiVaSystemCache,
+        MiVaSystemPtes,
+        MiVaHal,
+        MiVaSessionGlobalSpace,
+        MiVaDriverImages,
+        MiVaSystemPtesLarge,
+        MiVaKernelStacks,
+        MiVaSecureNonPagedPool,
+        MiVaMaximumType
+    }MI_SYSTEM_VA_TYPE, *PMI_SYSTEM_VA_TYPE;
 
-#define PG_MAXIMUM_CONTEXT_COUNT 0x00000002UI32 // Worker 中可能存在的 Context 最大数量
+    typedef struct _PGBLOCK {
+        struct _GPBLOCK * GpBlock;
+
+#define GetGpBlock(pgb) ((PGPBLOCK)((PCHAR)pgb - sizeof(GPBLOCK)))
+
+#define PG_MAXIMUM_CONTEXT_COUNT 0x00000003UI32 // 可能存在的 Context 最大数量
 #define PG_FIRST_FIELD_OFFSET 0x00000100UI32 // 搜索使用的第一个 Context 成员偏移
 #define PG_CMP_APPEND_DLL_SECTION_END 0x000000c0UI32 // CmpAppendDllSection 长度
 #define PG_COMPARE_FIELDS_COUNT 0x00000004UI32 // 搜索时比较的 Context 成员数量
+#define PG_COMPARE_BYTE_COUNT 0x00000010UI32 // 搜索 Worker 时比较的字节数量
 
-        // EntryPoint 缓存大小 用来搜索头部的代码片段 ( 最小长度 =  max(2 * 8 + 7, sizeof(DETOUR_BODY)) )
-#define PG_MAXIMUM_EP_BUFFER_COUNT ((max(2 * 8 + 7, sizeof(DETOUR_BODY)) + 7) & ~7)
+        // EntryPoint 缓存大小 用来搜索头部的代码片段 ( 最小长度 =  max(2 * 8 + 7, sizeof(GUARD_BODY)) )
+#define PG_MAXIMUM_EP_BUFFER_COUNT ((max(2 * 8 + 7, sizeof(GUARD_BODY)) + 7) & ~7)
 
 #define PG_FIELD_BITS \
-            ((ULONG)((((PG_FIRST_FIELD_OFFSET + PG_COMPARE_FIELDS_COUNT * sizeof(PVOID)) \
-                - PG_CMP_APPEND_DLL_SECTION_END) / sizeof(PVOID)) - 1))
+            ((u32)((((PG_FIRST_FIELD_OFFSET + PG_COMPARE_FIELDS_COUNT * sizeof(ptr)) \
+                - PG_CMP_APPEND_DLL_SECTION_END) / sizeof(ptr)) - 1))
 
-        BOOLEAN BtcEnable;
-        ULONG OffsetEntryPoint;
-        ULONG SizeCmpAppendDllSection;
-        ULONG SizeINITKDBG;
-        SIZE_T SizeSdbpCheckDll;
-        ULONG_PTR Fields[PG_COMPARE_FIELDS_COUNT];
-        CHAR Header[PG_MAXIMUM_EP_BUFFER_COUNT];
+        u8 Count;
+        u8 Cleared;
+        b Repeat;
+        b BtcEnable;
+        u32 OffsetEntryPoint;
+        u32 SizeCmpAppendDllSection;
+        u32 SizeINITKDBG;
+        ptr INITKDBG;
 
         struct {
-            PPOOL_BIG_PAGES PoolBigPageTable;
-            SIZE_T PoolBigPageTableSize;
-            PEX_SPIN_LOCK ExpLargePoolTableLock;
+            PPOOL_BIG_PAGES * PoolBigPageTable;
+            uptr PoolBigPageTableSize;
 
-            POOL_TYPE
-            (NTAPI * MmDeterminePoolType)(
-                __in PVOID VirtualAddress
+#define POOL_TABLE (*PgBlock->Pool.PoolBigPageTable)
+#define POOL_TABLE_SIZE (*PgBlock->Pool.PoolBigPageTableSize)
+
+            b
+            (NTAPI * MmIsNonPagedSystemAddressValid)(
+                __in ptr VirtualAddress
                 );
-        }; // pool big page
+        }Pool; // pool big page
 
         struct {
-            ULONG_PTR NumberOfPtes;
+            u NumberOfPtes;
             PMMPTE BasePte;
-        }; // system ptes
+        }SystemPtes; // system ptes
 
         struct {
-            PVOID WorkerContext;
+            ptr WorkerContext;
 
-            VOID
-            (NTAPI * ExpWorkerThread)(
-                __in PVOID StartContext
+            MI_SYSTEM_VA_TYPE
+            (NTAPI * MiGetSystemRegionType)(
+                __in ptr VirtualAddress
                 );
 
-            VOID
+            void
+            (NTAPI * ExpWorkerThread)(
+                __in ptr StartContext
+                );
+
+            void
             (NTAPI * PspSystemThreadStartup)(
                 __in PKSTART_ROUTINE StartRoutine,
-                __in PVOID StartContext
+                __in ptr StartContext
                 );
 
-            VOID
+            void
             (NTAPI * KiStartSystemThread)(
-                VOID
+                void
                 );
 
-            ULONG OffsetSameThreadPassive;
+            u32 OffsetSameThreadPassive;
         }; // restart ExpWorkerThread
 
-        VOID
+        ptr
+        (NTAPI * MmAllocateIndependentPages)(
+            __in u NumberOfBytes,
+            __in u32 Node
+            );
+
+        void
         (NTAPI * MmFreeIndependentPages)(
-            __in PVOID VirtualAddress,
-            __in SIZE_T NumberOfBytes
+            __in ptr VirtualAddress,
+            __in u NumberOfBytes
             );
 
-        BOOLEAN
+        b
         (NTAPI * MmSetPageProtection)(
-            __in_bcount(NumberOfBytes) PVOID VirtualAddress,
-            __in SIZE_T NumberOfBytes,
-            __in ULONG NewProtect
+            __in_bcount(NumberOfBytes) ptr VirtualAddress,
+            __in u NumberOfBytes,
+            __in u32 NewProtect
             );
 
-        VOID
-        (NTAPI * SdbpCheckDll)(
-            __in ULONG BugCheckCode,
-            __in ULONG_PTR P1,
-            __in ULONG_PTR P2,
-            __in ULONG_PTR P3,
-            __in ULONG_PTR P4,
-            __in VOID
-            (NTAPI * KeBugCheckEx)(
-                __in ULONG BugCheckCode,
-                __in ULONG_PTR P1,
-                __in ULONG_PTR P2,
-                __in ULONG_PTR P3,
-                __in ULONG_PTR P4
-                ),
-            __in ULONG64 InitialStack
-            );
-
-        PVOID
+        ptr
         (NTAPI * RtlLookupFunctionEntry)(
-            __in ULONG64 ControlPc,
-            __out PULONG64 ImageBase,
-            __inout_opt PVOID HistoryTable
+            __in u64 ControlPc,
+            __out u64ptr ImageBase,
+            __inout_opt ptr HistoryTable
             );
 
         PEXCEPTION_ROUTINE
         (NTAPI * RtlVirtualUnwind)(
-            __in ULONG HandlerType,
-            __in ULONG64 ImageBase,
-            __in ULONG64 ControlPc,
-            __in PVOID FunctionEntry,
+            __in u32 HandlerType,
+            __in u64 ImageBase,
+            __in u64 ControlPc,
+            __in ptr FunctionEntry,
             __inout PCONTEXT ContextRecord,
-            __out PVOID * HandlerData,
-            __out PULONG64 EstablisherFrame,
-            __inout_opt PVOID ContextPointers
+            __out ptr * HandlerData,
+            __out u64ptr EstablisherFrame,
+            __inout_opt ptr ContextPointers
             );
 
-        VOID
+        void
         (NTAPI * ExQueueWorkItem)(
             __inout PWORK_QUEUE_ITEM WorkItem,
             __in WORK_QUEUE_TYPE QueueType
             );
 
-        ULONG64
-        (NTAPI *  Btc64)(
-            __in ULONG64 a,
-            __in ULONG64 b
+        void
+        (NTAPI * FreeWorker)(
+            __in struct _PGOBJECT * Object
             );
 
-        VOID
+        void
         (NTAPI * ClearCallback)(
             __in PCONTEXT Context,
-            __in PPGOBJECT Object,
-            __in_opt struct _PGBLOCK * PgBlock,
-            __in_opt PVOID Reserved
+            __in_opt ptr ProgramCounter,
+            __in_opt ptr Parameter,
+            __in_opt ptr Reserved
             );
 
-        VOID
-        (NTAPI * FreeWorker)(
-            __in PPGOBJECT Object
+        u64
+        (NTAPI *  Btc64)(
+            __in u64 a,
+            __in u64 b
             );
 
-        LIST_ENTRY List;
-        KSPIN_LOCK Lock;
+        u
+        (NTAPI * Ror64)(
+            __in u Value,
+            __in u8 Count
+            );
 
-        PSTR Message[2];
+#define ROR64(p, x, n) (p)->Ror64((x), (n))
 
-        CHAR _SdbpCheckDll[0x40];
-        CHAR _Btc64[8];
-        CHAR _Message[0x80];
-        CHAR _FreeWorker[0x100];
-        CHAR _ClearCallback[PAGE_SIZE];
+        u
+        (NTAPI * Rol64)(
+            __in u Value,
+            __in u8 Count
+            );
+
+#define ROL64(p, x, n) (p)->Rol64((x), (n))
+
+        void
+        (NTAPI * CaptureContext)(
+            __in u32 ProgramCounter,
+            __in ptr Guard,
+            __in ptr Stack,
+            __in_opt ptr Parameter,
+            __in_opt ptr Reserved
+            );
+
+        cptr ClearMessage[2];
+
+        LIST_ENTRY ObjectList;
+        KSPIN_LOCK ObjectLock;
+
+        u64 Fields[PG_COMPARE_FIELDS_COUNT];
+        u8 Header[PG_MAXIMUM_EP_BUFFER_COUNT];
+        u8 _Btc64[8];
+        u8 _Ror64[8];
+        u8 _Rol64[8];
+
+#ifndef _WIN64
+        u8 _CaptureContext[0x100];
+#else
+        u8 _CaptureContext[0x200];
+#endif // !_WIN64
+
+        u8 _ClearMessage[0x80];
+        u8 _FreeWorker[0xB0];
+        u8 _ClearCallback[0xC00];
     }PGBLOCK, *PPGBLOCK;
 
-    VOID
+    void
         NTAPI
         PgClear(
             __inout PPGBLOCK PgBlock

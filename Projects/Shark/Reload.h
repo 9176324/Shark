@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2015 - 2019 by blindtiger. All rights reserved.
+* Copyright (c) 2015 - 2021 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License"); you may not use this file except in compliance with
@@ -19,7 +19,7 @@
 #ifndef _RELOAD_H_
 #define _RELOAD_H_
 
-#include <detoursdefs.h>
+#include <guarddefs.h>
 #include <devicedefs.h>
 #include <dump.h>
 
@@ -46,48 +46,26 @@ extern "C" {
 
         PKLDR_DATA_TABLE_ENTRY KernelDataTableEntry; // ntoskrnl.exe
         PKLDR_DATA_TABLE_ENTRY CoreDataTableEntry; // self
-        PVOID CpuControlBlock; // hypervisor
-        struct _PRIVATE_HEADER * PrivateHeader; // private data
+        ptr CpuControlBlock; // hypervisor
 
-        PVOID NativeObject;
+        ptr NativeObject;
 
 #ifdef _WIN64
-        PVOID Wx86NativeObject;
+        ptr Wx86NativeObject;
 #endif // _WIN64
-
         LIST_ENTRY LoadedPrivateImageList;
         LIST_ENTRY ObjectList;
         KSPIN_LOCK ObjectLock;
 
-        CHAR NumberProcessors;
-        CHAR Linkage[3];// { 0x33, 0xc0, 0xc3 };
+        s8 NumberProcessors;
+        s8 Linkage[3];// { 0x33, 0xc0, 0xc3 };
 
-        LONG BuildNumber;
-
-        PBOOLEAN KdDebuggerEnabled;
-        PBOOLEAN KdDebuggerNotPresent;
-        PBOOLEAN KdEnteredDebugger;
-
-        PBOOLEAN ShadowKdDebuggerEnabled;
-        PBOOLEAN ShadowKdDebuggerNotPresent;
-        PBOOLEAN ShadowKdEnteredDebugger;
-
-        NTSTATUS
-        (NTAPI * NtQuerySystemInformation)(
-            __in SYSTEM_INFORMATION_CLASS SystemInformationClass,
-            __out_bcount_opt(SystemInformationLength) PVOID SystemInformation,
-            __in ULONG SystemInformationLength,
-            __out_opt PULONG ReturnLength
-            );
-
-        VOID
-        (NTAPI * KiDispatchException)(
-            __in PEXCEPTION_RECORD ExceptionRecord,
-            __in PKEXCEPTION_FRAME ExceptionFrame,
-            __in PKTRAP_FRAME TrapFrame,
-            __in KPROCESSOR_MODE PreviousMode,
-            __in BOOLEAN FirstChance
-            );
+        s32 BuildNumber;
+        u32 Flags;
+        u64 * PerfGlobalGroupMask;
+        s8 KiSystemServiceCopyEnd[6];
+        cptr PerfInfoLogSysCallEntry;
+        ptr KeUserExceptionDispatcher;
 
 #ifdef _WIN64
         PMMPTE PxeBase;
@@ -103,51 +81,139 @@ extern "C" {
         PMMPTE PteBase;
         PMMPTE PteTop;
 
-        VOID
-        (NTAPI * CaptureContext)(
-            __in ULONG ProgramCounter,
-            __in PVOID Detour,
-            __in struct _GUARD * Guard
+        void
+        (NTAPI * KiDispatchException)(
+            __in PEXCEPTION_RECORD ExceptionRecord,
+            __in PKEXCEPTION_FRAME ExceptionFrame,
+            __in PKTRAP_FRAME TrapFrame,
+            __in KPROCESSOR_MODE PreviousMode,
+            __in b FirstChance
             );
 
-        VOID
+        void
+        (NTAPI * KeContextFromKframes)(
+            __in PKTRAP_FRAME TrapFrame,
+#if defined(_X86_)
+            __in_opt PKEXCEPTION_FRAME ExceptionFrame,
+#else
+            __in PKEXCEPTION_FRAME ExceptionFrame,
+#endif
+            __inout PCONTEXT ContextFrame
+            );
+
+        void
+        (NTAPI * KeContextToKframes)(
+            __inout PKTRAP_FRAME TrapFrame,
+
+#if defined(_X86_)
+            __inout_opt PKEXCEPTION_FRAME ExceptionFrame,
+#else
+            __inout PKEXCEPTION_FRAME ExceptionFrame,
+#endif
+            __in PCONTEXT ContextFrame,
+            __in u32 ContextFlags,
+            __in KPROCESSOR_MODE PreviousMode
+            );
+
+#ifndef _WIN64
+        status
+        (NTAPI * DbgkpSendApiMessageLpc)(
+            __inout PAPI_MESSAGE ApiMsg,
+            __in ptr Port,
+            __in b SuspendProcess
+            );
+
+        status
+        (FASTCALL * FastDbgkpSendApiMessageLpc)(
+            __inout PAPI_MESSAGE ApiMsg,
+            __in ptr Port,
+            __in b SuspendProcess
+            );
+#else
+        status
+        (FASTCALL * DbgkpSendApiMessageLpc)(
+            __inout ptr ApiMsg,
+            __in ptr Port,
+            __in b SuspendProcess
+            );
+#endif // !_WIN64
+
+        OB_PREOP_CALLBACK_STATUS
+        (NTAPI * GlobalObjectPreCallback)(
+            __in ptr RegistrationContext,
+            __in POB_PRE_OPERATION_INFORMATION OperationInformation
+            );
+
+        void
+        (NTAPI * GlobalObjectPostCallback)(
+            __in ptr RegistrationContext,
+            __in POB_POST_OPERATION_INFORMATION OperationInformation
+            );
+
+        void
+        (NTAPI * GlobalProcessNotify)(
+            __in ptr ParentId,
+            __in ptr ProcessId,
+            __in b Create
+            );
+
+        void
+        (NTAPI * GlobalThreadNotify)(
+            __in ptr ProcessId,
+            __in ptr ThreadId,
+            __in b Create
+            );
+
+        void
+        (NTAPI * GlobalImageNotify)(
+            __in PUNICODE_STRING FullImageName,
+            __in ptr ProcessId,
+            __in PIMAGE_INFO ImageInfo
+            );
+
+        void
         (NTAPI * KeEnterCriticalRegion)(
-            VOID
+            void
             );
 
-        VOID
+        void
         (NTAPI * KeLeaveCriticalRegion)(
-            VOID
+            void
             );
 
-        NTSTATUS
+        status
         (NTAPI * PspCreateThread)(
-            __out PHANDLE ThreadHandle,
+            __out ptr * ThreadHandle,
             __in ACCESS_MASK DesiredAccess,
             __in_opt POBJECT_ATTRIBUTES ObjectAttributes,
-            __in HANDLE ProcessHandle,
+            __in ptr ProcessHandle,
             __in PEPROCESS ProcessPointer,
-            __in_opt PVOID Reserved,
+            __in_opt ptr Reserved,
             __in_opt PLARGE_INTEGER Cookie,
             __out_opt PCLIENT_ID ClientId,
             __in_opt PCONTEXT ThreadContext,
             __in_opt PINITIAL_TEB InitialTeb,
-            __in BOOLEAN CreateSuspended,
+            __in b CreateSuspended,
             __in_opt PKSTART_ROUTINE StartRoutine,
-            __in PVOID StartContext
+            __in ptr StartContext
             );
 
-        BOOLEAN
+        void
+        (NTAPI * PspInitializeThunkContext)(
+            void
+            );
+
+        b
         (FASTCALL * ExAcquireRundownProtection)(
             __inout PEX_RUNDOWN_REF RunRef
             );
 
-        VOID
+        void
         (FASTCALL * ExReleaseRundownProtection)(
             __inout PEX_RUNDOWN_REF RunRef
             );
 
-        VOID
+        void
         (FASTCALL * ExWaitForRundownProtectionRelease)(
             __inout PEX_RUNDOWN_REF RunRef
             );
@@ -157,52 +223,52 @@ extern "C" {
             __inout PEX_SPIN_LOCK SpinLock
             );
 
-        VOID
+        void
         (NTAPI * ExReleaseSpinLockShared)(
             __inout PEX_SPIN_LOCK SpinLock,
             __in KIRQL OldIrql
             );
 
-        ULONG
+        u32
         (NTAPI * DbgPrint)(
             __in PCH Format,
             ...
             );
 
-        SIZE_T
+        u
         (NTAPI * RtlCompareMemory)(
-            const VOID * Destination,
-            const VOID * Source,
-            SIZE_T Length
+            const void * Destination,
+            const void * Source,
+            u Length
             );
 
-        VOID
+        void
         (NTAPI * RtlRestoreContext)(
             __in PCONTEXT ContextRecord,
             __in_opt struct _EXCEPTION_RECORD *ExceptionRecord
             );
 
-        VOID
+        void
         (NTAPI * ExQueueWorkItem)(
             __inout PWORK_QUEUE_ITEM WorkItem,
             __in WORK_QUEUE_TYPE QueueType
             );
 
-        VOID
+        void
         (NTAPI * ExFreePoolWithTag)(
-            __in PVOID P,
-            __in ULONG Tag
+            __in ptr P,
+            __in u32 Tag
             );
 
-        PGUARD_OBJECT BugCheckHandle;
+        PSAFEGUARD_OBJECT BugCheckHandle;
 
-        VOID
+        void
         (NTAPI * KeBugCheckEx)(
-            __in ULONG BugCheckCode,
-            __in ULONG_PTR P1,
-            __in ULONG_PTR P2,
-            __in ULONG_PTR P3,
-            __in ULONG_PTR P4
+            __in u32 BugCheckCode,
+            __in u P1,
+            __in u P2,
+            __in u P3,
+            __in u P4
             );
 
         PLIST_ENTRY
@@ -211,52 +277,47 @@ extern "C" {
             __inout PKSPIN_LOCK Lock
             );
 
-        HANDLE ObjectCallback;
+        ptr ObjectCallback;
 
         KDDEBUGGER_DATA64 DebuggerDataBlock;
         KDDEBUGGER_DATA_ADDITION64 DebuggerDataAdditionBlock;
 
-        USHORT OffsetKProcessThreadListHead;
-        USHORT OffsetKThreadThreadListEntry;
-        USHORT OffsetKThreadWin32StartAddress;
+        u16 OffsetKProcessThreadListHead;
+        u16 OffsetKThreadThreadListEntry;
+        u16 OffsetKThreadWin32StartAddress;
+        u32 OffsetKThreadProcessId;
 
-#ifndef _WIN64
-        CHAR _CaptureContext[0x100];
-#else
-        CHAR _CaptureContext[0x200];
-#endif // !_WIN64
-
-        // struct _PGBLOCK PgBlock;
+        struct _PGBLOCK * PgBlock;
     } GPBLOCK, *PGPBLOCK;
 
     NTKERNELAPI
-        NTSTATUS
+        status
         NTAPI
         PsAcquireProcessExitSynchronization(
             __in PEPROCESS Process
         );
 
     NTKERNELAPI
-        VOID
+        void
         NTAPI
         PsReleaseProcessExitSynchronization(
             __in PEPROCESS Process
         );
 
 #define FastAcquireRundownProtection(ref) \
-            GpBlock->ExAcquireRundownProtection((ref))
+            GpBlock.ExAcquireRundownProtection((ref))
 
 #define FastReleaseRundownProtection(ref) \
-            GpBlock->ExReleaseRundownProtection((ref))
+            GpBlock.ExReleaseRundownProtection((ref))
 
 #define FastWaitForRundownProtectionRelease(ref) \
-            GpBlock->ExWaitForRundownProtectionRelease((ref))
+            GpBlock.ExWaitForRundownProtectionRelease((ref))
 
 #define FastAcquireObjectLock(irql) \
-            *(irql) = GpBlock->ExAcquireSpinLockShared(&GpBlock->ObjectLock)
+            *(irql) = GpBlock.ExAcquireSpinLockShared(&GpBlock.ObjectLock)
 
 #define FastReleaseObjectLock(irql) \
-            GpBlock->ExReleaseSpinLockShared(&GpBlock->ObjectLock, (irql))
+            GpBlock.ExReleaseSpinLockShared(&GpBlock.ObjectLock, (irql))
 
     VOID
         NTAPI
@@ -322,7 +383,7 @@ extern "C" {
             __out PKLDR_DATA_TABLE_ENTRY * DataTableEntry
         );
 
-    extern PGPBLOCK GpBlock;
+    extern GPBLOCK GpBlock;
 
 #ifdef __cplusplus
 }

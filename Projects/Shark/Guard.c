@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2015 - 2019 by blindtiger. All rights reserved.
+* Copyright (c) 2015 - 2021 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License")); you may not use this file except in compliance with
@@ -18,33 +18,88 @@
 
 #include <defs.h>
 
-#include "Detours.h"
+#include "Guard.h"
 
 #include "Scan.h"
 #include "Reload.h"
 
-VOID
+#pragma section( ".guard", read, write, execute )
+
+#pragma pack (push, 1)
+__declspec(allocate(".guard")) struct {
+    RTL_BITMAP BitMap;
+    u8 Bits[0x100];
+    u8 Bytes[4 * PAGE_SIZE - 0x100 - sizeof(RTL_BITMAP)];
+}Trampoline = { 0x100, __utop(&Trampoline.Bytes) };
+#pragma pack (pop)
+
+C_ASSERT(sizeof(Trampoline) == 4 * PAGE_SIZE);
+
+ptr
 NTAPI
-DetourMapLockedCopyInstruction(
-    __in PVOID Destination,
-    __in PVOID Source,
-    __in ULONG Length
+GuardAllocateTrampoline(
+    __in u8 NumberOfBytes
 )
 {
-    CHAR Instruction[4] = { 0 };
-    PHYSICAL_ADDRESS PhysicalAddress = { 0 };
-    PVOID VirtualAddress = NULL;
+    ptr Result = NULL;
+    u32 HintIndex = 0;
 
-    if (Length > sizeof(ULONG)) {
-        RtlCopyMemory(Instruction, Source, sizeof(ULONG));
+    NumberOfBytes = (NumberOfBytes + 7) & ~7;
+
+    HintIndex = RtlFindClearBitsAndSet(
+        &Trampoline.BitMap,
+        NumberOfBytes / 8,
+        HintIndex);
+
+    if (MAXULONG != HintIndex) {
+        Result = Trampoline.Bytes + HintIndex * 8;
+    }
+
+    return Result;
+}
+
+void
+NTAPI
+GuardFreeTrampoline(
+    __in ptr BaseAddress,
+    __in u8 NumberOfBytes
+)
+{
+    u32 HintIndex = 0;
+
+    NumberOfBytes = (NumberOfBytes + 7) & ~7;
+
+    HintIndex =
+        ((u8ptr)BaseAddress - Trampoline.Bytes) / 8;
+
+    RtlClearBits(
+        &Trampoline.BitMap,
+        HintIndex,
+        NumberOfBytes / 8);
+}
+
+void
+NTAPI
+MapLockedCopyInstruction(
+    __in ptr Destination,
+    __in ptr Source,
+    __in u32 Length
+)
+{
+    s8 Instruction[4] = { 0 };
+    PHYSICAL_ADDRESS PhysicalAddress = { 0 };
+    ptr VirtualAddress = NULL;
+
+    if (Length > sizeof(u32)) {
+        RtlCopyMemory(Instruction, Source, sizeof(u32));
     }
     else {
         RtlCopyMemory(Instruction, Source, Length);
 
         RtlCopyMemory(
             Instruction + Length,
-            (PCHAR)Destination + Length,
-            sizeof(ULONG) - Length);
+            (u8ptr)Destination + Length,
+            sizeof(u32) - Length);
     }
 
     PhysicalAddress = MmGetPhysicalAddress(Destination);
@@ -55,133 +110,133 @@ DetourMapLockedCopyInstruction(
         MmNonCached);
 
     if (NULL != VirtualAddress) {
-        if (Length > sizeof(ULONG)) {
+        if (Length > sizeof(u32)) {
             InterlockedExchange(VirtualAddress, JUMP_SELF);
 
             RtlCopyMemory(
-                (PCHAR)VirtualAddress + sizeof(ULONG),
-                (PCHAR)Source + sizeof(ULONG),
-                Length - sizeof(ULONG));
+                (u8ptr)VirtualAddress + sizeof(u32),
+                (u8ptr)Source + sizeof(u32),
+                Length - sizeof(u32));
         }
 
-        InterlockedExchange(VirtualAddress, *(PULONG)Instruction);
+        InterlockedExchange(VirtualAddress, *(u32ptr)Instruction);
 
         MmUnmapIoSpace(VirtualAddress, Length);
     }
 }
 
-VOID
+void
 NTAPI
-DetourMapLockedBuildJumpCode(
-    __inout PVOID * Pointer,
-    __in PVOID Detour
+MapLockedBuildJumpCode(
+    __inout ptr * Pointer,
+    __in ptr Guard
 )
 {
-    DETOUR_BODY DetourBody = { 0 };
+    GUARD_BODY GuardBody = { 0 };
 
-    SetDetourBody(&DetourBody, Detour);
+    SetGuardBody(&GuardBody, Guard);
 
-    DetourMapLockedCopyInstruction(
+    MapLockedCopyInstruction(
         *Pointer,
-        &DetourBody,
-        DETOUR_BODY_CODE_LENGTH);
+        &GuardBody,
+        GUARD_BODY_CODE_LENGTH);
 }
 
-VOID
+void
 NTAPI
-DetourLockedCopyInstruction(
-    __in PVOID Destination,
-    __in PVOID Source,
-    __in ULONG Length
+LockedCopyInstruction(
+    __in ptr Destination,
+    __in ptr Source,
+    __in u32 Length
 )
 {
-    CHAR Instruction[4] = { 0 };
+    s8 Instruction[4] = { 0 };
 
-    if (Length > sizeof(LONG)) {
-        RtlCopyMemory(Instruction, Source, sizeof(LONG));
+    if (Length > sizeof(s32)) {
+        RtlCopyMemory(Instruction, Source, sizeof(s32));
     }
     else {
         RtlCopyMemory(Instruction, Source, Length);
 
         RtlCopyMemory(
             Instruction + Length,
-            (PCHAR)Destination + Length,
-            sizeof(LONG) - Length);
+            (u8ptr)Destination + Length,
+            sizeof(s32) - Length);
     }
 
-    if (Length > sizeof(LONG)) {
+    if (Length > sizeof(s32)) {
         InterlockedExchange(Destination, JUMP_SELF);
 
         RtlCopyMemory(
-            (PCHAR)Destination + sizeof(LONG),
-            (PCHAR)Source + sizeof(LONG),
-            Length - sizeof(LONG));
+            (u8ptr)Destination + sizeof(s32),
+            (u8ptr)Source + sizeof(s32),
+            Length - sizeof(s32));
     }
 
-    InterlockedExchange(Destination, *(PLONG)Instruction);
+    InterlockedExchange(Destination, *(s32ptr)Instruction);
 }
 
-VOID
+void
 NTAPI
-DetourLockedBuildJumpCode(
-    __inout PVOID * Pointer,
-    __in PVOID Detour
+LockedBuildJumpCode(
+    __inout ptr * Pointer,
+    __in ptr Guard
 )
 {
-    DETOUR_BODY DetourBody = { 0 };
+    GUARD_BODY GuardBody = { 0 };
 
-    SetDetourBody(&DetourBody, Detour);
+    SetGuardBody(&GuardBody, Guard);
 
-    DetourLockedCopyInstruction(
+    LockedCopyInstruction(
         *Pointer,
-        &DetourBody,
-        DETOUR_BODY_CODE_LENGTH);
+        &GuardBody,
+        GUARD_BODY_CODE_LENGTH);
 }
 
 #ifdef _WIN64
-PVOID
+ptr
 NTAPI
 DisCopy8B(
-    __in_opt PVOID Dst,
-    __in_opt PVOID * DstPool,
-    __in PVOID Src,
-    __out_opt PVOID * Target,
-    __out LONG * Extra
+    __in_opt ptr Dst,
+    __in_opt ptr * DstPool,
+    __in ptr Src,
+    __out_opt ptr * Target,
+    __out s32 * Extra
 )
 {
     PCHAR Instruction = NULL;
-    UCHAR Prefix = 0;
-    UCHAR Code = 0;
-    ULONG Length = 0;
-    ULONG GpReg = 0;
-    PVOID RealAddress = 0;
-    PVOID ReturnAddress = NULL;
+    u8 Prefix = 0;
+    u8 Code = 0;
+    u32 Length = 0;
+    u32 GpReg = 0;
+    ptr RealAddress = 0;
+    ptr ReturnAddress = NULL;
 
     struct {
-        UCHAR Source : 3;
-        UCHAR Destination : 3;
-        UCHAR Mod : 2;
+        u8 Source : 3;
+        u8 Destination : 3;
+        u8 Mod : 2;
     }*ModRM;
 
     C_ASSERT(sizeof(*ModRM) == 1);
 
     struct DECLSPEC_ALIGN(1) {
-        UCHAR Prefix;
+        u8 Prefix;
 
         struct {
-            UCHAR GpReg : 3;
-            UCHAR Inst : 5;
+            u8 GpReg : 3;
+            u8 Inst : 5;
         }Code;
 
-        UCHAR RealAddress[8];
+        u8 RealAddress[8];
 
-        UCHAR CopyPrefix;
-        UCHAR CopyInst;
+        u8 CopyPrefix;
+        u8 CopyInst;
 
         struct {
-            UCHAR Source : 3;
-            UCHAR Destination : 3;
-            UCHAR Mod : 2;
+            u8 Source : 3;
+            u8 Destination : 3;
+            u8 Mod : 2;
         }CopyMod;
     }*CopyOpCode;
 
@@ -197,10 +252,12 @@ DisCopy8B(
 
     if (0 == ModRM->Mod &&
         5 == ModRM->Source) {
-        // [disp32]
+        // [--][--]
+        // [--][--] + disp8
+        // [--][--] + disp32
 
         GpReg = ModRM->Destination;
-        RealAddress = RvaToVa(Instruction);
+        RealAddress = __rva_to_va(Instruction);
 
         if (NULL != Target) {
             *Target = NULL;
@@ -211,14 +268,14 @@ DisCopy8B(
         }
 
         if (NULL != Dst && NULL != DstPool) {
-            if ((PCHAR)*DstPool - (PCHAR)Dst >= sizeof(CopyOpCode)) {
+            if ((u8ptr)*DstPool - (u8ptr)Dst >= sizeof(CopyOpCode)) {
                 CopyOpCode = Dst;
 
                 CopyOpCode->Prefix = Prefix;
                 CopyOpCode->Code.Inst = 0x17; // Reg <- Immediate
                 CopyOpCode->Code.GpReg = GpReg;
 
-                *(PVOID *)&CopyOpCode->RealAddress = RealAddress;
+                *(ptr *)&CopyOpCode->RealAddress = RealAddress;
 
                 CopyOpCode->CopyPrefix = Prefix;
                 CopyOpCode->CopyInst = 0x8b; // Reg <- [Reg]
@@ -228,7 +285,7 @@ DisCopy8B(
             }
         }
 
-        ReturnAddress = Instruction + sizeof(LONG);
+        ReturnAddress = Instruction + sizeof(s32);
     }
 
     return ReturnAddress;
@@ -239,27 +296,27 @@ DisCopy8B(
 PPATCH_HEADER
 NTAPI
 HotpatchAttach(
-    __inout PVOID * Pointer,
-    __in PVOID Hotpatch
+    __inout ptr * Pointer,
+    __in ptr Hotpatch
 )
 {
     PHOTPATCH_OBJECT HotpatchObjct = NULL;
     PHOTPATCH_BODY HotpatchBody = NULL;
-    LONG Relative = 0;
+    s32 Relative = 0;
 
-    HotpatchObjct = ExAllocatePool(
-        NonPagedPool,
-        sizeof(HOTPATCH_OBJECT));
+    HotpatchObjct = GuardAllocateTrampoline(sizeof(HOTPATCH_OBJECT));
 
     if (NULL != HotpatchObjct) {
         RtlZeroMemory(HotpatchObjct, sizeof(HOTPATCH_OBJECT));
+
+        HotpatchObjct->Header.Length = sizeof(HOTPATCH_OBJECT);
 
         HotpatchBody = CONTAINING_RECORD(
             *Pointer,
             HOTPATCH_BODY,
             JmpSelf);
 
-        DetourMapLockedCopyInstruction(
+        MapLockedCopyInstruction(
             &HotpatchBody->Jmp,
             HOTPATCH_BODY_CODE,
             HOTPATCH_BODY_CODE_LENGTH - HOTPATCH_MASK_LENGTH);
@@ -267,12 +324,12 @@ HotpatchAttach(
         Relative =
             PtrToLong(Hotpatch) - PtrToLong(&HotpatchBody->JmpSelf);
 
-        DetourMapLockedCopyInstruction(
+        MapLockedCopyInstruction(
             &HotpatchBody->Hotpatch,
             &Relative,
-            sizeof(LONG));
+            sizeof(s32));
 
-        DetourMapLockedCopyInstruction(
+        MapLockedCopyInstruction(
             &HotpatchBody->JmpSelf,
             HOTPATCH_BODY_CODE + FIELD_OFFSET(HOTPATCH_BODY, JmpSelf),
             RTL_FIELD_SIZE(HOTPATCH_BODY, JmpSelf));
@@ -281,21 +338,21 @@ HotpatchAttach(
         HotpatchObjct->Header.ProgramCounter = *Pointer;
         HotpatchObjct->Header.Target = Hotpatch;
 
-        DetourMapLockedCopyInstruction(
+        MapLockedCopyInstruction(
             Pointer,
             &HotpatchObjct->Header.Entry,
-            sizeof(PVOID));
+            sizeof(ptr));
     }
 
     return HotpatchObjct;
 }
 
-VOID
+void
 NTAPI
 HotpatchDetach(
-    __inout PVOID * Pointer,
+    __inout ptr * Pointer,
     __in PPATCH_HEADER PatchHeader,
-    __in PVOID Hotpatch
+    __in ptr Hotpatch
 )
 {
     PHOTPATCH_OBJECT HotpatchObjct = NULL;
@@ -311,319 +368,66 @@ HotpatchDetach(
         HOTPATCH_BODY,
         JmpSelf);
 
-    DetourMapLockedCopyInstruction(
+    MapLockedCopyInstruction(
         &HotpatchBody->JmpSelf,
         HOTPATCH_MASK,
         HOTPATCH_MASK_LENGTH);
 
-    DetourMapLockedCopyInstruction(
+    MapLockedCopyInstruction(
         Pointer,
         &HotpatchObjct->Header.ProgramCounter,
-        sizeof(PVOID));
+        sizeof(ptr));
 
-    ExFreePool(HotpatchObjct);
+    GuardFreeTrampoline(HotpatchObjct, HotpatchObjct->Header.Length);
 }
 #endif // !_WIN64
 
 PPATCH_HEADER
 NTAPI
-DetourAttach(
-    __inout PVOID * Pointer,
-    __in PVOID Detour
-)
-{
-    PDETOUR_OBJECT DetourObjct = NULL;
-    PCHAR DetourBody = NULL;
-    PCHAR Import = NULL;
-    PVOID Address = NULL;
-    PCHAR ControlPc = NULL;
-    PCHAR TargetPc = NULL;
-    ULONG Length = 0;
-    LONG Extra = 0;
-    PCHAR Target = NULL;
-    ULONG BytesCopied = 0;
-    PCHAR Header = NULL;
-    ULONG FunctionCount = 1;
-    ULONG CodeLength = 0;
-
-#ifdef _WIN64
-    ULONG FunctionIndex = 1;
-    PCHAR FunctionEntry = NULL;
-    ULONG Index = 0;
-    PCHAR Instruction = NULL;
-    ULONG InstructionLength = 0;
-    PCHAR RealAddress = NULL;
-#endif // _WIN64
-
-    struct {
-        UCHAR B : 1;
-        UCHAR X : 1;
-        UCHAR R : 1;
-
-        // 0 = Operand size determined by CS.D
-        // 1 = 64 Bit Operand Size
-
-        UCHAR W : 1;
-        UCHAR Reserved : 4; // always 0100
-    }*Rex;
-
-    struct {
-        UCHAR Source : 3;
-        UCHAR Destination : 3;
-        UCHAR Mod : 2;
-    }*ModRM;
-
-    C_ASSERT(sizeof(*ModRM) == 1);
-
-    Address = *Pointer;
-    *Pointer = NULL;
-
-    ControlPc = Address;
-
-    while (Length < DETOUR_BODY_CODE_LENGTH) {
-        TargetPc = DetourCopyInstruction(
-            NULL,
-            NULL,
-            ControlPc,
-            &Target,
-            &Extra);
-
-        if (NULL != TargetPc) {
-#ifdef _WIN64
-            if (7 == TargetPc - ControlPc) {
-                Rex = ControlPc;
-
-                if ((4 == Rex->Reserved && 1 == Rex->W) &&
-                    0 == _CmpByte(ControlPc[1], 0x8b)) {
-                    ModRM = &ControlPc[2];
-
-                    if (0 == ModRM->Mod &&
-                        5 == ModRM->Source) {
-                        // [disp32]
-
-                        TargetPc = DisCopy8B(
-                            NULL,
-                            NULL,
-                            ControlPc,
-                            &Target,
-                            &Extra);
-                    }
-                }
-            }
-#endif // _WIN64
-
-#ifdef _WIN64
-            if (NULL != Target) {
-                FunctionCount++;
-            }
-#endif // _WIN64
-
-            Length += TargetPc - ControlPc;
-            CodeLength += TargetPc - ControlPc + Extra;
-
-            if (Length >= DETOUR_BODY_CODE_LENGTH) {
-                DetourObjct = ExAllocatePool(
-                    NonPagedPool,
-                    sizeof(DETOUR_OBJECT) +
-                    Length +
-                    CodeLength +
-                    DETOUR_BODY_CODE_LENGTH * FunctionCount);
-
-                if (NULL != DetourObjct) {
-                    RtlZeroMemory(
-                        DetourObjct,
-                        sizeof(DETOUR_OBJECT) +
-                        Length +
-                        CodeLength +
-                        DETOUR_BODY_CODE_LENGTH * FunctionCount);
-
-                    DetourObjct->Original = DetourObjct + 1;
-                    DetourObjct->Length = Length;
-
-                    DetourBody = (PCHAR)DetourObjct->Original + DetourObjct->Length;
-                    Import = DetourBody + CodeLength;
-
-                    RtlCopyMemory(DetourObjct->Original, Address, DetourObjct->Length);
-
-                    ControlPc = Address;
-                    Length = 0;
-
-                    while (Length < DETOUR_BODY_CODE_LENGTH) {
-                        TargetPc = DetourCopyInstruction(
-                            DetourBody + BytesCopied,
-                            &Import,
-                            ControlPc,
-                            &Target,
-                            &Extra);
-
-                        if (NULL != TargetPc) {
-#ifdef _WIN64
-                            if (7 == TargetPc - ControlPc) {
-                                Rex = ControlPc;
-
-                                if ((4 == Rex->Reserved && 1 == Rex->W) &&
-                                    0 == _CmpByte(ControlPc[1], 0x8b)) {
-                                    ModRM = &ControlPc[2];
-
-                                    if (0 == ModRM->Mod &&
-                                        5 == ModRM->Source) {
-                                        // [disp32]
-
-                                        TargetPc = DisCopy8B(
-                                            DetourBody + BytesCopied,
-                                            &Import,
-                                            ControlPc,
-                                            &Target,
-                                            &Extra);
-                                    }
-                                }
-                            }
-#endif // _WIN64
-
-#ifdef _WIN64
-                            if (NULL != Target) {
-                                Instruction = DetourBody + BytesCopied;
-                                InstructionLength = TargetPc - ControlPc + Extra;
-
-                                FunctionEntry =
-                                    Import + DETOUR_BODY_CODE_LENGTH * FunctionIndex;
-
-                                DetourLockedBuildJumpCode(&FunctionEntry, Target);
-
-                                for (Index = 0;
-                                    Index <= InstructionLength - sizeof(LONG);
-                                    Index++) {
-                                    RealAddress = RvaToVa(Instruction + Index);
-
-                                    if (*(PLONG)&Target == *(PLONG)&RealAddress) {
-                                        *(PLONG)(Instruction + Index) =
-                                            FunctionEntry - ((Instruction + Index) + sizeof(LONG));
-                                    }
-                                }
-
-                                FunctionIndex++;
-                            }
-#endif // _WIN64
-
-                            Length += TargetPc - ControlPc;
-                            BytesCopied += TargetPc - ControlPc + Extra;
-
-                            if (Length >= DETOUR_BODY_CODE_LENGTH) {
-                                DetourLockedBuildJumpCode(&Import, TargetPc);
-                                DetourMapLockedBuildJumpCode(&Address, Detour);
-
-                                DetourObjct->Header.Entry = DetourBody;
-                                DetourObjct->Header.ProgramCounter = Address;
-                                DetourObjct->Header.Target = Detour;
-
-                                DetourLockedCopyInstruction(
-                                    Pointer,
-                                    &DetourObjct->Header.Entry,
-                                    sizeof(PVOID));
-
-                                break;
-                            }
-
-                            ControlPc = TargetPc;
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                }
-
-                break;
-            }
-
-            ControlPc = TargetPc;
-        }
-        else {
-            break;
-        }
-    }
-
-    return DetourObjct;
-}
-
-VOID
-NTAPI
-DetourDetach(
-    __inout PVOID * Pointer,
-    __in PPATCH_HEADER PatchHeader,
-    __in PVOID Detour
-)
-{
-    PDETOUR_OBJECT DetourObjct = NULL;
-
-    DetourObjct = CONTAINING_RECORD(
-        PatchHeader,
-        DETOUR_OBJECT,
-        Header);
-
-    if (PatchHeader->Target == Detour &&
-        *Pointer == DetourObjct->Header.Entry) {
-        DetourMapLockedCopyInstruction(
-            DetourObjct->Header.ProgramCounter,
-            DetourObjct->Original,
-            DetourObjct->Length);
-
-        DetourLockedCopyInstruction(
-            Pointer,
-            &DetourObjct->Header.ProgramCounter,
-            sizeof(PVOID));
-
-        ExFreePool(DetourObjct);
-    }
-}
-
-PPATCH_HEADER
-NTAPI
-DetourGuardAttach(
-    __inout PVOID * Pointer,
-    __in PGUARD Guard,
-    __in_opt PVOID Parameter,
-    __in_opt PVOID Reserved
+GuardAttach(
+    __inout ptr * Pointer,
+    __in ptr Guard
 )
 {
     PGUARD_OBJECT GuardObject = NULL;
-    PCHAR DetourBody = NULL;
-    PCHAR Import = NULL;
-    PVOID Address = NULL;
-    PCHAR ControlPc = NULL;
-    PCHAR TargetPc = NULL;
-    ULONG Length = 0;
-    LONG Extra = 0;
-    PCHAR Target = NULL;
-    ULONG BytesCopied = 0;
-    PCHAR Header = NULL;
-    ULONG FunctionCount = 1;
-    ULONG CodeLength = 0;
+    u8ptr GuardBody = NULL;
+    u8ptr Import = NULL;
+    ptr Address = NULL;
+    u8ptr ControlPc = NULL;
+    u8ptr TargetPc = NULL;
+    u32 Length = 0;
+    s32 Extra = 0;
+    u8ptr Target = NULL;
+    u32 BytesCopied = 0;
+    u8ptr Header = NULL;
+    u32 FunctionCount = 1;
+    u32 CodeLength = 0;
 
 #ifdef _WIN64
-    ULONG FunctionIndex = 1;
-    PCHAR FunctionEntry = NULL;
-    ULONG Index = 0;
-    PCHAR Instruction = NULL;
-    ULONG InstructionLength = 0;
-    PCHAR RealAddress = NULL;
+    u32 FunctionIndex = 1;
+    u8ptr FunctionEntry = NULL;
+    u32 Index = 0;
+    u8ptr Instruction = NULL;
+    u32 InstructionLength = 0;
+    u8ptr RealAddress = NULL;
 #endif // _WIN64
 
     struct {
-        UCHAR B : 1;
-        UCHAR X : 1;
-        UCHAR R : 1;
+        u8 B : 1;
+        u8 X : 1;
+        u8 R : 1;
 
         // 0 = Operand size determined by CS.D
         // 1 = 64 Bit Operand Size
 
-        UCHAR W : 1;
-        UCHAR Reserved : 4; // always 0100
+        u8 W : 1;
+        u8 Reserved : 4; // always 0100
     }*Rex;
 
     struct {
-        UCHAR Source : 3;
-        UCHAR Destination : 3;
-        UCHAR Mod : 2;
+        u8 Source : 3;
+        u8 Destination : 3;
+        u8 Mod : 2;
     }*ModRM;
 
     C_ASSERT(sizeof(*ModRM) == 1);
@@ -633,7 +437,7 @@ DetourGuardAttach(
 
     ControlPc = Address;
 
-    while (Length < DETOUR_BODY_CODE_LENGTH) {
+    while (Length < GUARD_BODY_CODE_LENGTH) {
         TargetPc = DetourCopyInstruction(
             NULL,
             NULL,
@@ -647,12 +451,14 @@ DetourGuardAttach(
                 Rex = ControlPc;
 
                 if ((4 == Rex->Reserved && 1 == Rex->W) &&
-                    0 == _CmpByte(ControlPc[1], 0x8b)) {
+                    0 == _cmpbyte(ControlPc[1], 0x8b)) {
                     ModRM = &ControlPc[2];
 
                     if (0 == ModRM->Mod &&
                         5 == ModRM->Source) {
-                        // [disp32]
+                        // [--][--]
+                        // [--][--] + disp8
+                        // [--][--] + disp32
 
                         TargetPc = DisCopy8B(
                             NULL,
@@ -674,36 +480,40 @@ DetourGuardAttach(
             Length += TargetPc - ControlPc;
             CodeLength += TargetPc - ControlPc + Extra;
 
-            if (Length >= DETOUR_BODY_CODE_LENGTH) {
-                GuardObject = ExAllocatePool(
-                    NonPagedPool,
+            if (Length >= GUARD_BODY_CODE_LENGTH) {
+                GuardObject = GuardAllocateTrampoline(
                     sizeof(GUARD_OBJECT) +
                     Length +
                     CodeLength +
-                    DETOUR_BODY_CODE_LENGTH * FunctionCount);
+                    GUARD_BODY_CODE_LENGTH * FunctionCount);
 
                 if (NULL != GuardObject) {
                     RtlZeroMemory(
                         GuardObject,
-                        sizeof(GUARD_OBJECT) +
-                        Length +
-                        CodeLength +
-                        DETOUR_BODY_CODE_LENGTH * FunctionCount);
+                        sizeof(GUARD_OBJECT)
+                        + Length
+                        + CodeLength
+                        + GUARD_BODY_CODE_LENGTH * FunctionCount);
+
+                    GuardObject->Header.Length = sizeof(GUARD_OBJECT)
+                        + Length
+                        + CodeLength
+                        + GUARD_BODY_CODE_LENGTH * FunctionCount;
 
                     GuardObject->Original = GuardObject + 1;
                     GuardObject->Length = Length;
 
-                    DetourBody = (PCHAR)GuardObject->Original + GuardObject->Length;
-                    Import = DetourBody + CodeLength;
+                    GuardBody = (u8ptr)GuardObject->Original + GuardObject->Length;
+                    Import = GuardBody + CodeLength;
 
                     RtlCopyMemory(GuardObject->Original, Address, GuardObject->Length);
 
                     ControlPc = Address;
                     Length = 0;
 
-                    while (Length < DETOUR_BODY_CODE_LENGTH) {
+                    while (Length < GUARD_BODY_CODE_LENGTH) {
                         TargetPc = DetourCopyInstruction(
-                            DetourBody + BytesCopied,
+                            GuardBody + BytesCopied,
                             &Import,
                             ControlPc,
                             &Target,
@@ -715,15 +525,17 @@ DetourGuardAttach(
                                 Rex = ControlPc;
 
                                 if ((4 == Rex->Reserved && 1 == Rex->W) &&
-                                    0 == _CmpByte(ControlPc[1], 0x8b)) {
+                                    0 == _cmpbyte(ControlPc[1], 0x8b)) {
                                     ModRM = &ControlPc[2];
 
                                     if (0 == ModRM->Mod &&
                                         5 == ModRM->Source) {
-                                        // [disp32]
+                                        // [--][--]
+                                        // [--][--] + disp8
+                                        // [--][--] + disp32
 
                                         TargetPc = DisCopy8B(
-                                            DetourBody + BytesCopied,
+                                            GuardBody + BytesCopied,
                                             &Import,
                                             ControlPc,
                                             &Target,
@@ -735,22 +547,22 @@ DetourGuardAttach(
 
 #ifdef _WIN64
                             if (NULL != Target) {
-                                Instruction = DetourBody + BytesCopied;
+                                Instruction = GuardBody + BytesCopied;
                                 InstructionLength = TargetPc - ControlPc + Extra;
 
                                 FunctionEntry =
-                                    Import + DETOUR_BODY_CODE_LENGTH * FunctionIndex;
+                                    Import + GUARD_BODY_CODE_LENGTH * FunctionIndex;
 
-                                DetourLockedBuildJumpCode(&FunctionEntry, Target);
+                                LockedBuildJumpCode(&FunctionEntry, Target);
 
                                 for (Index = 0;
-                                    Index <= InstructionLength - sizeof(LONG);
+                                    Index <= InstructionLength - sizeof(s32);
                                     Index++) {
-                                    RealAddress = RvaToVa(Instruction + Index);
+                                    RealAddress = __rva_to_va(Instruction + Index);
 
-                                    if (*(PLONG)&Target == *(PLONG)&RealAddress) {
-                                        *(PLONG)(Instruction + Index) =
-                                            FunctionEntry - ((Instruction + Index) + sizeof(LONG));
+                                    if (*(s32ptr)&Target == *(s32ptr)&RealAddress) {
+                                        *(s32ptr)(Instruction + Index) =
+                                            FunctionEntry - ((Instruction + Index) + sizeof(s32));
                                     }
                                 }
 
@@ -761,28 +573,18 @@ DetourGuardAttach(
                             Length += TargetPc - ControlPc;
                             BytesCopied += TargetPc - ControlPc + Extra;
 
-                            if (Length >= DETOUR_BODY_CODE_LENGTH) {
-                                DetourLockedBuildJumpCode(&Import, TargetPc);
+                            if (Length >= GUARD_BODY_CODE_LENGTH) {
+                                LockedBuildJumpCode(&Import, TargetPc);
+                                MapLockedBuildJumpCode(&Address, Guard);
 
-                                SetGuardBody(
-                                    &GuardObject->Body,
-                                    Reserved,
-                                    Parameter,
-                                    Guard,
-                                    DetourBody,
-                                    Address,
-                                    GpBlock->CaptureContext);
-
-                                DetourMapLockedBuildJumpCode(&Address, &GuardObject->Body);
-
-                                GuardObject->Header.Entry = DetourBody;
+                                GuardObject->Header.Entry = GuardBody;
                                 GuardObject->Header.ProgramCounter = Address;
                                 GuardObject->Header.Target = Guard;
 
-                                DetourLockedCopyInstruction(
+                                LockedCopyInstruction(
                                     Pointer,
                                     &GuardObject->Header.Entry,
-                                    sizeof(PVOID));
+                                    sizeof(ptr));
 
                                 break;
                             }
@@ -808,12 +610,12 @@ DetourGuardAttach(
     return GuardObject;
 }
 
-VOID
+void
 NTAPI
-DetourGuardDetach(
-    __inout PVOID * Pointer,
+GuardDetach(
+    __inout ptr * Pointer,
     __in PPATCH_HEADER PatchHeader,
-    __in PGUARD Guard
+    __in ptr Guard
 )
 {
     PGUARD_OBJECT GuardObject = NULL;
@@ -825,16 +627,290 @@ DetourGuardDetach(
 
     if (PatchHeader->Target == Guard &&
         *Pointer == GuardObject->Header.Entry) {
-        DetourMapLockedCopyInstruction(
+        MapLockedCopyInstruction(
             GuardObject->Header.ProgramCounter,
             GuardObject->Original,
             GuardObject->Length);
 
-        DetourLockedCopyInstruction(
+        LockedCopyInstruction(
             Pointer,
             &GuardObject->Header.ProgramCounter,
-            sizeof(PVOID));
+            sizeof(ptr));
 
-        ExFreePool(GuardObject);
+        GuardFreeTrampoline(GuardObject, GuardObject->Header.Length);
+    }
+}
+
+PPATCH_HEADER
+NTAPI
+SafeGuardAttach(
+    __inout ptr * Pointer,
+    __in PGUARD_CALLBACK Callback,
+    __in_opt ptr Parameter,
+    __in_opt ptr Reserved
+)
+{
+    PSAFEGUARD_OBJECT GuardObject = NULL;
+    u8ptr GuardBody = NULL;
+    u8ptr Import = NULL;
+    ptr Address = NULL;
+    u8ptr ControlPc = NULL;
+    u8ptr TargetPc = NULL;
+    u32 Length = 0;
+    s32 Extra = 0;
+    u8ptr Target = NULL;
+    u32 BytesCopied = 0;
+    u8ptr Header = NULL;
+    u32 FunctionCount = 1;
+    u32 CodeLength = 0;
+    ptr CaptureContext = NULL;
+
+#ifdef _WIN64
+    u32 FunctionIndex = 1;
+    u8ptr FunctionEntry = NULL;
+    u32 Index = 0;
+    u8ptr Instruction = NULL;
+    u32 InstructionLength = 0;
+    u8ptr RealAddress = NULL;
+#endif // _WIN64
+
+    struct {
+        u8 B : 1;
+        u8 X : 1;
+        u8 R : 1;
+
+        // 0 = Operand size determined by CS.D
+        // 1 = 64 Bit Operand Size
+
+        u8 W : 1;
+        u8 Reserved : 4; // always 0100
+    }*Rex;
+
+    struct {
+        u8 Source : 3;
+        u8 Destination : 3;
+        u8 Mod : 2;
+    }*ModRM;
+
+    C_ASSERT(sizeof(*ModRM) == 1);
+
+    Address = *Pointer;
+    *Pointer = NULL;
+
+    ControlPc = Address;
+
+    while (Length < GUARD_BODY_CODE_LENGTH) {
+        TargetPc = DetourCopyInstruction(
+            NULL,
+            NULL,
+            ControlPc,
+            &Target,
+            &Extra);
+
+        if (NULL != TargetPc) {
+#ifdef _WIN64
+            if (7 == TargetPc - ControlPc) {
+                Rex = ControlPc;
+
+                if ((4 == Rex->Reserved && 1 == Rex->W) &&
+                    0 == _cmpbyte(ControlPc[1], 0x8b)) {
+                    ModRM = &ControlPc[2];
+
+                    if (0 == ModRM->Mod &&
+                        5 == ModRM->Source) {
+                        // [--][--]
+                        // [--][--] + disp8
+                        // [--][--] + disp32
+
+                        TargetPc = DisCopy8B(
+                            NULL,
+                            NULL,
+                            ControlPc,
+                            &Target,
+                            &Extra);
+                    }
+                }
+            }
+#endif // _WIN64
+
+#ifdef _WIN64
+            if (NULL != Target) {
+                FunctionCount++;
+            }
+#endif // _WIN64
+
+            Length += TargetPc - ControlPc;
+            CodeLength += TargetPc - ControlPc + Extra;
+
+            if (Length >= GUARD_BODY_CODE_LENGTH) {
+                GuardObject = GuardAllocateTrampoline(
+                    sizeof(SAFEGUARD_OBJECT) +
+                    Length +
+                    CodeLength +
+                    GUARD_BODY_CODE_LENGTH * FunctionCount);
+
+                if (NULL != GuardObject) {
+                    RtlZeroMemory(
+                        GuardObject,
+                        sizeof(SAFEGUARD_OBJECT)
+                        + Length
+                        + CodeLength
+                        + GUARD_BODY_CODE_LENGTH * FunctionCount);
+
+                    GuardObject->Header.Length = sizeof(SAFEGUARD_OBJECT)
+                        + Length
+                        + CodeLength
+                        + GUARD_BODY_CODE_LENGTH * FunctionCount;
+
+                    GuardObject->Original = GuardObject + 1;
+                    GuardObject->Length = Length;
+
+                    GuardBody = (u8ptr)GuardObject->Original + GuardObject->Length;
+                    Import = GuardBody + CodeLength;
+
+                    RtlCopyMemory(GuardObject->Original, Address, GuardObject->Length);
+
+                    ControlPc = Address;
+                    Length = 0;
+
+                    while (Length < GUARD_BODY_CODE_LENGTH) {
+                        TargetPc = DetourCopyInstruction(
+                            GuardBody + BytesCopied,
+                            &Import,
+                            ControlPc,
+                            &Target,
+                            &Extra);
+
+                        if (NULL != TargetPc) {
+#ifdef _WIN64
+                            if (7 == TargetPc - ControlPc) {
+                                Rex = ControlPc;
+
+                                if ((4 == Rex->Reserved && 1 == Rex->W) &&
+                                    0 == _cmpbyte(ControlPc[1], 0x8b)) {
+                                    ModRM = &ControlPc[2];
+
+                                    if (0 == ModRM->Mod &&
+                                        5 == ModRM->Source) {
+                                        // [--][--]
+                                        // [--][--] + disp8
+                                        // [--][--] + disp32
+
+                                        TargetPc = DisCopy8B(
+                                            GuardBody + BytesCopied,
+                                            &Import,
+                                            ControlPc,
+                                            &Target,
+                                            &Extra);
+                                    }
+                                }
+                            }
+#endif // _WIN64
+
+#ifdef _WIN64
+                            if (NULL != Target) {
+                                Instruction = GuardBody + BytesCopied;
+                                InstructionLength = TargetPc - ControlPc + Extra;
+
+                                FunctionEntry =
+                                    Import + GUARD_BODY_CODE_LENGTH * FunctionIndex;
+
+                                LockedBuildJumpCode(&FunctionEntry, Target);
+
+                                for (Index = 0;
+                                    Index <= InstructionLength - sizeof(s32);
+                                    Index++) {
+                                    RealAddress = __rva_to_va(Instruction + Index);
+
+                                    if (*(s32ptr)&Target == *(s32ptr)&RealAddress) {
+                                        *(s32ptr)(Instruction + Index) =
+                                            FunctionEntry - ((Instruction + Index) + sizeof(s32));
+                                    }
+                                }
+
+                                FunctionIndex++;
+                            }
+#endif // _WIN64
+
+                            Length += TargetPc - ControlPc;
+                            BytesCopied += TargetPc - ControlPc + Extra;
+
+                            if (Length >= GUARD_BODY_CODE_LENGTH) {
+                                LockedBuildJumpCode(&Import, TargetPc);
+
+                                CaptureContext = _CaptureContext;
+
+                                SetStackBody(
+                                    &GuardObject->Body,
+                                    Reserved,
+                                    Parameter,
+                                    Callback,
+                                    GuardBody,
+                                    Address,
+                                    CaptureContext);
+
+                                MapLockedBuildJumpCode(&Address, &GuardObject->Body);
+
+                                GuardObject->Header.Entry = GuardBody;
+                                GuardObject->Header.ProgramCounter = Address;
+                                GuardObject->Header.Target = Callback;
+
+                                LockedCopyInstruction(
+                                    Pointer,
+                                    &GuardObject->Header.Entry,
+                                    sizeof(ptr));
+
+                                break;
+                            }
+
+                            ControlPc = TargetPc;
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                }
+
+                break;
+            }
+
+            ControlPc = TargetPc;
+        }
+        else {
+            break;
+        }
+    }
+
+    return GuardObject;
+}
+
+void
+NTAPI
+SafeGuardDetach(
+    __inout ptr * Pointer,
+    __in PPATCH_HEADER PatchHeader,
+    __in PGUARD_CALLBACK Callback
+)
+{
+    PSAFEGUARD_OBJECT GuardObject = NULL;
+
+    GuardObject = CONTAINING_RECORD(
+        PatchHeader,
+        SAFEGUARD_OBJECT,
+        Header);
+
+    if (PatchHeader->Target == Callback &&
+        *Pointer == GuardObject->Header.Entry) {
+        MapLockedCopyInstruction(
+            GuardObject->Header.ProgramCounter,
+            GuardObject->Original,
+            GuardObject->Length);
+
+        LockedCopyInstruction(
+            Pointer,
+            &GuardObject->Header.ProgramCounter,
+            sizeof(ptr));
+
+        GuardFreeTrampoline(GuardObject, GuardObject->Header.Length);
     }
 }

@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2015 - 2019 by blindtiger. All rights reserved.
+* Copyright (c) 2015 - 2021 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License"); you may not use this file except in compliance with
@@ -29,146 +29,146 @@ extern "C" {
 #ifndef _WIN64
 #define GetPxeAddress(va) (NULL);
 #define GetPpeAddress(va) (NULL);
-#define GetVirtualAddressMappedByPxe(Pxe) (NULL);
-#define GetVirtualAddressMappedByPpe(Ppe) (NULL);
+#define GetVaMappedByPxe(Pxe) (NULL);
+#define GetVaMappedByPpe(Ppe) (NULL);
 
     PMMPTE
         NTAPI
         _GetPdeAddress(
-            __in PVOID VirtualAddress,
+            __in ptr VirtualAddress,
             __in PMMPTE PdeBase
         );
 
     PMMPTE
         NTAPI
         _GetPdeAddressPae(
-            __in PVOID VirtualAddress,
+            __in ptr VirtualAddress,
             __in PMMPTE PdeBase
         );
 
     PMMPTE
         NTAPI
         _GetPteAddress(
-            __in PVOID VirtualAddress,
+            __in ptr VirtualAddress,
             __in PMMPTE PteBase
         );
 
     PMMPTE
         NTAPI
         _GetPteAddressPae(
-            __in PVOID VirtualAddress,
+            __in ptr VirtualAddress,
             __in PMMPTE PteBase
         );
 
-    PVOID
+    ptr
         NTAPI
-        _GetVirtualAddressMappedByPte(
+        _GetVaMappedByPte(
             __in PMMPTE Pte
         );
 
-    PVOID
+    ptr
         NTAPI
-        _GetVirtualAddressMappedByPtePae(
+        _GetVaMappedByPtePae(
             __in PMMPTE Pte
         );
 
-    PVOID
+    ptr
         NTAPI
-        _GetVirtualAddressMappedByPde(
+        _GetVaMappedByPde(
             __in PMMPTE Pde
         );
 
-    PVOID
+    ptr
         NTAPI
-        _GetVirtualAddressMappedByPdePae(
+        _GetVaMappedByPdePae(
             __in PMMPTE Pde
         );
 #else
     PMMPTE
         NTAPI
         GetPxeAddress(
-            __in PVOID VirtualAddress
+            __in ptr VirtualAddress
         );
 
     PMMPTE
         NTAPI
         GetPpeAddress(
-            __in PVOID VirtualAddress
+            __in ptr VirtualAddress
         );
 
-    PVOID
+    ptr
         NTAPI
-        GetVirtualAddressMappedByPxe(
+        GetVaMappedByPxe(
             __in PMMPTE Pxe
         );
 
-    PVOID
+    ptr
         NTAPI
-        GetVirtualAddressMappedByPpe(
+        GetVaMappedByPpe(
             __in PMMPTE Ppe
         );
 #endif // !_WIN64
 
-    VOID
+    void
         NTAPI
-        InitializeSystemSpace(
-            __inout PVOID Block
+        InitializeSpace(
+            __inout ptr Block
         );
 
     PMMPTE
         NTAPI
         GetPdeAddress(
-            __in PVOID VirtualAddress
+            __in ptr VirtualAddress
         );
 
     PMMPTE
         NTAPI
         GetPteAddress(
-            __in PVOID VirtualAddress
+            __in ptr VirtualAddress
         );
 
-    PVOID
+    ptr
         NTAPI
-        GetVirtualAddressMappedByPde(
+        GetVaMappedByPde(
             __in PMMPTE Pde
         );
 
-    PVOID
+    ptr
         NTAPI
-        GetVirtualAddressMappedByPte(
+        GetVaMappedByPte(
             __in PMMPTE Pte
         );
 
     //
     //  Miscellaneous support macros.
     //
-    //      ULONG
+    //      u32
     //      FlagOn (
-    //          IN ULONG Flags,
-    //          IN ULONG SingleFlag
+    //          IN u32 Flags,
+    //          IN u32 SingleFlag
     //          );
     //
-    //      BOOLEAN
+    //      b
     //      BooleanFlagOn (
-    //          IN ULONG Flags,
-    //          IN ULONG SingleFlag
+    //          IN u32 Flags,
+    //          IN u32 SingleFlag
     //          );
     //
-    //      VOID
+    //      void
     //      SetFlag (
-    //          IN ULONG Flags,
-    //          IN ULONG SingleFlag
+    //          IN u32 Flags,
+    //          IN u32 SingleFlag
     //          );
     //
-    //      VOID
+    //      void
     //      ClearFlag (
-    //          IN ULONG Flags,
-    //          IN ULONG SingleFlag
+    //          IN u32 Flags,
+    //          IN u32 SingleFlag
     //          );
     //
-    //      ULONG
+    //      u32
     //      QuadAlign (
-    //          IN ULONG Pointer
+    //          IN u32 Pointer
     //          );
     //
 
@@ -177,7 +177,7 @@ extern "C" {
 )
 
 #define BooleanFlagOn(F,SF) (    \
-    (BOOLEAN)(((F) & (SF)) != 0) \
+    (b)(((F) & (SF)) != 0) \
 )
 
 #define SetFlag(F,SF) { \
@@ -198,39 +198,39 @@ extern "C" {
 #ifndef _WIN64
 #define MM_PTE_EXECUTE_MASK 0x8000000000000000UI64
 
-#define PAE_ENABLE (FALSE != GpBlock->DebuggerDataBlock.PaeEnabled)
+#define PAE_ENABLE (FALSE != GpBlock.DebuggerDataBlock.PaeEnabled)
 
 #define INSERT_EXECUTE_TO_VALID_PTE(PPTE) { \
             if(FALSE != PAE_ENABLE) \
-                *(PULONG64)(PPTE) &= ~MM_PTE_EXECUTE_MASK; \
+                *(u64ptr)(PPTE) &= ~MM_PTE_EXECUTE_MASK; \
         }
 #define REMOVE_EXECUTE_TO_VALID_PTE(PPTE) { \
             if(FALSE != PAE_ENABLE) \
-                *(PULONG64)(PPTE) |= MM_PTE_EXECUTE_MASK; \
+                *(u64ptr)(PPTE) |= MM_PTE_EXECUTE_MASK; \
         }
 #else
 #define INSERT_EXECUTE_TO_VALID_PTE(PPTE) (PPTE)->u.Hard.NoExecute = 0;
 #define REMOVE_EXECUTE_TO_VALID_PTE(PPTE) (PPTE)->u.Hard.NoExecute = 1;
 #endif // !_WIN64
 
-    VOID
+    void
         NTAPI
         _FlushSingleTb(
-            __in PVOID VirtualAddress
+            __in ptr VirtualAddress
         );
 
-    VOID
+    void
         NTAPI
         FlushSingleTb(
-            __in PVOID VirtualAddress
+            __in ptr VirtualAddress
         );
 
     FORCEINLINE
-        VOID
+        void
         NTAPI
         _FlushMultipleTb(
-            __in PVOID VirtualAddress,
-            __in SIZE_T RegionSize
+            __in ptr VirtualAddress,
+            __in u RegionSize
         )
     {
         PFN_NUMBER NumberOfPages = 0;
@@ -238,22 +238,22 @@ extern "C" {
 
         NumberOfPages =
             BYTES_TO_PAGES(RegionSize +
-            ((PCHAR)VirtualAddress - (PCHAR)PAGE_ALIGN(VirtualAddress)));
+            ((u8ptr)VirtualAddress - (u8ptr)PAGE_ALIGN(VirtualAddress)));
 
         for (PageFrameIndex = 0;
             PageFrameIndex < NumberOfPages;
             PageFrameIndex++) {
             _FlushSingleTb(
-                (PCHAR)PAGE_ALIGN(VirtualAddress) + PAGE_SIZE * PageFrameIndex);
+                (u8ptr)PAGE_ALIGN(VirtualAddress) + PAGE_SIZE * PageFrameIndex);
         }
     }
 
-    VOID
+    void
         NTAPI
         FlushMultipleTb(
-            __in PVOID VirtualAddress,
-            __in SIZE_T RegionSize,
-            __in BOOLEAN AllProcesors
+            __in ptr VirtualAddress,
+            __in u RegionSize,
+            __in b AllProcesors
         );
 
 #ifdef __cplusplus

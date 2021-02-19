@@ -1,6 +1,6 @@
 ;
 ;
-; Copyright (c) 2015 - 2019 by blindtiger. All rights reserved.
+; Copyright (c) 2015 - 2021 by blindtiger. All rights reserved.
 ;
 ; The contents of this file are subject to the Mozilla Public License Version
 ; 2.0 (the "License"); you may not use this file except in compliance with
@@ -26,26 +26,28 @@ include callconv.inc
 _TEXT$00    SEGMENT PAGE 'CODE'
 
 ; DECLSPEC_NORETURN
-;     VOID
+;     void
 ;     STDCALL
 ;     _CaptureContext(
-;         __in ULONG ProgramCounter,
-;         __in PVOID Detour,
-;         __in PGUARD Guard,
-;         __in_opt PVOID Parameter,
-;         __in_opt PVOID Reserved
+;         __in u32 ProgramCounter,
+;         __in ptr Guard,
+;         __in PGUARD_CALLBACK Callback,
+;         __in_opt ptr Parameter,
+;         __in_opt ptr Reserved
 ;     );
 
 StackPointer EQU 14h
 Reserved EQU 10h
 Parameter EQU 0ch
-Guard EQU 8
-Detour EQU 4
+Callback EQU 8
+Guard EQU 4
 ProgramCounter EQU 0
 
     cPublicProc __CaptureContext, 5
     
-        sub esp, ContextFrameLength
+        pushfd
+
+        sub esp, ContextFrameLength - 4
         
         push ebx
         
@@ -70,13 +72,13 @@ ProgramCounter EQU 0
         mov [ebx].CsEsi, esi
         mov [ebx].CsEdi, edi
         
-        pushfd
-        pop [ebx].CsEFlags
+        mov eax, [esp - 4].ContextFrameLength
+        mov [ebx].CsEFlags, eax
 
         lea eax, [esp].ContextFrameLength.StackPointer
         mov [ebx].CsEsp, eax
 
-        mov eax, [esp].ContextFrameLength.Detour
+        mov eax, [esp].ContextFrameLength.Guard
         mov [ebx].CsEip, eax
         
         mov eax, CONTEXT_FULL
@@ -86,7 +88,7 @@ ProgramCounter EQU 0
         lea ecx, [ebx]
         mov edi, [esp].ContextFrameLength.Reserved
         mov esi, [esp].ContextFrameLength.Parameter
-        mov eax, [esp].ContextFrameLength.Guard
+        mov eax, [esp].ContextFrameLength.Callback
         
         push edi
         push esi

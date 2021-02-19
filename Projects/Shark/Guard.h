@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2015 - 2019 by blindtiger. All rights reserved.
+* Copyright (c) 2015 - 2021 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License"); you may not use this file except in compliance with
@@ -16,10 +16,10 @@
 *
 */
 
-#ifndef _DETOURS_H_
-#define _DETOURS_H_
+#ifndef _GUARD_H_
+#define _GUARD_H_
 
-#include <detoursdefs.h>
+#include <guarddefs.h>
 
 #ifdef __cplusplus
 /* Assume byte packing throughout */
@@ -29,11 +29,11 @@ extern "C" {
     //////////////////////////////////////////////////////////////////////////////
     //
     //  Function:
-    //      DetourCopyInstruction(PVOID pDst,
-    //                            PVOID *ppDstPool
-    //                            PVOID pSrc,
-    //                            PVOID *ppTarget,
-    //                            LONG *plExtra)
+    //      DetourCopyInstruction(ptr pDst,
+    //                            ptr *ppDstPool
+    //                            ptr pSrc,
+    //                            ptr *ppTarget,
+    //                            s32 *plExtra)
     //  Purpose:
     //      Copy a single instruction from pSrc to pDst.
     //
@@ -87,97 +87,108 @@ extern "C" {
     //
     //////////////////////////////////////////////////////////////////////////////
 
-    PVOID
+    ptr
         NTAPI
         DetourCopyInstruction(
-            __in_opt PVOID pDst,
-            __in_opt PVOID * ppDstPool,
-            __in PVOID pSrc,
-            __out_opt PVOID * ppTarget,
-            __out LONG * plExtra
+            __in_opt ptr pDst,
+            __in_opt ptr * ppDstPool,
+            __in ptr pSrc,
+            __out_opt ptr * ppTarget,
+            __out s32 * plExtra
         );
 
-    VOID
+    DECLSPEC_NORETURN
+        void
         NTAPI
-        DetourMapLockedCopyInstruction(
-            __in PVOID Destination,
-            __in PVOID Source,
-            __in ULONG Length
+        _CaptureContext(
+            __in u32 ProgramCounter,
+            __in ptr Guard,
+            __in PGUARD_CALLBACK Callback,
+            __in_opt ptr Parameter,
+            __in_opt ptr Reserved
         );
 
-    VOID
+    void
         NTAPI
-        DetourMapLockedBuildJumpCode(
-            __inout PVOID * Pointer,
-            __in PVOID Detour
+        MapLockedCopyInstruction(
+            __in ptr Destination,
+            __in ptr Source,
+            __in u32 Length
         );
 
-    VOID
+    void
         NTAPI
-        DetourLockedCopyInstruction(
-            __in PVOID Destination,
-            __in PVOID Source,
-            __in ULONG Length
+        MapLockedBuildJumpCode(
+            __inout ptr * Pointer,
+            __in ptr Guard
         );
 
-    VOID
+    void
         NTAPI
-        DetourLockedBuildJumpCode(
-            __inout PVOID * Pointer,
-            __in PVOID Detour
+        LockedCopyInstruction(
+            __in ptr Destination,
+            __in ptr Source,
+            __in u32 Length
+        );
+
+    void
+        NTAPI
+        LockedBuildJumpCode(
+            __inout ptr * Pointer,
+            __in ptr Guard
         );
 
 #ifndef _WIN64
     PPATCH_HEADER
         NTAPI
         HotpatchAttach(
-            __inout PVOID * Pointer,
-            __in PVOID Hotpatch
+            __inout ptr * Pointer,
+            __in ptr Hotpatch
         );
 
-    VOID
+    void
         NTAPI
         HotpatchDetach(
-            __inout PVOID * Pointer,
+            __inout ptr * Pointer,
             __in PPATCH_HEADER PatchHeader,
-            __in PVOID Hotpatch
+            __in ptr Hotpatch
         );
 #endif // !_WIN64
 
     PPATCH_HEADER
         NTAPI
-        DetourAttach(
-            __inout PVOID * Pointer,
-            __in PVOID Detour
+        GuardAttach(
+            __inout ptr * Pointer,
+            __in ptr Guard
         );
 
-    VOID
+    void
         NTAPI
-        DetourDetach(
-            __inout PVOID * Pointer,
+        GuardDetach(
+            __inout ptr * Pointer,
             __in PPATCH_HEADER PatchHeader,
-            __in PVOID Detour
+            __in ptr Guard
         );
 
     PPATCH_HEADER
         NTAPI
-        DetourGuardAttach(
-            __inout PVOID * Pointer,
-            __in PGUARD Guard,
-            __in_opt PVOID Parameter,
-            __in_opt PVOID Reserved
+        SafeGuardAttach(
+            __inout ptr * Pointer,
+            __in PGUARD_CALLBACK Callback,
+            __in_opt ptr Parameter,
+            __in_opt ptr Reserved
         );
 
-    VOID
+    void
         NTAPI
-        DetourGuardDetach(
-            __inout PVOID * Pointer,
+        SafeGuardDetach(
+            __inout ptr * Pointer,
             __in PPATCH_HEADER PatchHeader,
-            __in PGUARD Guard
+            __in PGUARD_CALLBACK Callback
         );
 
 #ifdef __cplusplus
 }
 #endif	/* __cplusplus */
 
-#endif // !_DETOURS_H_
+#endif // !_GUARD_H_

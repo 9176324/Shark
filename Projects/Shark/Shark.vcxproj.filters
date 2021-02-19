@@ -66,7 +66,7 @@
     <ClCompile Include="I386\StackI386.c">
       <Filter>Source Files\I386</Filter>
     </ClCompile>
-    <ClCompile Include="Detours.c">
+    <ClCompile Include="Guard.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -129,7 +129,7 @@
     <ClInclude Include="Rtx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Detours.h">
+    <ClInclude Include="Guard.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,6 +1,6 @@
 ;
 ;
-; Copyright (c) 2015 - 2019 by blindtiger. All rights reserved.
+; Copyright (c) 2015 - 2021 by blindtiger. All rights reserved.
 ;
 ; The contents of this file are subject to the Mozilla Public License Version
 ; 2.0 (the "License"); you may not use this file except in compliance with
@@ -20,26 +20,28 @@ include ksamd64.inc
 include macamd64.inc
 
 ; DECLSPEC_NORETURN
-;     VOID
+;     void
 ;     STDCALL
 ;     _CaptureContext(
-;         __in ULONG ProgramCounter,
-;         __in PVOID Detour,
-;         __in PGUARD Guard,
-;         __in_opt PVOID Parameter,
-;         __in_opt PVOID Reserved
+;         __in u32 ProgramCounter,
+;         __in ptr Guard,
+;         __in PGUARD_CALLBACK Callback,
+;         __in_opt ptr Parameter,
+;         __in_opt ptr Reserved
 ;     );
 
 StackPointer EQU 28h
 Reserved EQU 20h
 Parameter EQU 18h
-Guard EQU 10h
-Detour EQU 8
+Callback EQU 10h
+Guard EQU 8
 ProgramCounter EQU 0
 
     LEAF_ENTRY _CaptureContext, _TEXT$00
         
-        sub rsp, CONTEXT_FRAME_LENGTH
+        pushfq
+
+        sub rsp, CONTEXT_FRAME_LENGTH - 8
 
         push rcx
 
@@ -94,10 +96,10 @@ ProgramCounter EQU 0
 
         stmxcsr CxMxCsr [rcx]
         
-        pushfq
-        pop CxEFlags [rcx]
+        mov rax, CONTEXT_FRAME_LENGTH [rsp - 8]
+        mov CxEFlags [rcx], rax
 
-        mov rax, CONTEXT_FRAME_LENGTH + Detour [rsp]
+        mov rax, CONTEXT_FRAME_LENGTH + Guard [rsp]
         mov CxRip [rcx], rax
 
         mov eax, CONTEXT_FULL
@@ -107,7 +109,7 @@ ProgramCounter EQU 0
         mov r8, CONTEXT_FRAME_LENGTH + Parameter [rsp]
         mov rdx, CONTEXT_FRAME_LENGTH + ProgramCounter [rsp]
         lea rcx, [rcx]
-        mov rax, CONTEXT_FRAME_LENGTH + Guard [rsp]
+        mov rax, CONTEXT_FRAME_LENGTH + Callback [rsp]
 
         call rax
 

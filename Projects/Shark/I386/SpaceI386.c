@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2015 - 2019 by blindtiger. All rights reserved.
+* Copyright (c) 2015 - 2021 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License")); you may not use this file except in compliance with
@@ -20,14 +20,14 @@
 
 #include "Space.h"
 
-#include "Detours.h"
+#include "Guard.h"
 #include "Reload.h"
 #include "Rtx.h"
 #include "Scan.h"
 
-VOID
+void
 NTAPI
-InitializeSystemSpace(
+InitializeSpace(
     __inout PGPBLOCK Block
 )
 {
@@ -47,43 +47,43 @@ InitializeSystemSpace(
 PMMPTE
 NTAPI
 GetPdeAddress(
-    __in PVOID VirtualAddress
+    __in ptr VirtualAddress
 )
 {
-    return (PMMPTE)(0 != GpBlock->DebuggerDataBlock.PaeEnabled ?
-        _GetPdeAddressPae(VirtualAddress, GpBlock->PdeBase) :
-        _GetPdeAddress(VirtualAddress, GpBlock->PdeBase));
+    return (PMMPTE)(0 != GpBlock.DebuggerDataBlock.PaeEnabled ?
+        _GetPdeAddressPae(VirtualAddress, GpBlock.PdeBase) :
+        _GetPdeAddress(VirtualAddress, GpBlock.PdeBase));
 }
 
 PMMPTE
 NTAPI
 GetPteAddress(
-    __in PVOID VirtualAddress
+    __in ptr VirtualAddress
 )
 {
-    return (PMMPTE)(0 != GpBlock->DebuggerDataBlock.PaeEnabled ?
-        _GetPteAddressPae(VirtualAddress, GpBlock->PteBase) :
-        _GetPteAddress(VirtualAddress, GpBlock->PteBase));
+    return (PMMPTE)(0 != GpBlock.DebuggerDataBlock.PaeEnabled ?
+        _GetPteAddressPae(VirtualAddress, GpBlock.PteBase) :
+        _GetPteAddress(VirtualAddress, GpBlock.PteBase));
 }
 
-PVOID
+ptr
 NTAPI
-GetVirtualAddressMappedByPte(
+GetVaMappedByPte(
     __in PMMPTE Pte
 )
 {
-    return (PVOID)(0 != GpBlock->DebuggerDataBlock.PaeEnabled ?
-        _GetVirtualAddressMappedByPtePae(Pte) :
-        _GetVirtualAddressMappedByPte(Pte));
+    return (ptr)(0 != GpBlock.DebuggerDataBlock.PaeEnabled ?
+        _GetVaMappedByPtePae(Pte) :
+        _GetVaMappedByPte(Pte));
 }
 
-PVOID
+ptr
 NTAPI
-GetVirtualAddressMappedByPde(
+GetVaMappedByPde(
     __in PMMPTE Pde
 )
 {
-    return (PVOID)(0 != GpBlock->DebuggerDataBlock.PaeEnabled ?
-        _GetVirtualAddressMappedByPdePae(Pde) :
-        _GetVirtualAddressMappedByPde(Pde));
+    return (ptr)(0 != GpBlock.DebuggerDataBlock.PaeEnabled ?
+        _GetVaMappedByPdePae(Pde) :
+        _GetVaMappedByPde(Pde));
 }

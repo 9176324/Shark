@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2015 - 2019 by blindtiger. All rights reserved.
+* Copyright (c) 2015 - 2021 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License"); you may not use this file except in compliance with
@@ -24,40 +24,40 @@
 extern "C" {
 #endif	/* __cplusplus */
 
-    BOOLEAN
+    b
         NTAPI
-        _CmpByte(
-            __in CHAR b1,
-            __in CHAR b2
+        _cmpbyte(
+            __in s8 b1,
+            __in s8 b2
         );
 
-    BOOLEAN
+    b
         NTAPI
-        _CmpShort(
-            __in SHORT s1,
-            __in SHORT s2
+        _cmpword(
+            __in s16 s1,
+            __in s16 s2
         );
 
-    BOOLEAN
+    b
         NTAPI
-        _CmpLong(
-            __in LONG l1,
-            __in LONG l2
+        _cmpdword(
+            __in s32 l1,
+            __in s32 l2
         );
 
-    BOOLEAN
+    b
         NTAPI
-        _CmpLongLong(
-            __in LONGLONG ll1,
-            __in LONGLONG ll2
+        _cmpqword(
+            __in s64 ll1,
+            __in s64 ll2
         );
 
-    PVOID
+    ptr
         NTAPI
         ScanBytes(
-            __in PSTR Begin,
-            __in PSTR End,
-            __in PSTR Sig
+            __in u8ptr Begin,
+            __in u8ptr End,
+            __in u8ptr Sig
         );
 
 #ifdef __cplusplus

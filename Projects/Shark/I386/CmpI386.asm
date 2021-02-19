@@ -1,6 +1,6 @@
 ;
 ;
-; Copyright (c) 2015 - 2019 by blindtiger. All rights reserved.
+; Copyright (c) 2015 - 2021 by blindtiger. All rights reserved.
 ;
 ; The contents of this file are subject to the Mozilla Public License Version
 ; 2.0 (the "License"); you may not use this file except in compliance with
@@ -24,68 +24,68 @@ include callconv.inc
         
 _TEXT$00    SEGMENT PAGE 'CODE'
 
-; BOOLEAN
+; b
 ;     NTAPI
-;     _CmpByte(
-;         __in CHAR b1,
-;         __in CHAR b2
+;     _cmpbyte(
+;         __in s8 b1,
+;         __in s8 b2
 ;     );
 
-    cPublicProc __CmpByte, 2
+    cPublicProc __cmpbyte, 2
 
         mov cl, [esp + 4]
         mov dl, [esp + 8]
         cmp cl, dl
         setnz al
 
-        stdRET __CmpByte
+        stdRET __cmpbyte
 
-    stdENDP __CmpByte
+    stdENDP __cmpbyte
     
-; BOOLEAN
+; b
 ;     NTAPI
-;     _CmpShort(
-;         __in SHORT s1,
-;         __in SHORT s2
+;     _cmpword(
+;         __in s16 s1,
+;         __in s16 s2
 ;     );
 
-    cPublicProc __CmpShort, 2
+    cPublicProc __cmpword, 2
 
         mov cx, [esp + 4]
         mov dx, [esp + 8]
         cmp cx, dx
         setnz al
         
-        stdRET __CmpShort
+        stdRET __cmpword
 
-    stdENDP __CmpShort
+    stdENDP __cmpword
 
-; BOOLEAN
+; b
 ;     NTAPI
-;     _CmpLong(
-;         __in LONG l1,
-;         __in LONG l2
+;     _cmpdword(
+;         __in s32 l1,
+;         __in s32 l2
 ;     );
 
-    cPublicProc __CmpLong, 2
+    cPublicProc __cmpdword, 2
 
         mov ecx, [esp + 4]
         mov edx, [esp + 8]
         cmp ecx, edx
         setnz al
         
-        stdRET __CmpLong
+        stdRET __cmpdword
 
-    stdENDP __CmpLong
+    stdENDP __cmpdword
     
-; BOOLEAN
+; b
 ;     NTAPI
-;     _CmpLongLong(
-;         __in LONGLONG ll1,
-;         __in LONGLONG ll2
+;     _cmpqword(
+;         __in s64 ll1,
+;         __in s64 ll2
 ;     );
 
-    cPublicProc __CmpLongLong, 4
+    cPublicProc __cmpqword, 4
 
         mov ecx, [esp + 4]
         mov edx, [esp + 0ch]
@@ -100,9 +100,9 @@ _TEXT$00    SEGMENT PAGE 'CODE'
     @@ :
         setnz al
         
-        stdRET __CmpLongLong
+        stdRET __cmpqword
 
-    stdENDP __CmpLongLong
+    stdENDP __cmpqword
 
 _TEXT$00    ends
 

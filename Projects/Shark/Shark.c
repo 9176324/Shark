@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2015 - 2019 by blindtiger. All rights reserved.
+* Copyright (c) 2015 - 2021 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License")); you may not use this file except in compliance with
@@ -21,10 +21,19 @@
 
 #include "Shark.h"
 
-#include "Detours.h"
+#include "Guard.h"
 #include "Reload.h"
 #include "PatchGuard.h"
 #include "Space.h"
+
+#pragma section( ".block", read, write, execute )
+
+__declspec(allocate(".block")) GPBLOCK GpBlock = { 0 };
+__declspec(allocate(".block")) PGBLOCK PgBlock = { 0 };
+
+// #ifdef ALLOC_PRAGMA
+// #pragma alloc_text(PAGE, DriverEntry)
+// #endif
 
 VOID
 NTAPI
@@ -103,6 +112,9 @@ DriverEntry(
 
         if (NT_SUCCESS(Status)) {
             DriverObject->DriverUnload = (PDRIVER_UNLOAD)DriverUnload;
+            
+            InitializeGpBlock(&GpBlock);
+            InitializeSpace(&GpBlock);
 
 #ifndef PUBLIC
             DbgPrint("[Shark] load\n");
@@ -223,24 +235,10 @@ DeviceControl(
 
     switch (IrpSp->Parameters.DeviceIoControl.IoControlCode) {
     case 0: {
-        PPGBLOCK PgBlock = NULL;
+        InitializeGpBlock(&GpBlock);
+        InitializeSpace(&GpBlock);
 
-        GpBlock = ExAllocatePool(
-            NonPagedPool,
-            sizeof(GPBLOCK) + sizeof(PGBLOCK));
-
-        if (NULL != GpBlock) {
-            RtlZeroMemory(
-                GpBlock,
-                sizeof(GPBLOCK) + sizeof(PGBLOCK));
-
-            InitializeGpBlock(GpBlock);
-            InitializeSystemSpace(GpBlock);
-
-            PgBlock =(PCHAR)GpBlock + sizeof(GPBLOCK);
-
-            PgClear(PgBlock);
-        }
+        PgClear(&PgBlock);
 
         Irp->IoStatus.Information = 0;
 

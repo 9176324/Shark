@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2015 - 2019 by blindtiger. All rights reserved.
+* Copyright (c) 2015 - 2021 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License")); you may not use this file except in compliance with
@@ -20,23 +20,23 @@
 
 #include "Scan.h"
 
-SIZE_T
+u
 NTAPI
 TrimBytes(
-    __in PSTR Sig,
-    __in_opt PSTR Coll,
-    __in_bcount(Coll) SIZE_T CollSize,
-    __out PBOOLEAN Selector
+    __in u8ptr Sig,
+    __in_opt u8ptr Coll,
+    __in_bcount(Coll) u CollSize,
+    __out bptr Selector
 )
 {
-    NTSTATUS Status = STATUS_SUCCESS;
-    SIZE_T Result = 0;
-    PSTR Buffer = NULL;
-    SIZE_T BufferSize = 0;
-    CHAR Single[3] = { 0 };
-    ULONG Digit = 0;
-    SIZE_T Index = 0;
-    ULONG Length = 0;
+    status Status = STATUS_SUCCESS;
+    u Result = 0;
+    u8ptr Buffer = NULL;
+    u BufferSize = 0;
+    u8 Single[3] = { 0 };
+    u32 Digit = 0;
+    u Index = 0;
+    u32 Length = 0;
 
     Length = strlen(Sig);
 
@@ -44,22 +44,13 @@ TrimBytes(
         Index < Length;
         Index++) {
         if (0 != isxdigit(*(Sig + Index)) ||
-            0 == _CmpByte(*(Sig + Index), '?')) {
+            0 == _cmpbyte(*(Sig + Index), '?')) {
             BufferSize++;
         }
     }
 
     if (0 != BufferSize) {
-#ifndef NTOS_KERNEL_RUNTIME
-        Buffer = RtlAllocateHeap(
-            RtlProcessHeap(),
-            0,
-            BufferSize);
-#else
-        Buffer = ExAllocatePool(
-            NonPagedPool,
-            BufferSize);
-#endif // !NTOS_KERNEL_RUNTIME
+        Buffer = __malloc(BufferSize);
 
         if (NULL != Buffer) {
             RtlZeroMemory(
@@ -70,7 +61,7 @@ TrimBytes(
                 Index < Length;
                 Index++) {
                 if (0 != isxdigit(*(Sig + Index)) ||
-                    0 == _CmpByte(*(Sig + Index), '?')) {
+                    0 == _cmpbyte(*(Sig + Index), '?')) {
                     RtlCopyMemory(
                         Buffer + strlen(Buffer),
                         Sig + Index,
@@ -94,8 +85,8 @@ TrimBytes(
                         for (Index = 0;
                             Index < BufferSize;
                             Index += 2) {
-                            if (0 == _CmpByte(*(Buffer + Index), '?') &&
-                                0 == _CmpByte(*(Buffer + Index + 1), '?')) {
+                            if (0 == _cmpbyte(*(Buffer + Index), '?') &&
+                                0 == _cmpbyte(*(Buffer + Index + 1), '?')) {
                                 *(Coll + Index / 2) = '?';
 
                                 *Selector = TRUE;
@@ -105,18 +96,18 @@ TrimBytes(
                                 RtlCopyMemory(
                                     Single,
                                     Buffer + Index,
-                                    sizeof(CHAR) * 2);
+                                    sizeof(u8) * 2);
 
                                 Status = RtlCharToInteger(
                                     Single,
                                     16,
                                     &Digit);
 
-                                if (NT_SUCCESS(Status)) {
-                                    *(Coll + Index / 2) = (CHAR)Digit;
+                                if (TRACE(Status)) {
+                                    *(Coll + Index / 2) = (u8)Digit;
 
                                     *Selector =
-                                        *Selector ? TRUE : FALSE;
+                                        FALSE != *Selector ? TRUE : FALSE;
                                 }
                                 else {
                                     Result = -1;
@@ -137,30 +128,23 @@ TrimBytes(
                 }
             }
 
-#ifndef NTOS_KERNEL_RUNTIME
-            RtlFreeHeap(
-                RtlProcessHeap(),
-                0,
-                Buffer);
-#else
-            ExFreePool(Buffer);
-#endif // !NTOS_KERNEL_RUNTIME
+            __free(Buffer);
         }
     }
 
     return Result;
 }
 
-SIZE_T
+u
 NTAPI
 CompareBytes(
-    __in PSTR Destination,
-    __in PSTR Source,
-    __in SIZE_T Length,
-    __in BOOLEAN Selector
+    __in u8ptr Destination,
+    __in u8ptr Source,
+    __in u Length,
+    __in b Selector
 )
 {
-    SIZE_T Count = 0;
+    u Count = 0;
 
     if (FALSE == Selector) {
         Count = RtlCompareMemory(
@@ -172,8 +156,8 @@ CompareBytes(
         for (Count = 0;
             Count < Length;
             Count++) {
-            if (0 != _CmpByte(*(Destination + Count), *(Source + Count)) &&
-                0 != _CmpByte(*(Source + Count), '?')) {
+            if (0 != _cmpbyte(*(Destination + Count), *(Source + Count)) &&
+                0 != _cmpbyte(*(Source + Count), '?')) {
                 break;
             }
         }
@@ -182,19 +166,19 @@ CompareBytes(
     return Count;
 }
 
-PVOID
+ptr
 NTAPI
 ScanBytes(
-    __in PSTR Begin,
-    __in PSTR End,
-    __in PSTR Sig
+    __in u8ptr Begin,
+    __in u8ptr End,
+    __in u8ptr Sig
 )
 {
-    BOOLEAN Selector = FALSE;
-    PSTR Coll = NULL;
-    SIZE_T CollSize = 0;
-    PVOID Result = NULL;
-    SIZE_T Index = 0;
+    b Selector = FALSE;
+    u8ptr Coll = NULL;
+    u CollSize = 0;
+    ptr Result = NULL;
+    u Index = 0;
 
     CollSize = TrimBytes(
         Sig,
@@ -203,17 +187,8 @@ ScanBytes(
         &Selector);
 
     if (-1 != CollSize) {
-        if ((LONG_PTR)(End - Begin - CollSize) >= 0) {
-#ifndef NTOS_KERNEL_RUNTIME
-            Coll = RtlAllocateHeap(
-                RtlProcessHeap(),
-                0,
-                CollSize);
-#else
-            Coll = ExAllocatePool(
-                NonPagedPool,
-                CollSize);
-#endif // !NTOS_KERNEL_RUNTIME
+        if ((s)(End - Begin - CollSize) >= 0) {
+            Coll = __malloc(CollSize);
 
             if (NULL != Coll) {
                 CollSize = TrimBytes(
@@ -237,14 +212,7 @@ ScanBytes(
                     }
                 }
 
-#ifndef NTOS_KERNEL_RUNTIME
-                RtlFreeHeap(
-                    RtlProcessHeap(),
-                    0,
-                    Coll);
-#else
-                ExFreePool(Coll);
-#endif // !NTOS_KERNEL_RUNTIME
+                __free(Coll);
             }
         }
     }

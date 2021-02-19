@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2015 - 2019 by blindtiger. All rights reserved.
+* Copyright (c) 2015 - 2021 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License")); you may not use this file except in compliance with
@@ -20,47 +20,47 @@
 
 #include "Space.h"
 
-#include "Detours.h"
+#include "Guard.h"
 #include "Reload.h"
 #include "Rtx.h"
 #include "Scan.h"
 
-VOID
+void
 NTAPI
-InitializeSystemSpace(
+InitializeSpace(
     __inout PGPBLOCK Block
 )
 {
-    if (Block->BuildNumber > 10586) {
+    if (Block->BuildNumber >= 10586) {
         Block->PteBase = (PMMPTE)Block->DebuggerDataAdditionBlock.PteBase;
 
         Block->PteTop = (PMMPTE)
-            ((LONGLONG)Block->PteBase |
-            (((((LONGLONG)1 << (VIRTUAL_ADDRESS_BITS + 1)) >> PTI_SHIFT) << PTE_SHIFT) - 1));
+            ((s64)Block->PteBase |
+            (((((s64)1 << (VIRTUAL_ADDRESS_BITS + 1)) >> PTI_SHIFT) << PTE_SHIFT) - 1));
 
         Block->PdeBase = (PMMPTE)
-            (((LONGLONG)Block->PteBase & ~(((LONGLONG)1 << (PHYSICAL_ADDRESS_BITS - 1)) - 1)) |
-            (((LONGLONG)Block->PteBase >> 9) & (((LONGLONG)1 << (PHYSICAL_ADDRESS_BITS - 1)) - 1)));
+            (((s64)Block->PteBase & ~(((s64)1 << (PHYSICAL_ADDRESS_BITS - 1)) - 1)) |
+            (((s64)Block->PteBase >> 9) & (((s64)1 << (PHYSICAL_ADDRESS_BITS - 1)) - 1)));
 
         Block->PdeTop = (PMMPTE)
-            ((LONGLONG)Block->PdeBase |
-            (((((LONGLONG)1 << (VIRTUAL_ADDRESS_BITS + 1)) >> PDI_SHIFT) << PTE_SHIFT) - 1));
+            ((s64)Block->PdeBase |
+            (((((s64)1 << (VIRTUAL_ADDRESS_BITS + 1)) >> PDI_SHIFT) << PTE_SHIFT) - 1));
 
         Block->PpeBase = (PMMPTE)
-            (((LONGLONG)Block->PdeBase & ~(((LONGLONG)1 << (PHYSICAL_ADDRESS_BITS - 1)) - 1)) |
-            (((LONGLONG)Block->PdeBase >> 9) & (((LONGLONG)1 << (PHYSICAL_ADDRESS_BITS - 1)) - 1)));
+            (((s64)Block->PdeBase & ~(((s64)1 << (PHYSICAL_ADDRESS_BITS - 1)) - 1)) |
+            (((s64)Block->PdeBase >> 9) & (((s64)1 << (PHYSICAL_ADDRESS_BITS - 1)) - 1)));
 
         Block->PpeTop = (PMMPTE)
-            ((LONGLONG)Block->PpeBase |
-            (((((LONGLONG)1 << (VIRTUAL_ADDRESS_BITS + 1)) >> PPI_SHIFT) << PTE_SHIFT) - 1));
+            ((s64)Block->PpeBase |
+            (((((s64)1 << (VIRTUAL_ADDRESS_BITS + 1)) >> PPI_SHIFT) << PTE_SHIFT) - 1));
 
         Block->PxeBase = (PMMPTE)
-            (((LONGLONG)Block->PpeBase & ~(((LONGLONG)1 << (PHYSICAL_ADDRESS_BITS - 1)) - 1)) |
-            (((LONGLONG)Block->PpeBase >> 9) & (((LONGLONG)1 << (PHYSICAL_ADDRESS_BITS - 1)) - 1)));
+            (((s64)Block->PpeBase & ~(((s64)1 << (PHYSICAL_ADDRESS_BITS - 1)) - 1)) |
+            (((s64)Block->PpeBase >> 9) & (((s64)1 << (PHYSICAL_ADDRESS_BITS - 1)) - 1)));
 
         Block->PxeTop = (PMMPTE)
-            ((LONGLONG)Block->PxeBase |
-            (((((LONGLONG)1 << (VIRTUAL_ADDRESS_BITS + 1)) >> PXI_SHIFT) << PTE_SHIFT) - 1));
+            ((s64)Block->PxeBase |
+            (((((s64)1 << (VIRTUAL_ADDRESS_BITS + 1)) >> PXI_SHIFT) << PTE_SHIFT) - 1));
     }
     else {
         Block->PteBase = (PMMPTE)PTE_BASE;
@@ -77,78 +77,81 @@ InitializeSystemSpace(
 PMMPTE
 NTAPI
 GetPxeAddress(
-    __in PVOID VirtualAddress
+    __in ptr VirtualAddress
 )
 {
-    return GpBlock->PxeBase + MiGetPxeOffset(VirtualAddress);
+    return GpBlock.PxeBase + MiGetPxeOffset(VirtualAddress);
 }
 
 PMMPTE
 NTAPI
 GetPpeAddress(
-    __in PVOID VirtualAddress
+    __in ptr VirtualAddress
 )
 {
     return (PMMPTE)
-        (((((LONGLONG)VirtualAddress &
-            VIRTUAL_ADDRESS_MASK) >> PPI_SHIFT) << PTE_SHIFT) + (LONGLONG)GpBlock->PpeBase);
+        (((((s64)VirtualAddress & VIRTUAL_ADDRESS_MASK)
+            >> PPI_SHIFT)
+            << PTE_SHIFT) + (s64)GpBlock.PpeBase);
 }
 
 PMMPTE
 NTAPI
 GetPdeAddress(
-    __in PVOID VirtualAddress
+    __in ptr VirtualAddress
 )
 {
     return (PMMPTE)
-        (((((LONGLONG)VirtualAddress &
-            VIRTUAL_ADDRESS_MASK) >> PDI_SHIFT) << PTE_SHIFT) + (LONGLONG)GpBlock->PdeBase);
+        (((((s64)VirtualAddress & VIRTUAL_ADDRESS_MASK)
+            >> PDI_SHIFT)
+            << PTE_SHIFT) + (s64)GpBlock.PdeBase);
 }
 
 PMMPTE
 NTAPI
 GetPteAddress(
-    __in PVOID VirtualAddress
+    __in ptr VirtualAddress
 )
 {
     return (PMMPTE)
-        (((((LONGLONG)VirtualAddress &
-            VIRTUAL_ADDRESS_MASK) >> PTI_SHIFT) << PTE_SHIFT) + (LONGLONG)GpBlock->PteBase);
+        (((((s64)VirtualAddress & VIRTUAL_ADDRESS_MASK)
+            >> PTI_SHIFT)
+            << PTE_SHIFT) + (s64)GpBlock.PteBase);
 }
 
-PVOID
+ptr
 NTAPI
-GetVirtualAddressMappedByPte(
+GetVaMappedByPte(
     __in PMMPTE Pte
 )
 {
-    return (PVOID)((((LONGLONG)Pte - (LONGLONG)GpBlock->PteBase) <<
+    return (ptr)((((s64)Pte - (s64)GpBlock.PteBase) <<
         (PAGE_SHIFT + VA_SHIFT - PTE_SHIFT)) >> VA_SHIFT);
 }
 
-PVOID
+ptr
 NTAPI
-GetVirtualAddressMappedByPde(
+GetVaMappedByPde(
     __in PMMPTE Pde
 )
 {
-    return GetVirtualAddressMappedByPte(GetVirtualAddressMappedByPte(Pde));
+    return GetVaMappedByPte(GetVaMappedByPte(Pde));
 }
 
-PVOID
+ptr
 NTAPI
-GetVirtualAddressMappedByPpe(
+GetVaMappedByPpe(
     __in PMMPTE Ppe
 )
 {
-    return GetVirtualAddressMappedByPte(GetVirtualAddressMappedByPde(Ppe));
+    return GetVaMappedByPte(GetVaMappedByPde(Ppe));
 }
 
-PVOID
+ptr
 NTAPI
-GetVirtualAddressMappedByPxe(
+GetVaMappedByPxe(
     __in PMMPTE Pxe
 )
 {
-    return GetVirtualAddressMappedByPde(GetVirtualAddressMappedByPde(Pxe));
+    return GetVaMappedByPde(GetVaMappedByPde(Pxe));
 }

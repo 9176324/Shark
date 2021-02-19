@@ -1,6 +1,6 @@
 /*
 *
-* Copyright (c) 2015 - 2019 by blindtiger. All rights reserved.
+* Copyright (c) 2015 - 2021 by blindtiger. All rights reserved.
 *
 * The contents of this file are subject to the Mozilla Public License Version
 * 2.0 (the "License")); you may not use this file except in compliance with
@@ -23,39 +23,39 @@
 #include "Reload.h"
 #include "Rtx.h"
 
-VOID
+void
 NTAPI
 FlushSingleTb(
-    __in PVOID VirtualAddress
+    __in ptr VirtualAddress
 )
 {
     IpiSingleCall(
-        (PPS_APC_ROUTINE)NULL,
-        (PKSYSTEM_ROUTINE)NULL,
-        (PUSER_THREAD_START_ROUTINE)_FlushSingleTb,
-        (PVOID)VirtualAddress);
+        (PGKERNEL_ROUTINE)NULL,
+        (PGSYSTEM_ROUTINE)NULL,
+        (PGRUNDOWN_ROUTINE)_FlushSingleTb,
+        (PGNORMAL_ROUTINE)VirtualAddress);
 }
 
-VOID
+void
 NTAPI
 FlushMultipleTb(
-    __in PVOID VirtualAddress,
-    __in SIZE_T RegionSize,
-    __in BOOLEAN AllProcesors
+    __in ptr VirtualAddress,
+    __in u RegionSize,
+    __in b AllProcesors
 )
 {
     if (FALSE != AllProcesors) {
         IpiGenericCall(
-            (PPS_APC_ROUTINE)NULL,
-            (PKSYSTEM_ROUTINE)_FlushMultipleTb,
-            (PUSER_THREAD_START_ROUTINE)VirtualAddress,
-            (PVOID)RegionSize);
+            (PGKERNEL_ROUTINE)NULL,
+            (PGSYSTEM_ROUTINE)_FlushMultipleTb,
+            (PGRUNDOWN_ROUTINE)VirtualAddress,
+            (PGNORMAL_ROUTINE)RegionSize);
     }
     else {
         IpiSingleCall(
-            (PPS_APC_ROUTINE)NULL,
-            (PKSYSTEM_ROUTINE)_FlushMultipleTb,
-            (PUSER_THREAD_START_ROUTINE)VirtualAddress,
-            (PVOID)RegionSize);
+            (PGKERNEL_ROUTINE)NULL,
+            (PGSYSTEM_ROUTINE)_FlushMultipleTb,
+            (PGRUNDOWN_ROUTINE)VirtualAddress,
+            (PGNORMAL_ROUTINE)RegionSize);
     }
 }
