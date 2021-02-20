@@ -110,12 +110,6 @@ extern "C" {
 
     void
         NTAPI
-        InitializeGuardTrampoline(
-            void
-        );
-
-    void
-        NTAPI
         MapLockedCopyInstruction(
             __in ptr Destination,
             __in ptr Source,

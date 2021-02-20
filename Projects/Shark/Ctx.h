@@ -123,7 +123,7 @@ extern "C" {
     {
         return CONTAINING_RECORD(
             (ULONG_PTR)Thread +
-            GpBlock.DebuggerDataBlock.OffsetKThreadApcProcess,
+            GpBlock->DebuggerDataBlock.OffsetKThreadApcProcess,
             KAPC_STATE,
             Process);
     }
@@ -136,7 +136,7 @@ extern "C" {
         )
     {
         return *(PCCHAR)((ULONG_PTR)Thread +
-            GpBlock.DebuggerDataBlock.OffsetKThreadState);
+            GpBlock->DebuggerDataBlock.OffsetKThreadState);
     }
 
     FORCEINLINE

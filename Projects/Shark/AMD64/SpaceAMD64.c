@@ -80,7 +80,7 @@ GetPxeAddress(
     __in ptr VirtualAddress
 )
 {
-    return GpBlock.PxeBase + MiGetPxeOffset(VirtualAddress);
+    return GpBlock->PxeBase + MiGetPxeOffset(VirtualAddress);
 }
 
 PMMPTE
@@ -92,7 +92,7 @@ GetPpeAddress(
     return (PMMPTE)
         (((((s64)VirtualAddress & VIRTUAL_ADDRESS_MASK)
             >> PPI_SHIFT)
-            << PTE_SHIFT) + (s64)GpBlock.PpeBase);
+            << PTE_SHIFT) + (s64)GpBlock->PpeBase);
 }
 
 PMMPTE
@@ -104,7 +104,7 @@ GetPdeAddress(
     return (PMMPTE)
         (((((s64)VirtualAddress & VIRTUAL_ADDRESS_MASK)
             >> PDI_SHIFT)
-            << PTE_SHIFT) + (s64)GpBlock.PdeBase);
+            << PTE_SHIFT) + (s64)GpBlock->PdeBase);
 }
 
 PMMPTE
@@ -116,7 +116,7 @@ GetPteAddress(
     return (PMMPTE)
         (((((s64)VirtualAddress & VIRTUAL_ADDRESS_MASK)
             >> PTI_SHIFT)
-            << PTE_SHIFT) + (s64)GpBlock.PteBase);
+            << PTE_SHIFT) + (s64)GpBlock->PteBase);
 }
 
 ptr
@@ -125,7 +125,7 @@ GetVaMappedByPte(
     __in PMMPTE Pte
 )
 {
-    return (ptr)((((s64)Pte - (s64)GpBlock.PteBase) <<
+    return (ptr)((((s64)Pte - (s64)GpBlock->PteBase) <<
         (PAGE_SHIFT + VA_SHIFT - PTE_SHIFT)) >> VA_SHIFT);
 }
 

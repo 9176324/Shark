@@ -259,7 +259,7 @@ extern "C" {
 
         u8 _ClearMessage[0x80];
         u8 _FreeWorker[0xB0];
-        u8 _ClearCallback[0xC00];
+        u8 _ClearCallback[0xD00];
     }PGBLOCK, *PPGBLOCK;
 
     void

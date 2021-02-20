@@ -25,6 +25,8 @@
 #include "Except.h"
 #include "Scan.h"
 
+PGPBLOCK GpBlock;
+
 void
 NTAPI
 InitializeGpBlock(
@@ -772,17 +774,17 @@ FindEntryForKernelImage(
     NTSTATUS Status = STATUS_NO_MORE_ENTRIES;
     PKLDR_DATA_TABLE_ENTRY FoundDataTableEntry = NULL;
 
-    GpBlock.KeEnterCriticalRegion();
-    ExAcquireResourceExclusiveLite(GpBlock.PsLoadedModuleResource, TRUE);
+    GpBlock->KeEnterCriticalRegion();
+    ExAcquireResourceExclusiveLite(GpBlock->PsLoadedModuleResource, TRUE);
 
-    if (FALSE == IsListEmpty(GpBlock.PsLoadedModuleList)) {
+    if (FALSE == IsListEmpty(GpBlock->PsLoadedModuleList)) {
         FoundDataTableEntry = CONTAINING_RECORD(
-            GpBlock.PsLoadedModuleList->Flink,
+            GpBlock->PsLoadedModuleList->Flink,
             KLDR_DATA_TABLE_ENTRY,
             InLoadOrderLinks);
 
         while ((ULONG_PTR)FoundDataTableEntry !=
-            (ULONG_PTR)GpBlock.PsLoadedModuleList) {
+            (ULONG_PTR)GpBlock->PsLoadedModuleList) {
             if (FALSE != RtlEqualUnicodeString(
                 ImageFileName,
                 &FoundDataTableEntry->BaseDllName,
@@ -799,8 +801,8 @@ FindEntryForKernelImage(
         }
     }
 
-    ExReleaseResourceLite(GpBlock.PsLoadedModuleResource);
-    GpBlock.KeLeaveCriticalRegion();
+    ExReleaseResourceLite(GpBlock->PsLoadedModuleResource);
+    GpBlock->KeLeaveCriticalRegion();
 
     return Status;
 }
@@ -815,17 +817,17 @@ FindEntryForKernelImageAddress(
     NTSTATUS Status = STATUS_NO_MORE_ENTRIES;
     PKLDR_DATA_TABLE_ENTRY FoundDataTableEntry = NULL;
 
-    GpBlock.KeEnterCriticalRegion();
-    ExAcquireResourceExclusiveLite(GpBlock.PsLoadedModuleResource, TRUE);
+    GpBlock->KeEnterCriticalRegion();
+    ExAcquireResourceExclusiveLite(GpBlock->PsLoadedModuleResource, TRUE);
 
-    if (FALSE == IsListEmpty(GpBlock.PsLoadedModuleList)) {
+    if (FALSE == IsListEmpty(GpBlock->PsLoadedModuleList)) {
         FoundDataTableEntry = CONTAINING_RECORD(
-            (GpBlock.PsLoadedModuleList)->Flink,
+            (GpBlock->PsLoadedModuleList)->Flink,
             KLDR_DATA_TABLE_ENTRY,
             InLoadOrderLinks);
 
         while ((ULONG_PTR)FoundDataTableEntry !=
-            (ULONG_PTR)GpBlock.PsLoadedModuleList) {
+            (ULONG_PTR)GpBlock->PsLoadedModuleList) {
             if ((ULONG_PTR)Address >= (ULONG_PTR)FoundDataTableEntry->DllBase &&
                 (ULONG_PTR)Address < (ULONG_PTR)FoundDataTableEntry->DllBase +
                 FoundDataTableEntry->SizeOfImage) {
@@ -841,8 +843,8 @@ FindEntryForKernelImageAddress(
         }
     }
 
-    ExReleaseResourceLite(GpBlock.PsLoadedModuleResource);
-    GpBlock.KeLeaveCriticalRegion();
+    ExReleaseResourceLite(GpBlock->PsLoadedModuleResource);
+    GpBlock->KeLeaveCriticalRegion();
 
     return Status;
 }

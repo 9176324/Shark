@@ -103,8 +103,8 @@ NtProcessStartup(
                 MessageBox(NULL, ErrorString, TEXT("error"), MB_OK);
             }
 
-            // Change to permanent 
-            // UnloadKernelImage(SERVICE_STRING);
+            // Change to permanent
+            UnloadKernelImage(SERVICE_STRING);
         }
         else {
             _stprintf(

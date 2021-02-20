@@ -383,7 +383,7 @@ extern "C" {
             __out PKLDR_DATA_TABLE_ENTRY * DataTableEntry
         );
 
-    extern GPBLOCK GpBlock;
+    extern PGPBLOCK GpBlock;
 
 #ifdef __cplusplus
 }
