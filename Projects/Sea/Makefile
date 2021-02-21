@@ -128,8 +128,8 @@ BUILDLIBS = ntdllp.lib bufferoverflow.lib \
     kernl32p.lib msvcrt.lib shell32.lib user32.lib gdi32.lib \
     nt_process_startup.obj
 
-LINKFLAGS = $(LINKIGNORE) /WX /NODEFAULTLIB /machine:$(ARCH) /debug /debugtype:cv,fixup
 LINK = link.exe /nologo
+LINKFLAGS = $(LINKIGNORE) /WX /NODEFAULTLIB /machine:$(ARCH) /debug /debugtype:cv,fixup
 
 LINKPROJNAMES = /out:$(PROJTARG).exe /map:$(PROJTARG).map /pdb:$(PROJTARG).pdb
 

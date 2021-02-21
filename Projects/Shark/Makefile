@@ -152,8 +152,8 @@ BUILDLIBS = hal.lib ntoskrnl.lib bufferoverflowk.lib \
 !endif
     detours.lib
 
-LINKFLAGS = $(LINKIGNORE) /WX /NODEFAULTLIB /machine:$(ARCH) /debug /debugtype:cv,fixup
 LINK = link.exe /nologo
+LINKFLAGS = $(LINKIGNORE) /WX /NODEFAULTLIB /machine:$(ARCH) /debug /debugtype:cv,fixup
 
 LINKPROJNAMES = /out:$(PROJTARG).sys /map:$(PROJTARG).map /pdb:$(PROJTARG).pdb
 
