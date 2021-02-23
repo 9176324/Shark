@@ -118,14 +118,14 @@ extern "C" {
 #ifndef _WIN64
         status
         (NTAPI * DbgkpSendApiMessageLpc)(
-            __inout PAPI_MESSAGE ApiMsg,
+            __inout ptr ApiMsg,
             __in ptr Port,
             __in b SuspendProcess
             );
 
         status
         (FASTCALL * FastDbgkpSendApiMessageLpc)(
-            __inout PAPI_MESSAGE ApiMsg,
+            __inout ptr ApiMsg,
             __in ptr Port,
             __in b SuspendProcess
             );

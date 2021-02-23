@@ -368,7 +368,7 @@ InitializePgBlock(
     s8 ReservedCrossThreadFlags[] =
         "89 83 ?? ?? F0 83 0C 24 00 80 3D ?? ?? ?? ?? ?? 0F";
 
-    u64 Btc64[] = { 0xC3C18B48D1BB0F48 };
+    u64 Btc64[] = { 0xC3C3C0BB0F489148 };
     u64 Rol64[] = { 0xC3C0D348CA869148 };
     u64 Ror64[] = { 0xC3C8D348CA869148 };
 
@@ -1314,21 +1314,6 @@ PgCompareFields(
 
                 if (FALSE != Chance) {
                     if (PgPoolBigPage == VaType) {
-                        PointerPde = GetPdeAddress(BaseAddress);
-
-                        if (0 == PointerPde->u.Hard.LargePage) {
-                            PointerPte = GetPteAddress(BaseAddress);
-
-                            if (1 == PointerPte->u.Hard.NoExecute) {
-                                Chance = FALSE;
-                            }
-                        }
-                        else if (1 == PointerPde->u.Hard.NoExecute) {
-                            Chance = FALSE;
-                        }
-                        else {
-                            __debugbreak();
-                        }
                     }
                     else {
                         if (ROUND_TO_PAGES(*(u64ptr)BaseAddress) != RegionSize) {
@@ -2079,7 +2064,7 @@ PgClearAll(
         GetGpBlock(PgBlock)->BugCheckHandle = SafeGuardAttach(
             (ptr *)&GetGpBlock(PgBlock)->KeBugCheckEx,
             PgBlock->ClearCallback,
-            NULL,
+            PgBlock->CaptureContext,
             NULL,
             PgBlock);
     }

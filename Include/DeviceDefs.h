@@ -31,6 +31,39 @@ extern "C" {
 #define DEVICE_STRING L"\\Device\\{94A4D943-9D91-4DFA-AA05-5486E61BF500}"
 #define SYMBOLIC_STRING L"\\DosDevices\\{00081140-C743-454D-917B-C3F437C770DC}"
 
+    FORCEINLINE
+        u
+        NTAPI
+        GuardCall(
+            __in_opt PGKERNEL_ROUTINE KernelRoutine,
+            __in_opt PGSYSTEM_ROUTINE SystemRoutine,
+            __in_opt PGRUNDOWN_ROUTINE RundownRoutine,
+            __in_opt PGNORMAL_ROUTINE NormalRoutine
+        )
+    {
+        u Result = 0;
+
+        __try {
+            if (NULL != KernelRoutine) {
+                Result = KernelRoutine(SystemRoutine, RundownRoutine, NormalRoutine);
+            }
+            else if (NULL != SystemRoutine) {
+                Result = SystemRoutine(RundownRoutine, NormalRoutine);
+            }
+            else if (NULL != RundownRoutine) {
+                Result = RundownRoutine(NormalRoutine);
+            }
+            else if (NULL != NormalRoutine) {
+                Result = NormalRoutine();
+            }
+        }
+        __except (EXCEPTION_EXECUTE_HANDLER) {
+            NOTHING;
+        }
+
+        return Result;
+    }
+
 #ifdef __cplusplus
 }
 #endif	/* __cplusplus */

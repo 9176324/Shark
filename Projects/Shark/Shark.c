@@ -114,9 +114,7 @@ DriverEntry(
             DbgPrint("[Shark] load\n");
 #endif // !PUBLIC
 
-            GpBlock = ExAllocatePool(
-                NonPagedPool,
-                sizeof(GPBLOCK) + sizeof(PGBLOCK));
+            GpBlock = __malloc(sizeof(GPBLOCK) + sizeof(PGBLOCK));
 
             if (NULL != GpBlock) {
                 RtlZeroMemory(

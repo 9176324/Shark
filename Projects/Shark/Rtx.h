@@ -29,27 +29,27 @@ extern "C" {
     typedef struct _OBJECT *POBJECT;
 
     typedef struct _ROUTINES32 {
-        ULONG ApcRoutine;
-        ULONG SystemRoutine;
-        ULONG StartRoutine;
-        ULONG StartContext;
-        ULONG Result;
+        u32 KernelRoutine;
+        u32 SystemRoutine;
+        u32 RundownRoutine;
+        u32 NormalRoutine;
+        u32 Result;
     }ROUTINES32, *PROUTINES32;
 
     typedef struct _ROUTINES64 {
-        ULONG64 ApcRoutine;
-        ULONG64 SystemRoutine;
-        ULONG64 StartRoutine;
-        ULONG64 StartContext;
-        ULONG64 Result;
+        u64 KernelRoutine;
+        u64 SystemRoutine;
+        u64 RundownRoutine;
+        u64 NormalRoutine;
+        u64 Result;
     }ROUTINES64, *PROUTINES64;
 
     typedef struct _ROUTINES {
-        PPS_APC_ROUTINE ApcRoutine;
-        PKSYSTEM_ROUTINE SystemRoutine;
-        PUSER_THREAD_START_ROUTINE StartRoutine;
-        PVOID StartContext;
-        ULONG_PTR Result;
+        PGKERNEL_ROUTINE KernelRoutine;
+        PGSYSTEM_ROUTINE SystemRoutine;
+        PGRUNDOWN_ROUTINE RundownRoutine;
+        PGNORMAL_ROUTINE NormalRoutine;
+        u Result;
     }ROUTINES, *PROUTINES;
 
     typedef struct _WORKER_OBJECT {
@@ -60,11 +60,11 @@ extern "C" {
     typedef struct _RTX {
         POBJECT Object;
         POBJECT Target;
-        PVOID ApiMessage;
+        ptr ApiMessage;
         KEVENT Notify;
 
-        USHORT Platform;
-        ULONG Processor;
+        u16 Platform;
+        u32 Processor;
 
         union {
             ROUTINES Routines;
@@ -82,67 +82,32 @@ extern "C" {
 
 #define MAXIMUM_COMPARE_INSTRUCTION_COUNT 8
 
-    ULONG_PTR
-        NTAPI
-        _GuardCall(
-            __in_opt PPS_APC_ROUTINE ApcRoutine,
-            __in_opt PKSYSTEM_ROUTINE SystemRoutine,
-            __in_opt PUSER_THREAD_START_ROUTINE StartRoutine,
-            __in_opt PVOID StartContext
-        );
-
-    FORCEINLINE
-    ULONG_PTR
-        NTAPI
-        GuardCall(
-            __in_opt PPS_APC_ROUTINE ApcRoutine,
-            __in_opt PKSYSTEM_ROUTINE SystemRoutine,
-            __in_opt PUSER_THREAD_START_ROUTINE StartRoutine,
-            __in_opt PVOID StartContext
-        )
-    {
-        ULONG_PTR Result = 0;
-
-        __try {
-            Result = _GuardCall(
-                ApcRoutine,
-                SystemRoutine,
-                StartRoutine,
-                StartContext);
-        }
-        __except (EXCEPTION_EXECUTE_HANDLER) {
-            NOTHING;
-        }
-
-        return Result;
-    }
-
-    NTSTATUS
+    status
         NTAPI
         AsyncCall(
-            __in HANDLE UniqueThread,
-            __in_opt PPS_APC_ROUTINE ApcRoutine,
-            __in_opt PKSYSTEM_ROUTINE SystemRoutine,
-            __in_opt PUSER_THREAD_START_ROUTINE StartRoutine,
-            __in_opt PVOID StartContext
+            __in ptr UniqueThread,
+            __in_opt PGKERNEL_ROUTINE KernelRoutine,
+            __in_opt PGSYSTEM_ROUTINE SystemRoutine,
+            __in_opt PGRUNDOWN_ROUTINE RundownRoutine,
+            __in_opt PGNORMAL_ROUTINE NormalRoutine
         );
 
-    ULONG_PTR
+    u
         NTAPI
         IpiSingleCall(
-            __in_opt PPS_APC_ROUTINE ApcRoutine,
-            __in_opt PKSYSTEM_ROUTINE SystemRoutine,
-            __in_opt PUSER_THREAD_START_ROUTINE StartRoutine,
-            __in_opt PVOID StartContext
+            __in_opt PGKERNEL_ROUTINE KernelRoutine,
+            __in_opt PGSYSTEM_ROUTINE SystemRoutine,
+            __in_opt PGRUNDOWN_ROUTINE RundownRoutine,
+            __in_opt PGNORMAL_ROUTINE NormalRoutine
         );
 
-    VOID
+    void
         NTAPI
         IpiGenericCall(
-            __in_opt PPS_APC_ROUTINE ApcRoutine,
-            __in_opt PKSYSTEM_ROUTINE SystemRoutine,
-            __in_opt PUSER_THREAD_START_ROUTINE StartRoutine,
-            __in_opt PVOID StartContext
+            __in_opt PGKERNEL_ROUTINE KernelRoutine,
+            __in_opt PGSYSTEM_ROUTINE SystemRoutine,
+            __in_opt PGRUNDOWN_ROUTINE RundownRoutine,
+            __in_opt PGNORMAL_ROUTINE NormalRoutine
         );
 
 #ifdef __cplusplus

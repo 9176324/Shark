@@ -50,9 +50,9 @@ GetPdeAddress(
     __in ptr VirtualAddress
 )
 {
-    return (PMMPTE)(0 != GpBlock.DebuggerDataBlock.PaeEnabled ?
-        _GetPdeAddressPae(VirtualAddress, GpBlock.PdeBase) :
-        _GetPdeAddress(VirtualAddress, GpBlock.PdeBase));
+    return (PMMPTE)(0 != GpBlock->DebuggerDataBlock.PaeEnabled ?
+        _GetPdeAddressPae(VirtualAddress, GpBlock->PdeBase) :
+        _GetPdeAddress(VirtualAddress, GpBlock->PdeBase));
 }
 
 PMMPTE
@@ -61,9 +61,9 @@ GetPteAddress(
     __in ptr VirtualAddress
 )
 {
-    return (PMMPTE)(0 != GpBlock.DebuggerDataBlock.PaeEnabled ?
-        _GetPteAddressPae(VirtualAddress, GpBlock.PteBase) :
-        _GetPteAddress(VirtualAddress, GpBlock.PteBase));
+    return (PMMPTE)(0 != GpBlock->DebuggerDataBlock.PaeEnabled ?
+        _GetPteAddressPae(VirtualAddress, GpBlock->PteBase) :
+        _GetPteAddress(VirtualAddress, GpBlock->PteBase));
 }
 
 ptr
@@ -72,7 +72,7 @@ GetVaMappedByPte(
     __in PMMPTE Pte
 )
 {
-    return (ptr)(0 != GpBlock.DebuggerDataBlock.PaeEnabled ?
+    return (ptr)(0 != GpBlock->DebuggerDataBlock.PaeEnabled ?
         _GetVaMappedByPtePae(Pte) :
         _GetVaMappedByPte(Pte));
 }
@@ -83,7 +83,7 @@ GetVaMappedByPde(
     __in PMMPTE Pde
 )
 {
-    return (ptr)(0 != GpBlock.DebuggerDataBlock.PaeEnabled ?
+    return (ptr)(0 != GpBlock->DebuggerDataBlock.PaeEnabled ?
         _GetVaMappedByPdePae(Pde) :
         _GetVaMappedByPde(Pde));
 }

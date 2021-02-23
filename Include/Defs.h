@@ -25,8 +25,9 @@
 
 #define _WIN32_WINNT 0x0500
 
-#include <statusdefs.h>
 #include <typesdefs.h>
+#include <statusdefs.h>
+#include <listdefs.h>
 
 #ifdef __cplusplus
 /* Assume byte packing throughout */
@@ -122,7 +123,7 @@ extern "C" {
             (((status)exp) >= 0) ? \
                 TRUE : \
                 (vDbgPrint( \
-                    _T("[Shark] %hs[%d] %hs failed < %08x >\n"), \
+                    _T("[FRK] %hs[%d] %hs failed < %08x >\n"), \
                     __FILE__, \
                     __LINE__, \
                     __FUNCDNAME__, \
@@ -132,7 +133,7 @@ extern "C" {
             (((status)exp) >= 0) ? \
                 TRUE : \
                 (vDbgPrint( \
-                    "[Shark] %hs[%d] %hs failed < %08x >\n", \
+                    "[FRK] %hs[%d] %hs failed < %08x >\n", \
                     __FILE__, \
                     __LINE__, \
                     __FUNCDNAME__, \

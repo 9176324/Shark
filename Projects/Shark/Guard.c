@@ -31,9 +31,7 @@ GuardAllocateTrampoline(
 {
     ptr Result = NULL;
 
-    Result = ExAllocatePool(
-        NonPagedPool,
-        NumberOfBytes);
+    Result = __malloc(NumberOfBytes);
 
     if (NULL != Result) {
         RtlZeroMemory(Result, NumberOfBytes);
@@ -49,7 +47,7 @@ GuardFreeTrampoline(
     __in u8 NumberOfBytes
 )
 {
-    ExFreePool(BaseAddress);
+    __free(BaseAddress);
 }
 
 void
@@ -353,7 +351,7 @@ HotpatchDetach(
         sizeof(ptr));
 
     GuardFreeTrampoline(HotpatchObjct, HotpatchObjct->Header.Length);
-        }
+}
 #endif // !_WIN64
 
 PPATCH_HEADER

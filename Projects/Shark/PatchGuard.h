@@ -221,7 +221,7 @@ extern "C" {
             __in u8 Count
             );
 
-#define ROR64(p, x, n) (p)->Ror64((x), (n))
+#define ROR64(pgb, x, n) (pgb)->Ror64((x), (n))
 
         u
         (NTAPI * Rol64)(
@@ -229,7 +229,7 @@ extern "C" {
             __in u8 Count
             );
 
-#define ROL64(p, x, n) (p)->Rol64((x), (n))
+#define ROL64(pgb, x, n) (pgb)->Rol64((x), (n))
 
         void
         (NTAPI * CaptureContext)(
