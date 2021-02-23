@@ -123,7 +123,7 @@ extern "C" {
             (((status)exp) >= 0) ? \
                 TRUE : \
                 (vDbgPrint( \
-                    _T("[FRK] %hs[%d] %hs failed < %08x >\n"), \
+                    _T("[SHARK] %hs[%d] %hs failed < %08x >\n"), \
                     __FILE__, \
                     __LINE__, \
                     __FUNCDNAME__, \
@@ -133,7 +133,7 @@ extern "C" {
             (((status)exp) >= 0) ? \
                 TRUE : \
                 (vDbgPrint( \
-                    "[FRK] %hs[%d] %hs failed < %08x >\n", \
+                    "[SHARK] %hs[%d] %hs failed < %08x >\n", \
                     __FILE__, \
                     __LINE__, \
                     __FUNCDNAME__, \
