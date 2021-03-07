@@ -806,6 +806,8 @@ InitializePgBlock(
 
         if (NULL != ControlPc) {
             PgBlock->Pool.PoolBigPageTable =
+                GetGpBlock(PgBlock)->BuildNumber < 9200 ?
+                __rva_to_va_ex(ControlPc + 3, 1) :
                 __rva_to_va(ControlPc
                     + (GetGpBlock(PgBlock)->BuildNumber >= 9200 ? 8 : 3));
 
@@ -1683,9 +1685,8 @@ PgClearPoolEncryptedContext(
         Index++) {
         if (POOL_BIG_TABLE_ENTRY_FREE !=
             ((u64)POOL_TABLE[Index].Va & POOL_BIG_TABLE_ENTRY_FREE)) {
-            if (FALSE !=
-                PgBlock->Pool.MmIsNonPagedSystemAddressValid(POOL_TABLE[Index].Va)) {
-                if (POOL_TABLE[Index].NumberOfPages > PgBlock->SizeINITKDBG) {
+            if (POOL_TABLE[Index].NumberOfPages >= PgBlock->SizeINITKDBG) {
+                if (0 != PgBlock->Pool.MmIsNonPagedSystemAddressValid(POOL_TABLE[Index].Va)) {
                     PgCompareFields(
                         PgBlock,
                         PgPoolBigPage,

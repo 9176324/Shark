@@ -2,7 +2,6 @@
 # Compiled binaries.
 #
 Build/**
-Debug/**
 
 #
 # Visual Studio files.
