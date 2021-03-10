@@ -304,6 +304,7 @@ InitializePgBlock(
     LONG64 Diff = 0;
     UNICODE_STRING RoutineString = { 0 };
     ptr RoutineAddress = NULL;
+    u8 Selector = 0;
 
     PPOOL_BIG_PAGES * PageTable = NULL;
     uptr PageTableSize = NULL;
@@ -321,21 +322,59 @@ InitializePgBlock(
     s8 KiStartSystemThread[] = "B9 01 00 00 00 44 0F 22 C1 48 8B 14 24 48 8B 4C 24 08";
     s8 PspSystemThreadStartup[] = "EB ?? B9 1E 00 00 00 E8";
 
-    // 48 8B 35 D4 C8 0C 00                     mov rsi, cs:PoolBigPageTableSize
-    // 48 8D 3C 76                              lea rdi, [rsi + rsi * 2]
-    // 48 C1 E7 03                              shl rdi, 3
-    // 4D 85 E4                                 test r12, r12
-    // 74 08                                    jz short loc_1401498F1
+    // 7600 ~ 7601
+    // 48 83 3D F5 DF 0C 00 00                  cmp     cs:PoolBigPageTable, 0
+    // 75 10                                    jnz     short loc_140150235
+    // 4D 85 C0                                 test    r8, r8
+    // 74 04                                    jz      short loc_14015022E
+    // 41 83 20 00                              and     dword ptr [r8], 0
+    // 33 C0                                    xor     eax, eax
+    // E9 DB 02 00 00                           jmp     loc_140150510
+    // 48 8B 35 D4 DF 0C 00                     mov     rsi, cs:PoolBigPageTableSize
 
-    // 83 FE 01                                 cmp esi, 1
-    // 75 10                                    jnz short loc_1401BDE4E
-    // 48 8B 15 8B 36 0D 00                     mov rdx, cs:PoolBigPageTable
-    // 48 8B 35 9C 36 0D 00                     mov rsi, cs:PoolBigPageTableSize
-    // EB 29                                    jmp short loc_1401BDE77
+    // 9200 ~ 18950
+    // 83 FE 01                                 cmp     esi, 1
+    // 75 10                                    jnz     short loc_1401BDE4E
+    // 48 8B 15 8B 36 0D 00                     mov     rdx, cs:PoolBigPageTable
+    // 48 8B 35 9C 36 0D 00                     mov     rsi, cs:PoolBigPageTableSize
+    // EB 29                                    jmp     short loc_1401BDE77
 
-    u8ptr ExGetBigPoolInfo[] = {
-        "48 83 3D ?? ?? ?? ?? 00 75 10 4D 85 C0 74 04 41 83 20 00 33 C0",
-        "83 ?? 01 75 10 48 8B 15 ?? ?? ?? ?? ?? 8B ?? ?? ?? ?? ?? EB",
+    // 19041
+    // 40 8A F0                                 mov     sil, al
+    // 83 BC 24 B0 00 00 00 01                  cmp     dword ptr [rsp+0B0h], 1
+    // 75 15                                    jnz     short loc_1405BBE06
+    // 48 8B 15 60 AA 65 00                     mov     rdx, cs:PoolBigPageTable
+    // 48 8B 0D 71 AA 65 00                     mov     rcx, cs:PoolBigPageTableSize
+    // 48 89 4C 24 40                           mov     [rsp+40h], rcx
+    // EB 1A                                    jmp     short loc_1405BBE20
+
+    // 20279
+    // 40 8A F0                                 mov     sil, al
+    // 41 83 FE 01                              cmp     r14d, 1
+    // 75 10                                    jnz     short loc_14061C6D5
+    // 48 8B 15 2C 0D 60 00                     mov     rdx, cs:qword_140C1D3F8
+    // 4C 8B 35 3D 0D 60 00                     mov     r14, cs:qword_140C1D410
+    // EB 15                                    jmp     short loc_14061C6EA
+
+    // 21327
+    // 40 8A F0                                 mov     sil, al
+    // 41 83 FE 01                              cmp     r14d, 1
+    // 75 1A                                    jnz     short loc_140624CCE
+    // 48 8B 15 BD C8 5E 00                     mov     rdx, cs:PoolBigPageTable
+    // 48 89 54 24 48                           mov     [rsp+98h+Src], rdx
+    // 48 8B 0D C9 C8 5E 00                     mov     rcx, cs:PoolBigPageTableSize
+    // 48 89 4C 24 40                           mov     [rsp+98h+var_58], rcx
+    // EB 19                                    jmp     short loc_140624CE7
+
+    struct {
+        u8 Offset[4];
+        u8ptr Signature;
+    } ExGetBigPoolInfo[] = {
+        { 3, 1, 0x1D, 0, "48 83 3D ?? ?? ?? ?? 00 75 10 4D 85 C0 74 04 41 83 20 00 33 C0" },
+        { 8, 0, 0xF, 0, "83 ?? 01 75 10 48 8B 15 ?? ?? ?? ?? ?? 8B ?? ?? ?? ?? ?? EB" },
+        { 0xD, 0, 0x14, 0, "83 BC 24 ?? 00 00 00 01 75 15 48 8B 15 ?? ?? ?? ?? 48 8B" },
+        { 0xC, 0, 0x13, 0, "40 8A F0 41 83 FE 01 75 ?? 48 8B 15" },
+        { 0xC, 0, 0x18, 0, "40 8A F0 41 83 FE 01 75 ?? 48 8B 15" }
     };
 
     // MiGetSystemRegionType
@@ -799,17 +838,36 @@ InitializePgBlock(
             }
         }
 
+        if (GetGpBlock(PgBlock)->BuildNumber >= 7600 &&
+            GetGpBlock(PgBlock)->BuildNumber < 9200) {
+            Selector = 0;
+        }
+        else if (GetGpBlock(PgBlock)->BuildNumber >= 9200 &&
+            GetGpBlock(PgBlock)->BuildNumber < 19041) {
+            Selector = 1;
+        }
+        else if (GetGpBlock(PgBlock)->BuildNumber >= 19041 &&
+            GetGpBlock(PgBlock)->BuildNumber < 20295) {
+            Selector = 2;
+        }
+        else if (GetGpBlock(PgBlock)->BuildNumber >= 20279 &&
+            GetGpBlock(PgBlock)->BuildNumber < 21327) {
+            Selector = 3;
+        }
+        else if (GetGpBlock(PgBlock)->BuildNumber >= 21327) {
+            Selector = 4;
+        }
+
         ControlPc = ScanBytes(
             ControlPc,
             EndToLock,
-            ExGetBigPoolInfo[GetGpBlock(PgBlock)->BuildNumber >= 9200 ? 1 : 0]);
+            ExGetBigPoolInfo[Selector].Signature);
 
         if (NULL != ControlPc) {
             PgBlock->Pool.PoolBigPageTable =
-                GetGpBlock(PgBlock)->BuildNumber < 9200 ?
-                __rva_to_va_ex(ControlPc + 3, 1) :
-                __rva_to_va(ControlPc
-                    + (GetGpBlock(PgBlock)->BuildNumber >= 9200 ? 8 : 3));
+                __rva_to_va_ex(
+                    ControlPc + ExGetBigPoolInfo[Selector].Offset[0],
+                    ExGetBigPoolInfo[Selector].Offset[1]);
 
 #ifdef DEBUG
             vDbgPrint(
@@ -818,8 +876,9 @@ InitializePgBlock(
 #endif // DEBUG
 
             PgBlock->Pool.PoolBigPageTableSize =
-                __rva_to_va(ControlPc
-                    + (GetGpBlock(PgBlock)->BuildNumber >= 9200 ? 0xF : 0x1D));
+                __rva_to_va_ex(
+                    ControlPc + ExGetBigPoolInfo[Selector].Offset[2],
+                    +ExGetBigPoolInfo[Selector].Offset[3]);
 
 #ifdef DEBUG
             vDbgPrint(
