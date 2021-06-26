@@ -9,6 +9,7 @@ Build/**
 .vs/**
 *.VC.db
 *.VC.opendb
+*.sdf
 
 #
 # VS Code files.
