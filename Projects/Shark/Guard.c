@@ -165,6 +165,23 @@ LockedBuildJumpCode(
         GUARD_BODY_CODE_LENGTH);
 }
 
+void
+NTAPI
+BuildJumpCode(
+    __inout ptr * Pointer,
+    __in ptr Guard
+)
+{
+    GUARD_BODY GuardBody = { 0 };
+
+    SetGuardBody(&GuardBody, Guard);
+
+    RtlCopyMemory(
+        *Pointer,
+        &GuardBody,
+        GUARD_BODY_CODE_LENGTH);
+}
+
 #ifdef _WIN64
 ptr
 NTAPI

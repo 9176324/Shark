@@ -38,6 +38,14 @@ extern "C" {
         u NumberOfPages;
     } POOL_BIG_PAGES, *PPOOL_BIG_PAGES;
 
+    typedef struct _POOL_BIG_PAGESEX {
+        ptr Va;
+        u32 Key;
+        u32 PoolType;
+        u NumberOfPages;
+        u Unuse;
+    } POOL_BIG_PAGESEX, *PPOOL_BIG_PAGESEX;
+
     enum {
         PgPoolBigPage,
         PgSystemPtes,
@@ -46,14 +54,17 @@ extern "C" {
 
     enum {
         PgDeclassified,
-        PgEncrypted
+        PgEncrypted,
+        PgDoubleEncrypted
     };
 
     typedef struct _PGOBJECT {
         LIST_ENTRY Entry;
         WORK_QUEUE_ITEM Worker;
         b Encrypted;
-        u64 XorKey;
+        u64 Key;
+        uptr Context;
+        u ContextSize;
         u8 Type;
         ptr BaseAddress;
         u RegionSize;
@@ -106,13 +117,22 @@ extern "C" {
         u32 SizeCmpAppendDllSection;
         u32 SizeINITKDBG;
         ptr INITKDBG;
+        s32 BuildKey;
+        s32 BranchKey[12];
+
+        uptr OriginalCmpAppendDllSection;
+        uptr CacheCmpAppendDllSection;
+
+        uptr KiWaitNever;
+        uptr KiWaitAlways;
 
         struct {
-            PPOOL_BIG_PAGES * PoolBigPageTable;
-            uptr PoolBigPageTableSize;
+            union {
+                PPOOL_BIG_PAGES * PoolBigPageTable;
+                PPOOL_BIG_PAGESEX * PoolBigPageTableEx;
+            };
 
-#define POOL_TABLE (*PgBlock->Pool.PoolBigPageTable)
-#define POOL_TABLE_SIZE (*PgBlock->Pool.PoolBigPageTableSize)
+            uptr PoolBigPageTableSize;
 
             b
             (NTAPI * MmIsNonPagedSystemAddressValid)(
@@ -209,27 +229,29 @@ extern "C" {
             __in_opt ptr Reserved
             );
 
+        u
+        (FASTCALL * CmpDecode)(
+            __in u Value,
+            __in u8 Count
+            );
+
+        u
+        (FASTCALL * Ror64)(
+            __in u Value,
+            __in u8 Count
+            );
+
+        u
+        (FASTCALL * Rol64)(
+            __in u Value,
+            __in u8 Count
+            );
+
         u64
-        (NTAPI *  Btc64)(
-            __in u64 a,
-            __in u64 b
+        (FASTCALL *  RorWithBtc64)(
+            __in u64 Value,
+            __in u64 Count
             );
-
-        u
-        (NTAPI * Ror64)(
-            __in u Value,
-            __in u8 Count
-            );
-
-#define ROR64(pgb, x, n) (pgb)->Ror64((x), (n))
-
-        u
-        (NTAPI * Rol64)(
-            __in u Value,
-            __in u8 Count
-            );
-
-#define ROL64(pgb, x, n) (pgb)->Rol64((x), (n))
 
         void
         (NTAPI * CaptureContext)(
@@ -240,16 +262,30 @@ extern "C" {
             __in_opt ptr Reserved
             );
 
-        cptr ClearMessage[2];
+        u
+        (FASTCALL * PostCache)(
+            __in u Index,
+            __in ptr Context
+            );
+
+        u
+        (FASTCALL * PostKey)(
+            __in u Index,
+            __in u Original
+            );
+
+        cptr ClearMessage[3];
 
         LIST_ENTRY ObjectList;
         KSPIN_LOCK ObjectLock;
 
         u64 Fields[PG_COMPARE_FIELDS_COUNT];
         u8 Header[PG_MAXIMUM_EP_BUFFER_COUNT];
-        u8 _Btc64[8];
         u8 _Ror64[8];
         u8 _Rol64[8];
+        u8 _RorWithBtc64[16];
+        u8 _PostCache[16];
+        u8 _PostKey[64];
 
 #ifndef _WIN64
         u8 _CaptureContext[0x100];
@@ -257,9 +293,12 @@ extern "C" {
         u8 _CaptureContext[0x200];
 #endif // !_WIN64
 
-        u8 _ClearMessage[0x80];
+        u8 _ClearMessage[0x120];
         u8 _FreeWorker[0xB0];
-        u8 _ClearCallback[0xD00];
+        u8 _ClearCallback[0xE00];
+
+        u8 _OriginalCmpAppendDllSection[0xC8];
+        u8 _CacheCmpAppendDllSection[0xC8];
     }PGBLOCK, *PPGBLOCK;
 
     void

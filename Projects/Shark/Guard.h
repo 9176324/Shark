@@ -138,6 +138,13 @@ extern "C" {
             __in ptr Guard
         );
 
+    void
+        NTAPI
+        BuildJumpCode(
+            __inout ptr * Pointer,
+            __in ptr Guard
+        );
+
 #ifndef _WIN64
     PPATCH_HEADER
         NTAPI

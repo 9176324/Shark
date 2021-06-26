@@ -69,24 +69,6 @@ RCOBJS = $(OBJD)\$(PROJ).res
 
 PROJOBJS = $(ASOBJS) $(CCARCHOBJS) $(CCOBJS) $(RCOBJS)
 
-PROJSRCS = \
-    $(ARCTARG)\$(ARCTARG).asm \
-    $(ARCTARG)\Context$(ARCTARG).asm \
-    $(ARCTARG)\PatchGuard$(ARCTARG).c \
-    $(ARCTARG)\Space$(ARCTARG).c \
-    $(ARCTARG)\Stack$(ARCTARG).c \
-    $(PROJ).c \
-    Ctx.c \
-    Cmp$(ARCTARG).asm \
-    Guard.c \
-    Except.c \
-    PatchGuard.c \
-    Reload.c \
-    Rtx.c \
-    Scan.c \
-    Space.c \
-    Stack.c
-    
 !if "$(ARCTARG)" == "I386"
 TARGDEFS = /D_X86_=1 /Di386=1 /DSTD_CALL /DFPO=0 /DDOSWIN32 /DDETOURS_X86 /DDETOURS_32BIT
 TARGAOPTS = /safeseh /coff /Zm
