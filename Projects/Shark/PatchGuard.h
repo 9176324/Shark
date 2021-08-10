@@ -12,7 +12,7 @@
 * for the specific language governing rights and limitations under the
 * License.
 *
-* The Initial Developer of the Original e is blindtiger.
+* The Initial Developer of the Original Code is blindtiger.
 *
 */
 
@@ -96,13 +96,13 @@ extern "C" {
 
 #define GetGpBlock(pgb) (pgb->GpBlock)
 
-#define PG_MAXIMUM_CONTEXT_COUNT 0x00000003UI32 // ¿ÉÄÜ´æÔÚµÄ Context ×î´óÊýÁ¿
-#define PG_FIRST_FIELD_OFFSET 0x00000100UI32 // ËÑË÷Ê¹ÓÃµÄµÚÒ»¸ö Context ³ÉÔ±Æ«ÒÆ
-#define PG_CMP_APPEND_DLL_SECTION_END 0x000000c0UI32 // CmpAppendDllSection ³¤¶È
-#define PG_COMPARE_FIELDS_COUNT 0x00000004UI32 // ËÑË÷Ê±±È½ÏµÄ Context ³ÉÔ±ÊýÁ¿
-#define PG_COMPARE_BYTE_COUNT 0x00000010UI32 // ËÑË÷ Worker Ê±±È½ÏµÄ×Ö½ÚÊýÁ¿
+#define PG_MAXIMUM_CONTEXT_COUNT 0x00000003UI32 // ï¿½ï¿½ï¿½Ü´ï¿½ï¿½Úµï¿½ Context ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+#define PG_FIRST_FIELD_OFFSET 0x00000100UI32 // ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½ÃµÄµï¿½Ò»ï¿½ï¿½ Context ï¿½ï¿½Ô±Æ«ï¿½ï¿½
+#define PG_CMP_APPEND_DLL_SECTION_END 0x000000c0UI32 // CmpAppendDllSection ï¿½ï¿½ï¿½ï¿½
+#define PG_COMPARE_FIELDS_COUNT 0x00000004UI32 // ï¿½ï¿½ï¿½ï¿½Ê±ï¿½È½Ïµï¿½ Context ï¿½ï¿½Ô±ï¿½ï¿½ï¿½ï¿½
+#define PG_COMPARE_BYTE_COUNT 0x00000010UI32 // ï¿½ï¿½ï¿½ï¿½ Worker Ê±ï¿½È½Ïµï¿½ï¿½Ö½ï¿½ï¿½ï¿½ï¿½ï¿½
 
-        // EntryPoint »º´æ´óÐ¡ ÓÃÀ´ËÑË÷Í·²¿µÄ´úÂëÆ¬¶Î ( ×îÐ¡³¤¶È =  max(2 * 8 + 7, sizeof(GUARD_BODY)) )
+        // EntryPoint ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½Ä´ï¿½ï¿½ï¿½Æ¬ï¿½ï¿½ ( ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½ =  max(2 * 8 + 7, sizeof(GUARD_BODY)) )
 #define PG_MAXIMUM_EP_BUFFER_COUNT ((max(2 * 8 + 7, sizeof(GUARD_BODY)) + 7) & ~7)
 
 #define PG_FIELD_BITS \

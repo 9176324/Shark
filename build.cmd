@@ -12,7 +12,7 @@
 @rem for the specific language governing rights and limitations under the
 @rem License.
 @rem 
-@rem The Initial Developer of the Original e is blindtiger.
+@rem The Initial Developer of the Original Code is blindtiger.
 @rem 
 @rem 
 

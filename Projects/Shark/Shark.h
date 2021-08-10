@@ -12,7 +12,7 @@
 * for the specific language governing rights and limitations under the
 * License.
 *
-* The Initial Developer of the Original e is blindtiger.
+* The Initial Developer of the Original Code is blindtiger.
 *
 */
 
