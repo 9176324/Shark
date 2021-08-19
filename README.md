@@ -1,5 +1,3 @@
-# Celebrating the centenary of the birth of the Communist Party of China.
-
 # Shark
     Turn off PatchGuard in real time for win7 (7600) ~ later.
 

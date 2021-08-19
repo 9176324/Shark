@@ -93,7 +93,7 @@ InitializeGpBlock(
 
 #ifdef DEBUG
     vDbgPrint(
-        "[Shark] [PatchGuard] < %p > BuildNumber\n",
+        "[Shark] < %p > BuildNumber\n",
         Block->BuildNumber);
 #endif // DEBUG
 
@@ -108,7 +108,7 @@ InitializeGpBlock(
 
 #ifdef DEBUG
     vDbgPrint(
-        "[Shark] [PatchGuard] < %p > PsInitialSystemProcess\n",
+        "[Shark] < %p > PsInitialSystemProcess\n",
         Block->PsInitialSystemProcess);
 #endif // DEBUG
 
@@ -123,7 +123,7 @@ InitializeGpBlock(
 
 #ifdef DEBUG
     vDbgPrint(
-        "[Shark] [PatchGuard] < %p > NumberProcessors\n",
+        "[Shark] < %p > NumberProcessors\n",
         Block->NumberProcessors);
 #endif // DEBUG
 
@@ -133,7 +133,7 @@ InitializeGpBlock(
 
 #ifdef DEBUG
     vDbgPrint(
-        "[Shark] [PatchGuard] < %p > KeEnterCriticalRegion\n",
+        "[Shark] < %p > KeEnterCriticalRegion\n",
         Block->KeEnterCriticalRegion);
 #endif // DEBUG
 
@@ -143,7 +143,7 @@ InitializeGpBlock(
 
 #ifdef DEBUG
     vDbgPrint(
-        "[Shark] [PatchGuard] < %p > KeLeaveCriticalRegion\n",
+        "[Shark] < %p > KeLeaveCriticalRegion\n",
         Block->KeLeaveCriticalRegion);
 #endif // DEBUG
 
@@ -153,7 +153,7 @@ InitializeGpBlock(
 
 #ifdef DEBUG
     vDbgPrint(
-        "[Shark] [PatchGuard] < %p > ExAcquireSpinLockShared\n",
+        "[Shark] < %p > ExAcquireSpinLockShared\n",
         Block->ExAcquireSpinLockShared);
 #endif // DEBUG
 
@@ -163,7 +163,7 @@ InitializeGpBlock(
 
 #ifdef DEBUG
     vDbgPrint(
-        "[Shark] [PatchGuard] < %p > ExReleaseSpinLockShared\n",
+        "[Shark] < %p > ExReleaseSpinLockShared\n",
         Block->ExReleaseSpinLockShared);
 #endif // DEBUG
 
@@ -173,7 +173,7 @@ InitializeGpBlock(
 
 #ifdef DEBUG
     vDbgPrint(
-        "[Shark] [PatchGuard] < %p > DbgPrint\n",
+        "[Shark] < %p > DbgPrint\n",
         Block->DbgPrint);
 #endif // DEBUG
 
@@ -183,7 +183,7 @@ InitializeGpBlock(
 
 #ifdef DEBUG
     vDbgPrint(
-        "[Shark] [PatchGuard] < %p > RtlCompareMemory\n",
+        "[Shark] < %p > RtlCompareMemory\n",
         Block->RtlCompareMemory);
 #endif // DEBUG
 
@@ -193,7 +193,7 @@ InitializeGpBlock(
 
 #ifdef DEBUG
     vDbgPrint(
-        "[Shark] [PatchGuard] < %p > RtlRestoreContext\n",
+        "[Shark] < %p > RtlRestoreContext\n",
         Block->RtlRestoreContext);
 #endif // DEBUG
 
@@ -203,7 +203,7 @@ InitializeGpBlock(
 
 #ifdef DEBUG
     vDbgPrint(
-        "[Shark] [PatchGuard] < %p > ExQueueWorkItem\n",
+        "[Shark] < %p > ExQueueWorkItem\n",
         Block->ExQueueWorkItem);
 #endif // DEBUG
 
@@ -213,7 +213,7 @@ InitializeGpBlock(
 
 #ifdef DEBUG
     vDbgPrint(
-        "[Shark] [PatchGuard] < %p > ExFreePoolWithTag\n",
+        "[Shark] < %p > ExFreePoolWithTag\n",
         Block->ExFreePoolWithTag);
 #endif // DEBUG
 
@@ -223,7 +223,7 @@ InitializeGpBlock(
 
 #ifdef DEBUG
     vDbgPrint(
-        "[Shark] [PatchGuard] < %p > KeBugCheckEx\n",
+        "[Shark] < %p > KeBugCheckEx\n",
         Block->KeBugCheckEx);
 #endif // DEBUG
 
@@ -233,7 +233,7 @@ InitializeGpBlock(
 
 #ifdef DEBUG
     vDbgPrint(
-        "[Shark] [PatchGuard] < %p > ExInterlockedRemoveHeadList\n",
+        "[Shark] < %p > ExInterlockedRemoveHeadList\n",
         Block->ExInterlockedRemoveHeadList);
 #endif // DEBUG
 
@@ -243,7 +243,7 @@ InitializeGpBlock(
 
 #ifdef DEBUG
     vDbgPrint(
-        "[Shark] [PatchGuard] < %p > ExAcquireRundownProtection\n",
+        "[Shark] < %p > ExAcquireRundownProtection\n",
         Block->ExAcquireRundownProtection);
 #endif // DEBUG
 
@@ -253,7 +253,7 @@ InitializeGpBlock(
 
 #ifdef DEBUG
     vDbgPrint(
-        "[Shark] [PatchGuard] < %p > ExReleaseRundownProtection\n",
+        "[Shark] < %p > ExReleaseRundownProtection\n",
         Block->ExReleaseRundownProtection);
 #endif // DEBUG
 
@@ -263,7 +263,7 @@ InitializeGpBlock(
 
 #ifdef DEBUG
     vDbgPrint(
-        "[Shark] [PatchGuard] < %p > ExWaitForRundownProtectionRelease\n",
+        "[Shark] < %p > ExWaitForRundownProtectionRelease\n",
         Block->ExWaitForRundownProtectionRelease);
 #endif // DEBUG
 
