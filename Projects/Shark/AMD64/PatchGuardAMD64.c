@@ -489,7 +489,34 @@ InitializePgBlock(
     u64 Ror64[] = { 0xC3C8D348CA869148 };
     u64 Rol64[] = { 0xC3C0D348CA869148 };
     u64 RorWithBtc64[] = { 0x48C8D348CA869148, 0xCCCCCCCCC3C0BB0F };
+
+    // 4892            xchg    rax, rdx
+    // 4801c8          add     rax, rcx
+    // c3              ret
+
+    // 4892            xchg    rax, rdx
+    // 480fafc1        imul    rax, rcx
+    // c3              ret
+
     u64 PostCache[] = { 0xCCCCC3C801489248, 0xCCC3C1AF0F489248 };
+
+    // 48c7c0c8000000  mov     rax, 0C8h
+    // 482bc1          sub     rax, rcx
+    // 4833c1          xor     rax, rcx
+    // 4887ca          xchg    rcx, rdx
+    // 48f7d1          not     rcx
+    // 80e13f          and     cl, 3Fh
+    // 48d3c8          ror     rax, cl
+    // c3              ret
+
+    // 48c7c0c8000000  mov     rax, 0C8h
+    // 482bc1          sub     rax, rcx
+    // 480fafc1        imul    rax, rcx
+    // 4887ca          xchg    rcx, rdx
+    // 48f7d1          not     rcx
+    // 80e13f          and     cl, 3Fh
+    // 48d3c8          ror     rax, cl
+    // c3              ret
 
     u64 PostKey[] = {
         0x48000000C8C0C748, 0xCA8748C13348C12B, 0xD3483FE180D1F748, 0xCCCCCCCCCCCCC3C8,
@@ -1175,7 +1202,7 @@ InitializePgBlock(
         }
     }
 
-    if (GetGpBlock(PgBlock)->BuildNumber < 20000) {
+    if (GetGpBlock(PgBlock)->BuildNumber < 21000) {
         RtlInitUnicodeString(&RoutineString, L"MmAllocateMappingAddressEx");
 
         RoutineAddress = MmGetSystemRoutineAddress(&RoutineString);
