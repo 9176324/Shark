@@ -21,3 +21,6 @@
 #pragma warning(disable:4242)	// return type and variable type do not match
 #pragma warning(disable:4244)	// conversion' conversion from 'type1' to 'type2', possible loss of data
 #pragma warning(disable:4090)	// different 'const' qualifiers
+#pragma warning(disable:4391)	// incorrect return type for intrinsic function
+#pragma warning(disable:4091)	// 'typedef ': ignored on left of xxx when no variable is declared
+#pragma warning(disable:4330)   // attribute 'write' for section xxx ignored
