@@ -106,13 +106,14 @@ extern "C" {
 
 #define GetGpBlock(pgb) (pgb->GpBlock)
 
-#define PG_MAXIMUM_CONTEXT_COUNT 0x00000003UI32 // 可能存在的 Context 最大数量
-#define PG_FIRST_FIELD_OFFSET 0x00000100UI32 // 搜索使用的第一个 Context 成员偏移
-#define PG_CMP_APPEND_DLL_SECTION_END 0x000000c0UI32 // CmpAppendDllSection 长度
-#define PG_COMPARE_FIELDS_COUNT 0x00000004UI32 // 搜索时比较的 Context 成员数量
-#define PG_COMPARE_BYTE_COUNT 0x00000010UI32 // 搜索 Worker 时比较的字节数量
+#define PG_MAXIMUM_CONTEXT_COUNT 0x00000003UI32 // The maximum number of context that may exist
+#define PG_FIRST_FIELD_OFFSET 0x00000100UI32 // offset of the first context member used by the search
+#define PG_CMP_APPEND_DLL_SECTION_END 0x000000c0UI32 // CmpAppendDllSection length
+#define PG_COMPARE_FIELDS_COUNT 0x00000004UI32 // number of context members compared during search
+#define PG_COMPARE_BYTE_COUNT 0x00000010UI32 // number of bytes compared when searching for workers
 
-        // EntryPoint 缓存大小 用来搜索头部的代码片段 ( 最小长度 =  max(2 * 8 + 7, sizeof(GUARD_BODY)) )
+        // EntryPoint cache size used to search the code fragment of the header 
+        // (minimum length = max(2 * 8 + 7, sizeof(GUARD_BODY)))
 #define PG_MAXIMUM_EP_BUFFER_COUNT ((max(2 * 8 + 7, sizeof(GUARD_BODY)) + 7) & ~7)
 
 #define PG_FIELD_BITS \
@@ -196,6 +197,11 @@ extern "C" {
             __in_bcount(NumberOfBytes) ptr VirtualAddress,
             __in u NumberOfBytes,
             __in u32 NewProtect
+            );
+
+        b
+        (NTAPI * MmIsAddressValid)(
+            __in ptr VirtualAddress
             );
 
         ptr

@@ -115,7 +115,8 @@ PgClearCallback(
                         &ImageBase,
                         NULL);
 
-                    if (FunctionEntry != NULL) {
+                    if (NULL != FunctionEntry &&
+                        FALSE != PgBlock->MmIsAddressValid((ptr)EstablisherFrame)) {
                         PgBlock->RtlVirtualUnwind(
                             UNW_FLAG_EHANDLER,
                             ImageBase,
@@ -1345,6 +1346,16 @@ InitializePgBlock(
     PgBlock->PostKey =
         GetGpBlock(PgBlock)->BuildNumber >= 18362 ?
         __utop(PgBlock->_PostKey) : __utop(PgBlock->_PostKey + 0x20);
+
+    RtlInitUnicodeString(&RoutineString, L"MmIsAddressValid");
+
+    PgBlock->MmIsAddressValid = MmGetSystemRoutineAddress(&RoutineString);
+
+#ifdef DEBUG
+    vDbgPrint(
+        "[Shark] < %p > MmIsAddressValid\n",
+        PgBlock->MmIsAddressValid);
+#endif // DEBUG
 
     RtlInitUnicodeString(&RoutineString, L"RtlLookupFunctionEntry");
 
@@ -2923,7 +2934,8 @@ PgCheckAllWorkerThread(
                                     &ImageBase,
                                     NULL);
 
-                                if (NULL != FunctionEntry) {
+                                if (NULL != FunctionEntry &&
+                                    FALSE != MmIsAddressValid((ptr)EstablisherFrame)) {
                                     RtlVirtualUnwind(
                                         UNW_FLAG_NHANDLER,
                                         ImageBase,

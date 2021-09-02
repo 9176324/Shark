@@ -16,9 +16,7 @@
 ;
 ;
 
-.386
-
-.model flat, stdcall
+.686
 
         .xlist
 include callconv.inc
@@ -26,9 +24,26 @@ include callconv.inc
 
 _TEXT   SEGMENT DWORD PUBLIC 'CODE'
         ASSUME  DS:FLAT, ES:FLAT, SS:FLAT, FS:NOTHING, GS:NOTHING
-
-
-
+        
+    __ValidateEH3RN :
+ 
+        mov edi, edi
+ 
+        push ebp
+        mov ebp, esp
+ 
+        mov eax, [ebp + 8]
+        test byte ptr [eax + 8], 3
+        mov eax, 0
+        setz al
+ 
+        mov esp, ebp
+        pop ebp
+ 
+        ret
+    
+    PUBLIC __ValidateEH3RN
+    
 _TEXT   ends
 
         end

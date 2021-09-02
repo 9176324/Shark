@@ -39,7 +39,6 @@
     <NMakeIncludeSearchPath>..\..\..\WRK\public\ddk\inc;..\..\..\WRK\public\halkit\inc;..\..\..\WRK\public\internal\base\inc;..\..\..\WRK\public\internal\ds\inc;..\..\..\WRK\public\internal\sdktools\inc;..\..\..\WRK\public\sdk\inc;..\..\..\WRK\public\sdk\inc\crt;..\..\..\WRK\base\inc;..\..\..\WRK\base\ntos\inc;..\..\..\WinDDK\3790.1830\inc\wnet;..\..\..\WinDDK\3790.1830\inc\crt;..\..\..\WinDDK\3790.1830\inc\crt\gl;..\..\..\WinDDK\3790.1830\inc\crt\sys;..\..\..\WinDDK\7600.16385.1\Debuggers\sdk\inc;;$(SolutionDir)Include;$(ProjectDir)</NMakeIncludeSearchPath>
     <OutDir>$(SolutionDir)Build\Bins\I386\</OutDir>
     <IntDir>$(SolutionDir)Build\Objs\$(ProjectName)\I386\</IntDir>
-    <ExecutablePath>C:\Windows;C:\Windows\System32;..\..\..\WRK\tools\x86</ExecutablePath>
     <IncludePath>..\..\..\WRK\public\ddk\inc;..\..\..\WRK\public\halkit\inc;..\..\..\WRK\public\internal\base\inc;..\..\..\WRK\public\internal\ds\inc;..\..\..\WRK\public\internal\sdktools\inc;..\..\..\WRK\public\sdk\inc;..\..\..\WRK\public\sdk\inc\crt;..\..\..\WRK\base\inc;..\..\..\WRK\base\ntos\inc;..\..\..\WinDDK\3790.1830\inc\wnet;..\..\..\WinDDK\3790.1830\inc\crt;..\..\..\WinDDK\3790.1830\inc\crt\gl;..\..\..\WinDDK\3790.1830\inc\crt\sys;..\..\..\WinDDK\7600.16385.1\Debuggers\sdk\inc;;$(SolutionDir)Include;$(ProjectDir)</IncludePath>
     <ReferencePath />
     <LibraryPath>..\..\..\WinDDK\7600.16385.1\lib\win7\I386;..\..\..\WinDDK\7600.16385.1\lib\Crt\I386;$(SolutionDir)Lib\I386</LibraryPath>
@@ -56,7 +55,6 @@
     <NMakeIncludeSearchPath>..\..\..\WRK\public\ddk\inc;..\..\..\WRK\public\halkit\inc;..\..\..\WRK\public\internal\base\inc;..\..\..\WRK\public\internal\ds\inc;..\..\..\WRK\public\internal\sdktools\inc;..\..\..\WRK\public\sdk\inc;..\..\..\WRK\public\sdk\inc\crt;..\..\..\WRK\base\inc;..\..\..\WRK\base\ntos\inc;..\..\..\WinDDK\3790.1830\inc\wnet;..\..\..\WinDDK\3790.1830\inc\crt;..\..\..\WinDDK\3790.1830\inc\crt\gl;..\..\..\WinDDK\3790.1830\inc\crt\sys;..\..\..\WinDDK\7600.16385.1\Debuggers\sdk\inc;;$(SolutionDir)Include;$(ProjectDir)</NMakeIncludeSearchPath>
     <OutDir>$(SolutionDir)Build\Bins\AMD64\</OutDir>
     <IntDir>$(SolutionDir)Build\Objs\$(ProjectName)\AMD64\</IntDir>
-    <ExecutablePath>C:\Windows;C:\Windows\System32;..\..\..\WRK\tools\amd64</ExecutablePath>
     <IncludePath>..\..\..\WRK\public\ddk\inc;..\..\..\WRK\public\halkit\inc;..\..\..\WRK\public\internal\base\inc;..\..\..\WRK\public\internal\ds\inc;..\..\..\WRK\public\internal\sdktools\inc;..\..\..\WRK\public\sdk\inc;..\..\..\WRK\public\sdk\inc\crt;..\..\..\WRK\base\inc;..\..\..\WRK\base\ntos\inc;..\..\..\WinDDK\3790.1830\inc\wnet;..\..\..\WinDDK\3790.1830\inc\crt;..\..\..\WinDDK\3790.1830\inc\crt\gl;..\..\..\WinDDK\3790.1830\inc\crt\sys;..\..\..\WinDDK\7600.16385.1\Debuggers\sdk\inc;;$(SolutionDir)Include;$(ProjectDir)</IncludePath>
     <ReferencePath />
     <LibraryPath>..\..\..\WinDDK\7600.16385.1\lib\win7\AMD64;..\..\..\WinDDK\7600.16385.1\lib\Crt\AMD64;$(SolutionDir)Lib\AMD64</LibraryPath>

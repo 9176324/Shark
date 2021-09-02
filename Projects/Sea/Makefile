@@ -20,10 +20,18 @@ LABS=..\..\..\
 
 !if "$(PLATFORM)" == "x86"
 ARCTARG = I386
-PATH = C:\Windows;C:\Windows\System32;$(LABS)\WRK\tools\x86
+!if "$(PROCESSOR_ARCHITEW6432)" == "AMD64"
+PATH = C:\Windows;C:\Windows\System32;$(LABS)\MSVC\Hostx64\x86
+!else
+PATH = C:\Windows;C:\Windows\System32;$(LABS)\MSVC\Hostx86\x86
+!endif
 !else if "$(PLATFORM)" == "x64"
 ARCTARG = AMD64
-PATH = C:\Windows;C:\Windows\System32;$(LABS)\WRK\tools\amd64
+!if "$(PROCESSOR_ARCHITEW6432)" == "AMD64"
+PATH = C:\Windows;C:\Windows\System32;$(LABS)\MSVC\Hostx64\x64
+!else
+PATH = C:\Windows;C:\Windows\System32;$(LABS)\MSVC\Hostx86\x64
+!endif
 !else
 !ERROR Usage: nmake (PLATFORM=x86|x64) (PROJ=ProjectName) (SLND=SolutionDir) [build|clean|rebuild]
 !endif
@@ -60,7 +68,7 @@ PROJOBJS = $(ASOBJS) $(CCARCHOBJS) $(CCOBJS) $(RCOBJS)
 !if "$(ARCTARG)" == "I386"
 TARGDEFS = /D_X86_=1 /Di386=1 /DSTD_CALL /DFPO=0 /DDOSWIN32 /DDETOURS_X86 /DDETOURS_32BIT
 TARGAOPTS = /safeseh /coff /Zm
-TARGCOPTS = /Gz /Gm- /GX- /G7 /Ze /Gi- /QIfdiv- /Od /Oy-
+TARGCOPTS = /Gz /Gm- /EHs-c- /Od /Oy-
 TARGLOPTS = 
 HOTPATCH = /stub:$(LABS)\WRK\base\ntos\BUILD\PREBUILT\$(ARCTARG)\STUB512.com
 ARCH = X86
@@ -68,7 +76,7 @@ ARCHML = ml
 !else if "$(ARCTARG)" == "AMD64"
 TARGDEFS = /D_WIN64 /D_AMD64_ /DAMD64 /DDETOURS_X64 /DDETOURS_64BIT
 TARGAOPTS = 
-TARGCOPTS = /Wp64 /Od /EHs-c- /Gs12288
+TARGCOPTS = /Od /EHs-c- /Gs12288
 TARGLOPTS = /IGNORE:4108,4088,4218,4218,4235
 HOTPATCH = $(LABS)\WRK\base\ntos\BUILD\PREBUILT\$(ARCTARG)\HOTPATCH.obj
 ARCH = AMD64
@@ -104,7 +112,7 @@ AFLAGS = $(AOPTS) $(INCS) /Fo$(OBJD)\ $(DEFS) $(SPECIALAFLAGS)
 CC = cl.exe /nologo
 CFLAGS = $(COPTS) $(INCS) /Fo$(OBJD)\ $(DEFS) $(SPECIALCFLAGS) $(COMPILERWARNINGS)
 
-RC = rc.exe
+RC = rc.exe /nologo
 RFLAGS = $(INCS) /fo$(RCOBJS)
 
 

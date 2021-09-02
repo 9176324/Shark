@@ -21,18 +21,55 @@
 @rem git clone https://github.com/9176324/Shark
 @rem git clone https://github.com/9176324/WRK
 @rem git clone https://github.com/9176324/WINDDK
+@rem git clone https://github.com/9176324/MSVC
 
-@set PATH=C:\Windows;C:\Windows\System32;%~dp0..\WRK\tools\amd64
 @set SLND=%~dp0
-
 @if not exist "%SLND%Build\Bins\AMD64" md "%SLND%Build\Bins\AMD64"
-@if not exist "%SLND%Build\Objs\Sea\AMD64" md "%SLND%Build\Objs\Sea\AMD64"
-@if not exist "%SLND%Build\Objs\Shark\AMD64" md "%SLND%Build\Objs\Shark\AMD64"
+@if not exist "%SLND%Build\Bins\I386" md "%SLND%Build\Bins\I386"
+
+@if not exist "%SLND%Build\Objs\Shark" md "%SLND%Build\Objs\Shark"
+@if not exist "%SLND%Build\Objs\Sea" md "%SLND%Build\Objs\Sea"
+
+@echo building x86
+
+:CheckOS
+@if exist "%PROGRAMFILES(X86)%" (goto x64x86) ELSE (goto x86x86)
+
+:x86x86
+@set path=C:\Windows;C:\Windows\System32;%~dp0\..\MSVC\Hostx86\x86
+@goto x86
+
+:x64x86
+@set path=C:\Windows;C:\Windows\System32;%~dp0\..\MSVC\Hostx64\x86
+@goto x86
+
+:x86
+@cd /d "%SLND%Projects\Shark"
+@NMAKE /NOLOGO PLATFORM=x86 PROJ=Shark
 
 @cd /d "%SLND%Projects\Sea"
-@NMAKE /NOLOGO REBUILD PLATFORM=x64 PROJ=Sea
+@NMAKE /NOLOGO PLATFORM=x86 PROJ=Sea
 
+@cd /d "%SLND%"
+
+@echo building x64
+
+:CheckOS
+@if exist "%PROGRAMFILES(X86)%" (goto x64x64) ELSE (goto x86x64)
+
+:x86x64
+@set path=C:\Windows;C:\Windows\System32;%~dp0\..\MSVC\Hostx86\x64
+@goto x64
+
+:x64x64
+@set path=C:\Windows;C:\Windows\System32;%~dp0\..\MSVC\Hostx64\x64
+@goto x64
+
+:x64
 @cd /d "%SLND%Projects\Shark"
-@NMAKE /NOLOGO REBUILD PLATFORM=x64 PROJ=Shark
+@NMAKE /NOLOGO PLATFORM=x64 PROJ=Shark
+
+@cd /d "%SLND%Projects\Sea"
+@NMAKE /NOLOGO PLATFORM=x64 PROJ=Sea
 
 @cd /d "%SLND%"
