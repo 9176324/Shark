@@ -20,7 +20,7 @@
 
 # Install
     run Sea.exe (use vbox exploit to load)
-    ![win11 disable virus](https://github.com/9176324/Shark/blob/master/Doc/win11 disable virus.png)
+    ![win11 disable virus](https://user-images.githubusercontent.com/4614528/139319409-1c3773f7-4c72-48bf-a415-29d018555bee.png)
     
 # Uninstall
     restart windows
