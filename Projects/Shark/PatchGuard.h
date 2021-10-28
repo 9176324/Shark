@@ -102,9 +102,9 @@ extern "C" {
     }MI_SYSTEM_VA_TYPE, *PMI_SYSTEM_VA_TYPE;
 
     typedef struct _PGBLOCK {
-        struct _GPBLOCK * GpBlock;
+        struct _RTB * RtBlock;
 
-#define GetGpBlock(pgb) (pgb->GpBlock)
+#define GetRtBlock(pgb) (pgb->RtBlock)
 
 #define PG_MAXIMUM_CONTEXT_COUNT 0x00000003UI32 // The maximum number of context that may exist
 #define PG_FIRST_FIELD_OFFSET 0x00000100UI32 // offset of the first context member used by the search
@@ -120,8 +120,12 @@ extern "C" {
             ((u32)((((PG_FIRST_FIELD_OFFSET + PG_COMPARE_FIELDS_COUNT * sizeof(ptr)) \
                 - PG_CMP_APPEND_DLL_SECTION_END) / sizeof(ptr)) - 1))
 
-        u8 Count;
-        b BtcEnable;
+        struct {
+            u8 Count : 3;
+            b BtcEnable : 1;
+            b IsDebug : 1;
+        };
+
         u32 OffsetEntryPoint;
         u32 SizeCmpAppendDllSection;
         u32 SizeINITKDBG;
@@ -154,10 +158,6 @@ extern "C" {
             PMMPTE BasePte;
         }SystemPtes; // system ptes       
 
-#define SYSTEM_REGION_TYPE_ARRAY_COUNT 0x100
-
-        s8 * SystemRegionTypeArray;
-
         struct {
             ptr WorkerContext;
 
@@ -178,6 +178,13 @@ extern "C" {
                 );
 
             u32 OffsetSameThreadPassive;
+            u32 OffsetExpWorkerThreadReturn;
+            ptr ExpWorkerThreadReturn;
+
+            struct {
+                u64 BeginAddress;
+                u64 EndAddress;
+            } KiScbQueueScanWorker;
         }; // restart ExpWorkerThread
 
         ptr
@@ -289,8 +296,8 @@ extern "C" {
 
         cptr ClearMessage[3];
 
-        LIST_ENTRY ObjectList;
-        KSPIN_LOCK ObjectLock;
+        LIST_ENTRY Object;
+        KSPIN_LOCK Lock;
 
         u64 Fields[PG_COMPARE_FIELDS_COUNT];
         u8 Header[PG_MAXIMUM_EP_BUFFER_COUNT];
@@ -308,7 +315,7 @@ extern "C" {
 
         u8 _ClearMessage[0x120];
         u8 _FreeWorker[0xB0];
-        u8 _ClearCallback[0xE00];
+        u8 _ClearCallback[0x380];
 
         u8 _OriginalCmpAppendDllSection[0xC8];
         u8 _CacheCmpAppendDllSection[0xC8];
@@ -317,7 +324,7 @@ extern "C" {
     void
         NTAPI
         PgClear(
-            __inout PPGBLOCK PgBlock
+            __inout PPGBLOCK Block
         );
 
 #ifdef __cplusplus

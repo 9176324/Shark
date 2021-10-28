@@ -19,8 +19,8 @@
 #ifndef _RELOAD_H_
 #define _RELOAD_H_
 
-#include <guarddefs.h>
 #include <devicedefs.h>
+#include <guarddefs.h>
 #include <dump.h>
 
 #include "Space.h"
@@ -30,22 +30,32 @@
 extern "C" {
 #endif	/* __cplusplus */
 
-    typedef LONG EX_SPIN_LOCK, *PEX_SPIN_LOCK;
+    typedef s32 EX_SPIN_LOCK, *PEX_SPIN_LOCK;
 
     typedef enum _OB_PREOP_CALLBACK_STATUS OB_PREOP_CALLBACK_STATUS;
     typedef struct _OB_PRE_OPERATION_INFORMATION *POB_PRE_OPERATION_INFORMATION;
     typedef struct _OB_POST_OPERATION_INFORMATION *POB_POST_OPERATION_INFORMATION;
 
-    typedef struct _GPBLOCK {
+    // runtime state block
+    typedef struct _RTB {
         PLIST_ENTRY PsLoadedModuleList;
         PEPROCESS PsInitialSystemProcess;
         PERESOURCE PsLoadedModuleResource;
         struct _FUNCTION_TABLE * PsInvertedFunctionTable;
         KSERVICE_TABLE_DESCRIPTOR * KeServiceDescriptorTable;
         KSERVICE_TABLE_DESCRIPTOR * KeServiceDescriptorTableShadow;
-
         PKLDR_DATA_TABLE_ENTRY KernelDataTableEntry; // ntoskrnl.exe
-        PKLDR_DATA_TABLE_ENTRY CoreDataTableEntry; // self
+
+        union {
+            SUPDRVLDRIMAGE SupImage;
+
+            struct {
+                KLDR_DATA_TABLE_ENTRY DataTableEntry;
+                wc FullDllName[MAXIMUM_FILENAME_LENGTH];
+                wc BaseDllName[MAXIMUM_FILENAME_LENGTH];
+            };
+        }*Self;
+
         ptr CpuControlBlock; // hypervisor
 
         ptr NativeObject;
@@ -53,15 +63,17 @@ extern "C" {
 #ifdef _WIN64
         ptr Wx86NativeObject;
 #endif // _WIN64
-        LIST_ENTRY LoadedPrivateImageList;
-        LIST_ENTRY ObjectList;
-        KSPIN_LOCK ObjectLock;
+
+        LIST_ENTRY LoadedModuleList;
+
+        LIST_ENTRY Object;
+        KSPIN_LOCK Lock;
 
         s8 NumberProcessors;
         s8 Linkage[3];// { 0x33, 0xc0, 0xc3 };
 
-        s32 BuildNumber;
-        u32 Flags;
+        u32 BuildNumber;
+        u32 Operation;
         u64 * PerfGlobalGroupMask;
         s8 KiSystemServiceCopyEnd[6];
         cptr PerfInfoLogSysCallEntry;
@@ -137,6 +149,80 @@ extern "C" {
             __in b SuspendProcess
             );
 #endif // !_WIN64
+
+        status
+        (NTAPI * ProcessOpen)(
+            __in OB_OPEN_REASON OpenReason,
+            __in KPROCESSOR_MODE PreviousMode,
+            __in_opt PEPROCESS Process,
+            __in ptr ProcessObject,
+            __in ACCESS_MASK * GrantedAccess,
+            __in u32 HandleCount
+            );
+
+        void
+        (NTAPI * ProcessDelete)(
+            __in ptr ProcessObject
+            );
+
+        status
+        (NTAPI * ThreadOpen)(
+            __in OB_OPEN_REASON OpenReason,
+            __in KPROCESSOR_MODE PreviousMode,
+            __in_opt PEPROCESS Process,
+            __in ptr ThreadObject,
+            __in ACCESS_MASK * GrantedAccess,
+            __in u32 HandleCount
+            );
+
+        void
+        (NTAPI * ThreadDelete)(
+            __in ptr ThreadObject
+            );
+
+        status
+        (NTAPI * FileOpen)(
+            __in OB_OPEN_REASON OpenReason,
+            __in KPROCESSOR_MODE PreviousMode,
+            __in_opt PEPROCESS Process,
+            __in ptr FileObject,
+            __in ACCESS_MASK * GrantedAccess,
+            __in u32 HandleCount
+            );
+
+        status
+        (NTAPI * FileParse)(
+            __in ptr ParseObject,
+            __in ptr ObjectType,
+            __in PACCESS_STATE AccessState,
+            __in KPROCESSOR_MODE AccessMode,
+            __in u32 Attributes,
+            __inout PUNICODE_STRING CompleteName,
+            __inout PUNICODE_STRING RemainingName,
+            __inout_opt ptr Context,
+            __in_opt PSECURITY_QUALITY_OF_SERVICE SecurityQos,
+            __out ptr * FileObject
+            );
+
+        void
+        (NTAPI * FileDelete)(
+            __in ptr FileObject
+            );
+
+        status
+        (NTAPI * DriverOpen)(
+            __in OB_OPEN_REASON OpenReason,
+            __in KPROCESSOR_MODE PreviousMode,
+            __in_opt PEPROCESS Process,
+            __in ptr DriverObject,
+            __in ACCESS_MASK * GrantedAccess,
+            __in u32 HandleCount
+            );
+
+        void
+        (NTAPI * DriverDelete)(
+            __in ptr DriverObject
+            );
 
         OB_PREOP_CALLBACK_STATUS
         (NTAPI * GlobalObjectPreCallback)(
@@ -235,6 +321,15 @@ extern "C" {
             ...
             );
 
+        NTSTATUS
+        (NTAPI *  KeWaitForSingleObject)(
+            __in PVOID Object,
+            __in KWAIT_REASON WaitReason,
+            __in KPROCESSOR_MODE WaitMode,
+            __in BOOLEAN Alertable,
+            __in_opt PLARGE_INTEGER Timeout
+            );
+
         u
         (NTAPI * RtlCompareMemory)(
             const void * Destination,
@@ -282,13 +377,16 @@ extern "C" {
         KDDEBUGGER_DATA64 DebuggerDataBlock;
         KDDEBUGGER_DATA_ADDITION64 DebuggerDataAdditionBlock;
 
+        u32 NameInterval;
+
         u16 OffsetKProcessThreadListHead;
         u16 OffsetKThreadThreadListEntry;
         u16 OffsetKThreadWin32StartAddress;
         u32 OffsetKThreadProcessId;
+        u16 OffsetEProcessActiveProcessLinks;
 
         struct _PGBLOCK * PgBlock;
-    } GPBLOCK, *PGPBLOCK;
+    } RTB, *PRTB;
 
     NTKERNELAPI
         status
@@ -305,85 +403,168 @@ extern "C" {
         );
 
 #define FastAcquireRundownProtection(ref) \
-            GpBlock.ExAcquireRundownProtection((ref))
+            RtBlock.ExAcquireRundownProtection((ref))
 
 #define FastReleaseRundownProtection(ref) \
-            GpBlock.ExReleaseRundownProtection((ref))
+            RtBlock.ExReleaseRundownProtection((ref))
 
 #define FastWaitForRundownProtectionRelease(ref) \
-            GpBlock.ExWaitForRundownProtectionRelease((ref))
+            RtBlock.ExWaitForRundownProtectionRelease((ref))
 
 #define FastAcquireObjectLock(irql) \
-            *(irql) = GpBlock.ExAcquireSpinLockShared(&GpBlock.ObjectLock)
+            *(irql) = RtBlock.ExAcquireSpinLockShared(&RtBlock.Lock)
 
 #define FastReleaseObjectLock(irql) \
-            GpBlock.ExReleaseSpinLockShared(&GpBlock.ObjectLock, (irql))
+            RtBlock.ExReleaseSpinLockShared(&RtBlock.Lock, (irql))
 
-    VOID
+    void
         NTAPI
         InitializeGpBlock(
-            __in PGPBLOCK Block
+            __in PRTB Block
         );
 
-    ULONG
+    u32
         NTAPI
-        GetPlatform(
-            __in PVOID ImageBase
+        LdrMakeProtection(
+            __in PIMAGE_SECTION_HEADER NtSection
         );
 
-    ULONG
+    u32
         NTAPI
-        GetTimeStamp(
-            __in PVOID ImageBase
+        LdrGetPlatform(
+            __in ptr ImageBase
         );
 
-    USHORT
+    u32
         NTAPI
-        GetSubsystem(
-            __in PVOID ImageBase
+        LdrGetTimeStamp(
+            __in ptr ImageBase
         );
 
-    ULONG
+    u16
         NTAPI
-        GetSizeOfImage(
-            __in PVOID ImageBase
+        LdrGetSubsystem(
+            __in ptr ImageBase
         );
 
-    PVOID
+    u32
         NTAPI
-        GetAddressOfEntryPoint(
-            __in PVOID ImageBase
+        LdrGetSize(
+            __in ptr ImageBase
+        );
+
+    ptr
+        NTAPI
+        LdrGetEntryPoint(
+            __in ptr ImageBase
         );
 
     PIMAGE_SECTION_HEADER
         NTAPI
         SectionTableFromVirtualAddress(
-            __in PVOID ImageBase,
-            __in PVOID Address
+            __in ptr ImageBase,
+            __in ptr Address
         );
 
     PIMAGE_SECTION_HEADER
         NTAPI
-        FindSection(
-            __in PVOID ImageBase,
-            __in PCSTR SectionName
+        LdrFindSection(
+            __in ptr ImageBase,
+            __in u8ptr SectionName
         );
 
-    NTSTATUS
+    void
         NTAPI
-        FindEntryForKernelImage(
+        LdrRelocImage(
+            __in ptr ImageBase,
+            __in s Diff
+        );
+
+    status
+        NTAPI
+        FindEntryForImage(
             __in PUNICODE_STRING ImageFileName,
             __out PKLDR_DATA_TABLE_ENTRY * DataTableEntry
         );
 
-    NTSTATUS
+    status
         NTAPI
-        FindEntryForKernelImageAddress(
-            __in PVOID Address,
+        FindEntryForImageAddress(
+            __in ptr Address,
             __out PKLDR_DATA_TABLE_ENTRY * DataTableEntry
         );
 
-    extern PGPBLOCK GpBlock;
+    ptr
+        NTAPI
+        LdrGetSymbol(
+            __in ptr ImageBase,
+            __in_opt cptr ProcedureName,
+            __in_opt u32 ProcedureNumber
+        );
+
+    ptr
+        NTAPI
+        LdrNameToAddress(
+            __in cptr String
+        );
+
+    void
+        NTAPI
+        LdrSnapThunk(
+            __in ptr ImageBase
+        );
+
+    void
+        NTAPI
+        LdrEnumerateThunk(
+            __in ptr ImageBase
+        );
+
+    void
+        NTAPI
+        LdrReplaceThunk(
+            __in ptr ImageBase,
+            __in_opt cptr ImageName,
+            __in_opt cptr ProcedureName,
+            __in_opt u32 ProcedureNumber,
+            __in ptr ProcedureAddress
+        );
+
+    s
+        NTAPI
+        LdrSetImageBase(
+            __in ptr ImageBase
+        );
+
+    PKLDR_DATA_TABLE_ENTRY
+        NTAPI
+        LdrLoad(
+            __in ptr ViewBase,
+            __in wcptr ImageName,
+            __in u32 Flags
+        );
+
+    void
+        NTAPI
+        LdrUnload(
+            __in PKLDR_DATA_TABLE_ENTRY DataTableEntry
+        );
+
+    void
+        NTAPI
+        DumpImageWorker(
+            __in ptr ImageBase,
+            __in u32 SizeOfImage,
+            __in PUNICODE_STRING ImageFIleName
+        );
+
+    status
+        NTAPI
+        DumpFileWorker(
+            __in PUNICODE_STRING ImageFIleName
+        );
+
+    extern RTB RtBlock;
 
 #ifdef __cplusplus
 }

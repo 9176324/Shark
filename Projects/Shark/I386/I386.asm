@@ -24,7 +24,15 @@ include callconv.inc
         .list
         
 _TEXT$00    SEGMENT PAGE 'CODE'
+                              
+    cPublicProc _DriverEntry, 2
+        
+        xor eax, eax
 
+        stdRET _DriverEntry
+        
+    stdENDP _DriverEntry
+        
     cPublicProc __FlushSingleTb, 1
         
         mov eax, [esp + 4]

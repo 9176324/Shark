@@ -13,6 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Include", "Include", "{2655
 		Include\guarddefs.h = Include\guarddefs.h
 		Include\listdefs.h = Include\listdefs.h
 		Include\statusdefs.h = Include\statusdefs.h
+		Include\supdefs.h = Include\supdefs.h
 		Include\typesdefs.h = Include\typesdefs.h
 		Include\ver.h = Include\ver.h
 		Include\WARNING.h = Include\WARNING.h

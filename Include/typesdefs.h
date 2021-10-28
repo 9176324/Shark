@@ -36,12 +36,14 @@ extern "C" {
 
     typedef void * ptr;
 
-    typedef unsigned __int8 c, *cptr;
+    typedef unsigned char c, *cptr;
     typedef unsigned __int16 wc, *wcptr;
     typedef unsigned __int8 b, *bptr;
 
+#ifndef __cplusplus
     typedef * __ptr32 ptr32;
     typedef * __ptr64 ptr64;
+#endif // !__cplusplus
 
 #else
 #ifndef _UNICODE
@@ -55,46 +57,50 @@ extern "C" {
 #ifndef _WIN64
 typedef __int32 s, *sptr;
 typedef unsigned __int32 u, *uptr;
-
-#define __utop(v) (ptr)(u32)(u)(v)
-#define __ptou(v) (u32)(u)(v)
 #else
 typedef __int64 s, *sptr;
 typedef unsigned __int64 u, *uptr;
-
-#define __utop(v) (ptr)(u64)(u)(v)
-#define __ptou(v) (u64)(u)(v)
 #endif // !_WIN64
 
-#define __rds8(p) (*(s8ptr)__utop(p) & 0xff)
-#define __rds16(p) (*(s16ptr)__utop(p) & 0xffff)
-#define __rds32(p) (*(s32ptr)__utop(p) & 0xffffffff)
-#define __rds64(p) (*(s64ptr)__utop(p) & 0xffffffffffffffff)
-#define __rdsptr(p) (*(sptr)__utop(p))
+#define s8c(v) (v)
+#define s16c(v) (v)
+#define s32c(v) (v)
+#define s64c(v) (v ## LL)
 
-#define __rdu8(p) (*(u8ptr)__utop(p) & 0xff)
-#define __rdu16(p) (*(u16ptr)__utop(p) & 0xffff)
-#define __rdu32(p) (*(u32ptr)__utop(p) & 0xffffffff)
-#define __rdu64(p) (*(u64ptr)__utop(p) & 0xffffffffffffffff)
-#define __rduptr(p) (*(uptr)__utop(p))
+#define u8c(v) (v)
+#define u16c(v) (v)
+#define u32c(v) (v ## U)
+#define u64c(v) (v ## ULL)
 
-#define __rdfloat(p) (*(float *)__utop(p)
-#define __rddouble(p) (*(double *)__utop(p)
+#define __rds8(p) (*(s8ptr)(ptr)(u)(p))
+#define __rds16(p) (*(s16ptr)(ptr)(u)(p))
+#define __rds32(p) (*(s32ptr)(ptr)(u)(p))
+#define __rds64(p) (*(s64ptr)(ptr)(u)(p))
+#define __rdsptr(p) (*(sptr)(ptr)(u)(p))
 
-#define __wrs8(p, v) (*(s8ptr)__utop(p) = (s8)(v))
-#define __wrs16(p, v) (*(s16ptr)__utop(p) = (s16)(v))
-#define __wrs32(p, v) (*(s32ptr)__utop(p) = (s32)(v))
-#define __wrs64(p, v) (*(s64ptr)__utop(p) = (s64)(v))
-#define __wrsptr(p, v) (*(sptr)__utop(p) = (s)(v))
+#define __rdu8(p) (*(u8ptr)(ptr)(u)(p))
+#define __rdu16(p) (*(u16ptr)(ptr)(u)(p))
+#define __rdu32(p) (*(u32ptr)(ptr)(u)(p))
+#define __rdu64(p) (*(u64ptr)(ptr)(u)(p))
+#define __rduptr(p) (*(uptr)(ptr)(u)(p))
 
-#define __wru8(p, v) (*(u8ptr)__utop(p) = (u8)(v))
-#define __wru16(p, v) (*(u16ptr)__utop(p) = (u16)(v))
-#define __wru32(p, v) (*(u32ptr)__utop(p) = (u32)(v))
-#define __wru64(p, v) (*(u64ptr)__utop(p) = (u64)(v))
-#define __wruptr(p, v) (*(uptr)__utop(p) = (u)(v))
+#define __rdfloat(p) (*(float *)(ptr)(u)(p)
+#define __rddouble(p) (*(double *)(ptr)(u)(p)
 
-#define __wrfloat(p, v) (*(float *)__utop(p) = (float)(v))
-#define __wrdouble(p, v) (*(double *)__utop(p) = (double)(v))
+#define __wrs8(p, v) (*(s8ptr)(ptr)(u)(p) = (s8)(v))
+#define __wrs16(p, v) (*(s16ptr)(ptr)(u)(p) = (s16)(v))
+#define __wrs32(p, v) (*(s32ptr)(ptr)(u)(p) = (s32)(v))
+#define __wrs64(p, v) (*(s64ptr)(ptr)(u)(p) = (s64)(v))
+#define __wrsptr(p, v) (*(sptr)(ptr)(u)(p) = (s)(v))
+
+#define __wru8(p, v) (*(u8ptr)(ptr)(u)(p) = (u8)(v))
+#define __wru16(p, v) (*(u16ptr)(ptr)(u)(p) = (u16)(v))
+#define __wru32(p, v) (*(u32ptr)(ptr)(u)(p) = (u32)(v))
+#define __wru64(p, v) (*(u64ptr)(ptr)(u)(p) = (u64)(v))
+#define __wruptr(p, v) (*(uptr)(ptr)(u)(p) = (u)(v))
+
+#define __wrfloat(p, v) (*(float *)(ptr)(u)(p) = (float)(v))
+#define __wrdouble(p, v) (*(double *)(ptr)(u)(p) = (double)(v))
 
 #define __max(a, b) (((a) > (b)) ? (a) : (b))
 #define __min(a, b) (((a) < (b)) ? (a) : (b))
@@ -110,11 +116,6 @@ typedef unsigned __int64 u, *uptr;
 #define __hiu32(l) ((u32)((u64)(l) >> 32))
 #define __lou32(l) ((u32)((u64)(l) & 0xffffffff))
 
-#define __flagon(b, n) ((n) == ((b) & (n)))
-
-#define ByteOffset(Va) ((u32)((s)(Va) & (PAGE_SIZE - 1)))
-#define PageAlign(Va) ((ptr)((u)(Va) & ~(PAGE_SIZE - 1)))
-
 #ifndef _WIN64
 #define __gcall __stdcall
 #else
@@ -124,6 +125,15 @@ typedef unsigned __int64 u, *uptr;
 #ifndef GCALL
 #define GCALL __gcall
 #endif // !GCALL
+
+typedef
+u
+(GCALL * PGSUPPORT_ROUTINE) (
+    ptr Argument1,
+    ptr Argument2,
+    ptr Argument3,
+    ptr Argument4
+    );
 
 typedef
 u

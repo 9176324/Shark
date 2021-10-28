@@ -26,115 +26,18 @@
 extern "C" {
 #endif	/* __cplusplus */
 
-    enum {
-        KiDivideErrorFault,
-        KiDebugTrapOrFault,
-        KiNmiInterrupt,
-        KiBreakpointTrap,
-        KiOverflowTrap,
-        KiBoundFault,
-        KiInvalidOpcodeFault,
-        KiNpxNotAvailableFault,
-        KiDoubleFaultAbort,
-        KiNpxSegmentOverrunAbort,
-        KiInvalidTssFault,
-        KiSegmentNotPresentFault,
-        KiStackFault,
-        KiGeneralProtectionFault,
-        KiPageFault,
-        KiFloatingErrorFault,
-        KiAlignmentFault,
-        KiMcheckAbort,
-        KiXmmException,
-        KiApcInterrupt,
-        KiRaiseAssertion,
-        KiDebugServiceTrap,
-        KiDpcInterrupt,
-        KiIpiInterrupt,
-        KiMaxInterrupt
-    };
-
-    typedef
-        VOID
-        (NTAPI * PINTERRUPT_HANDLER) (
-            VOID
-            );
-
-    typedef struct _INTERRUPTION_FRAME {
-        ULONG_PTR ProgramCounter;
-        ULONG_PTR SegCs;
-        ULONG_PTR Eflags;
-    }INTERRUPTION_FRAME, *PINTERRUPTION_FRAME;
-
-    typedef union _INTERRUPT_ADDRESS {
-        struct {
-#ifndef _WIN64
-            USHORT Offset;
-            USHORT ExtendedOffset;
-#else
-            USHORT OffsetLow;
-            USHORT OffsetMiddle;
-            ULONG OffsetHigh;
-#endif // !_WIN64
-        };
-
-        ULONG_PTR Address;
-    } INTERRUPT_ADDRESS, *PINTERRUPT_ADDRESS;
-
-    typedef struct _OBJECT OBJECT, *POBJECT;
-
-#define MAXIMUM_USER_FUNCTION_TABLE_SIZE 512
-#define MAXIMUM_KERNEL_FUNCTION_TABLE_SIZE 256
-
-    typedef struct _FUNCTION_TABLE_ENTRY32 {
-        ULONG FunctionTable;
-        ULONG ImageBase;
-        ULONG SizeOfImage;
-        ULONG SizeOfTable;
-    } FUNCTION_TABLE_ENTRY32, *PFUNCTION_TABLE_ENTRY32;
-
-    C_ASSERT(sizeof(FUNCTION_TABLE_ENTRY32) == 0x10);
-
-    typedef struct _FUNCTION_TABLE_ENTRY64 {
-        ULONG64 FunctionTable;
-        ULONG64 ImageBase;
-        ULONG SizeOfImage;
-        ULONG SizeOfTable;
-    } FUNCTION_TABLE_ENTRY64, *PFUNCTION_TABLE_ENTRY64;
-
-    C_ASSERT(sizeof(FUNCTION_TABLE_ENTRY64) == 0x18);
-
-    typedef struct _FUNCTION_TABLE {
-        ULONG CurrentSize;
-        ULONG MaximumSize;
-        ULONG Epoch;
-        BOOLEAN Overflow;
-        ULONG TableEntry[1];
-    } FUNCTION_TABLE, *PFUNCTION_TABLE;
-
-    C_ASSERT(FIELD_OFFSET(FUNCTION_TABLE, TableEntry) == 0x10);
-
-    typedef struct _FUNCTION_TABLE_LEGACY {
-        ULONG CurrentSize;
-        ULONG MaximumSize;
-        BOOLEAN Overflow;
-        ULONG TableEntry[1];
-    } FUNCTION_TABLE_LEGACY, *PFUNCTION_TABLE_LEGACY;
-
-    C_ASSERT(FIELD_OFFSET(FUNCTION_TABLE_LEGACY, TableEntry) == 0xc);
-
-    VOID
+    void
         NTAPI
         CaptureImageExceptionValues(
-            __in PVOID Base,
-            __out PVOID * FunctionTable,
-            __out PULONG TableSize
+            __in ptr Base,
+            __out ptr * FunctionTable,
+            __out u32ptr TableSize
         );
 
-    VOID
+    void
         NTAPI
         InitializeExcept(
-            __inout PGPBLOCK Block
+            __inout PRTB Block
         );
 
 #ifndef _WIN64
@@ -142,17 +45,41 @@ extern "C" {
         PEXCEPTION_REGISTRATION_RECORD RegistrationPointer;
     } DISPATCHER_CONTEXT;
 #else
-    VOID
+    void
         NTAPI
         InsertInvertedFunctionTable(
-            __in PVOID ImageBase,
-            __in ULONG SizeOfImage
+            __in ptr ImageBase,
+            __in u32 SizeOfImage
         );
 
-    VOID
+    void
         NTAPI
         RemoveInvertedFunctionTable(
-            __in PVOID ImageBase
+            __in ptr ImageBase
+        );
+
+    PRUNTIME_FUNCTION
+        NTAPI
+        UnwindPrologue(
+            __in u64 ImageBase,
+            __in u64 ControlPc,
+            __in u64 FrameBase,
+            __in PRUNTIME_FUNCTION FunctionEntry,
+            __inout PCONTEXT ContextRecord,
+            __inout_opt PKNONVOLATILE_CONTEXT_POINTERS ContextPointers
+        );
+
+    PEXCEPTION_ROUTINE
+        NTAPI
+        VirtualUnwind(
+            __in u32 HandlerType,
+            __in u64 ImageBase,
+            __in u64 ControlPc,
+            __in PRUNTIME_FUNCTION FunctionEntry,
+            __inout PCONTEXT ContextRecord,
+            __out ptr * HandlerData,
+            __out u64ptr EstablisherFrame,
+            __inout_opt PKNONVOLATILE_CONTEXT_POINTERS ContextPointers
         );
 #endif // !_WIN64
 

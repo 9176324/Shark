@@ -21,248 +21,181 @@
 
 #include "Shark.h"
 
+#include "Except.h"
 #include "Guard.h"
 #include "Reload.h"
 #include "PatchGuard.h"
 #include "Space.h"
 
-// #ifdef ALLOC_PRAGMA
-// #pragma alloc_text(PAGE, DriverEntry)
-// #endif
+#pragma section( ".block", read, write, execute )
 
-VOID
-NTAPI
-DriverUnload(
-    __in PDRIVER_OBJECT DriverObject
-);
+__declspec(allocate(".block")) RTB RtBlock = { 0 };
+__declspec(allocate(".block")) PGBLOCK PgBlock = { 0 };
 
-NTSTATUS
+status
 NTAPI
-DeviceCreate(
-    __in PDEVICE_OBJECT DeviceObject,
-    __in PIRP Irp
-);
-
-NTSTATUS
-NTAPI
-DeviceClose(
-    __in PDEVICE_OBJECT DeviceObject,
-    __in PIRP Irp
-);
-
-NTSTATUS
-NTAPI
-DeviceWrite(
-    __in PDEVICE_OBJECT DeviceObject,
-    __in PIRP Irp
-);
-
-NTSTATUS
-NTAPI
-DeviceRead(
-    __in PDEVICE_OBJECT DeviceObject,
-    __in PIRP Irp
-);
-
-NTSTATUS
-NTAPI
-DeviceControl(
-    __in PDEVICE_OBJECT DeviceObject,
-    __in PIRP Irp
-);
-
-NTSTATUS
-NTAPI
-DriverEntry(
-    __in PDRIVER_OBJECT DriverObject,
-    __in PUNICODE_STRING RegistryPath
+KernelFastCall(
+    __in ptr Reserve,
+    __in u32 Operation
 )
 {
-    NTSTATUS Status = STATUS_SUCCESS;
-    PDEVICE_OBJECT DeviceObject = NULL;
-    UNICODE_STRING DeviceName = { 0 };
-    UNICODE_STRING SymbolicLinkName = { 0 };
-    PMMPTE PointerPte = NULL;
-    PFN_NUMBER NumberOfPages = 0;
+    status Status = STATUS_SUCCESS;
 
-    RtlInitUnicodeString(&DeviceName, DEVICE_STRING);
+#ifdef DEBUG
+    vDbgPrint(
+        "[Shark] KernelFastCall\n");
+#endif // DEBUG
 
-    Status = IoCreateDevice(
-        DriverObject,
-        0,
-        &DeviceName,
-        FILE_DEVICE_UNKNOWN,
-        FILE_DEVICE_SECURE_OPEN,
-        FALSE,
-        &DeviceObject);
-
-    if (NT_SUCCESS(Status)) {
-        DriverObject->MajorFunction[IRP_MJ_CREATE] = (PDRIVER_DISPATCH)DeviceCreate;
-        DriverObject->MajorFunction[IRP_MJ_CLOSE] = (PDRIVER_DISPATCH)DeviceClose;
-        DriverObject->MajorFunction[IRP_MJ_WRITE] = (PDRIVER_DISPATCH)DeviceWrite;
-        DriverObject->MajorFunction[IRP_MJ_READ] = (PDRIVER_DISPATCH)DeviceRead;
-        DriverObject->MajorFunction[IRP_MJ_DEVICE_CONTROL] = (PDRIVER_DISPATCH)DeviceControl;
-
-        RtlInitUnicodeString(&SymbolicLinkName, SYMBOLIC_STRING);
-
-        Status = IoCreateSymbolicLink(&SymbolicLinkName, &DeviceName);
-
-        if (NT_SUCCESS(Status)) {
-            DriverObject->DriverUnload = (PDRIVER_UNLOAD)DriverUnload;
-
-#ifndef PUBLIC
-            DbgPrint("[Shark] load\n");
-#endif // !PUBLIC
-
-            GpBlock = __malloc(sizeof(GPBLOCK) + sizeof(PGBLOCK));
-
-            if (NULL != GpBlock) {
-                RtlZeroMemory(
-                    GpBlock,
-                    sizeof(GPBLOCK) + sizeof(PGBLOCK));
-
-                GpBlock->PgBlock = __utop(GpBlock + 1);
-                GpBlock->PgBlock->GpBlock = __utop(GpBlock);
-
-                InitializeGpBlock(GpBlock);
-                InitializeSpace(GpBlock);
-            }
-        }
-        else {
-            IoDeleteDevice(DeviceObject);
-        }
+    switch (Operation) {
+    case 0: {
+        break;
     }
 
-    return Status;
-}
+    case 1: {
+        break;
+    }
 
-VOID
-NTAPI
-DriverUnload(
-    __in PDRIVER_OBJECT DriverObject
-)
-{
-    UNICODE_STRING SymbolicLinkName = { 0 };
-
-    RtlInitUnicodeString(&SymbolicLinkName, SYMBOLIC_STRING);
-    IoDeleteSymbolicLink(&SymbolicLinkName);
-    IoDeleteDevice(DriverObject->DeviceObject);
-
-#ifndef PUBLIC
-    DbgPrint("[Shark] - unload\n");
-#endif // !PUBLIC
-}
-
-NTSTATUS
-NTAPI
-DeviceCreate(
-    __in PDEVICE_OBJECT DeviceObject,
-    __in PIRP Irp
-)
-{
-    NTSTATUS Status = STATUS_SUCCESS;
-
-    Irp->IoStatus.Information = 0;
-    Irp->IoStatus.Status = Status;
-
-    IoCompleteRequest(
-        Irp,
-        IO_NO_INCREMENT);
-
-    return Status;
-}
-
-NTSTATUS
-NTAPI
-DeviceClose(
-    __in PDEVICE_OBJECT DeviceObject,
-    __in PIRP Irp
-)
-{
-    NTSTATUS Status = STATUS_SUCCESS;
-
-    Irp->IoStatus.Information = 0;
-    Irp->IoStatus.Status = Status;
-
-    IoCompleteRequest(
-        Irp,
-        IO_NO_INCREMENT);
-
-    return Status;
-}
-
-NTSTATUS
-NTAPI
-DeviceWrite(
-    __in PDEVICE_OBJECT DeviceObject,
-    __in PIRP Irp
-)
-{
-    NTSTATUS Status = STATUS_SUCCESS;
-
-    Irp->IoStatus.Information = 0;
-    Irp->IoStatus.Status = Status;
-
-    IoCompleteRequest(
-        Irp,
-        IO_NO_INCREMENT);
-
-    return Status;
-}
-
-NTSTATUS
-NTAPI
-DeviceRead(
-    __in PDEVICE_OBJECT DeviceObject,
-    __in PIRP Irp
-)
-{
-    NTSTATUS Status = STATUS_SUCCESS;
-
-    Irp->IoStatus.Information = 0;
-    Irp->IoStatus.Status = Status;
-
-    IoCompleteRequest(
-        Irp,
-        IO_NO_INCREMENT);
-
-    return Status;
-}
-
-NTSTATUS
-NTAPI
-DeviceControl(
-    __in PDEVICE_OBJECT DeviceObject,
-    __in PIRP Irp
-)
-{
-    NTSTATUS Status = STATUS_SUCCESS;
-    PIO_STACK_LOCATION IrpSp = NULL;
-
-    IrpSp = IoGetCurrentIrpStackLocation(Irp);
-
-    switch (IrpSp->Parameters.DeviceIoControl.IoControlCode) {
-    case 0: {
-        PgClear(GpBlock->PgBlock);
-
-        Irp->IoStatus.Information = 0;
-
+    case 2: {
         break;
     }
 
     default: {
-        Irp->IoStatus.Information = 0;
-        Status = STATUS_INVALID_DEVICE_REQUEST;
-
         break;
     }
     }
 
-    Irp->IoStatus.Status = Status;
+    return Status;
+}
 
-    IoCompleteRequest(
-        Irp,
-        IO_NO_INCREMENT);
+status
+NTAPI
+ReloadSelf(
+    __in PRTB RtBlock,
+    __in u32 Operation
+)
+{
+    status Status = STATUS_SUCCESS;
+    PKLDR_DATA_TABLE_ENTRY DataTableEntry = NULL;
+    PGNORMAL_ROUTINE GsInitialize = NULL;
+    PGSUPPORT_ROUTINE KernelEntry = NULL;
+
+    DataTableEntry = LdrLoad(
+        RtBlock->Self->SupImage.pvImage,
+        KernelString,
+        LDRP_SYSTEM_MAPPED | LDRP_REDIRECTED);
+
+    if (NULL != DataTableEntry) {
+#ifdef DEBUG
+        vDbgPrint(
+            ".reload /i %wZ=%p < %p - %08x >\n",
+            &DataTableEntry->BaseDllName,
+            DataTableEntry->DllBase,
+            DataTableEntry->DllBase,
+            DataTableEntry->SizeOfImage);
+#endif // DEBUG
+
+        GsInitialize = DataTableEntry->EntryPoint;
+
+        if (NULL != GsInitialize) {
+            GsInitialize();
+
+            KernelEntry =
+                LdrGetSymbol(
+                    DataTableEntry->DllBase,
+                    "KernelEntry",
+                    0);
+
+            if (NULL != KernelEntry) {
+                Status = KernelEntry(
+                    (ptr)DataTableEntry,
+                    (ptr)(u)Operation,
+                    NULL,
+                    NULL);
+            }
+            else {
+                __free(DataTableEntry);
+
+                Status = STATUS_UNSUCCESSFUL;
+            }
+        }
+        else {
+            __free(DataTableEntry);
+
+            Status = STATUS_UNSUCCESSFUL;
+        }
+    }
+    else {
+        Status = STATUS_UNSUCCESSFUL;
+
+#ifdef DEBUG
+        vDbgPrint(
+            "[Shark] reload failed\n");
+#endif // DEBUG
+    }
+
+    return Status;
+}
+
+status
+NTAPI
+KernelEntry(
+    __in ptr Self,
+    __in u32 Operation,
+    __in ptr Reserve, // do not use
+    __in ptr Nothing
+)
+{
+    status Status = STATUS_SUCCESS;
+
+    RtBlock.PgBlock = &PgBlock;
+    PgBlock.RtBlock = &RtBlock;
+
+    RtBlock.Self = Self;
+    RtBlock.Operation = Operation;
+
+    InitializeGpBlock(&RtBlock);
+
+    if (CmdReload ==
+        (RtBlock.Operation & CmdReload)) {
+        ReloadSelf(&RtBlock, Operation & ~CmdReload);
+    }
+    else {
+        InitializeSpace(&RtBlock);
+
+        if (CmdPgClear ==
+            (RtBlock.Operation & CmdPgClear)) {
+            PgBlock.IsDebug = 1;
+
+#ifndef _WIN64
+            InitializeExcept(&RtBlock);
+#else                             
+            PgClear(&PgBlock);
+            InitializeExcept(&RtBlock);
+#endif // !_WIN64
+
+            __try {
+                *(volatile u8ptr)NULL;
+            }
+            __except (EXCEPTION_EXECUTE_HANDLER) {
+#ifdef DEBUG
+                vDbgPrint(
+                    "[SHARK] < %p > test exception code\n",
+                    GetExceptionCode());
+#endif // DEBUG    
+            }
+        }
+
+        if (CmdVmxOn ==
+            (RtBlock.Operation & CmdVmxOn)) {
+            // VmxStartAllProcessors(&RtBlock.CpuControlBlock);
+        }
+
+#ifdef DEBUG
+        vDbgPrint(
+            "[SHARK] < %p > shark load success\n",
+            RtBlock.Self);
+#endif // DEBUG
+    }
 
     return Status;
 }

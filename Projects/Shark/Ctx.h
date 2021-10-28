@@ -32,17 +32,17 @@ extern "C" {
         // Home address for the parameter registers.
         //
 
-        ULONG64 P1Home;
-        ULONG64 P2Home;
-        ULONG64 P3Home;
-        ULONG64 P4Home;
-        ULONG64 P5;
+        u64 P1Home;
+        u64 P2Home;
+        u64 P3Home;
+        u64 P4Home;
+        u64 P5;
 
         //
         // Kernel callout initial stack value.
         //
 
-        ULONG64 InitialStack;
+        u64 InitialStack;
 
         //
         // Saved nonvolatile floating registers.
@@ -63,41 +63,41 @@ extern "C" {
         // Kernel callout frame variables.
         //
 
-        ULONG64 TrapFrame;
-        ULONG64 CallbackStack;
-        ULONG64 OutputBuffer;
-        ULONG64 OutputLength;
+        u64 TrapFrame;
+        u64 CallbackStack;
+        u64 OutputBuffer;
+        u64 OutputLength;
 
         //
         // Saved MXCSR when a thread is interrupted in kernel mode via a dispatch
         // interrupt.
         //
 
-        ULONG64 MxCsr;
+        u64 MxCsr;
 
         //
         // Saved nonvolatile register - not always saved.
         //
 
-        ULONG64 Rbp;
+        u64 Rbp;
 
         //
         // Saved nonvolatile registers.
         //
 
-        ULONG64 Rbx;
-        ULONG64 Rdi;
-        ULONG64 Rsi;
-        ULONG64 R12;
-        ULONG64 R13;
-        ULONG64 R14;
-        ULONG64 R15;
+        u64 Rbx;
+        u64 Rdi;
+        u64 Rsi;
+        u64 R12;
+        u64 R13;
+        u64 R14;
+        u64 R15;
 
         //
         // EFLAGS and return address.
         //
 
-        ULONG64 Return;
+        u64 Return;
     }EXCEPTION_FRAME, *PEXCEPTION_FRAME;
 
 #define EXCEPTION_FRAME_LENGTH sizeof(EXCEPTION_FRAME)
@@ -122,8 +122,8 @@ extern "C" {
         )
     {
         return CONTAINING_RECORD(
-            (ULONG_PTR)Thread +
-            GpBlock->DebuggerDataBlock.OffsetKThreadApcProcess,
+            (u)Thread +
+            RtBlock.DebuggerDataBlock.OffsetKThreadApcProcess,
             KAPC_STATE,
             Process);
     }
@@ -135,60 +135,60 @@ extern "C" {
             __in PKTHREAD Thread
         )
     {
-        return *(PCCHAR)((ULONG_PTR)Thread +
-            GpBlock->DebuggerDataBlock.OffsetKThreadState);
+        return *(PCCHAR)((u)Thread +
+            RtBlock.DebuggerDataBlock.OffsetKThreadState);
     }
 
     FORCEINLINE
         PLIST_ENTRY
         NTAPI
         GetProcessThreadListHead(
-            __inout PGPBLOCK GpBlock,
+            __inout PRTB RtBlock,
             __inout PEPROCESS Process
         )
     {
-        return (PLIST_ENTRY)((PCHAR)Process +
-            GpBlock->OffsetKProcessThreadListHead);
+        return (PLIST_ENTRY)((u8ptr)Process +
+            RtBlock->OffsetKProcessThreadListHead);
     }
 
     FORCEINLINE
         PETHREAD
         NTAPI
         GetProcessFirstThread(
-            __inout PGPBLOCK GpBlock,
+            __inout PRTB RtBlock,
             __inout PEPROCESS Process
         )
     {
         return (PETHREAD)
-            ((PCHAR)GetProcessThreadListHead(
-                GpBlock, Process)->Flink -
-                GpBlock->OffsetKThreadThreadListEntry);
+            ((u8ptr)GetProcessThreadListHead(
+                RtBlock, Process)->Flink -
+                RtBlock->OffsetKThreadThreadListEntry);
     }
 
     FORCEINLINE
         PLIST_ENTRY
         NTAPI
         GetThreadListEntry(
-            __inout PGPBLOCK GpBlock,
+            __inout PRTB RtBlock,
             __inout PETHREAD Thread
         )
     {
-        return (PLIST_ENTRY)((PCHAR)Thread +
-            GpBlock->OffsetKThreadThreadListEntry);
+        return (PLIST_ENTRY)((u8ptr)Thread +
+            RtBlock->OffsetKThreadThreadListEntry);
     }
 
     FORCEINLINE
         PETHREAD
         NTAPI
         GetNexThread(
-            __inout PGPBLOCK GpBlock,
+            __inout PRTB RtBlock,
             __inout PETHREAD Thread
         )
     {
         return (PETHREAD)
-            ((PCHAR)(((PLIST_ENTRY)((PCHAR)Thread +
-                GpBlock->OffsetKThreadThreadListEntry))->Flink) -
-                GpBlock->OffsetKThreadThreadListEntry);
+            ((u8ptr)(((PLIST_ENTRY)((u8ptr)Thread +
+                RtBlock->OffsetKThreadThreadListEntry))->Flink) -
+                RtBlock->OffsetKThreadThreadListEntry);
     }
 
 #ifdef __cplusplus

@@ -97,6 +97,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">true</ExcludedFromBuild>
       <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|x64'">false</UseSafeExceptionHandlers>
     </MASM>
+    <ClCompile Include="AMD64\ExceptAMD64.c" />
     <ClCompile Include="AMD64\PatchGuardAMD64.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">true</ExcludedFromBuild>
       <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">false</UseSafeExceptionHandlers>
@@ -107,6 +108,7 @@
     <ClCompile Include="AMD64\StackAMD64.c" />
     <ClCompile Include="Except.c" />
     <ClCompile Include="Guard.c" />
+    <ClCompile Include="I386\ExceptI386.c" />
     <ClCompile Include="I386\PatchGuardI386.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">false</ExcludedFromBuild>
       <UseSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">true</UseSafeExceptionHandlers>

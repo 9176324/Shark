@@ -69,6 +69,12 @@
     <ClCompile Include="Guard.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AMD64\ExceptAMD64.c">
+      <Filter>Source Files\AMD64</Filter>
+    </ClCompile>
+    <ClCompile Include="I386\ExceptI386.c">
+      <Filter>Source Files\I386</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shark.def">

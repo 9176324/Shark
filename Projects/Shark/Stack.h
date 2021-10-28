@@ -25,61 +25,61 @@ extern "C" {
 #endif	/* __cplusplus */
 
     typedef struct _CALLERS {
-        PVOID * EstablisherFrame;
-        PVOID Establisher;
+        ptr * EstablisherFrame;
+        ptr Establisher;
     }CALLERS, *PCALLERS;
 
     DECLSPEC_NOINLINE
-        ULONG
+        u32
         NTAPI
         WalkFrameChain(
             __out PCALLERS Callers,
-            __in ULONG Count
+            __in u32 Count
         );
 
     typedef struct _SYMBOL {
         PKLDR_DATA_TABLE_ENTRY DataTableEntry;
-        PVOID Address;
-        PCHAR String;
-        USHORT Ordinal;
-        LONG Offset;
+        ptr Address;
+        cptr String;
+        u16 Ordinal;
+        s32 Offset;
     }SYMBOL, *PSYMBOL;
 
-    VOID
+    void
         NTAPI
         PrintSymbol(
-            __in PCSTR Prefix,
+            __in u8ptr Prefix,
             __in PSYMBOL Symbol
         );
 
-    VOID
+    void
         NTAPI
         WalkImageSymbol(
-            __in PVOID Address,
+            __in ptr Address,
             __inout PSYMBOL Symbol
         );
 
-    VOID
+    void
         NTAPI
         FindSymbol(
-            __in PVOID Address,
+            __in ptr Address,
             __inout PSYMBOL Symbol
         );
 
-    VOID
+    void
         NTAPI
         FindAndPrintSymbol(
-            __in PCSTR Prefix,
-            __in PVOID Address
+            __in u8ptr Prefix,
+            __in ptr Address
         );
 
-    VOID
+    void
         NTAPI
         PrintFrameChain(
-            __in PCSTR Prefix,
+            __in u8ptr Prefix,
             __in PCALLERS Callers,
-            __in_opt ULONG FramesToSkip,
-            __in ULONG Count
+            __in_opt u32 FramesToSkip,
+            __in u32 Count
         );
 
 #ifdef __cplusplus

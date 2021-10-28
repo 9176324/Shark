@@ -23,21 +23,21 @@
 #include "Except.h"
 
 DECLSPEC_NOINLINE
-ULONG
+u32
 NTAPI
 WalkFrameChain(
     __out PCALLERS Callers,
-    __in ULONG Count
+    __in u32 Count
 )
 {
     CONTEXT ContextRecord = { 0 };
-    PVOID HandlerData = NULL;
-    ULONG Index = 0;
+    ptr HandlerData = NULL;
+    u32 Index = 0;
     PRUNTIME_FUNCTION FunctionEntry = NULL;
-    ULONG64 ImageBase = 0;
-    ULONG64 EstablisherFrame = 0;
-    ULONG64 Top = 0;
-    ULONG64 Bottom = 0;
+    u64 ImageBase = 0;
+    u64 EstablisherFrame = 0;
+    u64 Top = 0;
+    u64 Bottom = 0;
 
     RtlCaptureContext(&ContextRecord);
     IoGetStackLimits(&Bottom, &Top);
@@ -61,8 +61,8 @@ WalkFrameChain(
 
             if (EstablisherFrame >= Bottom &&
                 EstablisherFrame < Top) {
-                Callers[Index].Establisher = (PVOID)ContextRecord.Rip;
-                Callers[Index].EstablisherFrame = (PVOID *)EstablisherFrame;
+                Callers[Index].Establisher = (ptr)ContextRecord.Rip;
+                Callers[Index].EstablisherFrame = (ptr *)EstablisherFrame;
             }
             else {
                 break;

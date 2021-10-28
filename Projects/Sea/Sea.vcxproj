@@ -72,7 +72,7 @@
   </ImportGroup>
   <ItemGroup>
     <ClCompile Include="Sea.c" />
-    <ClCompile Include="Sysload.c" />
+    <ClCompile Include="Support.c" />
   </ItemGroup>
   <ItemGroup>
     <MASM Include="AMD64\AMD64.asm">
@@ -96,6 +96,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sea.h" />
-    <ClInclude Include="Sysload.h" />
+    <ClInclude Include="Support.h" />
   </ItemGroup>
 </Project>

@@ -20,19 +20,19 @@
 
 #include "Except.h"
 
-VOID
+void
 NTAPI
 CaptureImageExceptionValues(
-    __in PVOID Base,
-    __out PVOID * FunctionTable,
-    __out PULONG TableSize
+    __in ptr Base,
+    __out ptr * FunctionTable,
+    __out u32ptr TableSize
 )
 {
     PIMAGE_NT_HEADERS NtHeaders = NULL;
     PIMAGE_LOAD_CONFIG_DIRECTORY32 LoadConfig = NULL;
-    ULONG LoadConfigSize = 0;
+    u32 LoadConfigSize = 0;
     PIMAGE_COR20_HEADER Cor20Header = NULL;
-    ULONG Cor20HeaderSize = 0;
+    u32 Cor20HeaderSize = 0;
 
     NtHeaders = RtlImageNtHeader(Base);
 
@@ -58,7 +58,7 @@ CaptureImageExceptionValues(
                         SEHandlerCount) &&
                     0 != LoadConfig->SEHandlerTable &&
                     0 != LoadConfig->SEHandlerCount) {
-                    *FunctionTable = ULongToPtr(LoadConfig->SEHandlerTable);
+                    *FunctionTable = UlongToPtr(LoadConfig->SEHandlerTable);
                     *TableSize = LoadConfig->SEHandlerCount;
                 }
                 else {

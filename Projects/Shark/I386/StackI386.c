@@ -21,17 +21,17 @@
 #include "Stack.h"
 
 DECLSPEC_NOINLINE
-ULONG
+u32
 NTAPI
 WalkFrameChain(
     __out PCALLERS Callers,
-    __in ULONG Count
+    __in u32 Count
 )
 {
-    ULONG Fp = 0;
-    ULONG Index = 0;
-    ULONG Top = 0;
-    ULONG Bottom = 0;
+    u32 Fp = 0;
+    u32 Index = 0;
+    u32 Top = 0;
+    u32 Bottom = 0;
 
     IoGetStackLimits(&Bottom, &Top);
 
@@ -40,11 +40,11 @@ WalkFrameChain(
     while (Index < Count &&
         Fp >= Bottom &&
         Fp < Top) {
-        Callers[Index].Establisher = (PVOID)(*(PULONG)(Fp + 4));
-        Callers[Index].EstablisherFrame = (PVOID *)(Fp + 8);
+        Callers[Index].Establisher = (ptr)(*(u32ptr)(Fp + 4));
+        Callers[Index].EstablisherFrame = (ptr *)(Fp + 8);
 
         Index += 1;
-        Fp = *(PULONG)Fp;
+        Fp = *(u32ptr)Fp;
     }
 
     return Index;

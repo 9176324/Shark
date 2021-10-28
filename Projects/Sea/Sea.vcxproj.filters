@@ -24,7 +24,7 @@
     <ClCompile Include="Sea.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Sysload.c">
+    <ClCompile Include="Support.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -51,7 +51,7 @@
     <ClInclude Include="Sea.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Sysload.h">
+    <ClInclude Include="Support.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

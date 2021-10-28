@@ -59,7 +59,7 @@ CCARCHOBJS = \
 
 CCOBJS = \
     $(OBJD)\$(PROJ).obj \
-    $(OBJD)\Sysload.obj
+    $(OBJD)\Support.obj
     
 RCOBJS = $(OBJD)\$(PROJ).res
 
@@ -129,7 +129,8 @@ BUILDLIBS = ntdllp.lib bufferoverflow.lib \
     gshandler.obj gshandlerseh.obj \
 !endif
     kernl32p.lib msvcrt.lib shell32.lib user32.lib gdi32.lib \
-    nt_process_startup.obj
+    nt_process_startup.obj \
+    vDbgPrint.obj
 
 LINK = link.exe /nologo
 LINKFLAGS = $(LINKIGNORE) /WX /NODEFAULTLIB /machine:$(ARCH) /debug /debugtype:cv,fixup

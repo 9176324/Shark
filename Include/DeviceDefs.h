@@ -24,12 +24,59 @@
 extern "C" {
 #endif	/* __cplusplus */
 
-#include <devioctl.h>
+#include <devioctl.h>      
+#include <supdefs.h>
 
-#define LOADER_STRING L"Shark.sys"
-#define SERVICE_STRING L"{107180F9-013A-45B4-BCE5-F046892D7426}"
-#define DEVICE_STRING L"\\Device\\{94A4D943-9D91-4DFA-AA05-5486E61BF500}"
-#define SYMBOLIC_STRING L"\\DosDevices\\{00081140-C743-454D-917B-C3F437C770DC}"
+#define KernelString L"Shark.sys"
+#define SupportString L"VBoxDrv.sys"
+#define KernelPortString L"\\{41F4CD92-4AF0-4447-903D-CD994368059A}"
+
+#define CmdClose                0x00000000ul
+#define CmdNull                 0x00000001ul
+#define CmdPgClear              0x00000002ul
+#define CmdVmxOn                0x00000004ul
+#define CmdBugCheck             0x00008000ul
+#define CmdReload               0x00010000ul
+
+#define MAXIMUM_USER_FUNCTION_TABLE_SIZE 512
+#define MAXIMUM_KERNEL_FUNCTION_TABLE_SIZE 256
+
+    typedef struct _FUNCTION_TABLE_ENTRY32 {
+        u32 FunctionTable;
+        u32 ImageBase;
+        u32 SizeOfImage;
+        u32 SizeOfTable;
+    } FUNCTION_TABLE_ENTRY32, *PFUNCTION_TABLE_ENTRY32;
+
+    C_ASSERT(sizeof(FUNCTION_TABLE_ENTRY32) == 0x10);
+
+    typedef struct _FUNCTION_TABLE_ENTRY64 {
+        u64 FunctionTable;
+        u64 ImageBase;
+        u32 SizeOfImage;
+        u32 SizeOfTable;
+    } FUNCTION_TABLE_ENTRY64, *PFUNCTION_TABLE_ENTRY64;
+
+    C_ASSERT(sizeof(FUNCTION_TABLE_ENTRY64) == 0x18);
+
+    typedef struct _FUNCTION_TABLE {
+        u32 CurrentSize;
+        u32 MaximumSize;
+        u32 Epoch;
+        u8 Overflow;
+        u32 TableEntry[1];
+    } FUNCTION_TABLE, *PFUNCTION_TABLE;
+
+    C_ASSERT(FIELD_OFFSET(FUNCTION_TABLE, TableEntry) == 0x10);
+
+    typedef struct _FUNCTION_TABLE_LEGACY {
+        u32 CurrentSize;
+        u32 MaximumSize;
+        u8 Overflow;
+        u32 TableEntry[1];
+    } FUNCTION_TABLE_LEGACY, *PFUNCTION_TABLE_LEGACY;
+
+    C_ASSERT(FIELD_OFFSET(FUNCTION_TABLE_LEGACY, TableEntry) == 0xc);
 
     FORCEINLINE
         u

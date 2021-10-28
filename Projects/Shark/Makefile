@@ -44,12 +44,8 @@ PROJD = $(SLND)Projects\$(PROJ)
 BUILD: $(PROJTARG).sys
 
 OBJD = $(SLND)Build\Objs\$(PROJ)\$(ARCTARG)
-
-!if "$(ARCTARG)" == "I386"
-PROJENTRY = GsDriverEntry@8
-!else
-PROJENTRY = GsDriverEntry
-!endif
+                           
+PROJENTRY = __security_init_cookie
 
 ASOBJS = \
     $(OBJD)\$(ARCTARG).obj \
@@ -57,6 +53,7 @@ ASOBJS = \
 
 CCARCHOBJS = \
     $(OBJD)\Context$(ARCTARG).obj \
+    $(OBJD)\Except$(ARCTARG).obj \
     $(OBJD)\PatchGuard$(ARCTARG).obj \
     $(OBJD)\Space$(ARCTARG).obj \
     $(OBJD)\Stack$(ARCTARG).obj
@@ -140,7 +137,7 @@ BUILDLIBS = hal.lib ntoskrnl.lib bufferoverflowk.lib \
 !else if "$(ARCTARG)" == "AMD64"
     gshandler.obj gshandlerseh.obj \
 !endif
-    detours.lib
+    disasm.obj detours.obj
 
 LINK = link.exe /nologo
 LINKFLAGS = $(LINKIGNORE) /WX /NODEFAULTLIB /machine:$(ARCH) /debug /debugtype:cv,fixup

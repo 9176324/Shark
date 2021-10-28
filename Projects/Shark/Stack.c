@@ -22,102 +22,102 @@
 
 #include "Reload.h"
 
-VOID
+void
 NTAPI
 PrintSymbol(
-    __in PCSTR Prefix,
+    __in u8ptr Prefix,
     __in PSYMBOL Symbol
 )
 {
     if (NULL != Symbol->String) {
         if (0 == Symbol->Offset) {
-#ifndef PUBLIC
-            DbgPrint(
+#ifdef DEBUG
+            vDbgPrint(
                 "%s < %p > %wZ!%hs\n",
                 Prefix,
                 Symbol->Address,
                 &Symbol->DataTableEntry->BaseDllName,
                 Symbol->String);
-#endif // !PUBLIC
+#endif // DEBUG
         }
         else {
-#ifndef PUBLIC
-            DbgPrint(
+#ifdef DEBUG
+            vDbgPrint(
                 "%s < %p > %wZ!%hs + %x\n",
                 Prefix,
                 Symbol->Address,
                 &Symbol->DataTableEntry->BaseDllName,
                 Symbol->String,
                 Symbol->Offset);
-#endif // !PUBLIC
+#endif // DEBUG
         }
     }
     else if (0 != Symbol->Ordinal) {
         if (0 == Symbol->Offset) {
-#ifndef PUBLIC
-            DbgPrint(
+#ifdef DEBUG
+            vDbgPrint(
                 "%s < %p > %wZ!@%d\n",
                 Prefix,
                 Symbol->Address,
                 &Symbol->DataTableEntry->BaseDllName,
                 Symbol->Ordinal);
-#endif // !PUBLIC
+#endif // DEBUG
         }
         else {
-#ifndef PUBLIC
-            DbgPrint(
+#ifdef DEBUG
+            vDbgPrint(
                 "%s < %p > %wZ!@%d + %x\n",
                 Prefix,
                 Symbol->Address,
                 &Symbol->DataTableEntry->BaseDllName,
                 Symbol->Ordinal,
                 Symbol->Offset);
-#endif // !PUBLIC
+#endif // DEBUG
         }
     }
     else if (NULL != Symbol->DataTableEntry) {
-#ifndef PUBLIC
-        DbgPrint(
+#ifdef DEBUG
+        vDbgPrint(
             "%s < %p > %wZ + %x\n",
             Prefix,
             Symbol->Address,
             &Symbol->DataTableEntry->BaseDllName,
             Symbol->Offset);
-#endif // !PUBLIC
+#endif // DEBUG
     }
     else {
-#ifndef PUBLIC
-        DbgPrint(
+#ifdef DEBUG
+        vDbgPrint(
             "%s < %p > symbol not found\n",
             Prefix,
             Symbol->Address);
-#endif // !PUBLIC
+#endif // DEBUG
     }
 }
 
-VOID
+void
 NTAPI
 WalkImageSymbol(
-    __in PVOID Address,
+    __in ptr Address,
     __inout PSYMBOL Symbol
 )
 {
-    NTSTATUS Status = STATUS_SUCCESS;
+    status Status = STATUS_SUCCESS;
     PIMAGE_EXPORT_DIRECTORY ExportDirectory = NULL;
-    ULONG Size = 0;
-    PULONG NameTable = NULL;
-    PUSHORT OrdinalTable = NULL;
-    PULONG AddressTable = NULL;
-    PSTR NameTableName = NULL;
-    USHORT HintIndex = 0;
-    USHORT NameIndex = 0;
-    PVOID ProcedureAddress = NULL;
-    PVOID NearAddress = NULL;
+    u32 Size = 0;
+    u32ptr NameTable = NULL;
+    u16ptr OrdinalTable = NULL;
+    u32ptr AddressTable = NULL;
+    cptr NameTableName = NULL;
+    u16 HintIndex = 0;
+    u16 NameIndex = 0;
+    ptr ProcedureAddress = NULL;
+    ptr NearAddress = NULL;
 
     Symbol->Address = Address;
 
     Symbol->Offset =
-        (ULONG_PTR)Address - (ULONG_PTR)Symbol->DataTableEntry->DllBase;
+        (u)Address - (u)Symbol->DataTableEntry->DllBase;
 
     ExportDirectory = RtlImageDirectoryEntryToData(
         Symbol->DataTableEntry->DllBase,
@@ -127,13 +127,13 @@ WalkImageSymbol(
 
     if (NULL != ExportDirectory) {
         NameTable =
-            (PCHAR)Symbol->DataTableEntry->DllBase + ExportDirectory->AddressOfNames;
+            (u8ptr)Symbol->DataTableEntry->DllBase + ExportDirectory->AddressOfNames;
 
         OrdinalTable =
-            (PCHAR)Symbol->DataTableEntry->DllBase + ExportDirectory->AddressOfNameOrdinals;
+            (u8ptr)Symbol->DataTableEntry->DllBase + ExportDirectory->AddressOfNameOrdinals;
 
         AddressTable =
-            (PCHAR)Symbol->DataTableEntry->DllBase + ExportDirectory->AddressOfFunctions;
+            (u8ptr)Symbol->DataTableEntry->DllBase + ExportDirectory->AddressOfFunctions;
 
         if (NULL != NameTable &&
             NULL != OrdinalTable &&
@@ -142,10 +142,10 @@ WalkImageSymbol(
                 HintIndex < ExportDirectory->NumberOfFunctions;
                 HintIndex++) {
                 ProcedureAddress =
-                    (PCHAR)Symbol->DataTableEntry->DllBase + AddressTable[HintIndex];
+                    (u8ptr)Symbol->DataTableEntry->DllBase + AddressTable[HintIndex];
 
-                if ((ULONG_PTR)ProcedureAddress <= (ULONG_PTR)Symbol->Address &&
-                    (ULONG_PTR)ProcedureAddress > (ULONG_PTR)NearAddress) {
+                if ((u)ProcedureAddress <= (u)Symbol->Address &&
+                    (u)ProcedureAddress > (u)NearAddress) {
                     NearAddress = ProcedureAddress;
 
                     for (NameIndex = 0;
@@ -153,7 +153,7 @@ WalkImageSymbol(
                         NameIndex++) {
                         if (HintIndex == OrdinalTable[NameIndex]) {
                             Symbol->String =
-                                (PCHAR)Symbol->DataTableEntry->DllBase + NameTable[HintIndex];
+                                (u8ptr)Symbol->DataTableEntry->DllBase + NameTable[HintIndex];
                         }
                     }
 
@@ -161,32 +161,36 @@ WalkImageSymbol(
                         HintIndex + ExportDirectory->Base;
 
                     Symbol->Offset =
-                        (ULONG_PTR)Symbol->Address - (ULONG_PTR)ProcedureAddress;
+                        (u)Symbol->Address - (u)ProcedureAddress;
                 }
             }
         }
     }
 }
 
-VOID
+void
 NTAPI
 FindSymbol(
-    __in PVOID Address,
+    __in ptr Address,
     __inout PSYMBOL Symbol
 )
 {
-    if (NT_SUCCESS(FindEntryForKernelImageAddress(
+    status Status = STATUS_SUCCESS;
+
+    Status = FindEntryForImageAddress(
         Address,
-        &Symbol->DataTableEntry))) {
+        &Symbol->DataTableEntry);
+
+    if (NT_SUCCESS(Status)) {
         WalkImageSymbol(Address, Symbol);
     }
 }
 
-VOID
+void
 NTAPI
 FindAndPrintSymbol(
-    __in PCSTR Prefix,
-    __in PVOID Address
+    __in u8ptr Prefix,
+    __in ptr Address
 )
 {
     SYMBOL Symbol = { 0 };
@@ -195,16 +199,16 @@ FindAndPrintSymbol(
     PrintSymbol(Prefix, &Symbol);
 }
 
-VOID
+void
 NTAPI
 PrintFrameChain(
-    __in PCSTR Prefix,
+    __in u8ptr Prefix,
     __in PCALLERS Callers,
-    __in_opt ULONG FramesToSkip,
-    __in ULONG Count
+    __in_opt u32 FramesToSkip,
+    __in u32 Count
 )
 {
-    ULONG Index = 0;
+    u32 Index = 0;
 
     for (Index = FramesToSkip;
         Index < Count;
