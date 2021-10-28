@@ -13,7 +13,6 @@
     git clone https://github.com/9176324/MSVC
 
 # Build
-# Build
     Method 1: run FastBuild.cmd or Rebuild.cmd
     Method 2: MSBuild "Shark.sln" -t:Rebuild /p:Platform="x86"
               MSBuild "Shark.sln" -t:Rebuild /p:Platform="x64"
@@ -21,7 +20,8 @@
 
 # Install
     run Sea.exe (use vbox exploit to load)
-
+    ![win11 disable virus](https://github.com/9176324/Shark/blob/master/Doc/win11 disable virus.png)
+    
 # Uninstall
     restart windows
 
