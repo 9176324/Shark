@@ -1,9 +1,6 @@
 # Shark
     Turn off PatchGuard in real time for win7 (7600) ~ later.
 
-# Change Log
-    Use decrypt replace hook for 18362 ~ later.
-
 # Create labs
     md X:\Labs
     cd /d X:\Labs
@@ -31,5 +28,4 @@
     findpg, https://github.com/tandasat/findpg
     PgResarch, https://github.com/tandasat/PgResarch
     UPGDSED, https://github.com/hfiref0x/UPGDSED
-
-# QQ Group : 119651372
+    

@@ -3,7 +3,7 @@
 @set SRCDIR=H:\Labs\Shark\Projects\
 @set BINDIR=H:\Labs\Shark\Build\Bins\
 @set REDISTDIR=H:\Labs\Shark\Redist\
-@set WORKDIR=.\
+@set WORKDIR=.\Publisher\
 
 @if not exist %WORKDIR% md %WORKDIR%
 
