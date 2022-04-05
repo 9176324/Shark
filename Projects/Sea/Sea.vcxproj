@@ -30,18 +30,18 @@
     <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">
+   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Optimized|Win32'">
     <NMakeBuildCommandLine>NMAKE /NOLOGO BUILD PLATFORM=$(PlatformShortName) PROJ=$(ProjectName) SLND=$(SolutionDir)</NMakeBuildCommandLine>
     <NMakeCleanCommandLine>NMAKE /NOLOGO CLEAN PLATFORM=$(PlatformShortName) PROJ=$(ProjectName) SLND=$(SolutionDir)</NMakeCleanCommandLine>
     <NMakeReBuildCommandLine>NMAKE /NOLOGO REBUILD PLATFORM=$(PlatformShortName) PROJ=$(ProjectName) SLND=$(SolutionDir)</NMakeReBuildCommandLine>
     <NMakeOutput>$(SolutionDir)Build\Bins\I386\$(ProjectName).exe</NMakeOutput>
     <NMakePreprocessorDefinitions>UNICODE;_UNICODE;DOSWIN32;_X86_</NMakePreprocessorDefinitions>
-    <NMakeIncludeGevurahrchPath>..\..\..\WRK\public\ddk\inc;..\..\..\WRK\public\halkit\inc;..\..\..\WRK\public\internal\base\inc;..\..\..\WRK\public\internal\ds\inc;..\..\..\WRK\public\internal\sdktools\inc;..\..\..\WRK\public\sdk\inc;..\..\..\WRK\public\sdk\inc\crt;..\..\..\WRK\base\inc;..\..\..\WRK\base\ntos\inc;..\..\..\WinDDK\3790.1830\inc\wnet;..\..\..\WinDDK\3790.1830\inc\crt;..\..\..\WinDDK\3790.1830\inc\crt\gl;..\..\..\WinDDK\3790.1830\inc\crt\sys;..\..\..\WinDDK\7600.16385.1\Debuggers\sdk\inc;;..\..\..\WinDDK\3790.1830\inc\wnet;..\..\..\WinDDK\3790.1830\inc\crt\gl;\$(SolutionDir)Include;$(ProjectDir)</NMakeIncludeGevurahrchPath>
+    <NMakeIncludeGamerchPath>..\..\..\MiniSDK\inc\ddk;..\..\..\MiniSDK\inc\halkit;..\..\..\MiniSDK\inc\internal\base;..\..\..\MiniSDK\inc\internal\ds;..\..\..\MiniSDK\inc\internal\sdktools;..\..\..\MiniSDK\inc\sdk;..\..\..\MiniSDK\inc\sdk\inc\crt;..\..\..\MiniSDK\inc\base;..\..\..\MiniSDK\inc\base\ntos;..\..\..\MiniSDK\inc\sdk\wnet;..\..\..\MiniSDK\inc\sdk\crt;..\..\..\MiniSDK\inc\sdk\crt\gl;..\..\..\MiniSDK\inc\sdk\crt\sys;..\..\..\MiniSDK\inc\debuggers;..\..\..\MiniSDK\inc\sdk\wnet;..\..\..\MiniSDK\inc\sdk\crt\gl;\$(SolutionDir)Include;$(ProjectDir)</NMakeIncludeGamerchPath>
     <OutDir>$(SolutionDir)Build\Bins\I386\</OutDir>
     <IntDir>$(SolutionDir)Build\Objs\$(ProjectName)\I386\</IntDir>
-    <IncludePath>..\..\..\WRK\public\ddk\inc;..\..\..\WRK\public\halkit\inc;..\..\..\WRK\public\internal\base\inc;..\..\..\WRK\public\internal\ds\inc;..\..\..\WRK\public\internal\sdktools\inc;..\..\..\WRK\public\sdk\inc;..\..\..\WRK\public\sdk\inc\crt;..\..\..\WRK\base\inc;..\..\..\WRK\base\ntos\inc;..\..\..\WinDDK\3790.1830\inc\wnet;..\..\..\WinDDK\3790.1830\inc\crt;..\..\..\WinDDK\3790.1830\inc\crt\gl;..\..\..\WinDDK\3790.1830\inc\crt\sys;..\..\..\WinDDK\7600.16385.1\Debuggers\sdk\inc;;..\..\..\WinDDK\3790.1830\inc\wnet;..\..\..\WinDDK\3790.1830\inc\crt\gl;$(SolutionDir)Include;$(ProjectDir)</IncludePath>
+    <IncludePath>..\..\..\MiniSDK\inc\ddk;..\..\..\MiniSDK\inc\halkit;..\..\..\MiniSDK\inc\internal\base;..\..\..\MiniSDK\inc\internal\ds;..\..\..\MiniSDK\inc\internal\sdktools;..\..\..\MiniSDK\inc\sdk;..\..\..\MiniSDK\inc\sdk\inc\crt;..\..\..\MiniSDK\inc\base;..\..\..\MiniSDK\inc\base\ntos;..\..\..\MiniSDK\inc\sdk\wnet;..\..\..\MiniSDK\inc\sdk\crt;..\..\..\MiniSDK\inc\sdk\crt\gl;..\..\..\MiniSDK\inc\sdk\crt\sys;..\..\..\MiniSDK\inc\debuggers;..\..\..\MiniSDK\inc\sdk\wnet;..\..\..\MiniSDK\inc\sdk\crt\gl;$(SolutionDir)Include;$(ProjectDir)</IncludePath>
     <ReferencePath />
-    <LibraryPath>..\..\..\WinDDK\7600.16385.1\lib\wnet\i386;..\..\..\WinDDK\7600.16385.1\lib\crt\i386</LibraryPath>
+    <LibraryPath>..\..\..\MiniSDK\lib\i386;..\..\..\MiniSDK\lib\crt\i386</LibraryPath>
     <LibraryWPath />
     <SourcePath />
     <ExcludePath />
@@ -52,12 +52,12 @@
     <NMakeReBuildCommandLine>NMAKE /NOLOGO REBUILD PLATFORM=$(PlatformShortName) PROJ=$(ProjectName) SLND=$(SolutionDir)</NMakeReBuildCommandLine>
     <NMakeOutput>$(SolutionDir)Build\Bins\AMD64\$(ProjectName).exe</NMakeOutput>
     <NMakePreprocessorDefinitions>UNICODE;_UNICODE;_AMD64_</NMakePreprocessorDefinitions>
-    <NMakeIncludeGevurahrchPath>..\..\..\WRK\public\ddk\inc;..\..\..\WRK\public\halkit\inc;..\..\..\WRK\public\internal\base\inc;..\..\..\WRK\public\internal\ds\inc;..\..\..\WRK\public\internal\sdktools\inc;..\..\..\WRK\public\sdk\inc;..\..\..\WRK\public\sdk\inc\crt;..\..\..\WRK\base\inc;..\..\..\WRK\base\ntos\inc;..\..\..\WinDDK\3790.1830\inc\wnet;..\..\..\WinDDK\3790.1830\inc\crt;..\..\..\WinDDK\3790.1830\inc\crt\gl;..\..\..\WinDDK\3790.1830\inc\crt\sys;..\..\..\WinDDK\7600.16385.1\Debuggers\sdk\inc;;..\..\..\WinDDK\3790.1830\inc\wnet;..\..\..\WinDDK\3790.1830\inc\crt\gl;$(SolutionDir)Include;$(ProjectDir)</NMakeIncludeGevurahrchPath>
+    <NMakeIncludeGamerchPath>..\..\..\MiniSDK\inc\ddk;..\..\..\MiniSDK\inc\halkit;..\..\..\MiniSDK\inc\internal\base;..\..\..\MiniSDK\inc\internal\ds;..\..\..\MiniSDK\inc\internal\sdktools;..\..\..\MiniSDK\inc\sdk;..\..\..\MiniSDK\inc\sdk\inc\crt;..\..\..\MiniSDK\inc\base;..\..\..\MiniSDK\inc\base\ntos;..\..\..\MiniSDK\inc\sdk\wnet;..\..\..\MiniSDK\inc\sdk\crt;..\..\..\MiniSDK\inc\sdk\crt\gl;..\..\..\MiniSDK\inc\sdk\crt\sys;..\..\..\MiniSDK\inc\debuggers;..\..\..\MiniSDK\inc\sdk\wnet;..\..\..\MiniSDK\inc\sdk\crt\gl;$(SolutionDir)Include;$(ProjectDir)</NMakeIncludeGamerchPath>
     <OutDir>$(SolutionDir)Build\Bins\AMD64\</OutDir>
     <IntDir>$(SolutionDir)Build\Objs\$(ProjectName)\AMD64\</IntDir>
-    <IncludePath>..\..\..\WRK\public\ddk\inc;..\..\..\WRK\public\halkit\inc;..\..\..\WRK\public\internal\base\inc;..\..\..\WRK\public\internal\ds\inc;..\..\..\WRK\public\internal\sdktools\inc;..\..\..\WRK\public\sdk\inc;..\..\..\WRK\public\sdk\inc\crt;..\..\..\WRK\base\inc;..\..\..\WRK\base\ntos\inc;..\..\..\WinDDK\3790.1830\inc\wnet;..\..\..\WinDDK\3790.1830\inc\crt;..\..\..\WinDDK\3790.1830\inc\crt\gl;..\..\..\WinDDK\3790.1830\inc\crt\sys;..\..\..\WinDDK\7600.16385.1\Debuggers\sdk\inc;;..\..\..\WinDDK\3790.1830\inc\wnet;..\..\..\WinDDK\3790.1830\inc\crt\gl;$(SolutionDir)Include;$(ProjectDir)</IncludePath>
+    <IncludePath>..\..\..\MiniSDK\inc\ddk;..\..\..\MiniSDK\inc\halkit;..\..\..\MiniSDK\inc\internal\base;..\..\..\MiniSDK\inc\internal\ds;..\..\..\MiniSDK\inc\internal\sdktools;..\..\..\MiniSDK\inc\sdk;..\..\..\MiniSDK\inc\sdk\inc\crt;..\..\..\MiniSDK\inc\base;..\..\..\MiniSDK\inc\base\ntos;..\..\..\MiniSDK\inc\sdk\wnet;..\..\..\MiniSDK\inc\sdk\crt;..\..\..\MiniSDK\inc\sdk\crt\gl;..\..\..\MiniSDK\inc\sdk\crt\sys;..\..\..\MiniSDK\inc\debuggers;..\..\..\MiniSDK\inc\sdk\wnet;..\..\..\MiniSDK\inc\sdk\crt\gl;$(SolutionDir)Include;$(ProjectDir)</IncludePath>
     <ReferencePath />
-    <LibraryPath>..\..\..\WinDDK\7600.16385.1\lib\wnet\amd64;..\..\..\WinDDK\7600.16385.1\lib\crt\amd64</LibraryPath>
+    <LibraryPath>..\..\..\MiniSDK\lib\amd64;..\..\..\MiniSDK\lib\crt\amd64</LibraryPath>
     <LibraryWPath />
     <SourcePath />
     <ExcludePath />

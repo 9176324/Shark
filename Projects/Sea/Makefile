@@ -16,21 +16,21 @@
 #
 #
 
-LABS=..\..\..\
+LABS=..\..\..
 
 !if "$(PLATFORM)" == "x86"
 ARCTARG = I386
 !if "$(PROCESSOR_ARCHITEW6432)" == "AMD64"
-PATH = C:\Windows;C:\Windows\System32;$(LABS)\MSVC\Hostx64\x86
+PATH = C:\Windows;C:\Windows\System32;$(LABS)\MiniSDK\bin\Hostx64\x86
 !else
-PATH = C:\Windows;C:\Windows\System32;$(LABS)\MSVC\Hostx86\x86
+PATH = C:\Windows;C:\Windows\System32;$(LABS)\MiniSDK\bin\Hostx86\x86
 !endif
 !else if "$(PLATFORM)" == "x64"
 ARCTARG = AMD64
 !if "$(PROCESSOR_ARCHITEW6432)" == "AMD64"
-PATH = C:\Windows;C:\Windows\System32;$(LABS)\MSVC\Hostx64\x64
+PATH = C:\Windows;C:\Windows\System32;$(LABS)\MiniSDK\bin\Hostx64\x64
 !else
-PATH = C:\Windows;C:\Windows\System32;$(LABS)\MSVC\Hostx86\x64
+PATH = C:\Windows;C:\Windows\System32;$(LABS)\MiniSDK\bin\Hostx86\x64
 !endif
 !else
 !ERROR Usage: nmake (PLATFORM=x86|x64) (PROJ=ProjectName) (SLND=SolutionDir) [build|clean|rebuild]
@@ -84,19 +84,20 @@ ARCHML = ml64
 !endif
 
 PROJLOPTS = /SUBSYSTEM:CONSOLE /ENTRY:$(PROJENTRY) /DEF:$(PROJ).def
-
+  
 INCS = \
-    /I$(LABS)\WRK\public\ddk\inc \
-    /I$(LABS)\WRK\public\halkit\inc \
-    /I$(LABS)\WRK\public\internal\base\inc \
-    /I$(LABS)\WRK\public\internal\ds\inc \
-    /I$(LABS)\WRK\public\internal\sdktools\inc \
-    /I$(LABS)\WRK\public\sdk\inc \
-    /I$(LABS)\WRK\public\sdk\inc\crt \
-    /I$(LABS)\WRK\base\inc \
-    /I$(LABS)\WRK\base\ntos\inc \
-    /I$(LABS)\WinDDK\3790.1830\inc\wnet \
-    /I$(LABS)\WinDDK\3790.1830\inc\crt\gl \
+    /I$(LABS)\MiniSDK\inc\ddk \
+    /I$(LABS)\MiniSDK\inc\halkit \
+    /I$(LABS)\MiniSDK\inc\internal\base \
+    /I$(LABS)\MiniSDK\inc\internal\ds \
+    /I$(LABS)\MiniSDK\inc\internal\sdktools \
+    /I$(LABS)\MiniSDK\inc\sdk \
+    /I$(LABS)\MiniSDK\inc\sdk\crt \
+    /I$(LABS)\MiniSDK\inc\sdk\crt\gl \
+    /I$(LABS)\MiniSDK\inc\sdk\crt\sys \
+    /I$(LABS)\MiniSDK\inc\base \
+    /I$(LABS)\MiniSDK\inc\base\ntos \
+    /I$(LABS)\MiniSDK\inc\debuggers \
     /I$(SLND)\Include \
     /I$(PROJD)
 
@@ -114,11 +115,10 @@ CFLAGS = $(COPTS) $(INCS) /Fo$(OBJD)\ $(DEFS) $(SPECIALCFLAGS) $(COMPILERWARNING
 
 RC = rc.exe /nologo
 RFLAGS = $(INCS) /fo$(RCOBJS)
-
-
+                  
 LINKLIBPATH = \
-    /LIBPATH:$(LABS)\WinDDK\7600.16385.1\lib\win7\$(ARCTARG) \
-    /LIBPATH:$(LABS)\WinDDK\7600.16385.1\lib\Crt\$(ARCTARG) \
+    /LIBPATH:$(LABS)\MiniSDK\lib\$(ARCTARG) \
+    /LIBPATH:$(LABS)\MiniSDK\lib\Crt\$(ARCTARG) \
     /LIBPATH:$(SLND)\Lib\$(ARCTARG)
 
 LINKIGNORE = /IGNORE:4087,4001,4010,4037,4039,4065,4070,4078,4087,4089,4221,4198

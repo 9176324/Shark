@@ -30,7 +30,6 @@ NtProcessStartup(
 )
 {
     NTSTATUS Status = STATUS_SUCCESS;
-    TCHAR ErrorString[MAXIMUM_FILENAME_LENGTH] = { 0 };
 
     Status = SupInstall();
 
@@ -43,23 +42,21 @@ NtProcessStartup(
             SupTerm();
         }
         else {
-            _stprintf(
-                ErrorString,
+            printf(
                 TEXT("load driver error code < %08x >\n"),
                 Status);
 
-            MessageBox(NULL, ErrorString, TEXT("error"), MB_OK);
+            _getwch();
         }
 
         SupUninstall();
     }
     else {
-        _stprintf(
-            ErrorString,
+        printf(
             TEXT("load driver error code < %08x >\n"),
             Status);
 
-        MessageBox(NULL, ErrorString, TEXT("error"), MB_OK);
+        _getwch();
     }
 
     return  NtTerminateProcess(

@@ -19,9 +19,7 @@
 @rem set LABS=%~dp0..\
 @rem cd /d "%LABS%"
 @rem git clone https://github.com/9176324/Shark
-@rem git clone https://github.com/9176324/WRK
-@rem git clone https://github.com/9176324/WINDDK
-@rem git clone https://github.com/9176324/MSVC
+@rem git clone https://github.com/9176324/MiniSDK
 
 @set SLND=%~dp0
 @if not exist "%SLND%Build\Bins\AMD64" md "%SLND%Build\Bins\AMD64"
