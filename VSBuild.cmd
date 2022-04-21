@@ -22,4 +22,4 @@
 @rem git clone https://github.com/9176324/MiniSDK
 
 @rem MSBuild %~dp0Shark.sln -t:Build /p:Platform="x86"
-MSBuild %~dp0Shark.sln -t:Build /p:Platform="x64"
+MSBuild %~dp0Shark.sln -t:Build -p:Platform="x64"

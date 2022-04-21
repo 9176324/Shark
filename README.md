@@ -5,14 +5,12 @@
     md X:\Labs
     cd /d X:\Labs
     git clone https://github.com/9176324/Shark
-    git clone https://github.com/9176324/WinDDK
-    git clone https://github.com/9176324/WRK
-    git clone https://github.com/9176324/MSVC
+    git clone https://github.com/9176324/MiniSDK
 
 # Build
     Method 1: run FastBuild.cmd or Rebuild.cmd
-    Method 2: MSBuild "Shark.sln" -t:Rebuild /p:Platform="x86"
-              MSBuild "Shark.sln" -t:Rebuild /p:Platform="x64"
+    Method 2: MSBuild "Shark.sln" -t:Rebuild -p:Platform="x86"
+              MSBuild "Shark.sln" -t:Rebuild -p:Platform="x64"
     Method 3: open "Shark.sln" with VisualStudio
 
 # Install
